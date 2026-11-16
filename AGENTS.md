@@ -1,8 +1,14 @@
 # Onza — instrucciones para construir
 
+## Primer paso obligatorio: leer el diario
+
+Antes de escribir código, leer **`DIARIO.md`** (raíz): "Estado actual", "Pendientes abiertos" y las últimas entradas. Dice qué se hizo, quién lo hizo, con qué IA, en qué rama y cuál es la siguiente tarea.
+
+Al terminar, agregar una entrada nueva en `DIARIO.md` (fecha, persona, IA y modelo, rama y commits, qué cambió, qué se verificó y qué no) y actualizar "Estado actual". No borrar entradas previas. Si no se hizo, el trabajo no está terminado. Sin secretos ni afirmaciones sin evidencia.
+
 ## Orden de lectura
 
-Leer README.md, docs/01-producto-y-diseno.md, docs/02-arquitectura.md, docs/03-bac-y-pagos.md, docs/04-plan-de-construccion.md y docs/05-pruebas-y-demo.md antes de implementar. Si una decisión está resuelta allí, no volver a preguntarla. Resolver detalles rutinarios con esos criterios y documentarlos.
+Después del diario, leer README.md, docs/01-producto-y-diseno.md, docs/02-arquitectura.md, docs/03-bac-y-pagos.md, docs/04-plan-de-construccion.md y docs/05-pruebas-y-demo.md antes de implementar. Si una decisión está resuelta allí, no volver a preguntarla. Resolver detalles rutinarios con esos criterios y documentarlos.
 
 ## Producto
 
