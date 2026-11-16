@@ -1,21 +1,7 @@
-import { test, expect, type Page } from "@playwright/test";
+import { loginStaff as login } from "./helpers/auth";
+import { test, expect } from "@playwright/test";
 const venue = "20000000-0000-4000-8000-000000000001";
 const live = process.env.E2E_LIVE === "true";
-async function login(page: Page, alias = "BARTENDER") {
-  await page.goto("/login");
-  await page
-    .getByLabel("Correo del personal")
-    .fill(process.env[`DEMO_${alias}_EMAIL`]!);
-  await page
-    .getByLabel("Contraseña", { exact: true })
-    .fill(process.env[`DEMO_${alias}_PASSWORD`]!);
-  await page
-    .getByRole("button", { name: "Iniciar sesión", exact: true })
-    .click();
-  await expect(
-    page.getByRole("heading", { name: "Tus espacios de trabajo" }),
-  ).toBeVisible();
-}
 test("Supabase real: cliente → barra → retiro concurrente → administrador", async ({
   browser,
 }) => {

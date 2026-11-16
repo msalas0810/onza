@@ -2,7 +2,9 @@
 
 Fecha de trabajo: 15 de noviembre de 2026 (America/Costa_Rica).
 
-**Estado general: implementación de las seis áreas escrita; aceptación multiusuario pendiente por bloqueo externo.** La etapa 1 está verificada. Las etapas 2–6 no se declaran terminadas por tener interfaz: requieren ejecutar Supabase real, sus servicios y el guion entre sesiones. No se reemplazó esa persistencia por navegador.
+**ACTUALIZACIÓN ALOJADA: conexión y flujo real ya verificados; ver sección final de esta continuación. Los bloqueos de Supabase/Docker descritos debajo son el registro histórico de la ejecución local anterior.**
+
+**Estado general anterior: implementación de las seis áreas escrita; aceptación multiusuario pendiente por bloqueo externo.** La etapa 1 está verificada. Las etapas 2–6 no se declaran terminadas por tener interfaz: requieren ejecutar Supabase real, sus servicios y el guion entre sesiones. No se reemplazó esa persistencia por navegador.
 
 ## Etapa 1 — verificada localmente
 
@@ -80,3 +82,28 @@ Revisión hecha por el mismo agente conforme al pedido explícito de trabajar so
 - Typecheck adicional de un checkout limpio del commit (sin .next) ejecutado, exit 0; las dependencias se compartieron por symlink únicamente para ese control local.
 - Último checkpoint de código: `2fc5335` (aplicación, SQL, pruebas y setup). Commit posterior incorpora documentación, CI y evidencia final. No hay remoto configurado. `main` conserva el kit base para integración posterior; el trabajo está en `feat/local-mvp`.
 - No se inició ningún recurso cloud ni se instaló Docker. El servidor de smoke test se cerró. Para usar la app: ejecutar los pasos del README.
+
+## Continuación alojada — accesos en comprobación
+
+- Rama nueva `fix/hosted-integration` desde `cd0faa6`; ramas y commits previos conservados.
+- Supabase CLI lista `onza-dev`, ref `ukdjuubekpanizcmppod`, organización `Onza` (`uczkkbsouopgwhqpvzyw`), ACTIVE_HEALTHY. La lectura administrativa de PostgreSQL se comprueba separadamente; las API keys no se toman como prueba de administración.
+- Git no autentica contra el remoto solicitado. Conector GitHub identifica msalas0810 pero devuelve 404 para msalas0810/onza. Se instaló gh desde Homebrew para completar OAuth en Terminal; no se cambiaron credenciales ni se hizo push.
+- Sin modificaciones remotas hasta confirmar ambos accesos. Script configure-hosted.mjs preparado para verificar identidad y guardar credenciales en .env.local (0600), sin imprimirlas ni sobrescribir archivos existentes.
+- Siguiente tarea exacta: completar `gh auth login --hostname github.com --git-protocol https --web`, verificar repositorio privado y permiso de push, terminar la lectura administrativa de Supabase y después ejecutar el setup alojado.
+
+
+## Cierre de la conexión alojada y verificación real
+
+- Repositorio confirmado privado `msalas0810/onza`, permiso ADMIN mediante gh/OAuth completado por el usuario. Remoto inicialmente vacío. `main` avanzó por fast-forward a `cd0faa6` y se publicó; `feat/local-mvp` conservada y publicada. Correcciones separadas en `fix/hosted-integration`; sin merge automático ni force push.
+- Proyecto administrativo confirmado por CLI: `onza-dev`, ref `ukdjuubekpanizcmppod`, organización Onza `uczkkbsouopgwhqpvzyw`. Consulta de lectura y consulta como postgres con CREATE=true verificadas antes de migrar; no se confundieron API keys con permisos de administración.
+- `.env.local` guardado con modo 0600 e ignorado por Git. Claves obtenidas en memoria; passwords demo y AES generados sin imprimir. No fue necesario ingresar valores manuales. Auditoría inicial: 176 blobs históricos, sin patrones de credenciales detectados.
+- Aplicadas migraciones 001/002/003 nuevas, seed ficticio idempotente y cuatro cuentas con memberships. No se ejecutó reset. Auth se actualizó con un config mínimo: invitado anónimo y URLs locales; nueve propiedades no declaradas quedaron intactas. No se cambió exposición automática ni esquemas API.
+- Migración 004 nueva: revoca tablas/secuencias/funciones privadas para anon/authenticated, conserva solo los predicados RLS requeridos, activa RLS privado. No altera los defaults globales de la plataforma. Flujo real volvió a pasar después de aplicarla.
+- E2E real: **2/2 pasaron**, sin omisiones en esa ejecución: cliente invitado → reserva mock → barra → aceptar/preparar → listo y actualización → persistencia al refrescar → QR disponible/código → retiro concurrente con un responsable → timeout de captura exitoso → conciliación → replays paralelos sin doble cobro → entrega repetida idempotente → resumen admin. Fallback manual sin escáner también pasó. No equivale a cámara física.
+- Script de seguridad alojada: **19/19 controles pasaron**. Incluye propietario/otro cliente, RLS y backend, intento de cambiar total y autoasignar rol, bartender de otro local, edición/restauración de disponibilidad por admin, pausa/restauración y rechazo del cliente durante pausa. Pedido de prueba se canceló sin borrarlo.
+- SQL/dominio: **23/23 pasaron** incluyendo la migración 004 en el harness. Typecheck/lint/build pasaron después de los cambios. No se repitieron suites locales que no dependían de los cambios de conexión.
+- Inspección visual conectada: **28 vistas**, 390/1280 px, claro/oscuro, cliente (incluido /orders y /login), barra y admin. 0 desbordes, 0 errores de ejecución observados. Ajustados espacio de acciones del menú, márgenes desktop y mediana menor a un minuto. Capturas con códigos ocultos en `docs/evidence/hosted/`; no contienen QR de retiro ni passwords.
+- React/use: **no reproducido después de conectar Supabase**. Mensaje histórico aportado por el usuario: “This library called use() to suspend in a previous render but did not call use() when it finished. This indicates an incorrect use of use().” Se observó antes de conectar, ruta no confirmada entre /, /orders y /login. No se presenta como corregido y no se hicieron cambios especulativos para ese mensaje.
+- Una consulta de auditoría administrativa devolvió 401; se revalidó la sesión (resultado final abajo). Esto se distingue del funcionamiento de API/Auth de la aplicación.
+- Pendientes físicos: Safari/iPhone y Android reales, cámara/sonido, VoiceOver, alertas en segundo plano (no prometidas) y fotografías licenciadas. Storage tiene bucket/políticas instalados, pero no se cargó fotografía final ni se afirma aceptación visual fotográfica. No hubo despliegue Vercel, banco real, recursos nuevos ni pago real.
+- Siguiente tarea exacta: revisión humana de `fix/hosted-integration` y pruebas físicas; si reaparece React/use, registrar ruta y reproducción exactas antes de modificar código. No fusionar automáticamente.

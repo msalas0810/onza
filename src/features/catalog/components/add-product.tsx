@@ -35,7 +35,7 @@ export function AddProduct({
   };
   return (
     <>
-      <div className="stack">
+      <div className={detail ? "stack" : "product-actions"}>
         {detail && (
           <QuantityStepper
             value={quantity}
@@ -55,7 +55,7 @@ export function AddProduct({
               ? "Pedidos no disponibles"
               : "Agregar"}
         </Button>
-        <span role="status" className="muted">
+        <span role="status" className="sr-only">
           {feedback}
         </span>
         {error && <p role="alert">{error}</p>}

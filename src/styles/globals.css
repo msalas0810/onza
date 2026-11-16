@@ -626,3 +626,19 @@ video {
 .product-copy a:hover {
   text-decoration: underline;
 }
+.product-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--onza-space-8);
+  margin-top: var(--onza-space-12);
+}
+@media (min-width: 768px) {
+  .page.wide,
+  .page.operations {
+    padding-left: var(--onza-space-32);
+    padding-right: var(--onza-space-32);
+  }
+  .operations input[type="date"] {
+    max-width: 280px;
+  }
+}

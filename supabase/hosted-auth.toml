@@ -1,0 +1,7 @@
+project_id = "onza-dev"
+[auth]
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = ["http://localhost:3000/**", "http://127.0.0.1:3000/**"]
+enable_anonymous_sign_ins = true
+[auth.email]
+enabled = true

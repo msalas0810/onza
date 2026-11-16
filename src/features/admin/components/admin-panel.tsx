@@ -154,7 +154,9 @@ export function AdminPanel({
               <strong>
                 {metrics.median_preparation_seconds === null
                   ? "—"
-                  : `${Math.round(metrics.median_preparation_seconds / 60)} min`}
+                  : metrics.median_preparation_seconds < 60
+                    ? "<1 min"
+                    : `${Math.round(metrics.median_preparation_seconds / 60)} min`}
               </strong>
               <small>N = {metrics.preparation_n}</small>
             </div>
