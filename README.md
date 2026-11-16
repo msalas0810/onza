@@ -2,7 +2,7 @@
 
 Web móvil Next.js/TypeScript con Supabase y dinero exclusivamente simulado. Cliente invitado, barra autenticada, retiro con claim por sesión y administración del local. La especificación original permanece en `docs/01` a `docs/05`.
 
-**Estado real:** código de las seis etapas implementado; sistema visual y reglas SQL probados localmente. La aceptación multiusuario con Supabase real está **pendiente**, porque esta computadora no tiene Docker/Podman ni un proyecto Supabase demo configurado. Sin configuración, la web muestra ese bloqueo; no simula persistencia en localStorage. Verificados: 23 tests de dominio/SQL y 16 de navegador; 2 E2E de Supabase real omitidas. Evidencia y pendientes en [docs/implementation-status.md](docs/implementation-status.md).
+**Estado real actualizado:** conectado a Supabase alojado `onza-dev` (organización Onza, ref `ukdjuubekpanizcmppod`). Flujo E2E real verificado en sesiones independientes, más 19 controles alojados de permisos/administración y 28 vistas claro/oscuro en móvil y escritorio. El historial de ejecución anterior se conserva en [docs/implementation-status.md](docs/implementation-status.md).
 
 ## Arranque
 
@@ -16,6 +16,20 @@ npm run dev
 ```
 
 Abrí [http://127.0.0.1:3000](http://127.0.0.1:3000). Sin Supabase podés revisar `/design-system`, los temas y el estado de configuración. Node 24 está fijado en `.nvmrc`; se incluye también Node 24 local como devDependency para que `npm run` use LTS sin cambiar el Node global. Para Vercel, seleccioná Node 24 en el proyecto. No hay que instalar herramientas globales con npm.
+
+## Proyecto alojado actual (sin Docker)
+
+El repositorio privado está en GitHub: https://github.com/msalas0810/onza. `main` conserva la base publicada; las correcciones están en `fix/hosted-integration` y no se fusionan automáticamente.
+
+En esta computadora `.env.local` ya está preparado, ignorado por Git y con permisos 0600. Para iniciar: `npm run dev` y abrir http://127.0.0.1:3000. Las credenciales demo están únicamente en ese archivo; no copiarlas al chat ni a commits. Usá perfiles separados para cliente, barra y admin. `.env.example` define nombres, nunca secretos.
+
+Para otro desarrollador autorizado: `npm ci`, autenticar Supabase CLI con permisos administrativos, verificar nombre/organización/ref y ejecutar `npm run demo:configure:hosted`. El script confirma la identidad remota, recupera las API keys en memoria y guarda `.env.local` sin imprimirlas. No sobrescribe archivos existentes. Los nuevos passwords generados no reemplazan contraseñas de usuarios remotos existentes: coordiná un juego de cuentas demo separado o gestioná sus credenciales por un canal seguro.
+
+Migraciones pendientes: `npm exec supabase -- db push --remote=ukdjuubekpanizcmppod --dry-run --skip-vault`, luego aplicar sin `--dry-run` y con `--yes` solo tras revisar el listado. Nunca `db reset` remoto. El seed SQL es idempotente y se ejecuta con `db query --file supabase/seed.sql --remote=ukdjuubekpanizcmppod --yes`; `npm run demo:seed-users` conserva usuarios existentes.
+
+`supabase/hosted-auth.toml` declara únicamente los cambios de Auth necesarios. Para revisarlos, copiarlo a `.supabase/hosted-config/supabase/config.toml` y usar `config diff --remote=ukdjuubekpanizcmppod --workdir .supabase/hosted-config`. No aplicar el config local completo sobre el proyecto alojado. No habilitar exposición automática ni ampliar esquemas API.
+
+Verificación real: `npm run test:e2e:live -- tests/e2e/full-demo.spec.ts tests/e2e/pickup.spec.ts`, `npm run verify:hosted:security` y `npm run verify:hosted:ui`. Esos comandos escriben datos ficticios; los controles de disponibilidad/pausa restauran los valores probados. La autenticación de pruebas evita volcar passwords en trazas de formularios. No generar traces/HAR con tokens.
 
 ## Demo persistente con Supabase local
 

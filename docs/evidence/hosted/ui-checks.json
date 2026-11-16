@@ -1,0 +1,257 @@
+{
+  "checks": [
+    {
+      "route": "/",
+      "role": "customer",
+      "width": 390,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/v/sala-norte",
+      "role": "customer",
+      "width": 390,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/v/sala-norte/p/30000000-0000-4000-8000-000000000001",
+      "role": "customer",
+      "width": 390,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/orders",
+      "role": "customer",
+      "width": 390,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/login",
+      "role": "customer",
+      "width": 390,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/staff/20000000-0000-4000-8000-000000000001",
+      "role": "BARTENDER",
+      "width": 390,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/admin/20000000-0000-4000-8000-000000000001",
+      "role": "ADMIN",
+      "width": 390,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/",
+      "role": "customer",
+      "width": 390,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/v/sala-norte",
+      "role": "customer",
+      "width": 390,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/v/sala-norte/p/30000000-0000-4000-8000-000000000001",
+      "role": "customer",
+      "width": 390,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/orders",
+      "role": "customer",
+      "width": 390,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/login",
+      "role": "customer",
+      "width": 390,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/staff/20000000-0000-4000-8000-000000000001",
+      "role": "BARTENDER",
+      "width": 390,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/admin/20000000-0000-4000-8000-000000000001",
+      "role": "ADMIN",
+      "width": 390,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/",
+      "role": "customer",
+      "width": 1280,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/v/sala-norte",
+      "role": "customer",
+      "width": 1280,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/v/sala-norte/p/30000000-0000-4000-8000-000000000001",
+      "role": "customer",
+      "width": 1280,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/orders",
+      "role": "customer",
+      "width": 1280,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/login",
+      "role": "customer",
+      "width": 1280,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/staff/20000000-0000-4000-8000-000000000001",
+      "role": "BARTENDER",
+      "width": 1280,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/admin/20000000-0000-4000-8000-000000000001",
+      "role": "ADMIN",
+      "width": 1280,
+      "theme": "light",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/",
+      "role": "customer",
+      "width": 1280,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/v/sala-norte",
+      "role": "customer",
+      "width": 1280,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/v/sala-norte/p/30000000-0000-4000-8000-000000000001",
+      "role": "customer",
+      "width": 1280,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/orders",
+      "role": "customer",
+      "width": 1280,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/login",
+      "role": "customer",
+      "width": 1280,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/staff/20000000-0000-4000-8000-000000000001",
+      "role": "BARTENDER",
+      "width": 1280,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    },
+    {
+      "route": "/admin/20000000-0000-4000-8000-000000000001",
+      "role": "ADMIN",
+      "width": 1280,
+      "theme": "dark",
+      "status": 200,
+      "overflow": false,
+      "runtimeError": false
+    }
+  ],
+  "failures": []
+}

@@ -1,0 +1,81 @@
+{
+  "projectRef": "ukdjuubekpanizcmppod",
+  "checks": [
+    {
+      "name": "anonymous A",
+      "passed": true
+    },
+    {
+      "name": "anonymous B",
+      "passed": true
+    },
+    {
+      "name": "published product version readable",
+      "passed": true
+    },
+    {
+      "name": "order created server total",
+      "passed": true
+    },
+    {
+      "name": "owner can read",
+      "passed": true
+    },
+    {
+      "name": "other anonymous cannot read",
+      "passed": true
+    },
+    {
+      "name": "backend denies alien order",
+      "passed": true
+    },
+    {
+      "name": "direct total update denied",
+      "passed": true
+    },
+    {
+      "name": "anonymous cannot self grant role",
+      "passed": true
+    },
+    {
+      "name": "patio staff authentication",
+      "passed": true
+    },
+    {
+      "name": "staff cannot read another venue",
+      "passed": true
+    },
+    {
+      "name": "staff cannot mutate another venue",
+      "passed": true
+    },
+    {
+      "name": "test order canceled by owner",
+      "passed": true
+    },
+    {
+      "name": "admin authentication",
+      "passed": true
+    },
+    {
+      "name": "admin changes availability",
+      "passed": true
+    },
+    {
+      "name": "availability restored",
+      "passed": true
+    },
+    {
+      "name": "admin pauses venue",
+      "passed": true
+    },
+    {
+      "name": "venue pause restored",
+      "passed": true
+    },
+    {
+      "name": "paused venue rejects client creation",
+      "passed": true
+    }
+  ]
+}
