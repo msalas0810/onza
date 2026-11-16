@@ -99,7 +99,7 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 - **Verificado:** se leyó la documentación completa del repo (`README`, `AGENTS`, `CONTRIBUTING`, `docs/01` a `05`, `implementation-status`, `github-vercel`, `review-notes`, `local-execution-plan`, `VALIDACION`) y la estructura de `src/`, `supabase/`, `scripts/`.
 - **No verificado:** no se corrió ninguna prueba ni la app; este cambio es solo documentación. Sí se comprobó con `git ls-remote` que `fix/hosted-integration` está en `bdda420` y que `main` sigue en `cd0faa6`. No se comprobó el estado de CI. El dueño confirmó que el demo desplegado es `bdda420` (Ready en Vercel); eso no se verificó desde esta sesión.
 - **Decisiones:** un solo archivo en la raíz para que sea imposible no verlo. El historial previo se reconstruyó **solo** de lo que el dueño pegó en el chat, y está marcado como tal.
-- **Pendientes / siguiente paso:** retomar **INC-001**. El diario se integró por merge a `fix/hosted-integration` (sin PR) y la rama `docs/diario-de-cambios` se borró. Falta integrar `fix/hosted-integration` a `main`, solo por PR y con decisión del dueño.
+- **Pendientes / siguiente paso:** retomar **INC-001**. El diario se integró a `fix/hosted-integration` por squash merge (sin PR). La rama remota `docs/diario-de-cambios` **no se pudo borrar desde la sesión** (el proxy bloquea el borrado) y debe borrarla el dueño en GitHub. Falta integrar `fix/hosted-integration` a `main`, solo por PR y con decisión del dueño.
 
 ### D-2026-11-16-00 · Desplegar el demo en Vercel *(reconstruida)*
 
