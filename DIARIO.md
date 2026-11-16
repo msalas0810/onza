@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`, punta en `bdda420` (verificado con `git ls-remote` el 2026-11-16). Aún **no** se mergeó a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`. Último commit de código: `3f58c54` (portada y logo de locales); `git log` muestra la punta exacta. Aún **no** se mergeó a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
 | Commit desplegado en Vercel | `bdda420` en `fix/hosted-integration`, estado **Ready** (confirmado por el dueño el 2026-11-16; no se verificó desde esta sesión). El reporte original del despliegue citaba `ee82a7b`, que es anterior |
 | Demo desplegada | https://onza-demo-msalas0810.vercel.app (Preview de Vercel, protegido por login de Vercel) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Resolver la incidencia abierta **INC-001** (ver "Pendientes abiertos") |
+| Siguiente tarea exacta | Aplicar en `onza-dev` las migraciones `...0005` y `...0006` y el seed de imágenes (**PEN-007**); después resolver **INC-001** |
 
 ### Pendientes abiertos
 
@@ -58,6 +58,8 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-004 | Resultado del CI de GitHub Actions (estaba en curso al registrar) | 2026-11-16 |
 | PEN-005 | Scheduler durable para expiraciones; hoy el barrido corre solo cuando hay tráfico | 2026-11-15 |
 | PEN-006 | Cobros reales: falta acuerdo y manual de BAC. Ver `docs/03-bac-y-pagos.md` | 2026-11-15 |
+| PEN-007 | Migraciones `202611160005_venue_images.sql` y `202611160006_venue_images_storage.sql` y `npm run demo:seed-venue-images` **sin aplicar en `onza-dev`**. Hasta entonces el demo desplegado no muestra portadas ni logos y la pestaña Perfil no podrá guardar. Comandos en `README.md` y `docs/implementation-status.md` | 2026-11-16 |
+| PEN-008 | Verificar contra `onza-dev` (subida real a Storage, guardado como admin, aislamiento entre admins) y extender `scripts/verify-hosted-security.mjs` con ese control | 2026-11-16 |
 
 ---
 
@@ -87,6 +89,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-16-02 · Portada y logo editables por cada bar, con tarjeta nueva
+
+- **Fecha y hora:** 2026-11-16 ~02:30 (America/Costa_Rica)
+- **Persona:** dueño del proyecto
+- **IA:** Claude Code · `claude-sonnet-5-5`
+- **Rama y commits:** `fix/hosted-integration` · `3f58c54` (código, migraciones, pruebas, arte demo); el commit siguiente trae esta entrada, el README, `docs/implementation-status.md` y las capturas
+- **Qué cambió:** tarjeta de local con portada y fade a oscuro, logo cuadrado redondeado en la esquina inferior izquierda y, a su derecha, nombre, ubicación opcional y "Ver tragos →"; se quitó el badge Abierto/Cerrado. Nueva pestaña Perfil en la administración (portada, logo, nombre y ubicación, con vista previa). Placeholders si falta la imagen o no carga. Migraciones aditivas: columnas `cover_url`/`logo_url`, función `update_venue_branding` y bucket público `venue-images` (2 MB, jpg/png/webp) con escritura solo para admins del local dueño de la carpeta. Arte demo original y seed idempotente.
+- **Archivos clave:** `supabase/migrations/202611160005_venue_images.sql`, `...0006_venue_images_storage.sql`, `src/features/catalog/components/venue-card.tsx`, `src/features/admin/components/venue-profile.tsx`, `src/features/admin/venue-image.ts`, `scripts/seed-venue-images.mjs`, `public/demo-venues/`.
+- **Verificado:** `tsc`, `eslint` y `next build` sin errores; `vitest`: 46 pruebas pasan (23 nuevas); Playwright: 41 pasan y 2 se omiten como antes. Incluye aislamiento (un admin no toca nombre, ubicación ni imágenes de otro local; bartender, invitado y anon tampoco), políticas de Storage sobre un esquema `storage` simulado, validación de archivos, contraste medido y capturas de la home en móvil y escritorio, claro y oscuro (`docs/evidence/venue-list-*.png`). Las pruebas de aislamiento se comprobaron con mutaciones: fallan si se debilita la migración.
+- **No verificado:** nada contra `onza-dev`. La home real se renderizó contra un servidor REST falso, no contra Supabase. No se probó la subida real a Storage ni el guardado con una sesión de admin, ni los límites de tamaño y MIME del bucket (los aplica el servicio Storage). Dispositivos físicos.
+- **Decisiones:** el conector de Supabase de esta sesión ve otra organización (proyectos "Pedidos SaaS" y "pedidos-staging", no `onza-dev`), así que no se aplicó nada a ciegas. Nombre y ubicación se editan solo en Perfil (salieron de Ajustes). Se guarda la URL pública y la función SQL solo acepta URLs del bucket y de la carpeta del propio local. SVG excluido por poder contener scripts. El seed no pisa imágenes que un admin haya subido.
+- **Pendientes / siguiente paso:** PEN-007 y PEN-008. Para `onza-dev`, desde la computadora con la CLI autenticada: `npm exec supabase -- db push --remote=ukdjuubekpanizcmppod --dry-run --skip-vault` (debe listar solo `0005` y `0006`), luego sin `--dry-run` y con `--yes`, y `npm run demo:seed-venue-images`.
 
 ### D-2026-11-16-01 · Crear el diario de cambios y el protocolo de lectura para IA
 
