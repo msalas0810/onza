@@ -26,6 +26,11 @@ export async function executeCommand(raw: unknown) {
     const { token, ...rest } = command;
     input = { ...rest, tokenHash: tokenHash(token) };
   }
+  if (command.action === "venue_branding") {
+    const { data, error } = await db.rpc("update_venue_branding", { input });
+    if (error) throw new Error(error.message);
+    return data;
+  }
   const { error: sweepError } = await db.rpc("sweep_orders");
   if (sweepError) throw new Error(sweepError.message);
   const { data, error } = await db.rpc("onza_command", { input });

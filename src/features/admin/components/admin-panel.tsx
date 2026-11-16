@@ -6,6 +6,7 @@ import type { Product, Venue } from "@/features/catalog/server/queries";
 import { summarySchema, type VenueSummary } from "@/features/analytics/types";
 import { Button, TextField, Price } from "@/components/ui/primitives";
 import { ProductEditor } from "./product-editor";
+import { VenueProfile } from "./venue-profile";
 import { sendCommand } from "@/features/orders/client-api";
 import { useLiveOrders } from "@/features/orders/use-live-orders";
 import { statusLabels, paymentLabels } from "@/features/orders/types";
@@ -76,7 +77,7 @@ export function AdminPanel({
         </Link>
       </div>
       <nav className="tabs" aria-label="Administración">
-        {["Resumen", "Pedidos", "Menú", "Ajustes"].map((name) => (
+        {["Resumen", "Pedidos", "Menú", "Perfil", "Ajustes"].map((name) => (
           <button
             aria-current={tab === name ? "page" : undefined}
             key={name}
@@ -423,6 +424,7 @@ export function AdminPanel({
           )}
         </section>
       )}
+      {tab === "Perfil" && <VenueProfile venue={venue} />}
       {tab === "Ajustes" && (
         <form
           className="stack"
@@ -432,8 +434,6 @@ export function AdminPanel({
             void run({
               action: "venue_update",
               venueId: venue.id,
-              name: String(f.get("name")),
-              zone: String(f.get("zone")),
               pickupLabel: String(f.get("pickup")),
               supportContact: String(f.get("contact")),
               hours: String(f.get("hours")),
@@ -445,13 +445,10 @@ export function AdminPanel({
           }}
         >
           <h2>Operación del local</h2>
-          <TextField
-            name="name"
-            label="Nombre del local"
-            required
-            defaultValue={venue.name}
-          />
-          <TextField name="zone" label="Zona" defaultValue={venue.zone} />
+          <p className="muted">
+            El nombre, la ubicación, la portada y el logo se editan en la
+            pestaña Perfil.
+          </p>
           <TextField
             name="pickup"
             label="Barra de retiro"

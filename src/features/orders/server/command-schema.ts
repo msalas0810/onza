@@ -88,6 +88,14 @@ export const commandSchema = z.discriminatedUnion("action", [
     capacity: z.number().int().min(1).max(100).optional(),
   }),
   z.object({
+    action: z.literal("venue_branding"),
+    venueId: uuid,
+    name: z.string().trim().min(1).max(100).optional(),
+    zone: z.string().trim().max(100).optional(),
+    coverUrl: z.string().url().max(500).nullable().optional(),
+    logoUrl: z.string().url().max(500).nullable().optional(),
+  }),
+  z.object({
     action: z.literal("product_save"),
     venueId: uuid,
     productId: uuid.optional(),

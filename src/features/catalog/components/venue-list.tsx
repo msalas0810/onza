@@ -1,10 +1,9 @@
 "use client";
 import { useState } from "react";
-import Link from "next/link";
-import Image from "next/image";
 import type { Venue } from "../server/queries";
-import { TextField, StatusBadge, EmptyState } from "@/components/ui/primitives";
+import { TextField, EmptyState } from "@/components/ui/primitives";
 import { CartDock } from "@/features/orders/components/cart-dock";
+import { VenueCard } from "./venue-card";
 export function VenueList({ venues }: { venues: Venue[] }) {
   const [search, setSearch] = useState("");
   const visible = venues.filter((v) =>
@@ -21,36 +20,8 @@ export function VenueList({ venues }: { venues: Venue[] }) {
         />
       </div>
       <div className="venue-list">
-        {visible.map((v) => (
-          <Link className="venue-link" key={v.id} href={`/v/${v.slug}`}>
-            <div className="venue-art">
-              <Image
-                unoptimized
-                src="/brand/onza-shot.svg"
-                width={48}
-                height={64}
-                alt=""
-              />
-            </div>
-            <div className="row between">
-              <h2>{v.name}</h2>
-              <StatusBadge
-                tone={
-                  v.open_state === "open" && !v.paused ? "success" : "neutral"
-                }
-              >
-                {v.open_state === "closed"
-                  ? "Cerrado"
-                  : v.paused
-                    ? "Pausado"
-                    : "Abierto"}
-              </StatusBadge>
-            </div>
-            <p className="muted">
-              {v.zone} · {v.pickup_label}
-            </p>
-            <span className="link-button">Ver menú →</span>
-          </Link>
+        {visible.map((v, index) => (
+          <VenueCard key={v.id} venue={v} eager={index < 2} />
         ))}
       </div>
       {!visible.length && (

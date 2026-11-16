@@ -24,7 +24,9 @@
     "test:e2e:live": "node --env-file=.env.local node_modules/@playwright/test/cli.js test",
     "demo:configure:hosted": "node scripts/configure-hosted.mjs",
     "verify:hosted:security": "node --env-file=.env.local scripts/verify-hosted-security.mjs",
-    "verify:hosted:ui": "node --env-file=.env.local scripts/inspect-hosted-ui.mjs"
+    "verify:hosted:ui": "node --env-file=.env.local scripts/inspect-hosted-ui.mjs",
+    "demo:seed-venue-images": "node --env-file=.env.local scripts/seed-venue-images.mjs",
+    "demo:generate-venue-art": "node scripts/generate-venue-placeholders.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.3.1",

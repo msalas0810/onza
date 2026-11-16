@@ -29,6 +29,8 @@ export const messages: Record<string, string> = {
   INVALID_QUANTITY:
     "Usá entre 1 y 10 unidades por producto, hasta 20 por pedido.",
   PROVIDER_NOT_CONFIGURED: "Los pagos reales no están configurados.",
+  INVALID_BRANDING:
+    "Los datos del local o la imagen no son válidos. Usá una imagen JPG, PNG o WebP de hasta 2 MB subida desde esta pantalla.",
   SUPERVISOR_REVIEW_REQUIRED:
     "Un supervisor debe verificar físicamente si se entregó antes de transferir el retiro.",
 };
