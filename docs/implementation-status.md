@@ -107,3 +107,9 @@ Revisión hecha por el mismo agente conforme al pedido explícito de trabajar so
 - Una consulta de auditoría administrativa devolvió 401 transitorio; se revalidó la sesión listando proyectos y repitiendo la consulta. Resultado final: private_rls_enabled=true, private_tables_denied=true y private_view_denied=true. Esto se distingue del funcionamiento de API/Auth de la aplicación.
 - Pendientes físicos: Safari/iPhone y Android reales, cámara/sonido, VoiceOver, alertas en segundo plano (no prometidas) y fotografías licenciadas. Storage tiene bucket/políticas instalados, pero no se cargó fotografía final ni se afirma aceptación visual fotográfica. No hubo despliegue Vercel, banco real, recursos nuevos ni pago real.
 - Siguiente tarea exacta: revisión humana de `fix/hosted-integration` y pruebas físicas; si reaparece React/use, registrar ruta y reproducción exactas antes de modificar código. No fusionar automáticamente.
+
+### Prueba específica de Realtime y publicación final
+
+- `verify-hosted-realtime.mjs`: suscripción WebSocket SUBSCRIBED y evento Postgres `preparing` recibido en la sesión del cliente después de una acción de otra sesión de barra, **sin polling**. Pedido ficticio cancelado por admin al cerrar; evidencia en realtime-check.json.
+- Escaneo exacto de secretos de `.env.local` contra 190 blobs históricos antes del último hito: 0 coincidencias, sin imprimir valores. `.env.local` sigue ignorado y no forma parte de los commits.
+- Correcciones y evidencia publicadas en `fix/hosted-integration`. `main` permanece en `cd0faa6`; no hubo merge automático, force push ni despliegue. GitHub Actions estaba en curso al cerrar esta comprobación; no se declara verde sin resultado final.

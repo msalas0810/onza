@@ -10,3 +10,5 @@ Proyecto verificado: `ukdjuubekpanizcmppod`, organización Onza. Datos ficticios
 React/use histórico: “This library called use() to suspend in a previous render but did not call use() when it finished. This indicates an incorrect use of use().” **No reproducido después de conectar Supabase**; no se declara corregido ni se hicieron cambios especulativos.
 
 Los montos del resumen corresponden a pedidos realmente entregados por las pruebas de demo, no métricas inventadas. Los controles restauran disponibilidad y pausa; pedidos de seguridad se cancelan sin borrar historia. Fotografías siguen siendo fallbacks hasta contar con material con derechos.
+
+`realtime-check.json` agrega prueba directa de WebSocket y recepción de cambio PostgreSQL entre sesiones. No usa polling como sustituto de esa comprobación. El pedido de prueba se cancela sin borrar historia.
