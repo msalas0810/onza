@@ -1,4 +1,6 @@
-# Onza · MVP local
+# Onza · Demo
+
+**Demo HTTPS:** https://onza-demo-msalas0810.vercel.app · Preview protegido por login de Vercel. Instrucciones y límites: [docs/vercel-demo.md](docs/vercel-demo.md).
 
 Web móvil Next.js/TypeScript con Supabase y dinero exclusivamente simulado. Cliente invitado, barra autenticada, retiro con claim por sesión y administración del local. La especificación original permanece en `docs/01` a `docs/05`.
 

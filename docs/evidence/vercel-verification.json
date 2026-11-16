@@ -1,0 +1,46 @@
+{
+  "origin": "https://onza-demo-msalas0810.vercel.app",
+  "checks": [
+    {
+      "name": "catalog HTTPS",
+      "passed": true
+    },
+    {
+      "name": "guest order and mock reserve",
+      "passed": true
+    },
+    {
+      "name": "order persists after refresh",
+      "passed": true
+    },
+    {
+      "name": "bartender authentication",
+      "passed": true
+    },
+    {
+      "name": "server reservation authorized",
+      "passed": true
+    },
+    {
+      "name": "remote bartender accepts and client updates",
+      "passed": true
+    },
+    {
+      "name": "remote ready update",
+      "passed": true
+    },
+    {
+      "name": "runtime errors absent",
+      "passed": true
+    },
+    {
+      "name": "Realtime WebSocket event",
+      "passed": true
+    },
+    {
+      "name": "test order canceled without capture",
+      "passed": true
+    }
+  ],
+  "pickupValidation": "PENDING_USER_REPORTED_ISSUE_NOT_TESTED"
+}
