@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`. Último commit de código: `3f58c54` (portada y logo de locales); `git log` muestra la punta exacta. Aún **no** se mergeó a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`. Último commit de código: `5b6acc7` (imagen de cada trago); `git log` muestra la punta exacta. Aún **no** se mergeó a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
 | Commit desplegado en Vercel | `bdda420` en `fix/hosted-integration`, estado **Ready** (confirmado por el dueño el 2026-11-16; no se verificó desde esta sesión). El reporte original del despliegue citaba `ee82a7b`, que es anterior |
 | Demo desplegada | https://onza-demo-msalas0810.vercel.app (Preview de Vercel, protegido por login de Vercel) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Aplicar en `onza-dev` las migraciones `...0005` y `...0006` y el seed de imágenes (**PEN-007**); después resolver **INC-001** |
+| Siguiente tarea exacta | Aplicar en `onza-dev` las migraciones `...0005`, `...0006` y `...0007` y los seeds de imágenes (**PEN-007**); después resolver **INC-001** |
 
 ### Pendientes abiertos
 
@@ -58,8 +58,8 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-004 | Resultado del CI de GitHub Actions (estaba en curso al registrar) | 2026-11-16 |
 | PEN-005 | Scheduler durable para expiraciones; hoy el barrido corre solo cuando hay tráfico | 2026-11-15 |
 | PEN-006 | Cobros reales: falta acuerdo y manual de BAC. Ver `docs/03-bac-y-pagos.md` | 2026-11-15 |
-| PEN-007 | Migraciones `202611160005_venue_images.sql` y `202611160006_venue_images_storage.sql` y `npm run demo:seed-venue-images` **sin aplicar en `onza-dev`**. Hasta entonces el demo desplegado no muestra portadas ni logos y la pestaña Perfil no podrá guardar. Comandos en `README.md` y `docs/implementation-status.md` | 2026-11-16 |
-| PEN-008 | Verificar contra `onza-dev` (subida real a Storage, guardado como admin, aislamiento entre admins) y extender `scripts/verify-hosted-security.mjs` con ese control | 2026-11-16 |
+| PEN-007 | Migraciones `202611160005_venue_images.sql`, `202611160006_venue_images_storage.sql` y `202611160007_product_images.sql`, y los seeds `npm run demo:seed-venue-images` y `npm run demo:seed-product-images`, **sin aplicar en `onza-dev`**. Hasta entonces el demo desplegado no muestra portadas, logos ni imágenes de tragos y las pantallas de edición no podrán guardar. Comandos en `README.md` y `docs/implementation-status.md` | 2026-11-16 |
+| PEN-008 | Verificar contra `onza-dev` (subida real a Storage, guardado como admin de bares y tragos, aislamiento entre admins) y extender `scripts/verify-hosted-security.mjs` con esos controles | 2026-11-16 |
 
 ---
 
@@ -89,6 +89,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-16-03 · Imagen editable para cada trago, en la lista de tragos de cada bar
+
+- **Fecha y hora:** 2026-11-16 ~02:45 (America/Costa_Rica)
+- **Persona:** dueño del proyecto
+- **IA:** Claude Code · `claude-sonnet-5-5`
+- **Rama y commits:** `fix/hosted-integration` · `5b6acc7` (código, migración, pruebas, ilustraciones); el commit siguiente trae esta entrada, el README, `docs/implementation-status.md` y las capturas
+- **Qué cambió:** `products.image_url` y la función `update_product_image` (solo admin del local dueño del trago; solo acepta `product-*` en la carpeta del propio local del bucket `venue-images`, con los mismos límites y políticas que las imágenes de bares). El editor de trago de la administración sube, cambia y quita la imagen; la lista de tragos de cada bar y la página del trago la muestran en marco fijo con bordes redondeados y marcador de posición. Seis ilustraciones originales por tipo de trago y un seed idempotente que asigna una a cada trago demo.
+- **Archivos clave:** `supabase/migrations/202611160007_product_images.sql`, `src/features/catalog/components/product-image.tsx`, `src/features/admin/components/product-editor.tsx`, `scripts/seed-product-images.mjs`, `public/demo-products/`.
+- **Verificado:** `tsc`, `eslint` y `next build` sin errores; `vitest`: 62 pruebas pasan (16 nuevas); Playwright: 61 pasan y 2 se omiten como antes. Permisos: un admin no puede cambiar tragos de otro local (en ambos sentidos), ni bartender, invitado o anon; probado con mutaciones que fallan si se debilita la migración. Marco de 88 × 110 px con radio ≥ 12 px con y sin imagen en 5 anchos, claro y oscuro; imagen rota y ausente; capturas de la lista y el detalle reales con datos ficticios en `docs/evidence/product-*.png`.
+- **No verificado:** nada contra `onza-dev`: las pantallas reales se renderizaron contra un servidor REST falso. No se probó la subida real a Storage ni el guardado desde una sesión de admin, ni los límites de tamaño y MIME del bucket. La rama "el trago se guardó pero la imagen falló" está implementada y sin probar de extremo a extremo. Dispositivos físicos.
+- **Decisiones:** se reutilizó el bucket y las políticas de Storage existentes (sin migración de Storage nueva). La imagen no sube `products.version` para no invalidar carritos. El campo antiguo de foto de 5 MB (`photo_path`) salió del editor, pero se sigue mostrando como respaldo hasta que el admin suba una imagen nueva. El conector de Supabase de esta sesión sigue viendo otra organización, así que no se aplicó nada a `onza-dev`.
+- **Pendientes / siguiente paso:** PEN-007 y PEN-008. Desde la computadora con la CLI autenticada: `npm exec supabase -- db push --remote=ukdjuubekpanizcmppod --dry-run --skip-vault` (revisar el listado), luego sin `--dry-run` y con `--yes`, y `npm run demo:seed-product-images` (y `demo:seed-venue-images` si no se corrió).
 
 ### D-2026-11-16-02 · Portada y logo editables por cada bar, con tarjeta nueva
 
