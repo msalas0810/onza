@@ -1,0 +1,178 @@
+{
+  "demo_only": true,
+  "id_mapping": "Seed converts fixture keys into UUIDs. Never use these strings as bank merchant identifiers.",
+  "timezone": "America/Costa_Rica",
+  "business_day_cutoff": "06:00",
+  "venues": [
+    {
+      "id": "demo-sala-norte",
+      "slug": "sala-norte",
+      "name": "Sala Norte",
+      "zone": "San José",
+      "state": "open",
+      "pickup_label": "Barra principal"
+    },
+    {
+      "id": "demo-patio",
+      "slug": "patio-central",
+      "name": "Patio Central",
+      "zone": "San José",
+      "state": "open",
+      "pickup_label": "Barra principal"
+    },
+    {
+      "id": "demo-club-cero",
+      "slug": "club-cero",
+      "name": "Club Cero",
+      "zone": "San José",
+      "state": "closed",
+      "pickup_label": "Barra principal"
+    }
+  ],
+  "products": [
+    {
+      "id": "demo-sala-norte-p1",
+      "venue_id": "demo-sala-norte",
+      "name": "Paloma",
+      "price_minor": 450000,
+      "currency": "CRC",
+      "description": "Tequila, toronja y soda.",
+      "category": "Cocteles",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-sala-norte-p2",
+      "venue_id": "demo-sala-norte",
+      "name": "Negroni",
+      "price_minor": 550000,
+      "currency": "CRC",
+      "description": "Gin, vermut rosso y bitter.",
+      "category": "Clásicos",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-sala-norte-p3",
+      "venue_id": "demo-sala-norte",
+      "name": "Gin tonic",
+      "price_minor": 500000,
+      "currency": "CRC",
+      "description": "Gin y agua tónica.",
+      "category": "Clásicos",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-sala-norte-p4",
+      "venue_id": "demo-sala-norte",
+      "name": "Margarita",
+      "price_minor": 500000,
+      "currency": "CRC",
+      "description": "Tequila, cítricos y licor de naranja.",
+      "category": "Cocteles",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-sala-norte-p5",
+      "venue_id": "demo-sala-norte",
+      "name": "Cerveza",
+      "price_minor": 250000,
+      "currency": "CRC",
+      "description": "Botella individual.",
+      "category": "Cervezas",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-sala-norte-p6",
+      "venue_id": "demo-sala-norte",
+      "name": "Soda cítrica",
+      "price_minor": 200000,
+      "currency": "CRC",
+      "description": "Bebida sin alcohol.",
+      "category": "Sin alcohol",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-patio-p1",
+      "venue_id": "demo-patio",
+      "name": "Paloma",
+      "price_minor": 450000,
+      "currency": "CRC",
+      "description": "Tequila, toronja y soda.",
+      "category": "Cocteles",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-patio-p2",
+      "venue_id": "demo-patio",
+      "name": "Negroni",
+      "price_minor": 550000,
+      "currency": "CRC",
+      "description": "Gin, vermut rosso y bitter.",
+      "category": "Clásicos",
+      "available": false,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-patio-p3",
+      "venue_id": "demo-patio",
+      "name": "Gin tonic",
+      "price_minor": 500000,
+      "currency": "CRC",
+      "description": "Gin y agua tónica.",
+      "category": "Clásicos",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-patio-p4",
+      "venue_id": "demo-patio",
+      "name": "Margarita",
+      "price_minor": 500000,
+      "currency": "CRC",
+      "description": "Tequila, cítricos y licor de naranja.",
+      "category": "Cocteles",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-patio-p5",
+      "venue_id": "demo-patio",
+      "name": "Cerveza",
+      "price_minor": 250000,
+      "currency": "CRC",
+      "description": "Botella individual.",
+      "category": "Cervezas",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    },
+    {
+      "id": "demo-patio-p6",
+      "venue_id": "demo-patio",
+      "name": "Soda cítrica",
+      "price_minor": 200000,
+      "currency": "CRC",
+      "description": "Bebida sin alcohol.",
+      "category": "Sin alcohol",
+      "available": true,
+      "photo_path": null,
+      "version": 1
+    }
+  ]
+}

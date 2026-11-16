@@ -1,0 +1,104 @@
+/* Generated from tokens.json. Update JSON and run python3 scripts/generate-tokens.py. */
+:root {
+  --onza-bg: #FFFFFF;
+  --onza-surface: #F5F5F7;
+  --onza-surface-raised: #FFFFFF;
+  --onza-text: #242426;
+  --onza-text-muted: #66666D;
+  --onza-border: #E5E5EA;
+  --onza-control-border: #85858E;
+  --onza-brand: #681D3B;
+  --onza-brand-text: #681D3B;
+  --onza-brand-soft: #F7EFF2;
+  --onza-on-brand: #FFFFFF;
+  --onza-success-text: #17663F;
+  --onza-warning-text: #825600;
+  --onza-danger-text: #A12A35;
+  --onza-focus: #681D3B;
+  --onza-space-4: 4px;
+  --onza-space-8: 8px;
+  --onza-space-12: 12px;
+  --onza-space-16: 16px;
+  --onza-space-20: 20px;
+  --onza-space-24: 24px;
+  --onza-space-32: 32px;
+  --onza-space-40: 40px;
+  --onza-space-48: 48px;
+  --onza-space-64: 64px;
+  --onza-radius-control: 12px;
+  --onza-radius-media: 16px;
+  --onza-radius-sheet: 24px;
+  --onza-size-touch-min: 44px;
+  --onza-size-control: 48px;
+  --onza-size-staff-control: 56px;
+  --onza-size-content-customer: 480px;
+  --onza-size-content-explore: 960px;
+  --onza-size-content-operations: 1280px;
+  --onza-type-display-size: 32px;
+  --onza-type-display-line: 38px;
+  --onza-type-display-weight: 600;
+  --onza-type-title-size: 28px;
+  --onza-type-title-line: 34px;
+  --onza-type-title-weight: 600;
+  --onza-type-heading-size: 20px;
+  --onza-type-heading-line: 26px;
+  --onza-type-heading-weight: 600;
+  --onza-type-body-size: 16px;
+  --onza-type-body-line: 24px;
+  --onza-type-body-weight: 400;
+  --onza-type-label-size: 14px;
+  --onza-type-label-line: 20px;
+  --onza-type-label-weight: 500;
+  --onza-type-caption-size: 12px;
+  --onza-type-caption-line: 16px;
+  --onza-type-caption-weight: 500;
+  --onza-motion-press: 100ms;
+  --onza-motion-state: 160ms;
+  --onza-motion-sheet: 220ms;
+  --onza-motion-confirm: 300ms;
+  --onza-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+  --onza-font: "InterVariable", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]):not([data-theme="dark"]) {
+  --onza-bg: #111113;
+  --onza-surface: #1B1B1F;
+  --onza-surface-raised: #242429;
+  --onza-text: #F5F5F7;
+  --onza-text-muted: #ADADB7;
+  --onza-border: #34343B;
+  --onza-control-border: #777780;
+  --onza-brand: #681D3B;
+  --onza-brand-text: #E7A4BE;
+  --onza-brand-soft: #302029;
+  --onza-on-brand: #FFFFFF;
+  --onza-success-text: #89D8AE;
+  --onza-warning-text: #F2CD80;
+  --onza-danger-text: #FFADB5;
+  --onza-focus: #E7A4BE;
+  color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --onza-bg: #111113;
+  --onza-surface: #1B1B1F;
+  --onza-surface-raised: #242429;
+  --onza-text: #F5F5F7;
+  --onza-text-muted: #ADADB7;
+  --onza-border: #34343B;
+  --onza-control-border: #777780;
+  --onza-brand: #681D3B;
+  --onza-brand-text: #E7A4BE;
+  --onza-brand-soft: #302029;
+  --onza-on-brand: #FFFFFF;
+  --onza-success-text: #89D8AE;
+  --onza-warning-text: #F2CD80;
+  --onza-danger-text: #FFADB5;
+  --onza-focus: #E7A4BE;
+  color-scheme: dark;
+}
+:root[data-theme="light"] { color-scheme: light; }
+@media (prefers-reduced-motion: reduce) {
+ :root { --onza-motion-press: 0ms; --onza-motion-state: 0ms; --onza-motion-sheet: 0ms; --onza-motion-confirm: 0ms; }
+}
