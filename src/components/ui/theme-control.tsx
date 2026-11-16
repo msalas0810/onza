@@ -1,0 +1,2 @@
+'use client';
+export function ThemeControl(){return <label className="theme-control"><span className="sr-only">Tema</span><select aria-label="Tema" defaultValue="system" onChange={event=>{const value=event.target.value;localStorage.setItem('onza-theme',value);if(value==='system')delete document.documentElement.dataset.theme;else document.documentElement.dataset.theme=value;}}><option value="system">Sistema</option><option value="light">Claro</option><option value="dark">Oscuro</option></select></label>}

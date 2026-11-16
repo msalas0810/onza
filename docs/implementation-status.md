@@ -1,20 +1,20 @@
 # Estado de implementación
 
-## Entregado en este kit
+## Etapa 1 — verificada
+- Next 16.4.6 / React 19.3.1 / TypeScript strict, Node LTS local, lockfile, assets originales y tokens en claro/oscuro.
+- Componentes compartidos y `/design-system` (solo desarrollo; producción 404 salvo habilitación explícita), tema aplicado antes del render, fuente local.
+- Ejecutados: `npm run typecheck`, `npm run lint`, `npm run build`: exit 0. Playwright: 11/11 a 360/390/430/768/1280 px en claro/oscuro, reduced motion, foco, targets y preferencia persistente.
+- Capturas: `test-results/design-<ancho>-<tema>.png` (artefactos locales ignorados por Git).
+- Corrección: el selector de targets incluía el botón de herramientas de Next; ahora mide los controles del contenido.
+- Próxima tarea: cerrar catálogo/persistencia y comprobar permisos SQL.
 
-Especificación de producto/diseño/arquitectura; plan de seis etapas; casos de aceptación; investigación pública de BAC; tokens de ambos temas; SVG; Inter con licencia; fixtures ficticias y contratos TypeScript de referencia.
+## Etapa 2 — en integración
+- Migración, RLS, seed reproducible y tipos generados desde SQL; clientes Supabase/guards en construcción.
+- Ejecutadas 6 pruebas PostgreSQL embebido (PGlite): todas pasan. Incluyen RLS con roles authenticated reales y JWT simulados; NO prueban Auth/Realtime/Storage reales.
+- Bloqueo externo: sin Docker ni proyecto Supabase configurado. No se usa persistencia alternativa para pedidos.
 
-## Todavía no implementado
+## Etapas 3–6 — en construcción
+Servicios, transacciones mock y pruebas en avance; aún no se declaran completas.
 
-Aplicación Next.js, proyecto Supabase, migraciones/RLS, autenticación, cola multiusuario, escáner, adaptador mock, pruebas de aplicación, despliegue y cualquier pago real. El PDF muestra una composición de referencia, no capturas de una app ya construida.
-
-## Primer trabajo de Codex
-
-Leer PROMPT-CODEX.md y AGENTS.md, inspeccionar el entorno y completar etapa 1. Registrar aquí, por etapa, archivos creados, comandos realmente ejecutados, resultados y pendientes. No convertir un objetivo en una capacidad declarada.
-
-## Insumos que siguen pendientes
-
-- Configuración de un proyecto Supabase dedicado para el demo persistente.
-- Serie de seis fotografías propias/licenciadas para aprobar el acabado del catálogo.
-- Acuerdo BAC que admita el caso de uso y manual del gateway para cualquier integración real.
-
+## Límites de aceptación
+No hay fotos finales licenciadas. No se han probado Safari/iPhone/Android físicos. Ningún pago real ni integración BAC. Sin push, repositorio remoto ni despliegue.
