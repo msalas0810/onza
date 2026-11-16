@@ -52,3 +52,13 @@ Leer README.md, docs/01-producto-y-diseno.md, docs/02-arquitectura.md, docs/03-b
 - Probar Safari de iPhone real antes de prometer cámara, push, audio o vibración. Playwright no prueba hápticos físicos.
 - Nunca afirmar que está certificado por BAC, listo para cobrar o que el pago se completó sin evidencia del proveedor.
 - Prohibido lanzar producción con accesos públicos de demo, bypasses de roles o simuladores habilitados como pagos reales.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

@@ -1,0 +1,35 @@
+project_id = "onza-local"
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 1000
+[db]
+port = 54322
+shadow_port = 54320
+major_version = 17
+[db.seed]
+enabled = true
+sql_paths = ["./seed.sql"]
+[studio]
+enabled = true
+port = 54323
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+additional_redirect_urls = ["http://localhost:3000/**", "http://127.0.0.1:3000/**"]
+enable_signup = true
+enable_anonymous_sign_ins = true
+[auth.email]
+# Keep password sign-in available for provisioned staff; RLS grants no role to self-signups.
+enabled = true
+[realtime]
+enabled = true
+[storage]
+enabled = true
+file_size_limit = "5MiB"
+[auth.rate_limit]
+anonymous_users = 30
+sign_in_sign_ups = 30
+token_refresh = 150
