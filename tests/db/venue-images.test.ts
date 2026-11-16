@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import type { PGlite } from "@electric-sql/pglite";
 import { it, expect, describe } from "vitest";
-import { database, actor, ids } from "./helpers";
+import { database, actor, ids, installStorageStub } from "./helpers";
 
 const adminPatio = "10000000-0000-4000-8000-000000000005";
 const base = "https://demo.supabase.co/storage/v1/object/public/venue-images";
@@ -215,22 +215,7 @@ describe("branding de locales (columnas y función)", () => {
 // para ejecutar la migración REAL de políticas. No prueba límites de tamaño ni MIME: eso lo aplica el servicio Storage.
 async function withStorage() {
   const db = await withVenues();
-  await db.exec(`
-    create schema storage;
-    create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
-    create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text references storage.buckets(id),name text,owner uuid default auth.uid());
-    create function storage.foldername(name text) returns text[] language sql immutable as $$select (string_to_array(name,'/'))[1:array_length(string_to_array(name,'/'),1)-1]$$;
-    alter table storage.objects enable row level security;
-    grant usage on schema storage to anon,authenticated;
-    grant select,insert,update,delete on storage.objects to anon,authenticated;
-    grant select on storage.buckets to anon,authenticated;
-  `);
-  await db.exec(
-    readFileSync(
-      "supabase/migrations/202611160006_venue_images_storage.sql",
-      "utf8",
-    ),
-  );
+  await installStorageStub(db);
   return db;
 }
 const insertObject = (db: PGlite, name: string, bucket = "venue-images") =>

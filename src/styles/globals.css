@@ -674,14 +674,25 @@ video {
     scroll-behavior: auto !important;
   }
 }
-.product-photo {
-  object-fit: cover;
+/* Drink image: fixed size, rounded, light frame so light illustrations stay delimited in the dark theme. */
+.product-image {
+  position: relative;
+  display: block;
+  flex: none;
+  overflow: hidden;
+  border: 1px solid var(--onza-border);
   border-radius: var(--onza-radius-media);
+  background: var(--onza-surface);
 }
-.detail-photo {
+.product-image.thumb {
+  width: 88px;
+  height: 110px;
+}
+.product-image.detail {
   width: 100%;
-  height: auto;
-  border-radius: var(--onza-radius-media);
+  aspect-ratio: 4 / 5;
+}
+.product-image img {
   object-fit: cover;
 }
 .staff-mobile-tabs {

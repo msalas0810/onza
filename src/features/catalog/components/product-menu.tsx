@@ -1,16 +1,12 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import type { Venue, Product } from "../server/queries";
-import {
-  TextField,
-  Price,
-  PhotoFallback,
-  EmptyState,
-} from "@/components/ui/primitives";
+import { TextField, Price, EmptyState } from "@/components/ui/primitives";
 import { CartDock } from "@/features/orders/components/cart-dock";
 import { AddProduct } from "./add-product";
+import { ProductImage } from "./product-image";
+import { productImageSrc } from "../product-image-src";
 export function ProductMenu({
   venue,
   products,
@@ -58,18 +54,11 @@ export function ProductMenu({
                   <Price amount={p.price_minor} />
                   <AddProduct product={p} venue={venue} />
                 </div>
-                {p.photo_path ? (
-                  <Image
-                    unoptimized
-                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-photos/${p.photo_path}`}
-                    alt={p.name}
-                    width={88}
-                    height={110}
-                    className="product-photo"
-                  />
-                ) : (
-                  <PhotoFallback name={p.name} />
-                )}
+                <ProductImage
+                  name={p.name}
+                  src={productImageSrc(p)}
+                  eager={visible.indexOf(p) < 3}
+                />
               </article>
             ))}
         </section>

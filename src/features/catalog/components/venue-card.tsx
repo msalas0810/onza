@@ -1,29 +1,13 @@
 "use client";
-import { useState } from "react";
-import type { Ref } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Venue } from "../server/queries";
+import { useImageFailure } from "@/lib/use-image-failure";
 
 export type VenueCardData = Pick<
   Venue,
   "slug" | "name" | "zone" | "cover_url" | "logo_url"
 >;
-
-/**
- * Tracks whether an image failed to load. An error can happen before React hydrates (server-rendered <img>), so besides
- * onError the ref callback checks the already-finished element. A new src starts fresh.
- */
-function useImageFailure(src: string | null) {
-  const [failedSrc, setFailedSrc] = useState<string | null>(null);
-  const ref: Ref<HTMLImageElement> = (img) => {
-    if (img && src && img.complete && img.naturalWidth === 0) setFailedSrc(src);
-  };
-  return {
-    usable: src && failedSrc !== src ? src : null,
-    props: { ref, onError: () => setFailedSrc(src) },
-  };
-}
 
 /**
  * Venue card: cover photo with a dark fade toward the bottom, square rounded logo on the bottom-left corner of the photo,

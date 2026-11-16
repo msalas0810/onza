@@ -11,7 +11,9 @@ import {
 import { Plus } from "lucide-react";
 import { VenueCard } from "@/features/catalog/components/venue-card";
 import { VenueProfile } from "@/features/admin/components/venue-profile";
-import type { Venue } from "@/features/catalog/server/queries";
+import { ProductMenu } from "@/features/catalog/components/product-menu";
+import { ProductEditorSample } from "./product-editor-sample";
+import type { Product, Venue } from "@/features/catalog/server/queries";
 import type { VenueCardData } from "@/features/catalog/components/venue-card";
 
 // Sample row so the admin profile form can be reviewed here. It does not save anything: no session, no Supabase.
@@ -33,6 +35,73 @@ const sampleVenue: Venue = {
   cover_url: "/demo-venues/sala-norte-cover.jpg",
   logo_url: "/demo-venues/sala-norte-logo.png",
 };
+
+// Sample drinks for reviewing the menu rows and the drink editor. Nothing here is saved.
+const sampleCategory = "ad46cb30-426b-52bb-8358-ac044919d89a";
+const sampleProduct = (id: string, patch: Partial<Product>): Product => ({
+  id,
+  venue_id: sampleVenue.id,
+  category_id: sampleCategory,
+  name: "Trago",
+  description: "",
+  price_minor: 450000,
+  photo_path: null,
+  image_url: null,
+  size: "",
+  allergens: "No informado por el local",
+  available: true,
+  archived: false,
+  version: 1,
+  ...patch,
+});
+const sampleProducts: Product[] = [
+  sampleProduct("30000000-0000-4000-8000-000000000001", {
+    name: "Paloma",
+    description: "Tequila, toronja y soda.",
+    image_url: "/demo-products/highball.png",
+  }),
+  sampleProduct("30000000-0000-4000-8000-000000000002", {
+    name: "Negroni",
+    description: "Gin, vermut rosso y bitter.",
+    price_minor: 550000,
+    image_url: "/demo-products/cocktail.png",
+  }),
+  sampleProduct("30000000-0000-4000-8000-000000000020", {
+    name: "Sin imagen",
+    description:
+      "Este trago aún no tiene imagen: se muestra el marcador de posición.",
+  }),
+  sampleProduct("30000000-0000-4000-8000-000000000021", {
+    name: "Imagen que no carga",
+    description:
+      "La URL falla y cae al marcador de posición sin dejar una caja rota.",
+    image_url: "/demo-products/no-existe.png",
+  }),
+  sampleProduct("30000000-0000-4000-8000-000000000022", {
+    name: "Cóctel de la casa con un nombre muy largo que ocupa varias líneas",
+    description:
+      "Una descripción larga para comprobar que el texto se ajusta a su columna sin empujar ni deformar la imagen del trago.",
+    price_minor: 1250000,
+    image_url: "/demo-products/wine.png",
+  }),
+  sampleProduct("30000000-0000-4000-8000-000000000023", {
+    name: "Shot",
+    description: "Trago corto.",
+    image_url: "/demo-products/shot.png",
+  }),
+  sampleProduct("30000000-0000-4000-8000-000000000024", {
+    name: "Cerveza",
+    description: "Botella individual.",
+    price_minor: 250000,
+    image_url: "/demo-products/beer.png",
+  }),
+  sampleProduct("30000000-0000-4000-8000-000000000025", {
+    name: "Soda cítrica",
+    description: "Bebida sin alcohol.",
+    price_minor: 200000,
+    image_url: "/demo-products/soft.png",
+  }),
+];
 
 // Static samples for reviewing the venue card; they use the original placeholder art in /public/demo-venues.
 const venueSamples: { title: string; venue: VenueCardData }[] = [
@@ -134,6 +203,22 @@ export default function DesignSystem() {
             </div>
           ))}
         </div>
+      </section>
+      <section className="stack" aria-label="Menú de tragos">
+        <h2>Menú de tragos</h2>
+        <ProductMenu
+          venue={sampleVenue}
+          products={sampleProducts}
+          categories={[{ id: sampleCategory, label: "Cocteles" }]}
+        />
+      </section>
+      <section className="stack" aria-label="Editor de trago">
+        <h2>Editor de trago</h2>
+        <ProductEditorSample
+          venueId={sampleVenue.id}
+          product={sampleProducts[0]}
+          categories={[{ id: sampleCategory, label: "Cocteles" }]}
+        />
       </section>
       <section className="stack" aria-label="Perfil del local">
         <VenueProfile venue={sampleVenue} />

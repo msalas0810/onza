@@ -33,6 +33,9 @@ export async function database() {
   await db.exec(
     readFileSync("supabase/migrations/202611160005_venue_images.sql", "utf8"),
   );
+  await db.exec(
+    readFileSync("supabase/migrations/202611160007_product_images.sql", "utf8"),
+  );
   await db.exec(readFileSync("supabase/seed.sql", "utf8"));
   await db.exec(
     `insert into auth.users values('${ids.customer}'),('${ids.other}'),('${ids.staff}'),('${ids.admin}');insert into public.memberships(user_id,venue_id,role) values('${ids.staff}','${ids.venue}','bartender'),('${ids.admin}','${ids.venue}','admin');`,
@@ -77,4 +80,26 @@ export function createInput(
     encryptedToken: "test-cipher",
     ...extra,
   };
+}
+
+// The Supabase storage schema does not exist in PGlite. This installs the minimum (objects table with RLS, foldername)
+// and runs the REAL venue-images storage migration. It does not test size/MIME limits: the Storage service enforces those.
+export async function installStorageStub(db: PGlite) {
+  await db.exec("reset role");
+  await db.exec(`
+    create schema storage;
+    create table storage.buckets(id text primary key,name text,public boolean,file_size_limit bigint,allowed_mime_types text[]);
+    create table storage.objects(id uuid primary key default gen_random_uuid(),bucket_id text references storage.buckets(id),name text,owner uuid default auth.uid());
+    create function storage.foldername(name text) returns text[] language sql immutable as $$select (string_to_array(name,'/'))[1:array_length(string_to_array(name,'/'),1)-1]$$;
+    alter table storage.objects enable row level security;
+    grant usage on schema storage to anon,authenticated;
+    grant select,insert,update,delete on storage.objects to anon,authenticated;
+    grant select on storage.buckets to anon,authenticated;
+  `);
+  await db.exec(
+    readFileSync(
+      "supabase/migrations/202611160006_venue_images_storage.sql",
+      "utf8",
+    ),
+  );
 }

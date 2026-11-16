@@ -8,7 +8,7 @@ export const VENUE_IMAGE_TYPES = {
   "image/webp": "webp",
 } as const;
 export type VenueImageType = keyof typeof VENUE_IMAGE_TYPES;
-export type VenueImageKind = "cover" | "logo";
+export type VenueImageKind = "cover" | "logo" | "product";
 
 export const VENUE_IMAGE_ACCEPT = Object.keys(VENUE_IMAGE_TYPES).join(",");
 

@@ -1,9 +1,10 @@
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getVenue, getPublishedMenu } from "@/features/catalog/server/queries";
 import { AddProduct } from "@/features/catalog/components/add-product";
-import { PhotoFallback, Price } from "@/components/ui/primitives";
+import { Price } from "@/components/ui/primitives";
+import { ProductImage } from "@/features/catalog/components/product-image";
+import { productImageSrc } from "@/features/catalog/product-image-src";
 import { CartDock } from "@/features/orders/components/cart-dock";
 export const dynamic = "force-dynamic";
 export default async function ProductPage({
@@ -21,18 +22,12 @@ export default async function ProductPage({
       <Link className="link-button" href={`/v/${slug}`}>
         ← Menú de {venue.name}
       </Link>
-      {product.photo_path ? (
-        <Image
-          unoptimized
-          src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/menu-photos/${product.photo_path}`}
-          width={440}
-          height={550}
-          alt={product.name}
-          className="detail-photo"
-        />
-      ) : (
-        <PhotoFallback name={product.name} large />
-      )}
+      <ProductImage
+        name={product.name}
+        src={productImageSrc(product)}
+        size="detail"
+        eager
+      />
       <div className="stack">
         <h1>{product.name}</h1>
         <Price amount={product.price_minor} />

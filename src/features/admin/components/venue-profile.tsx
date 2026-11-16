@@ -15,8 +15,11 @@ import {
   type VenueImageKind,
 } from "../venue-image";
 
+/** The venue profile only handles these two; product images are edited in the drink editor. */
+type BrandingKind = Exclude<VenueImageKind, "product">;
+
 const copy: Record<
-  VenueImageKind,
+  BrandingKind,
   { label: string; hint: string; remove: string }
 > = {
   cover: {
@@ -45,15 +48,16 @@ export function VenueProfile({ venue }: { venue: Venue }) {
     logo: venue.logo_url,
   });
   // Objects uploaded in this session but not saved yet, so they can be cleaned up if replaced or discarded.
-  const [pending, setPending] = useState<Record<VenueImageKind, string | null>>(
-    { cover: null, logo: null },
-  );
+  const [pending, setPending] = useState<Record<BrandingKind, string | null>>({
+    cover: null,
+    logo: null,
+  });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const storage = () => browserDb().storage.from(VENUE_IMAGE_BUCKET);
 
-  const upload = async (kind: VenueImageKind, file: File) => {
+  const upload = async (kind: BrandingKind, file: File) => {
     setError("");
     setNotice("");
     const check = await checkVenueImage(file);
@@ -92,7 +96,7 @@ export function VenueProfile({ venue }: { venue: Venue }) {
     }
   };
 
-  const clear = async (kind: VenueImageKind) => {
+  const clear = async (kind: BrandingKind) => {
     setError("");
     setNotice("");
     const previous = pending[kind];
@@ -137,7 +141,7 @@ export function VenueProfile({ venue }: { venue: Venue }) {
     }
   };
 
-  const picker = (kind: VenueImageKind) => (
+  const picker = (kind: BrandingKind) => (
     <div className="stack" key={kind}>
       <label className="field">
         <span>{copy[kind].label}</span>

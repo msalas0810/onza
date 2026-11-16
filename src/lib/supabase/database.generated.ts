@@ -165,6 +165,7 @@ export type Database = {
           available: boolean;
           archived: boolean;
           version: number;
+          image_url: string | null;
         };
         Insert: {
           id?: string;
@@ -179,6 +180,7 @@ export type Database = {
           available?: boolean;
           archived?: boolean;
           version?: number;
+          image_url?: string | null;
         };
         Update: {
           id?: string;
@@ -193,6 +195,7 @@ export type Database = {
           available?: boolean;
           archived?: boolean;
           version?: number;
+          image_url?: string | null;
         };
         Relationships: [];
       };
@@ -275,6 +278,7 @@ export type Database = {
       venue_summary: { Args: { venue: string; day: string }; Returns: Json };
       business_date_at: { Args: { instant: string }; Returns: string };
       update_venue_branding: { Args: { input: Json }; Returns: Json };
+      update_product_image: { Args: { input: Json }; Returns: Json };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

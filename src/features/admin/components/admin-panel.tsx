@@ -7,6 +7,8 @@ import { summarySchema, type VenueSummary } from "@/features/analytics/types";
 import { Button, TextField, Price } from "@/components/ui/primitives";
 import { ProductEditor } from "./product-editor";
 import { VenueProfile } from "./venue-profile";
+import { ProductImage } from "@/features/catalog/components/product-image";
+import { productImageSrc } from "@/features/catalog/product-image-src";
 import { sendCommand } from "@/features/orders/client-api";
 import { useLiveOrders } from "@/features/orders/use-live-orders";
 import { statusLabels, paymentLabels } from "@/features/orders/types";
@@ -359,8 +361,9 @@ export function AdminPanel({
                 venueId={venue.id}
                 product={edit}
                 categories={categories}
-                onSaved={() => {
+                onSaved={(warning) => {
                   setEdit(undefined);
+                  setError(warning ?? "");
                   router.refresh();
                 }}
               />
@@ -372,7 +375,8 @@ export function AdminPanel({
               )
               .map((p) => (
                 <article className="product-row" key={p.id}>
-                  <div>
+                  <ProductImage name={p.name} src={productImageSrc(p)} />
+                  <div className="product-copy">
                     <h3>{p.name}</h3>
                     <Price amount={p.price_minor} />
                     <p className="muted">

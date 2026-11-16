@@ -31,6 +31,11 @@ export async function executeCommand(raw: unknown) {
     if (error) throw new Error(error.message);
     return data;
   }
+  if (command.action === "product_image") {
+    const { data, error } = await db.rpc("update_product_image", { input });
+    if (error) throw new Error(error.message);
+    return data;
+  }
   const { error: sweepError } = await db.rpc("sweep_orders");
   if (sweepError) throw new Error(sweepError.message);
   const { data, error } = await db.rpc("onza_command", { input });
