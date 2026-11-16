@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { it, expect } from "vitest";
 import { database, actor, command, createInput, ids } from "../db/helpers";
 it("supervisor concilia autorización unknown sin crear otra reserva", async () => {
@@ -51,7 +52,7 @@ it("captura rechazada permite cancelación supervisada y anulación de reserva",
     const claim = await command(db, {
       action: "resolve",
       venueId: ids.venue,
-      code: o.public_code,
+      code: createHash("sha256").update("order-one").digest("hex").slice(0, 12),
     });
     const failed = await command(db, {
       action: "capture",

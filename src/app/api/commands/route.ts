@@ -1,14 +1,11 @@
+import { isAllowedRequestOrigin } from "@/lib/request-origin";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { executeCommand } from "@/features/orders/server/order-service";
 import { errorCode, errorMessage } from "@/lib/errors";
 export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
-  const origin = request.headers.get("origin");
-  if (
-    !origin ||
-    origin !== (process.env.APP_ORIGIN ?? new URL(request.url).origin)
-  )
+  if (!isAllowedRequestOrigin(request))
     return NextResponse.json(
       { error: "NOT_AUTHORIZED", message: "Origen no autorizado." },
       { status: 403 },
@@ -21,19 +18,24 @@ export async function POST(request: Request) {
       headers: { "Cache-Control": "no-store" },
     });
   } catch (error) {
-    const code = errorCode(error);
+    const code = error instanceof ZodError ? "INVALID_INPUT" : errorCode(error);
     const status =
       error instanceof ZodError
         ? 422
-        : code === "NOT_AUTHORIZED"
-          ? 403
-          : code === "SUPABASE_NOT_CONFIGURED"
-            ? 503
-            : code === "RATE_LIMITED"
-              ? 429
-              : 409;
+        : code === "SESSION_REQUIRED"
+          ? 401
+          : code === "RESOURCE_NOT_FOUND"
+            ? 404
+            : code === "NOT_AUTHORIZED"
+              ? 403
+              : code === "SUPABASE_NOT_CONFIGURED" ||
+                  code === "CONNECTION_ERROR"
+                ? 503
+                : code === "RATE_LIMITED"
+                  ? 429
+                  : 409;
     return NextResponse.json(
-      { error: code, message: errorMessage(error) },
+      { error: code, message: errorMessage(new Error(code)) },
       { status, headers: { "Cache-Control": "no-store" } },
     );
   }

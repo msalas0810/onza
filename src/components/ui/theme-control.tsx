@@ -1,5 +1,6 @@
 "use client";
 import { useSyncExternalStore } from "react";
+import { Monitor, Sun, Moon } from "lucide-react";
 function subscribe(callback: () => void) {
   window.addEventListener("onza-theme-change", callback);
   window.addEventListener("storage", callback);
@@ -15,30 +16,36 @@ function snapshot() {
     return "system";
   }
 }
+const choices = [
+  { value: "system", label: "Sistema", Icon: Monitor },
+  { value: "light", label: "Claro", Icon: Sun },
+  { value: "dark", label: "Oscuro", Icon: Moon },
+] as const;
 export function ThemeControl() {
   const theme = useSyncExternalStore(subscribe, snapshot, () => "system");
   return (
-    <label className="theme-control">
-      <span className="sr-only">Tema</span>
-      <select
-        aria-label="Tema"
-        value={theme}
-        onChange={(event) => {
-          const value = event.target.value;
-          try {
-            localStorage.setItem("onza-theme", value);
-          } catch {
-            /* Apply the preference for this page even if storage is blocked. */
-          }
-          if (value === "system") delete document.documentElement.dataset.theme;
-          else document.documentElement.dataset.theme = value;
-          window.dispatchEvent(new Event("onza-theme-change"));
-        }}
-      >
-        <option value="system">Sistema</option>
-        <option value="light">Claro</option>
-        <option value="dark">Oscuro</option>
-      </select>
-    </label>
+    <div className="theme-choices" role="group" aria-label="Apariencia">
+      {choices.map(({ value, label, Icon }) => (
+        <button
+          key={value}
+          className="button secondary"
+          aria-pressed={theme === value}
+          onClick={() => {
+            try {
+              localStorage.setItem("onza-theme", value);
+            } catch {
+              /* The current page still applies the choice. */
+            }
+            if (value === "system")
+              delete document.documentElement.dataset.theme;
+            else document.documentElement.dataset.theme = value;
+            window.dispatchEvent(new Event("onza-theme-change"));
+          }}
+        >
+          <Icon size={20} aria-hidden="true" />
+          {label}
+        </button>
+      ))}
+    </div>
   );
 }

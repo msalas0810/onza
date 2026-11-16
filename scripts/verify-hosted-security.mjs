@@ -28,7 +28,7 @@ try {
   const product = "30000000-0000-4000-8000-000000000001";
   const published = await a
     .from("products")
-    .select("version")
+    .select("version,price_minor")
     .eq("id", product)
     .single();
   check("published product version readable", !published.error);
@@ -36,7 +36,13 @@ try {
   const input = {
     action: "create",
     venueId: venue,
-    items: [{ productId: product, quantity: 1, expectedProductVersion: 1 }],
+    items: [
+      {
+        productId: product,
+        quantity: 1,
+        expectedProductVersion: published.data.version,
+      },
+    ],
     idempotencyKey: randomBytes(16).toString("hex"),
     termsVersion: "demo-v1",
     privacyVersion: "demo-v1",
@@ -46,7 +52,10 @@ try {
     encryptedToken: "test-only-security-check",
   };
   const { data: order, error } = await a.rpc("onza_command", { input });
-  check("order created server total", !error && order?.total_minor === 450000);
+  check(
+    "order created server total",
+    !error && order?.total_minor === published.data.price_minor,
+  );
   const own = await a.from("orders").select("id").eq("id", order.id);
   check("owner can read", !own.error && own.data.length === 1);
   const alien = await b.from("orders").select("id").eq("id", order.id);
@@ -179,6 +188,87 @@ try {
     "paused venue rejects client creation",
     !!paused.error && paused.error.message.includes("VENUE_PAUSED"),
   );
+  const venueProfile = await admin
+    .from("venues")
+    .select("latitude,longitude")
+    .eq("id", venue)
+    .single();
+  check("venue coordinates readable", !venueProfile.error);
+  const sameLocation = await admin.rpc("update_venue_branding", {
+    input: {
+      venueId: venue,
+      latitude: venueProfile.data.latitude,
+      longitude: venueProfile.data.longitude,
+    },
+  });
+  check(
+    "admin saves existing venue coordinates without inventing location",
+    !sameLocation.error,
+  );
+  const invalidLocation = await admin.rpc("update_venue_branding", {
+    input: { venueId: venue, latitude: 91, longitude: 0 },
+  });
+  check("invalid coordinates rejected", !!invalidLocation.error);
+  const crossLocation = await admin.rpc("update_venue_branding", {
+    input: {
+      venueId: "20000000-0000-4000-8000-000000000002",
+      latitude: null,
+      longitude: null,
+    },
+  });
+  check("admin cannot change another venue coordinates", !!crossLocation.error);
+  const { readFileSync } = await import("node:fs");
+  const files = (await import("node:fs")).readdirSync("public/demo-products");
+  const png = readFileSync(
+    `public/demo-products/${files.find((f) => f.endsWith(".png"))}`,
+  );
+  const imagePath = `${venue}/product-verification-${randomBytes(8).toString("hex")}.png`;
+  const beforeImage = await admin
+    .from("products")
+    .select("image_url")
+    .eq("id", product)
+    .single();
+  let uploaded = false;
+  try {
+    const upload = await admin.storage
+      .from("venue-images")
+      .upload(imagePath, png, { contentType: "image/png", upsert: false });
+    check("admin real Storage upload in own venue", !upload.error);
+    uploaded = true;
+    const imageUrl = admin.storage.from("venue-images").getPublicUrl(imagePath)
+      .data.publicUrl;
+    const savedImage = await admin.rpc("update_product_image", {
+      input: { productId: product, imageUrl },
+    });
+    check(
+      "admin saves real uploaded product image",
+      !savedImage.error && savedImage.data.image_url === imageUrl,
+    );
+    const foreignImage = await staff.rpc("update_product_image", {
+      input: { productId: product, imageUrl: null },
+    });
+    check("foreign bartender cannot edit product image", !!foreignImage.error);
+    const foreignPath = `20000000-0000-4000-8000-000000000002/product-verification-${randomBytes(8).toString("hex")}.png`;
+    const foreignUpload = await admin.storage
+      .from("venue-images")
+      .upload(foreignPath, png, { contentType: "image/png", upsert: false });
+    if (!foreignUpload.error)
+      await admin.storage.from("venue-images").remove([foreignPath]);
+    check(
+      "admin cannot upload to another venue Storage folder",
+      !!foreignUpload.error,
+    );
+  } finally {
+    const restoredImage = await admin.rpc("update_product_image", {
+      input: { productId: product, imageUrl: beforeImage.data.image_url },
+    });
+    check("original product image restored", !restoredImage.error);
+    if (uploaded)
+      check(
+        "temporary Storage image removed",
+        !(await admin.storage.from("venue-images").remove([imagePath])).error,
+      );
+  }
   writeFileSync(
     "docs/evidence/hosted/security-checks.json",
     JSON.stringify({ projectRef: "ukdjuubekpanizcmppod", checks }, null, 2),

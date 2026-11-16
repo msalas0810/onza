@@ -33,6 +33,8 @@ export const orderSchema = z.object({
   encrypted_token: z.string().nullable().optional(),
   pickup_token: z.string().optional(),
   qr_data_url: z.string().optional(),
+  pickup_code: z.string().optional(),
+  ticket_error: z.enum(["unavailable", "qr_unavailable"]).optional(),
   venue: z.object({
     id: z.string(),
     name: z.string(),
@@ -61,7 +63,7 @@ export const orderSchema = z.object({
 });
 export type Order = z.infer<typeof orderSchema>;
 export const statusLabels: Record<Order["status"], string> = {
-  pending_authorization: "Reserva pendiente",
+  pending_authorization: "Confirmando pedido",
   queued: "Pedido recibido",
   preparing: "Preparando",
   ready: "Listo para recoger",

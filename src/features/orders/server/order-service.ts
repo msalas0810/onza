@@ -6,6 +6,7 @@ import {
   createPickupToken,
   tokenHash,
   decryptPickupToken,
+  pickupCode,
 } from "@/features/pickup/server/tokens";
 import { assertMockPayments } from "@/features/payments/server/provider";
 import { orderSchema } from "../types";
@@ -18,7 +19,13 @@ export async function executeCommand(raw: unknown) {
     data: { user },
     error: authError,
   } = await db.auth.getUser();
-  if (authError || !user) throw new Error("NOT_AUTHORIZED");
+  if (
+    authError &&
+    ((authError.status && authError.status >= 500) ||
+      authError.name === "AuthRetryableFetchError")
+  )
+    throw new Error("CONNECTION_ERROR");
+  if (authError || !user) throw new Error("SESSION_REQUIRED");
   let input: Json = command;
   if (command.action === "create")
     input = { ...command, ...createPickupToken() };
@@ -51,20 +58,31 @@ export async function executeCommand(raw: unknown) {
     return data;
   return enrichOrder(data);
 }
-async function enrichOrder(data: unknown) {
+export async function enrichOrder(data: unknown) {
   const order = orderSchema.parse(data);
   const { encrypted_token, ...safe } = order;
   if (encrypted_token) {
-    const token = decryptPickupToken(encrypted_token);
-    return {
-      ...safe,
-      pickup_token: token,
-      qr_data_url: await QRCode.toDataURL(`onza:${token}`, {
-        width: 256,
-        margin: 3,
-        errorCorrectionLevel: "M",
-      }),
-    };
+    let token: string;
+    try {
+      token = decryptPickupToken(encrypted_token);
+    } catch {
+      // One unreadable old ticket must not hide the order, its state or other orders.
+      // Do not log the credential, change keys or silently issue another token.
+      return { ...safe, ticket_error: "unavailable" };
+    }
+    const ticket = { ...safe, pickup_code: pickupCode(token) };
+    try {
+      return {
+        ...ticket,
+        qr_data_url: await QRCode.toDataURL(`onza:${token}`, {
+          width: 256,
+          margin: 3,
+          errorCorrectionLevel: "M",
+        }),
+      };
+    } catch {
+      return { ...ticket, ticket_error: "qr_unavailable" };
+    }
   }
   return safe;
 }
@@ -90,8 +108,15 @@ export async function listOrders(
   const db = await serverDb();
   const {
     data: { user },
+    error: authError,
   } = await db.auth.getUser();
-  if (!user) return [];
+  if (
+    authError &&
+    ((authError.status && authError.status >= 500) ||
+      authError.name === "AuthRetryableFetchError")
+  )
+    throw new Error("CONNECTION_ERROR");
+  if (!user) throw new Error("SESSION_REQUIRED");
   assertMockPayments();
   const { error: sweepError } = await db.rpc("sweep_orders");
   if (sweepError) throw new Error(sweepError.message);

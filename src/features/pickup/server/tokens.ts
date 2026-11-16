@@ -8,6 +8,9 @@ import {
 export function tokenHash(token: string) {
   return createHash("sha256").update(token).digest("hex");
 }
+export function pickupCode(token: string) {
+  return tokenHash(token).slice(0, 12).toUpperCase();
+}
 function encryptionKey() {
   const raw = process.env.PICKUP_TOKEN_ENCRYPTION_KEY;
   if (!raw) throw new Error("PICKUP_KEY_NOT_CONFIGURED");

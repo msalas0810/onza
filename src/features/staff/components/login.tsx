@@ -47,7 +47,13 @@ export function StaffLogin() {
               email,
               password,
             });
-            if (error) throw new Error("Correo o contraseña incorrectos.");
+            if (error)
+              throw new Error(
+                error.name === "AuthRetryableFetchError" ||
+                  (error.status && error.status >= 500)
+                  ? "CONNECTION_ERROR"
+                  : "Correo o contraseña incorrectos.",
+              );
             const { data, error: membershipError } = await db
               .from("memberships")
               .select("venue_id,role");
@@ -59,7 +65,7 @@ export function StaffLogin() {
           } catch (e) {
             setError(
               e instanceof Error &&
-                e.message.includes("SUPABASE_NOT_CONFIGURED")
+                /SUPABASE_NOT_CONFIGURED|CONNECTION_ERROR/.test(e.message)
                 ? errorMessage(e)
                 : e instanceof Error
                   ? e.message

@@ -1,0 +1,78 @@
+{
+  "project": "onza-dev",
+  "checks": [
+    {
+      "role": "BARTENDER",
+      "width": 360,
+      "theme": "light",
+      "overflow": false
+    },
+    {
+      "role": "BARTENDER",
+      "width": 360,
+      "theme": "dark",
+      "overflow": false
+    },
+    {
+      "role": "BARTENDER",
+      "width": 390,
+      "theme": "light",
+      "overflow": false
+    },
+    {
+      "role": "BARTENDER",
+      "width": 390,
+      "theme": "dark",
+      "overflow": false
+    },
+    {
+      "role": "BARTENDER",
+      "width": 1440,
+      "theme": "light",
+      "overflow": false
+    },
+    {
+      "role": "BARTENDER",
+      "width": 1440,
+      "theme": "dark",
+      "overflow": false
+    },
+    {
+      "role": "ADMIN",
+      "width": 360,
+      "theme": "light",
+      "overflow": false
+    },
+    {
+      "role": "ADMIN",
+      "width": 360,
+      "theme": "dark",
+      "overflow": false
+    },
+    {
+      "role": "ADMIN",
+      "width": 390,
+      "theme": "light",
+      "overflow": false
+    },
+    {
+      "role": "ADMIN",
+      "width": 390,
+      "theme": "dark",
+      "overflow": false
+    },
+    {
+      "role": "ADMIN",
+      "width": 1440,
+      "theme": "light",
+      "overflow": false
+    },
+    {
+      "role": "ADMIN",
+      "width": 1440,
+      "theme": "dark",
+      "overflow": false
+    }
+  ],
+  "runtimeErrors": 0
+}

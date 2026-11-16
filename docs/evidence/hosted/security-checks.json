@@ -76,6 +76,46 @@
     {
       "name": "paused venue rejects client creation",
       "passed": true
+    },
+    {
+      "name": "venue coordinates readable",
+      "passed": true
+    },
+    {
+      "name": "admin saves existing venue coordinates without inventing location",
+      "passed": true
+    },
+    {
+      "name": "invalid coordinates rejected",
+      "passed": true
+    },
+    {
+      "name": "admin cannot change another venue coordinates",
+      "passed": true
+    },
+    {
+      "name": "admin real Storage upload in own venue",
+      "passed": true
+    },
+    {
+      "name": "admin saves real uploaded product image",
+      "passed": true
+    },
+    {
+      "name": "foreign bartender cannot edit product image",
+      "passed": true
+    },
+    {
+      "name": "admin cannot upload to another venue Storage folder",
+      "passed": true
+    },
+    {
+      "name": "original product image restored",
+      "passed": true
+    },
+    {
+      "name": "temporary Storage image removed",
+      "passed": true
     }
   ]
 }

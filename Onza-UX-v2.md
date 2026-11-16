@@ -2,6 +2,14 @@
 
 16 de noviembre de 2026 · Propuesta para revisar la implementación existente.
 
+## Actualización implementada · 16 de noviembre de 2026
+
+El encargo autónomo posterior reemplazó la secuencia de aprobación A–E: se trabajó incrementalmente sobre el código `506e3bf`, sin repetir la auditoría completa. Estado y evidencia actuales: `docs/hosted-ux-verification.md` y `DIARIO.md`.
+
+El número público es solo referencia: el retiro usa QR privado o código privado de 12 caracteres, sin precarga del personal. La segunda validación se rechaza como ya entregado; repetir capture/complete por el responsable previamente validado sigue siendo idempotente. Sin cambios de clave ni reemplazo silencioso de tickets anteriores.
+
+Sin portada, VenueCard usa una composición compacta y neutra; el fade queda reservado al contraste sobre fotografías existentes. Cercanía inicial: hasta 5 km con precisión de ubicación de hasta 1 km, distancias aproximadas y posición solo en memoria. Los locales demo carecen de coordenadas reales: no se inventaron; el fallback manual es el comportamiento inmediato. Apariencia vive en `/settings`; ancho del menú 640 px mediante token compartido.
+
 ## Cómo usar este documento
 
 Primero ejecutar únicamente el prompt A. Entregar su evidencia al founder y a un revisor independiente. Después ajustar esta propuesta con lo observado y ejecutar B–E por separado. Este documento no certifica la aplicación ni afirma haber recorrido el sitio.

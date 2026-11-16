@@ -6,7 +6,11 @@ const VenueChangeDialog = dynamic(() => import("./venue-change-dialog"), {
 });
 import type { Product, Venue } from "../server/queries";
 import { Button, QuantityStepper } from "@/components/ui/primitives";
-import { addProduct } from "@/features/orders/cart-store";
+import {
+  addProduct,
+  useCart,
+  setProductQuantity,
+} from "@/features/orders/cart-store";
 export function AddProduct({
   product,
   venue,
@@ -16,6 +20,14 @@ export function AddProduct({
   venue: Venue;
   detail?: boolean;
 }) {
+  const cart = useCart();
+  const inCart =
+    cart?.venueId === venue.id
+      ? (cart.items.find((item) => item.productId === product.id)?.quantity ??
+        0)
+      : 0;
+  const unavailable =
+    !product.available || venue.paused || venue.open_state !== "open";
   const [open, setOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [feedback, setFeedback] = useState("");
@@ -24,7 +36,7 @@ export function AddProduct({
     try {
       if (addProduct(product, venue, quantity, replace)) {
         setOpen(false);
-        setFeedback("Agregado al pedido");
+        setFeedback("Agregado al carrito");
         setTimeout(() => setFeedback(""), 2000);
       } else setOpen(true);
     } catch {
@@ -36,25 +48,38 @@ export function AddProduct({
   return (
     <>
       <div className={detail ? "stack" : "product-actions"}>
-        {detail && (
+        {detail && !inCart && (
           <QuantityStepper
             value={quantity}
             onChange={(value) => setQuantity(Math.max(1, value))}
           />
         )}
-        <Button
-          variant={detail ? "primary" : "secondary"}
-          disabled={
-            !product.available || venue.paused || venue.open_state !== "open"
-          }
-          onClick={() => add()}
-        >
-          {!product.available
-            ? "Agotado"
-            : venue.paused || venue.open_state !== "open"
-              ? "Pedidos no disponibles"
-              : "Agregar"}
-        </Button>
+        {inCart > 0 && !unavailable ? (
+          <QuantityStepper
+            value={inCart}
+            onChange={(value) => {
+              try {
+                setProductQuantity(product.id, value);
+              } catch {
+                setError("No pudimos guardar el carrito. Intentá nuevamente.");
+              }
+            }}
+          />
+        ) : (
+          <Button
+            variant={detail ? "primary" : "secondary"}
+            disabled={
+              !product.available || venue.paused || venue.open_state !== "open"
+            }
+            onClick={() => add()}
+          >
+            {!product.available
+              ? "Agotado"
+              : venue.paused || venue.open_state !== "open"
+                ? "Pedidos no disponibles"
+                : "Agregar"}
+          </Button>
+        )}
         <span role="status" className="sr-only">
           {feedback}
         </span>
@@ -63,6 +88,7 @@ export function AddProduct({
       {open && (
         <VenueChangeDialog
           venueName={venue.name}
+          currentVenueName={cart?.venueName ?? "otro local"}
           onOpenChange={setOpen}
           onReplace={() => add(true)}
         />

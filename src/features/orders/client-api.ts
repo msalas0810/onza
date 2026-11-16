@@ -1,4 +1,12 @@
 "use client";
+export class CommandError extends Error {
+  constructor(
+    message: string,
+    public code: string,
+  ) {
+    super(message);
+  }
+}
 export async function sendCommand(input: Record<string, unknown>) {
   if (!navigator.onLine)
     throw new Error(
@@ -15,7 +23,11 @@ export async function sendCommand(input: Record<string, unknown>) {
       typeof result === "object" && result && "message" in result
         ? String(result.message)
         : "No pudimos completar la operación.";
-    throw new Error(message);
+    const code =
+      typeof result === "object" && result && "error" in result
+        ? String(result.error)
+        : "UNKNOWN_ERROR";
+    throw new CommandError(message, code);
   }
   return result;
 }

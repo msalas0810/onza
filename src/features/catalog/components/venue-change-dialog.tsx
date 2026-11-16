@@ -3,10 +3,12 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/primitives";
 export default function VenueChangeDialog({
   venueName,
+  currentVenueName,
   onOpenChange,
   onReplace,
 }: {
   venueName: string;
+  currentVenueName: string;
   onOpenChange: (open: boolean) => void;
   onReplace: () => void;
 }) {
@@ -17,8 +19,8 @@ export default function VenueChangeDialog({
         <Dialog.Content className="sheet">
           <Dialog.Title>Cambiar de local</Dialog.Title>
           <Dialog.Description>
-            Tu carrito tiene productos de otro local. Podés conservarlo o
-            vaciarlo para pedir en {venueName}.
+            Tu carrito es de {currentVenueName}. Podés conservarlo o
+            reemplazarlo para pedir en {venueName}.
           </Dialog.Description>
           <div className="stack">
             <Button onClick={onReplace}>Vaciar y cambiar de local</Button>

@@ -42,6 +42,8 @@ export function VenueProfile({ venue }: { venue: Venue }) {
     logo: venue.logo_url,
   });
   const [draft, setDraft] = useState({
+    latitude: venue.latitude?.toString() ?? "",
+    longitude: venue.longitude?.toString() ?? "",
     name: venue.name,
     zone: venue.zone,
     cover: venue.cover_url,
@@ -113,6 +115,20 @@ export function VenueProfile({ venue }: { venue: Venue }) {
     setError("");
     setNotice("");
     try {
+      const latitude =
+        draft.latitude.trim() === "" ? null : Number(draft.latitude);
+      const longitude =
+        draft.longitude.trim() === "" ? null : Number(draft.longitude);
+      if (
+        (latitude === null) !== (longitude === null) ||
+        (latitude !== null &&
+          (!Number.isFinite(latitude) || Math.abs(latitude) > 90)) ||
+        (longitude !== null &&
+          (!Number.isFinite(longitude) || Math.abs(longitude) > 180))
+      )
+        throw new Error(
+          "Ingresá ambas coordenadas válidas o dejá ambas vacías.",
+        );
       await sendCommand({
         action: "venue_branding",
         venueId: venue.id,
@@ -120,6 +136,8 @@ export function VenueProfile({ venue }: { venue: Venue }) {
         zone: draft.zone.trim(),
         coverUrl: draft.cover,
         logoUrl: draft.logo,
+        latitude,
+        longitude,
       });
       // Best effort: remove files that are no longer referenced. The database already holds the new values.
       const stale = (["cover", "logo"] as const)
@@ -210,6 +228,32 @@ export function VenueProfile({ venue }: { venue: Venue }) {
       />
       {picker("cover")}
       {picker("logo")}
+      <h3>Coordenadas del local (opcional)</h3>
+      <p className="muted">
+        Usá la ubicación real del local para aparecer por cercanía. Si no la
+        tenés, dejá ambos campos vacíos; la búsqueda por nombre sigue
+        disponible.
+      </p>
+      <div className="row">
+        <TextField
+          label="Latitud"
+          type="number"
+          step="any"
+          min={-90}
+          max={90}
+          value={draft.latitude}
+          onChange={(e) => setDraft({ ...draft, latitude: e.target.value })}
+        />
+        <TextField
+          label="Longitud"
+          type="number"
+          step="any"
+          min={-180}
+          max={180}
+          value={draft.longitude}
+          onChange={(e) => setDraft({ ...draft, longitude: e.target.value })}
+        />
+      </div>
       {error && (
         <p role="alert" className="notice error">
           {error}

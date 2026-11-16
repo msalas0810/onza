@@ -1,3 +1,4 @@
+import { mkdirSync } from "node:fs";
 import { loginStaff as login } from "./helpers/auth";
 import { test, expect } from "@playwright/test";
 const venue = "20000000-0000-4000-8000-000000000001";
@@ -13,11 +14,27 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
   const customer = await browser.newContext({
     viewport: { width: 390, height: 844 },
   });
-  const bartender = await browser.newContext();
+  const bartender = await browser.newContext({
+    viewport: { width: 1440, height: 900 },
+    colorScheme: "dark",
+  });
   const competitor = await browser.newContext();
   const administrator = await browser.newContext();
   try {
     const a = await customer.newPage();
+    let readyEvent!: () => void;
+    const readySignal = new Promise<void>((resolve) => {
+      readyEvent = resolve;
+    });
+    a.on("websocket", (socket) =>
+      socket.on("framereceived", (frame) => {
+        if (
+          typeof frame.payload === "string" &&
+          /"status"\s*:\s*"ready"/.test(frame.payload)
+        )
+          readyEvent();
+      }),
+    );
     const b = await bartender.newPage();
     const c = await competitor.newPage();
     const admin = await administrator.newPage();
@@ -69,14 +86,81 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     await expect(
       a.getByRole("heading", { name: "Preparando", exact: true }),
     ).toBeVisible();
+    // Hold an old preparing snapshot while the real ready event arrives. The
+    // pending refetch must run after this response, without connected polling.
+    let release!: () => void, fetched!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const snapshotFetched = new Promise<void>((resolve) => {
+      fetched = resolve;
+    });
+    let first = true;
+    await a.route(`**/api/orders?order=${orderId}`, async (route) => {
+      const response = await route.fetch();
+      if (first) {
+        first = false;
+        fetched();
+        await held;
+      }
+      await route.fulfill({ response });
+    });
+    await a.evaluate(() =>
+      document.dispatchEvent(new Event("visibilitychange")),
+    );
+    await snapshotFetched;
     await card.getByRole("button", { name: "Marcar listo" }).click();
+    await readySignal;
+    release();
     await expect(
       a.getByRole("heading", { name: "Listo para recoger", exact: true }),
     ).toBeVisible({ timeout: 25000 });
     await expect(a.getByAltText("QR de autorización de retiro")).toBeVisible();
+    await a.unroute(`**/api/orders?order=${orderId}`);
+    mkdirSync("docs/evidence/hosted-ux", { recursive: true });
+    await a.emulateMedia({ colorScheme: "dark" });
+    await a.addStyleTag({ content: "nextjs-portal{display:none}" });
+    await a.screenshot({
+      path: "docs/evidence/hosted-ux/ticket-390-dark-redacted.png",
+      mask: [a.locator(".ticket img,.code")],
+      maskColor: "#66666D",
+    });
+    await b.evaluate(() => window.scrollTo(0, 0));
+    await b.addStyleTag({ content: "nextjs-portal{display:none}" });
+    await b.screenshot({ path: "docs/evidence/hosted-ux/staff-1440-dark.png" });
+    const ticketResponse = await a.request.get(`/api/orders?order=${orderId}`);
+    const ticket = (await ticketResponse.json())[0];
+    expect(Boolean(ticket.pickup_code)).toBe(true);
+    const headers = { origin: "http://127.0.0.1:3000" };
+    const staffList = await b.request.get(`/api/orders?venue=${venue}`);
+    const staffOrder = (await staffList.json()).find(
+      (o: { id: string }) => o.id === orderId,
+    );
+    expect(
+      Boolean(
+        staffOrder.pickup_code ||
+        staffOrder.pickup_token ||
+        staffOrder.encrypted_token ||
+        staffOrder.qr_data_url,
+      ),
+    ).toBe(false);
+    for (const input of [
+      { venueId: venue, code: order.public_code },
+      { venueId: venue, code: "000000000000" },
+      {
+        venueId: "20000000-0000-4000-8000-000000000002",
+        code: ticket.pickup_code,
+      },
+    ]) {
+      const invalid = await b.request.post("/api/commands", {
+        headers,
+        data: { action: "resolve", ...input },
+      });
+      expect(invalid.ok()).toBe(false);
+    }
     const request = {
       headers: { origin: "http://127.0.0.1:3000" },
-      data: { action: "resolve", venueId: venue, code: order.public_code },
+      data: { action: "resolve", venueId: venue, code: ticket.pickup_code },
     };
     const results = await Promise.all([
       b.request.post("/api/commands", request),
@@ -122,6 +206,35 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     for (const replay of captureReplays)
       expect((await replay.json()).payment_state).toBe("captured");
 
+    await owner.goto(`/staff/${venue}`);
+    const incident = owner
+      .locator(".notice")
+      .filter({
+        has: owner.getByRole("heading", {
+          name: `#${order.public_code}`,
+          exact: true,
+        }),
+      });
+    await incident
+      .getByRole("button", { name: "Retomar retiro validado", exact: true })
+      .click();
+    await expect(
+      owner.getByRole("heading", { name: "Podés entregar", exact: true }),
+    ).toBeVisible();
+    await expect(
+      owner.getByLabel("Código de retiro (12 caracteres)"),
+    ).toHaveValue("");
+    await owner
+      .getByRole("checkbox", {
+        name: "Entregué físicamente el pedido completo.",
+      })
+      .check();
+    await owner
+      .getByRole("button", { name: "Confirmar entrega", exact: true })
+      .click();
+    await expect(
+      owner.getByText("Ya entregado. No volver a cobrar ni entregar."),
+    ).toBeVisible();
     const complete = {
       action: "complete",
       orderId,
@@ -135,6 +248,9 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
       });
       expect((await done.json()).status).toBe("delivered");
     }
+    const consumed = await owner.request.post("/api/commands", request);
+    expect(consumed.ok()).toBe(false);
+    expect((await consumed.json()).error).toBe("ALREADY_DELIVERED");
     await a.reload();
     await expect(
       a.getByRole("heading", { name: "Entregado", exact: true }),
@@ -145,10 +261,6 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
       admin.getByRole("heading", { name: "Ventas de Onza" }),
     ).toBeVisible();
     await expect(admin.getByText("Paloma", { exact: true })).toBeVisible();
-    await admin.screenshot({
-      path: "test-results/admin-live.png",
-      fullPage: true,
-    });
   } finally {
     await Promise.all([
       customer.close(),

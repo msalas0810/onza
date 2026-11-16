@@ -22,11 +22,20 @@ export function StaffQueue({ venue }: { venue: Venue }) {
   });
   const [tab, setTab] = useState("queued");
   const [actionError, setActionError] = useState("");
+  const [errorOrder, setErrorOrder] = useState<{
+    id: string;
+    version: number;
+  } | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [paused, setPaused] = useState(venue.paused);
   const [scan, setScan] = useState(false);
   const [credential, setCredential] = useState<string | null>(null);
+  const [resumeOrderId, setResumeOrderId] = useState<string | null>(null);
+  const [pickupRevision, setPickupRevision] = useState(0);
+  const pickupInput = useRef<HTMLElement | null>(null);
   const handleScanResult = useCallback((value: string) => {
+    setResumeOrderId(null);
+    setPickupRevision((n) => n + 1);
     setCredential(value);
     setScan(false);
   }, []);
@@ -62,6 +71,8 @@ export function StaffQueue({ venue }: { venue: Venue }) {
       keys.current.delete(key);
       refresh();
     } catch (e) {
+      refresh();
+      setErrorOrder({ id: order.id, version: order.version });
       setActionError(
         e instanceof Error ? e.message : "No pudimos completar la acción.",
       );
@@ -119,7 +130,12 @@ export function StaffQueue({ venue }: { venue: Venue }) {
           Pedidos pausados. Continuá atendiendo la cola actual.
         </p>
       )}
-      {(error || actionError) && (
+      {(error ||
+        (actionError &&
+          (!errorOrder ||
+            orders.some(
+              (o) => o.id === errorOrder.id && o.version === errorOrder.version,
+            )))) && (
         <p role="alert" className="notice error">
           {error || actionError}
         </p>
@@ -203,7 +219,19 @@ export function StaffQueue({ venue }: { venue: Venue }) {
                       </Button>
                     )}
                     {state === "ready" && (
-                      <Button onClick={() => setCredential(o.public_code)}>
+                      <Button
+                        onClick={() => {
+                          setCredential(null);
+                          setResumeOrderId(null);
+                          setPickupRevision((n) => n + 1);
+                          pickupInput.current?.scrollIntoView({
+                            block: "start",
+                          });
+                          pickupInput.current
+                            ?.querySelector("input")
+                            ?.focus({ preventScroll: true });
+                        }}
+                      >
                         Validar retiro
                       </Button>
                     )}
@@ -238,21 +266,34 @@ export function StaffQueue({ venue }: { venue: Venue }) {
                   ? "Cobrado, entrega pendiente. Retomá el retiro sin volver a cobrar."
                   : "Resultado sin confirmar. Conservá el responsable del retiro."}
               </p>
-              <Button
-                variant="secondary"
-                onClick={() => setCredential(o.public_code)}
-              >
-                Consultar retiro
-              </Button>
+              {o.claim_id && (
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    setCredential(null);
+                    setResumeOrderId(o.id);
+                    setPickupRevision((n) => n + 1);
+                    pickupInput.current?.scrollIntoView({ block: "start" });
+                  }}
+                >
+                  Retomar retiro validado
+                </Button>
+              )}
             </div>
           ))}
         </section>
       )}
-      <section className="stack">
+      <section className="stack" ref={pickupInput}>
         <h2>Retiro con código</h2>
+        <p className="muted">
+          Escaneá el QR del cliente o pedile su código de retiro. El número del
+          pedido no autoriza la entrega.
+        </p>
         <PickupPanel
+          key={pickupRevision}
           venueId={venue.id}
           credential={credential}
+          resumeOrderId={resumeOrderId}
           onChanged={refresh}
         />
       </section>

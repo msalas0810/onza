@@ -217,6 +217,8 @@ export type Database = {
           max_units: number;
           cover_url: string | null;
           logo_url: string | null;
+          latitude: number | null;
+          longitude: number | null;
         };
         Insert: {
           id?: string;
@@ -235,6 +237,8 @@ export type Database = {
           max_units?: number;
           cover_url?: string | null;
           logo_url?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
         };
         Update: {
           id?: string;
@@ -253,6 +257,8 @@ export type Database = {
           max_units?: number;
           cover_url?: string | null;
           logo_url?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
         };
         Relationships: [];
       };

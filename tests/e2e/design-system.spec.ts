@@ -27,10 +27,13 @@ for (const width of [360, 390, 430, 768, 1280])
     });
 test("tema y foco persistentes", async ({ page }) => {
   await page.goto("/design-system");
-  await page.getByLabel("Tema").selectOption("dark");
+  await page.goto("/settings");
+  await page.getByRole("button", { name: "Oscuro", exact: true }).click();
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(page.getByLabel("Tema")).toHaveValue("dark");
+  await expect(
+    page.getByRole("button", { name: "Oscuro", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
   await page.keyboard.press("Tab");
   expect(await page.evaluate(() => document.activeElement?.tagName)).not.toBe(
     "BODY",

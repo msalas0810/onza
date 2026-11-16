@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { it, expect } from "vitest";
 import { database, actor, command, createInput, ids } from "./helpers";
 it("guion completo SQL: cliente → barra → QR/código → entrega → ventas", async () => {
@@ -21,7 +22,7 @@ it("guion completo SQL: cliente → barra → QR/código → entrega → ventas"
     const claim = await command(db, {
       action: "resolve",
       venueId: ids.venue,
-      code: o.public_code,
+      code: createHash("sha256").update("full-demo").digest("hex").slice(0, 12),
     });
     await command(db, {
       action: "capture",

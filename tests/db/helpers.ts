@@ -36,6 +36,15 @@ export async function database() {
   await db.exec(
     readFileSync("supabase/migrations/202611160007_product_images.sql", "utf8"),
   );
+  await db.exec(
+    readFileSync("supabase/migrations/202611160008_secure_pickup.sql", "utf8"),
+  );
+  await db.exec(
+    readFileSync(
+      "supabase/migrations/202611160009_venue_coordinates.sql",
+      "utf8",
+    ),
+  );
   await db.exec(readFileSync("supabase/seed.sql", "utf8"));
   await db.exec(
     `insert into auth.users values('${ids.customer}'),('${ids.other}'),('${ids.staff}'),('${ids.admin}');insert into public.memberships(user_id,venue_id,role) values('${ids.staff}','${ids.venue}','bartender'),('${ids.admin}','${ids.venue}','admin');`,

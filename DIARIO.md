@@ -39,27 +39,27 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`. Último commit de código: `5b6acc7` (imagen de cada trago); `git log` muestra la punta exacta. Aún **no** se mergeó a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`. Hito de funcionamiento/UI del 2026-11-16 en preparación de commit; `git log` muestra la punta exacta. Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
 | Commit desplegado en Vercel | `bdda420` en `fix/hosted-integration`, estado **Ready** (confirmado por el dueño el 2026-11-16; no se verificó desde esta sesión). El reporte original del despliegue citaba `ee82a7b`, que es anterior |
 | Demo desplegada | https://onza-demo-msalas0810.vercel.app (Preview de Vercel, protegido por login de Vercel) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Aplicar en `onza-dev` las migraciones `...0005`, `...0006` y `...0007` y los seeds de imágenes (**PEN-007**); después resolver **INC-001** |
+| Siguiente tarea exacta | Publicar el hito, comprobar CI y actualizar únicamente el Preview existente. Después, pruebas físicas y cargar coordenadas/fotografías reales del piloto. |
 
 ### Pendientes abiertos
 
 | ID | Pendiente | Desde |
 | --- | --- | --- |
-| INC-001 | En una prueba del dueño no apareció el **código de retiro** y la **entrega no pidió validación**. La prueba terminó en "Listo" y se canceló sin capturar ni entregar. **No está resuelto ni comprobado.** | 2026-11-16 |
+| INC-001 | Vía de retiro con número público cerrada y comprobada en dos sesiones reales; código privado y recuperación de ticket implementados. La ausencia original del ticket no se reprodujo: 19 cifrados válidos se abrieron con la clave existente, sin rotación. Pendiente prueba física del dueño. Ver D-2026-11-16-04. | 2026-11-16 |
 | PEN-001 | Error React `use()` de las capturas: quedó documentado como "no reproducido tras conectar Supabase", **no como corregido** | 2026-11-16 |
 | PEN-002 | Pruebas en iPhone y Android físicos (cámara, audio, safe area, foreground) | 2026-11-15 |
 | PEN-003 | Fotos finales con derechos de uso (hoy `photo_path=null`, fallback tipográfico) | 2026-11-15 |
 | PEN-004 | Resultado del CI de GitHub Actions (estaba en curso al registrar) | 2026-11-16 |
 | PEN-005 | Scheduler durable para expiraciones; hoy el barrido corre solo cuando hay tráfico | 2026-11-15 |
 | PEN-006 | Cobros reales: falta acuerdo y manual de BAC. Ver `docs/03-bac-y-pagos.md` | 2026-11-15 |
-| PEN-007 | Migraciones `202611160005_venue_images.sql`, `202611160006_venue_images_storage.sql` y `202611160007_product_images.sql`, y los seeds `npm run demo:seed-venue-images` y `npm run demo:seed-product-images`, **sin aplicar en `onza-dev`**. Hasta entonces el demo desplegado no muestra portadas, logos ni imágenes de tragos y las pantallas de edición no podrán guardar. Comandos en `README.md` y `docs/implementation-status.md` | 2026-11-16 |
-| PEN-008 | Verificar contra `onza-dev` (subida real a Storage, guardado como admin de bares y tragos, aislamiento entre admins) y extender `scripts/verify-hosted-security.mjs` con esos controles | 2026-11-16 |
+| PEN-007 | Corregido el registro: las migraciones 005–007 ya estaban aplicadas al iniciar esta sesión; 12 productos tenían imagen. Se aplicaron únicamente las nuevas 008/009. No se inventaron portadas ni coordenadas. | 2026-11-16 |
+| PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
 
@@ -89,6 +89,20 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-16-04 · Corregir retiro, carrito y flujos compartidos
+
+- **Fecha y hora:** 2026-11-16 13:13 (America/Costa_Rica)
+- **Persona:** Manu
+- **IA:** Codex · modelo exacto no registrado
+- **Rama y commits:** `fix/hosted-integration` · sin commit al redactar; el cierre posterior registra el hash real del hito.
+- **Qué cambió:** retiro con credencial privada de 12 caracteres, distinta del número público, sin precarga en barra; validación SQL con límite de intentos y consumo único. Ticket recuperable y fallback de QR sin cambiar claves. Carrito editable, dock contextual, cambio explícito de local. Explorar ordenado por disponibilidad, ubicación efímera opcional y coordenadas administrables. Ajustes de tema, navegación por contexto y menú/seguimiento compactos. Realtime principal con recuperación acotada y vencimiento puntual.
+- **Archivos clave:** `docs/hosted-ux-plan.md`, `docs/hosted-ux-verification.md`, migraciones 008/009, `src/features/{orders,pickup,catalog}`, componentes UI compartidos.
+- **Verificado:** `npm run check` (typecheck/lint/74 pruebas/build); 11 casos E2E relevantes aprobados contra onza-dev (con reejecución específica del caso de layout corregido), 7 controles de componentes. Carrera real de tres pedidos con un ganador por pedido; captura repetida/conciliación/recuperación UI; consumo de código, permisos y 29 controles alojados, incluyendo Storage real y restauración. Cliente 360/390/1440 y personal/admin en ambos temas, sin overflow. Cinco capturas, ticket redactado. Revisión independiente estática sin bloqueos.
+- **No verificado:** GPS, cámara, audio y safe areas de teléfonos físicos. Geolocalización del navegador emulada para permisos/timeout/imprecisión; ranking con coordenadas solo en fixtures unitarias, porque los locales demo no tienen coordenadas reales. No se reprodujo el error histórico React/use. Publicación/CI/Preview pendientes del cierre.
+- **Decisiones:** proyecto real confirmado `onza-dev`; 005–007 ya aplicadas, distinto del diario anterior. Solo nuevas migraciones 008/009, sin reset. 19 tickets cifrados válidos legibles, cuatro payloads históricos malformados, ninguno activo; sin fallos de autenticación AES y sin rotar clave. El número público ya no reclama retiros, pero complete/capture conservan replays idempotentes del responsable validado. Detectado rechazo de Origin en alias actuales: allowlist exacta de URLs asignadas por Vercel al Preview, conservando APP_ORIGIN y sin cambiar configuración.
+- **Pendientes / siguiente paso:** cierre de publicación, CI y Preview. Después validación en dispositivos físicos y datos reales de locales. Ver informe para límites exactos.
+
 
 ### D-2026-11-16-03 · Imagen editable para cada trago, en la lista de tragos de cada bar
 

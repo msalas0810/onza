@@ -1,3 +1,4 @@
+import { isAllowedRequestOrigin } from "@/lib/request-origin";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { serverDb } from "@/lib/supabase/server";
@@ -20,10 +21,7 @@ const schema = z.discriminatedUnion("action", [
   }),
 ]);
 export async function POST(request: Request) {
-  if (
-    request.headers.get("origin") !==
-    (process.env.APP_ORIGIN ?? new URL(request.url).origin)
-  )
+  if (!isAllowedRequestOrigin(request))
     return NextResponse.json(
       { message: "Origen no autorizado" },
       { status: 403 },

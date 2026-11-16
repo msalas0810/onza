@@ -46,7 +46,7 @@ export const commandSchema = z.discriminatedUnion("action", [
       venueId: uuid,
       code: z
         .string()
-        .regex(/^[A-Fa-f0-9]{6}$/)
+        .regex(/^[A-Fa-f0-9]{12}$/)
         .optional(),
       token: z
         .string()
@@ -94,6 +94,8 @@ export const commandSchema = z.discriminatedUnion("action", [
     zone: z.string().trim().max(100).optional(),
     coverUrl: z.string().url().max(500).nullable().optional(),
     logoUrl: z.string().url().max(500).nullable().optional(),
+    latitude: z.number().min(-90).max(90).nullable().optional(),
+    longitude: z.number().min(-180).max(180).nullable().optional(),
   }),
   z.object({
     action: z.literal("product_image"),

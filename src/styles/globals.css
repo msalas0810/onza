@@ -74,8 +74,8 @@ img {
 .header {
   max-width: var(--onza-size-content-operations);
   margin: auto;
-  min-height: 88px;
-  padding: var(--onza-space-20) var(--onza-space-32);
+  min-height: 72px;
+  padding: var(--onza-space-12) var(--onza-space-32);
   display: flex;
   align-items: center;
   gap: var(--onza-space-16);
@@ -123,7 +123,38 @@ img {
 .page {
   max-width: var(--onza-size-content-customer);
   margin: 0 auto;
-  padding: var(--onza-space-40) var(--onza-space-20) 160px;
+  padding: var(--onza-space-24) var(--onza-space-20)
+    calc(96px + env(safe-area-inset-bottom));
+}
+.page:has(.dock) {
+  padding-bottom: calc(176px + env(safe-area-inset-bottom));
+}
+.page:has(.category-tabs) {
+  max-width: var(--onza-size-content-menu);
+}
+.settings-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--onza-size-touch-min);
+  min-height: var(--onza-size-touch-min);
+  color: var(--onza-text);
+}
+.saved-cart {
+  max-width: var(--onza-size-content-explore);
+  margin: auto;
+  padding: 0 var(--onza-space-20);
+  font-size: var(--onza-type-label-size);
+}
+.theme-choices {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--onza-space-8);
+}
+.theme-choices [aria-pressed="true"] {
+  border-color: var(--onza-brand-text);
+  background: var(--onza-brand-soft);
+  color: var(--onza-brand-text);
 }
 .page.wide {
   max-width: var(--onza-size-content-explore);
@@ -325,7 +356,35 @@ time {
 .venue-list {
   display: grid;
   gap: var(--onza-space-20);
-  margin-top: var(--onza-space-32);
+  margin-top: var(--onza-space-20);
+}
+.location-prompt {
+  margin-block: var(--onza-space-12) var(--onza-space-20);
+  font-size: var(--onza-type-label-size);
+}
+.location-prompt .button {
+  padding-inline: 0;
+  justify-content: flex-start;
+  min-height: var(--onza-size-touch-min);
+}
+.nearby-label {
+  font-weight: 600;
+  color: var(--onza-brand-text);
+  margin-top: 0;
+}
+.venue-availability {
+  position: absolute;
+  top: var(--onza-space-12);
+  left: var(--onza-space-12);
+  border-radius: var(--onza-radius-control);
+  padding: var(--onza-space-4) var(--onza-space-8);
+  background: var(--onza-bg);
+  color: var(--onza-text);
+  font-size: var(--onza-type-label-size);
+  font-weight: 600;
+}
+.is-closed .venue-card-cover > img {
+  filter: grayscale(1) brightness(0.65);
 }
 .venue-link {
   display: block;
@@ -436,10 +495,71 @@ time {
 }
 .product-row {
   display: flex;
-  gap: var(--onza-space-20);
+  gap: var(--onza-space-16);
   justify-content: space-between;
   border-bottom: 1px solid var(--onza-border);
-  padding: var(--onza-space-24) 0;
+  padding: var(--onza-space-16) 0;
+}
+.menu-header p {
+  margin-block: var(--onza-space-4);
+}
+.menu-header .eyebrow {
+  margin-bottom: var(--onza-space-4);
+}
+.menu-header h1 {
+  font-size: var(--onza-type-title-size);
+  line-height: var(--onza-type-title-line);
+}
+.menu-header .badge {
+  margin-top: var(--onza-space-8);
+}
+.menu-search {
+  margin-top: var(--onza-space-20);
+}
+.venue-card-cover[data-has-cover="false"] {
+  aspect-ratio: auto;
+  min-height: 128px;
+  background: var(--onza-surface);
+  color: var(--onza-text-muted);
+}
+.venue-card-cover[data-has-cover="false"] .venue-card-fade,
+.venue-card-cover[data-has-cover="false"] .venue-card-cover-mark {
+  display: none;
+}
+.venue-card-cover[data-has-cover="false"] .venue-card-body {
+  position: relative;
+  align-items: center;
+  padding: var(--onza-space-20);
+}
+.venue-card-cover[data-has-cover="false"] h2 {
+  color: var(--onza-text);
+}
+.venue-card-cover[data-has-cover="false"] .venue-card-cta {
+  color: var(--onza-brand-text);
+}
+.venue-card-cover[data-has-cover="false"] .venue-card-logo {
+  border-color: var(--onza-border);
+}
+.venue-card-cover[data-has-cover="false"] .venue-availability {
+  position: relative;
+  display: inline-flex;
+  top: auto;
+  left: auto;
+  margin: var(--onza-space-12) 0 0 var(--onza-space-20);
+}
+.product-footer {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--onza-space-8) var(--onza-space-16);
+  margin-top: var(--onza-space-8);
+}
+.product-copy p {
+  margin-block: var(--onza-space-4) var(--onza-space-8);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 .product-copy {
   flex: 1;
@@ -482,11 +602,11 @@ time {
   scroll-margin-top: 80px;
 }
 .category h2 {
-  margin-top: var(--onza-space-32);
+  margin-top: var(--onza-space-16);
 }
 .dock {
   position: fixed;
-  bottom: 80px;
+  bottom: calc(72px + env(safe-area-inset-bottom));
   left: 50%;
   transform: translateX(-50%);
   width: calc(100% - 40px);
@@ -499,7 +619,11 @@ time {
 .stepper {
   display: flex;
   align-items: center;
-  gap: var(--onza-space-16);
+  gap: var(--onza-space-8);
+}
+.stepper .icon-button {
+  width: var(--onza-size-touch-min);
+  min-height: var(--onza-size-touch-min);
 }
 .stepper output {
   min-width: 20px;
@@ -538,8 +662,8 @@ time {
   border-radius: var(--onza-radius-control);
 }
 .code {
-  font-size: var(--onza-type-display-size);
-  letter-spacing: 0.16em;
+  font-size: var(--onza-type-heading-size);
+  letter-spacing: 0.08em;
   font-weight: 600;
 }
 .timeline {
@@ -581,6 +705,7 @@ time {
   background: var(--onza-surface-raised);
   border-radius: var(--onza-radius-sheet) var(--onza-radius-sheet) 0 0;
   padding: var(--onza-space-24);
+  padding-bottom: calc(var(--onza-space-24) + env(safe-area-inset-bottom));
   animation: sheet-in var(--onza-motion-sheet) var(--onza-motion-ease);
 }
 @keyframes sheet-in {
@@ -655,7 +780,7 @@ video {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .page {
-    padding-top: var(--onza-space-32);
+    padding-top: var(--onza-space-20);
   }
 }
 @media (max-width: 340px) {
@@ -730,9 +855,20 @@ video {
 }
 .product-actions {
   display: flex;
-  flex-direction: column;
+  align-items: flex-start;
   gap: var(--onza-space-8);
-  margin-top: var(--onza-space-12);
+  margin-top: 0;
+}
+.product-actions > .button {
+  min-height: var(--onza-size-touch-min);
+  padding: var(--onza-space-8) var(--onza-space-12);
+  font-size: var(--onza-type-label-size);
+}
+.ticket {
+  margin-top: var(--onza-space-20);
+}
+.financial-note {
+  font-size: var(--onza-type-label-size);
 }
 @media (min-width: 768px) {
   .page.wide,

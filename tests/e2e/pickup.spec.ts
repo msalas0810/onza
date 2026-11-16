@@ -16,5 +16,7 @@ test("cámara no disponible mantiene alternativa manual", async ({ page }) => {
   await page
     .getByRole("button", { name: "Cerrar y usar código manual" })
     .click();
-  await expect(page.getByLabel("Código de 6 caracteres")).toBeVisible();
+  await expect(
+    page.getByLabel("Código de retiro (12 caracteres)"),
+  ).toBeVisible();
 });

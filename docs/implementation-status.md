@@ -1,6 +1,8 @@
 # Estado de implementación · Onza local
 
-Fecha de trabajo: 15 de noviembre de 2026 (America/Costa_Rica).
+Fecha de trabajo: 16 de noviembre de 2026 (America/Costa_Rica).
+
+**Hito actual:** carrito/contexto, retiro seguro, Realtime y composición compartida implementados y probados contra `onza-dev`. Migraciones 005–007 ya estaban aplicadas; únicamente 008/009 se aplicaron en esta sesión. El registro de pendientes de imágenes inferior es histórico. Ver [verificación del hito](hosted-ux-verification.md) y D-2026-11-16-04 del diario. Publicación y Preview se registran al cierre.
 
 **ACTUALIZACIÓN ALOJADA: conexión y flujo real ya verificados; ver sección final de esta continuación. Los bloqueos de Supabase/Docker descritos debajo son el registro histórico de la ejecución local anterior.**
 
@@ -166,3 +168,15 @@ Revisión hecha por el mismo agente conforme al pedido explícito de trabajar so
 - No verificado: nada contra `onza-dev`. Las pantallas reales del bar se renderizaron contra un servidor REST falso con datos de ejemplo, no contra Supabase; no se probó la subida real a Storage ni el guardado del trago con imagen desde una sesión de admin; los límites de tamaño y MIME del bucket (los aplica el servicio Storage); dispositivos físicos. Si la imagen falla después de guardar un trago nuevo, el editor avisa que el trago se guardó y hay que reintentar desde Editar: esa rama se implementó pero no se probó de extremo a extremo.
 - Pendiente (bloqueo externo): el conector de Supabase de esta sesión ve otra organización y no `onza-dev`. Desde la computadora con la CLI autenticada: `npm exec supabase -- db push --remote=ukdjuubekpanizcmppod --dry-run --skip-vault` (revisar el listado: `0007`, y `0005` y `0006` si siguen pendientes), luego sin `--dry-run` y con `--yes`; después `npm run demo:seed-venue-images` (si no se ejecutó) y `npm run demo:seed-product-images`.
 - Siguiente tarea exacta: aplicar las migraciones pendientes y los seeds en `onza-dev`; entrar como admin, abrir Menú → Editar en un trago, subir una imagen y comprobar que aparece en la lista del bar; comprobar que un admin del otro local no puede cambiarla. Después extender `scripts/verify-hosted-security.mjs` con ese control.
+
+
+## Funcionamiento y UI compartida · 16 de noviembre de 2026
+
+- Carrito de un local: quitar, cantidad cero, vaciar confirmado, persistencia eliminada, conservación/reemplazo explícitos. Dock “Ver carrito” solo en menú/detalle dueño; acceso discreto desde otros contextos. Checkout conserva validación SQL y no borra un draft distinto creado mientras se enviaba.
+- INC-001: reproducido con dos sesiones reales antes del cambio: el public_code reclamaba retiros. Migración 008 reemplaza únicamente la función con búsqueda por token privado o código derivado de su digest privado; 48 bits manuales, 256 en QR, 10 intentos/min por actor, claim por sesión y consumo único. El número público y segundo resolve se rechazan; replays del responsable de capture/complete siguen idempotentes. No se expone código/QR/cifrado en listados del personal.
+- Ticket: un fallo de descifrado no oculta el pedido ni el resto de la lista; QR fallido conserva código si se pudo reconstruir. 19 cifrados históricos válidos abrieron con la clave existente; cuatro payloads malformados y ninguno activo, sin rotaciones. Esto no demuestra la causa exacta de la ausencia reportada originalmente.
+- Migración 009 añade coordenadas nullable del local y guardado atómico en branding, validado y solo admin propio. Cliente usa GPS temporalmente para ordenar todos los candidatos paginados; sin posición útil/coordenadas, búsqueda manual inmediata. No se guardan ni transmiten posiciones del cliente. Cerca: umbral inicial explícito 5 km, precisión aceptada hasta 1 km; criterios de producto, pendientes de datos de piloto.
+- Apariencia en Ajustes, navegación cliente/personal separada, fallback compacto sin foto ni gradiente decorativo, cerrados no accionables, pausa diferenciada, menú compacto de hasta 640 px reutilizando tokens/componentes. Estado y ticket predominan sobre detalles financieros mock.
+- Realtime conserva WebSocket; no hay polling conectado. Refetch pendiente si llega evento durante lectura, refetch al volver/conectar, cuatro reintentos visibles por desconexión y un refresco puntual al vencimiento. Sin scheduler durable cuando no hay tráfico ni clientes abiertos.
+- Evidencia: typecheck/lint/build; 74 pruebas de dominio/SQL/servicio; 11 casos E2E relevantes con onza-dev, 7 casos de componentes y 29 controles alojados (Storage real incluido). 42 combinaciones de rutas cliente/tamaño/tema y 12 de personal/admin, sin desborde; cinco PNG representativos y ticket redactado. Permisos de ubicación/cámara no disponible emulados, no sensores físicos. Detalles y comandos en el informe enlazado.
+- Preview: se confirmó Git conectado a `msalas0810/onza`, rama de producción `main` y creación automática de deployments deshabilitada. Push solo dispara el CI existente. No se cambian settings/variables/protección ni recursos pagados; únicamente se actualiza el Preview demo al cierre.

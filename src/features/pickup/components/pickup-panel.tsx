@@ -10,10 +10,12 @@ import {
 export function PickupPanel({
   venueId,
   credential,
+  resumeOrderId,
   onChanged,
 }: {
   venueId: string;
   credential: string | null;
+  resumeOrderId?: string | null;
   onChanged: () => void;
 }) {
   const [code, setCode] = useState("");
@@ -33,12 +35,13 @@ export function PickupPanel({
     try {
       const input = value.startsWith("onza:")
         ? { token: value.slice(5) }
-        : { code: value.trim().toUpperCase() };
+        : { code: value.replace(/[\s-]/g, "").toUpperCase() };
       setOrder(
         orderSchema.parse(
           await sendCommand({ action: "resolve", venueId, ...input }),
         ),
       );
+      setCode("");
     } catch (e) {
       setError(
         e instanceof Error ? e.message : "No pudimos validar el retiro.",
@@ -56,6 +59,25 @@ export function PickupPanel({
       if (timer) clearTimeout(timer);
     }; /* Credentials are intentionally consumed only when the parent changes them. */ // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [credential]);
+  useEffect(() => {
+    if (!resumeOrderId) return;
+    let closed = false;
+    void sendCommand({ action: "get", orderId: resumeOrderId })
+      .then((data) => {
+        if (!closed) {
+          setError("");
+          setPhysical(false);
+          setOrder(orderSchema.parse(data));
+        }
+      })
+      .catch(() => {
+        if (!closed)
+          setError("No pudimos retomar el retiro. Volvé a consultar.");
+      });
+    return () => {
+      closed = true;
+    };
+  }, [resumeOrderId]);
   async function act(action: string) {
     if (!order || !order.claim_id || lock.current) return;
     lock.current = true;
@@ -93,14 +115,18 @@ export function PickupPanel({
         }}
       >
         <TextField
-          label="Código de 6 caracteres"
-          placeholder="ABC234"
+          label="Código de retiro (12 caracteres)"
+          placeholder="El que muestra el cliente"
           value={code}
-          maxLength={6}
+          maxLength={14}
           autoComplete="off"
           onChange={(e) => setCode(e.target.value.toUpperCase())}
         />
-        <Button type="submit" loading={busy} disabled={code.length !== 6}>
+        <Button
+          type="submit"
+          loading={busy}
+          disabled={code.replace(/[\s-]/g, "").length !== 12}
+        >
           Validar
         </Button>
       </form>
@@ -158,7 +184,7 @@ export function PickupPanel({
                       </select>
                     </label>
                     <Button loading={busy} onClick={() => void act("capture")}>
-                      Capturar monto simulado
+                      Confirmar cobro simulado
                     </Button>
                   </>
                 )}

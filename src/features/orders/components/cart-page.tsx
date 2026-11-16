@@ -1,7 +1,12 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { useCart, writeCart, cartTotal } from "../cart-store";
+import {
+  useCart,
+  writeCart,
+  cartTotal,
+  setProductQuantity,
+} from "../cart-store";
 import {
   Button,
   Price,
@@ -13,7 +18,7 @@ export function CartPage() {
   const [error, setError] = useState("");
   if (!cart?.items.length)
     return (
-      <EmptyState title="Tu pedido está vacío">
+      <EmptyState title="Tu carrito está vacío">
         <Link className="link-button" href="/">
           Explorá los locales
         </Link>
@@ -21,7 +26,7 @@ export function CartPage() {
     );
   return (
     <>
-      <h1>Tu pedido</h1>
+      <h1>Carrito</h1>
       <p className="muted">{cart.venueName} · un solo local</p>
       {cart.items.map((item) => (
         <article className="product-row" key={item.productId}>
@@ -31,21 +36,21 @@ export function CartPage() {
             <p className="muted">
               Subtotal <Price amount={item.priceMinor * item.quantity} />
             </p>
-            <QuantityStepper
-              value={item.quantity}
-              onChange={(value) => {
-                writeCart({
-                  ...cart,
-                  items: cart.items
-                    .map((i) =>
-                      i.productId === item.productId
-                        ? { ...i, quantity: value }
-                        : i,
-                    )
-                    .filter((i) => i.quantity > 0),
-                });
-              }}
-            />
+            <div className="row wrap">
+              <QuantityStepper
+                value={item.quantity}
+                onChange={(value) => {
+                  setProductQuantity(item.productId, value);
+                }}
+              />
+              <Button
+                variant="quiet"
+                aria-label={`Quitar ${item.name}`}
+                onClick={() => setProductQuantity(item.productId, 0)}
+              >
+                Quitar
+              </Button>
+            </div>
           </div>
         </article>
       ))}
@@ -107,6 +112,19 @@ export function CartPage() {
         <Link className="link-button" href={`/v/${cart.venueSlug}`}>
           Seguir eligiendo
         </Link>
+        <Button
+          variant="quiet"
+          onClick={() => {
+            if (
+              confirm(
+                `¿Vaciar el carrito de ${cart.venueName}? Se quitarán todos los productos.`,
+              )
+            )
+              writeCart(null);
+          }}
+        >
+          Vaciar carrito
+        </Button>
         <p role="status">{error}</p>
       </div>
     </>

@@ -14,6 +14,16 @@ export default async function ProductPage({
 }) {
   const { slug, id } = await params;
   const venue = await getVenue(slug);
+  if (venue.open_state === "closed")
+    return (
+      <div className="page">
+        <h1>{venue.name}</h1>
+        <p className="notice">Este local está cerrado y no recibe pedidos.</p>
+        <Link className="link-button" href="/">
+          Explorar locales
+        </Link>
+      </div>
+    );
   const { products } = await getPublishedMenu(venue.id);
   const product = products.find((p) => p.id === id);
   if (!product) notFound();
@@ -39,7 +49,7 @@ export default async function ProductPage({
         </p>
         <AddProduct product={product} venue={venue} detail />
       </div>
-      <CartDock />
+      <CartDock venueId={venue.id} />
     </div>
   );
 }

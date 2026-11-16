@@ -24,7 +24,7 @@ export function ProductMenu({
   );
   return (
     <>
-      <div className="stack">
+      <div className="stack menu-search">
         <TextField
           label="Buscar en el menú"
           placeholder="¿Qué te servimos?"
@@ -39,34 +39,44 @@ export function ProductMenu({
           </a>
         ))}
       </nav>
-      {categories.map((c) => (
-        <section className="category" id={`category-${c.id}`} key={c.id}>
-          <h2>{c.label}</h2>
-          {visible
-            .filter((p) => p.category_id === c.id)
-            .map((p) => (
-              <article className="product-row" key={p.id}>
-                <div className="product-copy">
-                  <Link href={`/v/${venue.slug}/p/${p.id}`}>
-                    <h3>{p.name}</h3>
-                    <p>{p.description}</p>
-                  </Link>
-                  <Price amount={p.price_minor} />
-                  <AddProduct product={p} venue={venue} />
-                </div>
-                <ProductImage
-                  name={p.name}
-                  src={productImageSrc(p)}
-                  eager={visible.indexOf(p) < 3}
-                />
-              </article>
-            ))}
-        </section>
-      ))}
+      {categories
+        .filter((c) => visible.some((p) => p.category_id === c.id))
+        .map((c) => (
+          <section className="category" id={`category-${c.id}`} key={c.id}>
+            <h2>{c.label}</h2>
+            {visible
+              .filter((p) => p.category_id === c.id)
+              .map((p) => (
+                <article className="product-row" key={p.id}>
+                  <div className="product-copy">
+                    <Link href={`/v/${venue.slug}/p/${p.id}`}>
+                      <h3>{p.name}</h3>
+                      <p>{p.description}</p>
+                    </Link>
+                    <div className="product-footer">
+                      <Price amount={p.price_minor} />
+                      <AddProduct product={p} venue={venue} />
+                    </div>
+                  </div>
+                  <ProductImage
+                    name={p.name}
+                    src={productImageSrc(p)}
+                    eager={visible.indexOf(p) < 3}
+                  />
+                </article>
+              ))}
+          </section>
+        ))}
       {!visible.length && (
-        <EmptyState title="Sin productos">Probá otra búsqueda.</EmptyState>
+        <EmptyState
+          title={search ? "Sin resultados" : "El menú todavía está vacío"}
+        >
+          {search
+            ? "Probá otro nombre o borrá la búsqueda."
+            : "El local aún no publicó sus tragos. Volvé más tarde."}
+        </EmptyState>
       )}
-      <CartDock />
+      <CartDock venueId={venue.id} />
     </>
   );
 }

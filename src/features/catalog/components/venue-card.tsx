@@ -7,24 +7,24 @@ import { useImageFailure } from "@/lib/use-image-failure";
 export type VenueCardData = Pick<
   Venue,
   "slug" | "name" | "zone" | "cover_url" | "logo_url"
->;
+> &
+  Partial<Pick<Venue, "open_state" | "paused">>;
 
-/**
- * Venue card: cover photo with a dark fade toward the bottom, square rounded logo on the bottom-left corner of the photo,
- * and to its right the name, optional location and "Ver tragos →". Missing or broken images fall back to a branded
- * placeholder, never to an empty or broken box. Open/closed state is deliberately not shown here.
- */
 export function VenueCard({
   venue,
   preview = false,
   eager = false,
+  distance = null,
 }: {
   venue: VenueCardData;
+  distance?: number | null;
   /** Static preview (admin screen, design system): same markup without navigating. */
   preview?: boolean;
   /** Load the cover immediately (cards above the fold, which are the LCP) instead of lazily. */
   eager?: boolean;
 }) {
+  const closed = venue.open_state === "closed";
+  const paused = !closed && venue.paused;
   const coverImage = useImageFailure(venue.cover_url);
   const logoImage = useImageFailure(venue.logo_url);
   const cover = coverImage.usable;
@@ -53,6 +53,11 @@ export function VenueCard({
         />
       )}
       <div className="venue-card-fade" aria-hidden="true" />
+      {(closed || paused) && (
+        <span className="venue-availability">
+          {closed ? "Cerrado" : "Pedidos pausados"}
+        </span>
+      )}
       <div className="venue-card-body">
         <span
           className="venue-card-logo"
@@ -76,13 +81,22 @@ export function VenueCard({
         <span className="venue-card-info">
           <h2>{venue.name}</h2>
           {location && <span className="venue-card-location">{location}</span>}
-          <span className="venue-card-cta">Ver tragos →</span>
+          {distance !== null && (
+            <span className="venue-card-location">
+              Aprox. {distance < 1 ? "menos de 1" : Math.round(distance)} km
+            </span>
+          )}
+          {!closed && (
+            <span className="venue-card-cta">
+              {paused ? "Ver menú · sin pedidos" : "Ver tragos →"}
+            </span>
+          )}
         </span>
       </div>
     </div>
   );
-  return preview ? (
-    <div className="venue-card">{content}</div>
+  return preview || closed ? (
+    <div className={`venue-card ${closed ? "is-closed" : ""}`}>{content}</div>
   ) : (
     <Link className="venue-card" href={`/v/${venue.slug}`}>
       {content}

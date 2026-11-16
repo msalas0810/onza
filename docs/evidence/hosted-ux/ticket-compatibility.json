@@ -1,0 +1,12 @@
+{
+  "project": "onza-dev",
+  "summary": {
+    "readable": 19,
+    "malformed": 4,
+    "differentVersion": 0,
+    "authenticationFailed": 0,
+    "activeUnreadable": 0
+  },
+  "keyChanged": false,
+  "credentialsIncluded": false
+}

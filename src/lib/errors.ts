@@ -1,8 +1,21 @@
 export const messages: Record<string, string> = {
   PICKUP_KEY_NOT_CONFIGURED:
-    "Falta configurar PICKUP_TOKEN_ENCRYPTION_KEY con 32 bytes aleatorios en base64. Seguí el setup del README.",
+    "El ticket no está disponible en este momento. Volvé a consultar o pedí ayuda al local.",
   SUPABASE_NOT_CONFIGURED:
-    "Falta conectar Supabase. Seguí README: configurá .env.local, iniciá Supabase y aplicá las migraciones. No se guardan pedidos hasta conectarlo.",
+    "El servicio no está disponible en este momento. Intentá nuevamente más tarde.",
+  SESSION_REQUIRED:
+    "No hay una sesión activa. Abrí tus pedidos desde el navegador donde hiciste el pedido o iniciá sesión si sos del personal.",
+  CONNECTION_ERROR:
+    "No pudimos conectar con el servicio. Revisá tu conexión y volvé a consultar el estado.",
+  RESOURCE_NOT_FOUND:
+    "No encontramos este recurso. Volvé a Explorar para elegir un local.",
+  VENUE_CLOSED:
+    "Este local está cerrado. Tu carrito sigue disponible para cuando vuelva a abrir.",
+  ALREADY_DELIVERED:
+    "Este retiro ya fue utilizado. El pedido está entregado; no lo entregués otra vez.",
+  INVALID_INPUT: "Revisá los datos e intentá nuevamente.",
+  INVALID_LOCATION:
+    "Ingresá latitud entre -90 y 90 y longitud entre -180 y 180, o dejá ambas vacías.",
   NOT_AUTHORIZED: "Tu sesión no tiene permiso para este pedido o local.",
   VENUE_PAUSED:
     "El local no está recibiendo pedidos. Tu carrito sigue disponible.",
@@ -18,7 +31,8 @@ export const messages: Record<string, string> = {
     "No pudimos confirmar el cobro. Consultá el estado; no entregués ni cobrés otra vez.",
   CLAIM_OWNED_ELSEWHERE:
     "Otra persona está atendiendo este retiro. Solo esa sesión puede entregar.",
-  INVALID_PICKUP: "No encontramos un retiro válido para este local.",
+  INVALID_PICKUP:
+    "El QR o código de retiro no es válido para este local. Pedile al cliente su ticket; el número de pedido no sirve para retirar.",
   EXPIRED: "El ticket o la reserva venció. Consultá al local.",
   RATE_LIMITED: "Demasiados intentos. Esperá un minuto y volvé a intentar.",
   IDEMPOTENCY_CONFLICT:
@@ -37,6 +51,14 @@ export const messages: Record<string, string> = {
     "Un supervisor debe verificar físicamente si se entregó antes de transferir el retiro.",
 };
 export function errorCode(error: unknown) {
+  if (error instanceof Error && error.name === "AuthSessionMissingError")
+    return "SESSION_REQUIRED";
+  if (
+    error instanceof Error &&
+    (error.name === "AuthRetryableFetchError" ||
+      (error.name === "TypeError" && /fetch|network/i.test(error.message)))
+  )
+    return "CONNECTION_ERROR";
   const text = error instanceof Error ? error.message : String(error);
   return (
     Object.keys(messages).find((code) => text.includes(code)) ?? "UNKNOWN_ERROR"

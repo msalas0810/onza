@@ -26,23 +26,35 @@ export default async function MenuPage({
       <Link className="link-button" href="/">
         ← Locales
       </Link>
-      <p className="eyebrow">{venue.zone} · recogida en barra</p>
-      <h1>{venue.name}</h1>
-      <p className="muted">
-        {venue.pickup_label} · {venue.hours}
-      </p>
-      <StatusBadge
-        tone={
-          venue.paused || venue.open_state === "closed" ? "warning" : "success"
-        }
-      >
-        {venue.open_state === "closed"
-          ? "Cerrado · podés explorar el menú"
-          : venue.paused
-            ? "Pedidos pausados"
-            : "Recibiendo pedidos"}
-      </StatusBadge>
-      <ProductMenu venue={venue} {...menu} />
+      <header className="menu-header">
+        <p className="eyebrow">{venue.zone}</p>
+        <h1>{venue.name}</h1>
+        <p className="muted">
+          {venue.pickup_label}
+          {venue.hours !== "Consultar al local" && ` · ${venue.hours}`}
+        </p>
+        <StatusBadge
+          tone={
+            venue.paused || venue.open_state === "closed"
+              ? "warning"
+              : "success"
+          }
+        >
+          {venue.open_state === "closed"
+            ? "Cerrado"
+            : venue.paused
+              ? "Pedidos pausados"
+              : "Recibiendo pedidos"}
+        </StatusBadge>
+      </header>
+      {venue.open_state === "closed" ? (
+        <p className="notice">
+          Este local está cerrado y no recibe pedidos. Tus pedidos anteriores
+          siguen en <Link href="/orders">Pedidos</Link>.
+        </p>
+      ) : (
+        <ProductMenu venue={venue} {...menu} />
+      )}
     </div>
   );
 }

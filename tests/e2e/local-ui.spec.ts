@@ -7,7 +7,7 @@ test("sin Supabase se muestra bloqueo explícito y no un catálogo ficticiamente
     "Solo aplica al entorno sin configurar.",
   );
   await page.goto("/");
-  await expect(page.getByText(/Falta conectar Supabase/)).toBeVisible();
+  await expect(page.getByText(/El servicio no está disponible/)).toBeVisible();
   await page.screenshot({
     path: "test-results/configuration-required.png",
     fullPage: true,

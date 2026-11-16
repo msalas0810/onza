@@ -32,6 +32,8 @@ const sampleVenue: Venue = {
   eta_minutes: 15,
   capacity: 30,
   max_units: 20,
+  latitude: null,
+  longitude: null,
   cover_url: "/demo-venues/sala-norte-cover.jpg",
   logo_url: "/demo-venues/sala-norte-logo.png",
 };

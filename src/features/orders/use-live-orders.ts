@@ -20,10 +20,17 @@ export function useLiveOrders({
     let channel:
       ReturnType<ReturnType<typeof browserDb>["channel"]> | undefined;
     let db: ReturnType<typeof browserDb> | undefined;
-    let timer: ReturnType<typeof setInterval> | undefined;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    let realtimeConnected = false;
+    let fallbackAttempts = 0;
     let inFlight = false;
-    const refetch = async () => {
-      if (closed || inFlight || document.visibilityState !== "visible") return;
+    let pendingRefetch = false;
+    const refetch = async (): Promise<void> => {
+      if (closed || document.visibilityState !== "visible") return;
+      if (inFlight) {
+        pendingRefetch = true;
+        return;
+      }
       if (!navigator.onLine) {
         setConnection("Sin conexión");
         return;
@@ -43,19 +50,42 @@ export function useLiveOrders({
           );
         setOrders(z.array(orderSchema).parse(json));
         setError("");
-        setConnection("Sincronizado");
+        if (realtimeConnected) setConnection("Conectado");
       } catch (e) {
-        if (!closed) setError(e instanceof Error ? e.message : errorMessage(e));
+        if (!closed)
+          setError(
+            e instanceof Error && e.name !== "TypeError"
+              ? e.message
+              : errorMessage(e),
+          );
       } finally {
         inFlight = false;
         if (!closed) setLoading(false);
+        if (pendingRefetch && !closed) {
+          pendingRefetch = false;
+          void refetch();
+        }
       }
+    };
+    // Realtime is primary. At most four visible-page retries per disconnection;
+    // foreground/online/manual refresh opens a fresh recovery opportunity.
+    const fallback = () => {
+      if (timer || realtimeConnected || closed || fallbackAttempts >= 4) return;
+      timer = setTimeout(() => {
+        timer = undefined;
+        if (document.visibilityState === "visible" && navigator.onLine) {
+          fallbackAttempts++;
+          void refetch().finally(fallback);
+        }
+      }, 15000);
     };
     const resume = () => {
       if (!navigator.onLine) setConnection("Sin conexión");
       else {
         setConnection("Sincronizando");
         void refetch();
+        fallbackAttempts = 0;
+        fallback();
       }
     };
     const setup = async () => {
@@ -69,7 +99,8 @@ export function useLiveOrders({
         if (error) throw error;
         if (!user) {
           setLoading(false);
-          setConnection("Sin sesión invitada");
+          setConnection("Sin sesión");
+          setError(errorMessage(new Error("SESSION_REQUIRED")));
           return;
         }
         await refetch();
@@ -91,9 +122,14 @@ export function useLiveOrders({
             setConnection(
               status === "SUBSCRIBED" ? "Conectado" : "Reconectando",
             );
-            if (status === "SUBSCRIBED") void refetch();
+            realtimeConnected = status === "SUBSCRIBED";
+            if (realtimeConnected) {
+              if (timer) clearTimeout(timer);
+              timer = undefined;
+              fallbackAttempts = 0;
+              void refetch();
+            } else fallback();
           });
-        timer = setInterval(() => void refetch(), 15000);
       } catch (e) {
         if (!closed) {
           setError(errorMessage(e));
@@ -109,13 +145,31 @@ export function useLiveOrders({
     return () => {
       closed = true;
       controller.abort();
-      if (timer) clearInterval(timer);
+      if (timer) clearTimeout(timer);
       if (channel && db) void db.removeChannel(channel);
       document.removeEventListener("visibilitychange", resume);
       window.removeEventListener("online", resume);
       window.removeEventListener("offline", resume);
     };
   }, [venueId, orderId, revision]);
+  useEffect(() => {
+    // Demo expiry is traffic-driven: wake once at the nearest unclaimed deadline,
+    // even when Realtime is healthy and therefore has no polling fallback.
+    const deadline = orders
+      .filter(
+        (o) =>
+          ["queued", "ready", "pending_authorization"].includes(o.status) &&
+          ["authorized", "authorizing"].includes(o.payment_state) &&
+          !o.claim_id &&
+          !o.claimed_elsewhere,
+      )
+      .map((o) => Date.parse(o.deadline))
+      .filter((time) => time > Date.now())
+      .sort((a, b) => a - b)[0];
+    if (!deadline) return;
+    const timer = setTimeout(refresh, deadline - Date.now() + 1000);
+    return () => clearTimeout(timer);
+  }, [orders, refresh]);
   return {
     orders,
     order: orders.find((order) => order.id === orderId),

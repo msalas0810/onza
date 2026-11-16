@@ -19,6 +19,12 @@ await db.exec(
 await db.exec(
   readFileSync("supabase/migrations/202611160007_product_images.sql", "utf8"),
 );
+await db.exec(
+  readFileSync(
+    "supabase/migrations/202611160009_venue_coordinates.sql",
+    "utf8",
+  ),
+);
 const { rows } = await db.query(
   `select table_name,column_name,data_type,is_nullable,column_default from information_schema.columns where table_schema='public' order by table_name,ordinal_position`,
 );
@@ -29,6 +35,7 @@ for (const [table, columns] of Object.entries(groups)) {
     (({
       integer: "number",
       bigint: "number",
+      "double precision": "number",
       boolean: "boolean",
       jsonb: "Json",
     })[c.data_type] ?? "string") + (c.is_nullable === "YES" ? " | null" : "");

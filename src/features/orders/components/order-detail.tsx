@@ -3,24 +3,23 @@ import { useState, useRef } from "react";
 import Image from "next/image";
 import { useLiveOrders } from "../use-live-orders";
 import { statusLabels, paymentLabels } from "../types";
-import {
-  Button,
-  Price,
-  StatusBadge,
-  ErrorState,
-} from "@/components/ui/primitives";
+import { Button, Price, ErrorState } from "@/components/ui/primitives";
 import { sendCommand } from "../client-api";
 import { ReadySound } from "@/features/notifications/ready-sound";
 export function OrderDetail({ id }: { id: string }) {
   const { order, orders, loading, error, connection, refresh } = useLiveOrders({
     orderId: id,
   });
-  const [actionError, setActionError] = useState("");
+  const [actionError, setActionError] = useState<{
+    message: string;
+    version: number;
+  } | null>(null);
   const [busy, setBusy] = useState(false);
   const actionKey = useRef<string | null>(null);
   const act = async (action: string) => {
     if (!order || busy) return;
     setBusy(true);
+    setActionError(null);
     try {
       actionKey.current ??= crypto.randomUUID();
       await sendCommand({
@@ -33,7 +32,12 @@ export function OrderDetail({ id }: { id: string }) {
       actionKey.current = null;
       refresh();
     } catch (e) {
-      setActionError(e instanceof Error ? e.message : "Error al consultar");
+      setActionError({
+        message: e instanceof Error ? e.message : "Error al consultar",
+        version: order.version,
+      });
+      actionKey.current = null;
+      refresh();
     } finally {
       setBusy(false);
     }
@@ -62,7 +66,7 @@ export function OrderDetail({ id }: { id: string }) {
         <h1>{statusLabels[order.status]}</h1>
         <p>
           {order.status === "queued"
-            ? "El local todavía no aceptó tu pedido. La reserva no equivale a preparación."
+            ? "El local todavía no aceptó tu pedido. Podés cancelarlo mientras esperás."
             : order.status === "preparing"
               ? "La barra está preparando tu pedido."
               : order.status === "ready"
@@ -70,42 +74,58 @@ export function OrderDetail({ id }: { id: string }) {
                 : order.status === "delivered"
                   ? "La entrega quedó confirmada."
                   : order.status === "pending_authorization"
-                    ? "La reserva aún no está confirmada. Tu pedido no entró a la cola."
+                    ? "Estamos confirmando el pedido. Todavía no entró a la cola."
                     : "La barra no continuará este pedido."}
         </p>
-        <StatusBadge
-          tone={
-            order.payment_state === "captured"
-              ? "success"
-              : order.payment_state === "unknown"
-                ? "danger"
-                : "neutral"
-          }
-        >
-          {financial} · <Price amount={order.total_minor} />
-        </StatusBadge>
       </div>
-      <p className="muted" role="status">
-        {connection}
-      </p>
-      {order.status === "ready" && order.qr_data_url && (
-        <section className="ticket">
+      {order.status === "ready" && (
+        <section className="ticket" aria-label="Ticket de retiro">
           <h2>{order.venue.pickup_label}</h2>
-          <p>
-            <Image
-              unoptimized
-              src={order.qr_data_url}
-              width={224}
-              height={224}
-              alt="QR de autorización de retiro"
-            />
-          </p>
-          <div className="code">{order.public_code}</div>
-          <p>Retirá en {order.venue.pickup_label}.</p>
-          <p className="muted">
-            No compartás este ticket. Quien lo tenga puede recoger tu pedido.
-          </p>
+          {order.qr_data_url && (
+            <p>
+              <Image
+                unoptimized
+                src={order.qr_data_url}
+                width={224}
+                height={224}
+                alt="QR de autorización de retiro"
+              />
+            </p>
+          )}
+          {order.pickup_code ? (
+            <>
+              <p className="muted">Código de retiro</p>
+              <div className="code" data-private="pickup">
+                {order.pickup_code.match(/.{1,4}/g)?.join(" ")}
+              </div>
+              {!order.qr_data_url && (
+                <p role="status">
+                  El QR no está disponible. La barra puede validar este código.
+                </p>
+              )}
+              <p>Mostrá este ticket al retirar. No lo compartás.</p>
+            </>
+          ) : (
+            <div role="alert">
+              <p>
+                No pudimos abrir tu ticket. Tu pedido sigue listo; volvé a
+                consultar o pedí ayuda en la barra.
+              </p>
+              <Button variant="secondary" onClick={refresh}>
+                Reintentar ticket
+              </Button>
+            </div>
+          )}
         </section>
+      )}
+      <p className="muted financial-note">
+        Demo · {financial.toLocaleLowerCase("es-CR")} ·{" "}
+        <Price amount={order.total_minor} />. Sin dinero real.
+      </p>
+      {connection !== "Conectado" && connection !== "Sincronizado" && (
+        <p className="muted" role="status">
+          {connection}
+        </p>
       )}
       {order.payment_state === "unknown" && (
         <div className="notice error" role="alert">
@@ -162,9 +182,9 @@ export function OrderDetail({ id }: { id: string }) {
               Simular confirmación de reserva
             </Button>
           )}
-        {actionError && (
+        {actionError && actionError.version === order.version && (
           <p role="alert" className="notice error">
-            {actionError}
+            {actionError.message}
           </p>
         )}
         <Button variant="secondary" onClick={refresh}>

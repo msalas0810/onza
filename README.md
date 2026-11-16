@@ -58,7 +58,7 @@ Para un proyecto Supabase demo ya existente: copiá `.env.example` a `.env.local
 
 1. Cliente en perfil A: `/` → Sala Norte → productos → carrito → checkout. Sin formulario de login ni tarjeta. Reserva ficticia aprobada/rechazada/con acción/unknown. Confirmá mayoría de edad y políticas demo-v1.
 2. Barra en perfil B: `/login`, usá DEMO_BARTENDER_EMAIL/PASSWORD de `.env.local`; abrí su barra. Aceptá, prepará y marcá Listo. El cliente recibe actualizaciones con Realtime y refetch al volver/reconectar.
-3. Validá QR con cámara compatible o ingresá el código de 6 caracteres. Solo la sesión que obtuvo el claim puede capturar/entregar. Marcá la entrega física y confirmá. Una captura con respuesta perdida requiere consultar su estado; no se vuelve a cobrar.
+3. Validá QR con cámara compatible o ingresá el código privado de retiro de 12 caracteres. Solo la sesión que obtuvo el claim puede capturar/entregar. Marcá la entrega física y confirmá. Una captura con respuesta perdida requiere consultar su estado; no se vuelve a cobrar.
 4. Admin en perfil C: DEMO_ADMIN_EMAIL/PASSWORD → administración. Editá menú, fotos propias, disponibilidad, ajustes; consultá ventas y devoluciones de la fecha operativa (06:00 Costa Rica).
 5. Otro local: DEMO_BARTENDER_2 pertenece a Patio Central. No puede consultar ni operar pedidos de Sala Norte. Onza global: cuenta DEMO_ONZA, enlace de configuración global luego del login; crea locales y asigna personal existente con auditoría.
 

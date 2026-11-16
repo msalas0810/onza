@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { listOrders } from "@/features/orders/server/order-service";
 import { z } from "zod";
-import { errorMessage } from "@/lib/errors";
+import { errorCode, errorMessage } from "@/lib/errors";
 export const dynamic = "force-dynamic";
 export async function GET(request: Request) {
   try {
@@ -24,9 +24,18 @@ export async function GET(request: Request) {
       headers: { "Cache-Control": "no-store" },
     });
   } catch (error) {
+    const code = errorCode(error);
     return NextResponse.json(
-      { message: errorMessage(error) },
-      { status: 503, headers: { "Cache-Control": "no-store" } },
+      { error: code, message: errorMessage(error) },
+      {
+        status:
+          code === "SESSION_REQUIRED"
+            ? 401
+            : code === "NOT_AUTHORIZED"
+              ? 403
+              : 503,
+        headers: { "Cache-Control": "no-store" },
+      },
     );
   }
 }

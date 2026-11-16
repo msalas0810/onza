@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { browserDb } from "@/lib/supabase/browser";
 import { errorMessage } from "@/lib/errors";
-import { useCart, cartTotal, writeCart } from "../cart-store";
+import { useCart, cartTotal, writeCart, readCart } from "../cart-store";
 import { Button, Price, EmptyState } from "@/components/ui/primitives";
 import { sendCommand } from "../client-api";
 import { orderSchema } from "../types";
@@ -19,7 +19,7 @@ export function Checkout() {
   const lock = useRef(false);
   if (!cart?.items.length)
     return (
-      <EmptyState title="Tu pedido está vacío">
+      <EmptyState title="Tu carrito está vacío">
         <Link href="/">Explorar locales</Link>
       </EmptyState>
     );
@@ -37,7 +37,7 @@ export function Checkout() {
         const { error } = await db.auth.signInAnonymously();
         if (error)
           throw new Error(
-            "No pudimos iniciar tu sesión invitada. Revisá la conexión o la configuración de Auth.",
+            "No pudimos iniciar tu sesión invitada. Volvé a intentarlo en unos minutos.",
           );
       } else if (!user.is_anonymous) {
         throw new Error(
@@ -70,7 +70,7 @@ export function Checkout() {
       const order = orderSchema.parse(
         await sendCommand({ ...input, idempotencyKey: attempt.key }),
       );
-      writeCart(null);
+      if (JSON.stringify(readCart()) === JSON.stringify(cart)) writeCart(null);
       localStorage.removeItem("onza-checkout-attempt");
       router.push(`/orders/${order.id}`);
     } catch (e) {

@@ -27,7 +27,7 @@ export default function ScanSheet({
         ).BarcodeDetector;
         if (!Detector) {
           setError(
-            "Este navegador no tiene escáner QR compatible. Cerrá y usá el código de 6 caracteres.",
+            "Este navegador no tiene escáner QR compatible. Cerrá y usá el código de retiro del cliente.",
           );
           return;
         }

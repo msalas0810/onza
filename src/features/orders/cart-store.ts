@@ -151,3 +151,16 @@ export function cartTotal(cart: Cart | null) {
     ) ?? 0
   );
 }
+export function setProductQuantity(productId: string, quantity: number) {
+  const cart = readCart();
+  if (!cart || !Number.isInteger(quantity) || quantity < 0 || quantity > 10)
+    return;
+  writeCart({
+    ...cart,
+    items: cart.items
+      .map((item) =>
+        item.productId === productId ? { ...item, quantity } : item,
+      )
+      .filter((item) => item.quantity > 0),
+  });
+}

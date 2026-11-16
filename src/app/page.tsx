@@ -9,9 +9,7 @@ export default async function Home() {
   } catch (error) {
     return (
       <div className="page wide">
-        <p className="eyebrow">Tu próxima ronda</p>
-        <h1>Elegí el local.</h1>
-        <p className="muted">Pedí desde acá. Recogé en la barra.</p>
+        <h1>Explorar</h1>
         <div className="stack">
           <ConfigurationState error={error} />
         </div>
@@ -20,9 +18,7 @@ export default async function Home() {
   }
   return (
     <div className="page wide">
-      <p className="eyebrow">Tu próxima ronda</p>
-      <h1>Elegí el local.</h1>
-      <p className="muted">Pedí desde acá. Recogé en la barra.</p>
+      <h1>Explorar</h1>
       <VenueList venues={venues} />
       <p className="muted">
         Locales ficticios. Todos los montos y cobros de esta demo son simulados.

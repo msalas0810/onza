@@ -5,13 +5,18 @@ export type Venue = Database["public"]["Tables"]["venues"]["Row"];
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export async function getVenues() {
   const db = await serverDb();
-  const { data, error } = await db
-    .from("venues")
-    .select("*")
-    .order("name")
-    .limit(50);
-  if (error) throw error;
-  return data;
+  const venues: Venue[] = [];
+  // Paginate all candidates before distance ranking; a name-based cap can hide the nearest venue.
+  for (let from = 0; ; from += 200) {
+    const { data, error } = await db
+      .from("venues")
+      .select("*")
+      .order("id")
+      .range(from, from + 199);
+    if (error) throw error;
+    venues.push(...data);
+    if (data.length < 200) return venues;
+  }
 }
 export async function getPublishedMenu(venueId: string) {
   const db = await serverDb();
@@ -42,6 +47,7 @@ export async function getVenue(slug: string) {
     .select("*")
     .eq("slug", slug)
     .single();
+  if (error?.code === "PGRST116") throw new Error("RESOURCE_NOT_FOUND");
   if (error) throw error;
   return data;
 }
