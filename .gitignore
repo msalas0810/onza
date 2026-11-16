@@ -11,3 +11,4 @@ playwright-report/
 supabase/.temp/
 .superpowers/
 *.tsbuildinfo
+.vercel/

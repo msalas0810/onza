@@ -113,3 +113,10 @@ Revisión hecha por el mismo agente conforme al pedido explícito de trabajar so
 - `verify-hosted-realtime.mjs`: suscripción WebSocket SUBSCRIBED y evento Postgres `preparing` recibido en la sesión del cliente después de una acción de otra sesión de barra, **sin polling**. Pedido ficticio cancelado por admin al cerrar; evidencia en realtime-check.json.
 - Escaneo exacto de secretos de `.env.local` contra 190 blobs históricos antes del último hito: 0 coincidencias, sin imprimir valores. `.env.local` sigue ignorado y no forma parte de los commits.
 - Correcciones y evidencia publicadas en `fix/hosted-integration`. `main` permanece en `cd0faa6`; no hubo merge automático, force push ni despliegue. GitHub Actions estaba en curso al cerrar esta comprobación; no se declara verde sin resultado final.
+
+## Despliegue Vercel solicitado · 16 de noviembre de 2026
+
+- Rama vigente verificada: fix/hosted-integration, commit 757d032. main está en código anterior y no se desplegará como fuente de este demo. Sin merge automático.
+- Proyecto Vercel creado: onza-demo (prj_ESobIM57nGYOpNXDhqMAo8Y163md), equipo msalas0810s-projects. Next.js, raíz del repositorio, npm ci / npm run build, Node 24. No se contrató plan ni recurso pagado.
+- PENDIENTE reportado por el usuario: en su prueba no apareció código de retiro y la entrega no requirió validación. Esa validación NO se considera comprobada para su experiencia; no se amplía este despliegue para resolverla. Las pruebas técnicas anteriores no cierran esta incidencia.
+- Acceso a CLI Vercel en comprobación para transferir secretos localmente sin imprimirlos. No se transferirán service_role ni passwords demo al runtime Vercel.
