@@ -1,0 +1,43 @@
+name: Onza CI
+on:
+  push:
+    branches: [main, "feat/**", "fix/**"]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - run: npx playwright install --with-deps chrome
+      - run: npm run test:e2e -- tests/e2e/design-system.spec.ts tests/e2e/local-ui.spec.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-failures
+          path: test-results/
+  supabase-integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run db:start
+      - run: npm run demo:configure
+      - run: npm run demo:seed-users
+      - run: npx supabase test db
+      - run: npx playwright install --with-deps chrome
+      - run: npm run test:e2e:live -- tests/e2e/full-demo.spec.ts tests/e2e/pickup.spec.ts
+      - if: always()
+        run: npx supabase stop

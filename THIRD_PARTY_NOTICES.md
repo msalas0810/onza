@@ -11,3 +11,24 @@ SVG paths derived from the Onza image selected in this conversation. This kit do
 
 ## Photography
 No third-party photography is bundled. Fixture images are null; source licensed product photographs before final visual acceptance. Do not scrape images of real bars or imply affiliation.
+
+## Installed application dependencies
+
+Versions are fixed in package-lock.json. Unmodified upstream license files remain in each npm package under node_modules after `npm ci`; these notices supplement those files.
+
+| Dependency | Installed version | License |
+| --- | --- | --- |
+| Next.js | 16.4.6 | MIT |
+| React / React DOM | 19.3.1 | MIT |
+| Supabase JS / SSR | 2.119.0 / 0.12.7 | MIT |
+| Radix Dialog | 1.3.1 | MIT |
+| Zod | 4.6.7 | MIT |
+| Lucide React | 1.73.0 | ISC; retain upstream Feather MIT notices |
+| QRCode | 1.5.4 | MIT |
+| PGlite (tests only) | 0.5.16 | Apache-2.0; PostgreSQL upstream notices included by package |
+| Playwright (tests only) | 1.65.1 | Apache-2.0 |
+| Vitest (tests only) | 5.1.0 | MIT |
+| Supabase CLI (development only) | 3.1.0 | MIT |
+| Prettier (development only) | 3.10.1 | MIT |
+
+No Lucide Animated, Motion, SF Pro, scraped photography or bank/network artwork was added. The earlier planned-dependencies paragraph describes the original kit; the table records what was actually installed.

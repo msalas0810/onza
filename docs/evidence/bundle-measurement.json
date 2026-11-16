@@ -1,0 +1,27 @@
+{
+  "mode": "production build; no Supabase configured; HTML-referenced initial JS only",
+  "limitations": "No connected catalog/staff/admin measurement, LCP/INP/CLS, network/device performance or image budget assertion.",
+  "routes": [
+    {
+      "route": "/",
+      "status": 200,
+      "initial_script_files": 10,
+      "raw_bytes": 606566,
+      "gzip_bytes": 188666
+    },
+    {
+      "route": "/checkout",
+      "status": 200,
+      "initial_script_files": 12,
+      "raw_bytes": 1264897,
+      "gzip_bytes": 350020
+    },
+    {
+      "route": "/login",
+      "status": 200,
+      "initial_script_files": 11,
+      "raw_bytes": 868192,
+      "gzip_bytes": 257751
+    }
+  ]
+}

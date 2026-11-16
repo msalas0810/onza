@@ -65,4 +65,18 @@ Revisión hecha por el mismo agente conforme al pedido explícito de trabajar so
 
 ## Evidencia final
 
-Se completa al integrar los últimos cambios: comandos, cantidades exactas de tests y capturas se registran aquí antes del último commit.
+- `npm run check`: typecheck + lint + 22 pruebas SQL/dominio + build, exit 0 antes de optimizar carga. Después de optimizar: typecheck/lint/build exit 0 y nueva prueba del parser de carrito exit 0; ejecución final completa registrada abajo.
+- Playwright: 16 pasaron / 2 omitidas explícitamente (guion Supabase real y cámara en barra autenticada). Ambos temas, 360/390/430/768/1280 en componentes y 390/1280 en checkout. Repetición final tras optimización registrada abajo.
+- Build de producción: smoke test `/`, `/checkout`, `/login` 200, `/api/health` 200, `/design-system` 404. Node ejecutado por scripts: 24.22.3.
+- npm audit tras override acotado de minimatch en typescript-estree: 0 vulnerabilidades reportadas. Lint del override probado. No se cambiaron versiones globales.
+- Evidencia guardada en `docs/evidence/`: capturas y medición de bundles. `/` sin DB: 292432 → 188666 bytes gzip. Checkout 350020 y login 257751; sin promesa de presupuesto para el catálogo conectado ni métricas web físicas.
+- Se conservó el plan, las decisiones y la revisión propia en docs/local-execution-plan.md y docs/review-notes.md. Git local con main base y feat/local-mvp; no remoto.
+
+### Cierre de verificación posterior a optimización
+
+- `npm test`: **11 archivos, 23 pruebas pasaron**, exit 0 (suite completa posterior a optimizar).
+- `npm run test:e2e`: **16 pasaron, 2 omitidas** por ausencia de Supabase real, exit 0. Capturas móviles y escritorio actualizadas en docs/evidence. No se atribuyen los resultados a teléfonos físicos.
+- `npm run typecheck` y `npm run lint`: exit 0 sin warnings de código. `npm run build`: exit 0 después de los últimos cambios de UI.
+- Typecheck adicional de un checkout limpio del commit (sin .next) ejecutado, exit 0; las dependencias se compartieron por symlink únicamente para ese control local.
+- Último checkpoint de código: `2fc5335` (aplicación, SQL, pruebas y setup). Commit posterior incorpora documentación, CI y evidencia final. No hay remoto configurado. `main` conserva el kit base para integración posterior; el trabajo está en `feat/local-mvp`.
+- No se inició ningún recurso cloud ni se instaló Docker. El servidor de smoke test se cerró. Para usar la app: ejecutar los pasos del README.

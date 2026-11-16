@@ -1,47 +1,84 @@
-# Onza · Product & build kit
+# Onza · MVP local
 
-Web app móvil para pedir y recoger tragos. Cliente, barra y administración en un mismo sistema. El recorrido completo se construye primero con dinero simulado.
+Web móvil Next.js/TypeScript con Supabase y dinero exclusivamente simulado. Cliente invitado, barra autenticada, retiro con claim por sesión y administración del local. La especificación original permanece en `docs/01` a `docs/05`.
 
-## Abrir primero
+**Estado real:** código de las seis etapas implementado; sistema visual y reglas SQL probados localmente. La aceptación multiusuario con Supabase real está **pendiente**, porque esta computadora no tiene Docker/Podman ni un proyecto Supabase demo configurado. Sin configuración, la web muestra ese bloqueo; no simula persistencia en localStorage. Verificados: 23 tests de dominio/SQL y 16 de navegador; 2 E2E de Supabase real omitidas. Evidencia y pendientes en [docs/implementation-status.md](docs/implementation-status.md).
 
-1. `docs/01-producto-y-diseno.md`: alcance, experiencia y dirección visual.
-2. `docs/02-arquitectura.md`: datos, permisos, estados y límites entre módulos.
-3. `docs/03-bac-y-pagos.md`: evidencia pública, restricciones y contrato de integración.
-4. `docs/04-plan-de-construccion.md`: entregables y condiciones de cierre.
-5. `docs/05-pruebas-y-demo.md`: escenarios de aceptación y recorrido de demostración.
-6. `docs/06-fuentes.md`: referencias primarias y fecha de consulta.
+## Arranque
 
-`Onza-documento-maestro.pdf` reúne la dirección de producto y los criterios principales en formato de lectura. Los Markdown son la especificación editable y la fuente que debe leer Codex.
+Raíz de la aplicación y de Git: `onza-starter`.
 
-## Empezar en Codex
+```sh
+cd /Users/manu/Documents/Onza/onza-starter
+nvm use
+npm ci
+npm run dev
+```
 
-Abrir esta carpeta y pegar `PROMPT-CODEX.md`. `AGENTS.md` fija las reglas del proyecto. No hay una aplicación ya construida ni una integración BAC certificada en este kit.
+Abrí [http://127.0.0.1:3000](http://127.0.0.1:3000). Sin Supabase podés revisar `/design-system`, los temas y el estado de configuración. Node 24 está fijado en `.nvmrc`; se incluye también Node 24 local como devDependency para que `npm run` use LTS sin cambiar el Node global. Para Vercel, seleccioná Node 24 en el proyecto. No hay que instalar herramientas globales con npm.
 
-## Assets incluidos
+## Demo persistente con Supabase local
 
-- `brand/svg/`: vaso sin línea interior, wordmark trazado del original, lockups e icono de app. SVG reales, sin imágenes incrustadas.
-- `brand/fonts/`: Inter Variable 4.1 WOFF2 y su licencia SIL OFL.
-- `design/tokens.json`: valores semánticos de luz, oscuridad, tamaños y movimiento.
-- `design/tokens.css`: variables CSS listas para importar.
-- `design/fonts.css`: declaración de fuente local; copiar el WOFF2 a `/public/fonts/` al crear la app.
-- `fixtures/demo-data.json`: locales y productos ficticios; las fotografías finales no están incluidas.
-- `contracts/payment-provider.ts`: interfaz de pagos, no implementación del banco.
-- `.env.example`: nombres de configuración sin secretos.
-- `scripts/generate-tokens.py`: regenera CSS y audita contraste desde tokens.json, sin dependencias externas.
-- `scripts/check-kit.py`: valida los assets y contratos de este paquete; no ejecuta pruebas de una aplicación todavía inexistente.
+Requisito externo: instalar y abrir Docker Desktop o un runtime compatible; `docker info` debe funcionar. La CLI Supabase está fijada en devDependencies. No hace falta cuenta de nube, contratación ni proyecto remoto.
 
-## Decisiones de esta versión
+```sh
+npm run db:start
+npm run demo:configure
+npm run demo:seed-users
+npm run dev
+```
 
-Confirmado por Manu: web primero, iPhone después; estética premium; modo claro/oscuro; catálogo fotográfico; flujo cliente/barra; panel de ventas; BAC como primera entidad a evaluar; pago reservado al pedir y capturado al entregar.
+`db:start` aplica las migraciones y el seed en el proyecto local `onza-local`. `demo:configure` lee únicamente las claves de esa instancia local y crea `.env.local` (permisos 0600) con clave de cifrado y contraseñas aleatorias. Se niega a sobrescribir un archivo existente. Abrí ese archivo en tu editor para usar las credenciales demo; no lo compartás ni agregués a Git. El script de usuarios es idempotente y conserva contraseñas de cuentas existentes.
 
-Propuesta de diseño: cliente invitado con Supabase Anonymous Auth; personal con sesión; Next.js + TypeScript + Supabase; Inter; componentes propios sobre primitivas accesibles. No se presenta esta propuesta como una preferencia ya aprobada del fundador.
+Si necesitás reconstruir **esa base local descartable**, `npm run db:reset` elimina sus pedidos y usuarios. Luego repetí `npm run demo:seed-users`. No hay reset público desde la web. Antes de cualquier reset con datos útiles, hacé respaldo de DB, Storage y clave de cifrado. No se ejecutó reset aquí.
 
-## Hallazgo crítico de BAC
+Para un proyecto Supabase demo ya existente: copiá `.env.example` a `.env.local`, llená URL y publishable key, generá una clave AES de 32 bytes en base64 y aplicá las tres migraciones en orden. El seed habilita explícitamente el ledger mock; **no aplicarlo a producción**. Activá Anonymous Sign-ins y provisioná usuarios permanentes/roles con el script desde tu equipo. La service_role se usa solo en el seed, nunca en el runtime web. Realtime y Storage se configuran en la segunda migración. URLs de Auth y Vercel: [docs/github-vercel.md](docs/github-vercel.md).
 
-El contrato público F-CRI-0006171 V5, cláusula 3.11, lista Licores, Market Place y Facilitadores de Pago como prohibidos para ese producto. No se asume autorización del ecommerce estándar para Onza. Confirmar por escrito el producto/acuerdo aplicable antes de implementar cobros reales. Esto no impide construir el demo simulado.
+## Recorrido
 
-## Entorno de demostración
+1. Cliente en perfil A: `/` → Sala Norte → productos → carrito → checkout. Sin formulario de login ni tarjeta. Reserva ficticia aprobada/rechazada/con acción/unknown. Confirmá mayoría de edad y políticas demo-v1.
+2. Barra en perfil B: `/login`, usá DEMO_BARTENDER_EMAIL/PASSWORD de `.env.local`; abrí su barra. Aceptá, prepará y marcá Listo. El cliente recibe actualizaciones con Realtime y refetch al volver/reconectar.
+3. Validá QR con cámara compatible o ingresá el código de 6 caracteres. Solo la sesión que obtuvo el claim puede capturar/entregar. Marcá la entrega física y confirmá. Una captura con respuesta perdida requiere consultar su estado; no se vuelve a cobrar.
+4. Admin en perfil C: DEMO_ADMIN_EMAIL/PASSWORD → administración. Editá menú, fotos propias, disponibilidad, ajustes; consultá ventas y devoluciones de la fecha operativa (06:00 Costa Rica).
+5. Otro local: DEMO_BARTENDER_2 pertenece a Patio Central. No puede consultar ni operar pedidos de Sala Norte. Onza global: cuenta DEMO_ONZA, enlace de configuración global luego del login; crea locales y asigna personal existente con auditoría.
 
-`PAYMENT_PROVIDER=mock`, `REAL_PAYMENTS_ENABLED=false`, `DEMO_MODE=true`. No introducir tarjetas reales ni credenciales bancarias. No provisionar recursos pagados ni desplegar producción automáticamente.
+Un mismo perfil comparte cookies de Auth. Usá perfiles, incógnito o dispositivos separados para los roles. Borrar cookies o cambiar de dispositivo pierde el acceso invitado; el código de retiro no recupera identidad.
 
-Preparado el 16 de noviembre de 2026. La revisión bancaria usa fuentes públicas; los manuales técnicos específicos deben entregarlos BAC y el gateway asignado.
+## Verificación
+
+```sh
+npm run typecheck
+npm run lint
+npm test
+npm run build
+npm run test:e2e
+# Una vez disponible Supabase local:
+npm run test:e2e:live
+npm exec supabase -- test db
+```
+
+`npm test` ejecuta PostgreSQL real en WASM (PGlite) con roles `anon`/`authenticated` y claims Auth simulados. Aplica las migraciones de dominio y plataforma y el seed; comprueba transacciones, RLS, snapshots, idempotencia, pagos, dueño del retiro y métricas. **No prueba GoTrue/Auth, Realtime, Storage ni concurrencia entre conexiones PostgreSQL reales.** La migración específica de esos servicios y los tests pgTAP necesitan Supabase real.
+
+Playwright prueba componentes, tamaños/temas y UI disponible sin DB. El guion `full-demo.spec.ts` usa Supabase real, cuatro contextos de navegador y retiros HTTP en paralelo; se omite explícitamente sin `E2E_LIVE=true`. No toma un mock de API como evidencia multiusuario. No se probó iPhone físico ni Android físico. Cámara/audio no se garantizan en iPhone ni con la web en segundo plano; no hay push/SMS.
+
+CI está en `.github/workflows/ci.yml`: checks sin secretos productivos y job Supabase local con Docker y credenciales efímeras. No se ejecutó GitHub Actions en esta sesión porque no hay remoto/push.
+
+## Datos y módulos
+
+- `src/features/catalog`: queries RLS y menú editorial con fallback de fotos.
+- `src/features/orders`: carrito borrador, validación, servicios, seguimiento y cola.
+- `src/features/payments/server`: gate mock y BAC que falla explícitamente. El adaptador mock durable se ejecuta dentro de `public.onza_command` y `private.payment_operations`: autorización/captura/anulación/devolución atómicas sin red bancaria ni ledger en memoria.
+- `src/features/pickup`: token aleatorio de 256 bits, SHA-256 de búsqueda, copia AES-256-GCM, QR, cámara lazy y claim por `session_id` verificado de Supabase Auth.
+- `src/features/analytics`: cobros netos, reservas separadas, unidades entregadas y mediana con N. Corte 06:00 en America/Costa_Rica.
+- `supabase/migrations`: tablas, RLS, constraints, funciones, Realtime/Storage y permiso Onza global.
+- `src/lib/supabase/database.generated.ts`: tipos generados desde SQL. `npm run db:types` regenera desde Supabase local; `npm run db:types:offline` desde las migraciones con PGlite.
+
+Las escrituras pasan por comandos backend y RPC autorizados. Los RPC también validan permisos y entradas: no dependen del frontend. La API compacta `/api/commands` recibe acciones tipadas; no es una API bancaria. GET `/api/orders`, `/api/catalog`, `/api/summary` y `/api/health` complementan las lecturas. Las respuestas privadas no tienen caché compartida. No hay service worker que cachee pedidos offline.
+
+El barrido demo se ejecuta al consultar/mutar y no necesita que el navegador que creó el pedido siga abierto. **Sin tráfico, no hay scheduler:** expiraciones se aplican en la siguiente consulta autorizada. Para piloto hace falta tarea durable backend, con reconciliación y pruebas con navegadores cerrados. Un pago unknown o un claim con captura nunca se libera por vencimiento automático. Transferir un retiro exige supervisor y confirmación física auditada.
+
+## Colaboración y entrega posterior
+
+Ver [CONTRIBUTING.md](CONTRIBUTING.md) y [docs/github-vercel.md](docs/github-vercel.md). Git local y commits por hitos, sin remoto/push/despliegue. No usa el filesystem de Vercel como base de datos. Los flags de entorno no habilitan un banco: BAC permanece sin configurar. Faltan acuerdo/manual y condiciones del documento 03 antes de cualquier cobro real.
+
+No se incluyeron fotografías licenciadas; las fixtures conservan `photo_path=null`. SVG e Inter originales con licencias en `brand` y THIRD_PARTY_NOTICES.md. No se inventaron comercios afiliados, métricas ni logos bancarios.

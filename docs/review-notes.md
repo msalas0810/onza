@@ -33,6 +33,10 @@ El endpoint compacto /api/commands valida una unión tipada y delega al servicio
 
 PGlite se usa solo como motor de pruebas. Auth y claims se simulan en ese harness y la ejecución se serializa en una conexión. La aplicación real requiere Supabase; no hay sustitución por PGlite, SQLite o localStorage para guardar pedidos.
 
+## Carga inicial
+
+La medición de producción encontró exceso de JavaScript en `/`. Se separaron las islas de descubrimiento/menú, se sustituyó el validador general del borrador por un parser pequeño probado y se cargó el diálogo al abrirlo. `/` bajó de 292432 a 188666 bytes gzip en el shell sin DB. El catálogo conectado permanece sin medir; checkout/login todavía cargan más de 200 KB. Ver docs/evidence.
+
 ## Pendientes de aceptación
 
 Supabase Auth/Realtime/Storage, pgTAP, peticiones en conexiones concurrentes reales y pantallas operativas con datos reales del demo; ejecución de CI en GitHub; cámara/audio, VoiceOver y reconexión en iPhone/Android físicos. Fotos finales con derechos. Métricas de rendimiento con catálogo conectado y condiciones representativas. Los límites se detallan por etapa en implementation-status.md.
