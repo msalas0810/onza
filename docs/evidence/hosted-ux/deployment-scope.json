@@ -1,0 +1,9 @@
+{
+  "sameProject": true,
+  "productionDeploymentUnchanged": true,
+  "productionBranchUnchanged": true,
+  "gitAutomationUnchanged": true,
+  "protectionUnchanged": true,
+  "previewCommit": "e1e8987344ec7299f88cee023dbebad7992f8dac",
+  "previewTarget": null
+}

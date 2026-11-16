@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`. Hito de funcionamiento/UI del 2026-11-16 en preparación de commit; `git log` muestra la punta exacta. Sin merge a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`. Código del hito: `e1e8987`; `git log` muestra el cierre documental posterior. Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
-| Commit desplegado en Vercel | `bdda420` en `fix/hosted-integration`, estado **Ready** (confirmado por el dueño el 2026-11-16; no se verificó desde esta sesión). El reporte original del despliegue citaba `ee82a7b`, que es anterior |
-| Demo desplegada | https://onza-demo-msalas0810.vercel.app (Preview de Vercel, protegido por login de Vercel) |
+| Commit desplegado en Vercel | `e1e8987` en `fix/hosted-integration`, Preview **READY**, deployment `dpl_3m1TeU5CtKXozzjJKtBDmYDFtjn4`; flujo HTTPS real completado |
+| Demo desplegada | https://onza-demo-ml94rxfry-msalas0810s-projects.vercel.app (Preview verificado; protección existente preservada, actualmente sin ssoProtection) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Publicar el hito, comprobar CI y actualizar únicamente el Preview existente. Después, pruebas físicas y cargar coordenadas/fotografías reales del piloto. |
+| Siguiente tarea exacta | Pruebas en Safari/iPhone y Android físicos desde el Preview; cargar coordenadas y fotografías reales de locales. No activar pagos reales ni fusionar main. |
 
 ### Pendientes abiertos
 
@@ -55,7 +55,7 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-001 | Error React `use()` de las capturas: quedó documentado como "no reproducido tras conectar Supabase", **no como corregido** | 2026-11-16 |
 | PEN-002 | Pruebas en iPhone y Android físicos (cámara, audio, safe area, foreground) | 2026-11-15 |
 | PEN-003 | Fotos finales con derechos de uso (hoy `photo_path=null`, fallback tipográfico) | 2026-11-15 |
-| PEN-004 | Resultado del CI de GitHub Actions (estaba en curso al registrar) | 2026-11-16 |
+| PEN-004 | CI del código `e1e8987` aprobado: jobs checks y supabase-integration, run 43937917513. Cierre documental posterior sin cambios de aplicación. | 2026-11-16 |
 | PEN-005 | Scheduler durable para expiraciones; hoy el barrido corre solo cuando hay tráfico | 2026-11-15 |
 | PEN-006 | Cobros reales: falta acuerdo y manual de BAC. Ver `docs/03-bac-y-pagos.md` | 2026-11-15 |
 | PEN-007 | Corregido el registro: las migraciones 005–007 ya estaban aplicadas al iniciar esta sesión; 12 productos tenían imagen. Se aplicaron únicamente las nuevas 008/009. No se inventaron portadas ni coordenadas. | 2026-11-16 |
@@ -89,6 +89,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-16-05 · Publicar y comprobar el Preview del hito
+
+- **Fecha y hora:** 2026-11-16 13:23 (America/Costa_Rica)
+- **Persona:** Manu
+- **IA:** Codex · modelo exacto no registrado
+- **Rama y commits:** `fix/hosted-integration` · `e1e8987` publicado; esta entrada/evidencia se incorpora en el cierre documental posterior (hash en git log).
+- **Qué cambió:** Preview actualizado en el proyecto existente onza-demo desde el código revisado. No se modificaron settings, variables, automatizaciones, protección o recursos. README e informe enlazan la URL probada y distinguen las limitaciones físicas.
+- **Verificado:** GitHub Actions [43937917513](https://github.com/msalas0810/onza/actions/runs/43937917513): checks y supabase-integration exitosos. Vercel `dpl_3m1TeU5CtKXozzjJKtBDmYDFtjn4` READY y target=null (Preview), commit exacto e1e8987. Nueve controles HTTPS entre dos sesiones reales: checkout mock, aceptar/preparar/listo, ticket privado, número público rechazado, campo de personal vacío, validación manual, cobro mock/entrega y código consumido rechazado; cero errores de ejecución. Evidencia `docs/evidence/hosted-ux/preview-verification.json`. Comparación administrativa confirma proyecto, deployment de producción, rama production, automatizaciones y protección intactos. Escaneo exacto de credenciales locales sobre los 75 archivos del hito: cero coincidencias; .env.local ignorado.
+- **No verificado:** GPS/cámara/audio/safe areas de dispositivos físicos. No se promete funcionamiento en segundo plano ni cobros reales. No se reprodujo la ausencia original del ticket ni React/use.
+- **Decisiones:** la auto-revisión rechazó inicialmente target=staging; no creó despliegue. La API rechazó también el literal preview. Se consultó la documentación oficial: omitir target crea Preview. Esa solicitud explícitamente corregida creó solo el Preview autorizado, sin personalizaciones de entorno ni producción.
+- **Pendientes / siguiente paso:** abrir el Preview en teléfono como cliente y en otro perfil de computadora como personal; probar QR/código presentado por el cliente. Los locales demo no tienen coordenadas reales: buscar por nombre es el comportamiento inmediato correcto.
+
 
 ### D-2026-11-16-04 · Corregir retiro, carrito y flujos compartidos
 

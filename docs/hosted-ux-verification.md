@@ -47,3 +47,10 @@ Git conectado al proyecto Vercel existente `onza-demo`; rama de producción `mai
 Tras el cierre: usar la URL del Preview registrada en DIARIO.md en el teléfono para cliente. En computadora, otro perfil → Ajustes → Personal → login con las credenciales existentes → barra del mismo local. Agregar, enviar, aceptar, marcar listo y presentar **el código privado del ticket**; el número público no sirve para retirar. Para probar captura pendiente, elegir la simulación de respuesta perdida, consultar el resultado y retomar la entrega sin recobrar.
 
 Pendientes reales: prueba en Safari/iPhone y Android físicos (GPS, cámara, audio, foreground y safe areas), coordenadas reales configuradas por cada local, fotografías representativas con derechos y scheduler durable fuera de este alcance. Los locales demo son ficticios; no se inventaron ubicaciones para aparentar cercanía.
+
+
+## Cierre HTTPS
+
+Código `e1e8987` publicado en la rama solicitada. [CI del código aprobado](https://github.com/msalas0810/onza/actions/runs/43937917513), incluidos checks y supabase-integration. [Preview READY y probado](https://onza-demo-ml94rxfry-msalas0810s-projects.vercel.app): nueve controles reales cliente/barra, cero errores de ejecución. Evidencia: `evidence/hosted-ux/preview-verification.json` y `deployment-scope.json`; producción, settings y protección permanecen intactos.
+
+El primer intento de target=staging fue rechazado automáticamente y no creó deployment; target=preview recibió 400 de la API. Se corrigió omitiendo target, que crea Preview según [documentación oficial de la API](https://vercel.com/docs/rest-api/deployments/create-a-new-deployment). El deployment resultante tiene target=null y el SHA exacto revisado. No se eludió la protección ni se creó un entorno custom.

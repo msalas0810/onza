@@ -1,0 +1,44 @@
+{
+  "origin": "https://onza-demo-ml94rxfry-msalas0810s-projects.vercel.app",
+  "commit": "e1e8987344ec7299f88cee023dbebad7992f8dac",
+  "project": "onza-dev",
+  "paymentProvider": "mock",
+  "checks": [
+    {
+      "name": "real staff authentication",
+      "passed": true
+    },
+    {
+      "name": "Preview accepts its own Origin and creates mock order",
+      "passed": true
+    },
+    {
+      "name": "acceptance reaches customer",
+      "passed": true
+    },
+    {
+      "name": "private ticket QR and manual code available",
+      "passed": true
+    },
+    {
+      "name": "public number rejected",
+      "passed": true
+    },
+    {
+      "name": "staff action does not prefill credential",
+      "passed": true
+    },
+    {
+      "name": "validated mock capture and physical confirmation reach delivered",
+      "passed": true
+    },
+    {
+      "name": "consumed pickup rejects reuse",
+      "passed": true
+    },
+    {
+      "name": "no runtime errors",
+      "passed": true
+    }
+  ]
+}

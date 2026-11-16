@@ -1,5 +1,8 @@
 # Onza · Demo
 
+**Demo actualizado (Preview, pagos mock):** [abrir Onza](https://onza-demo-ml94rxfry-msalas0810s-projects.vercel.app). Código `e1e8987`, rama `fix/hosted-integration`; [verificación y límites](docs/hosted-ux-verification.md). En teléfono, cliente; en computadora, otro perfil → Ajustes → Personal → cuenta existente de barra. Retiro con QR o **código privado de 12 caracteres**; el número público no autoriza entrega.
+
+
 **Demo HTTPS:** https://onza-demo-msalas0810.vercel.app · Preview protegido por login de Vercel. Instrucciones y límites: [docs/vercel-demo.md](docs/vercel-demo.md).
 
 Web móvil Next.js/TypeScript con Supabase y dinero exclusivamente simulado. Cliente invitado, barra autenticada, retiro con claim por sesión y administración del local. La especificación original permanece en `docs/01` a `docs/05`.

@@ -11,7 +11,7 @@ Dirección visual: blanco/grafito/borgoña, Inter y marca actuales; composición
 - [x] 3. Catálogo: abiertos antes de pausados/cerrados; ubicación efímera opcional y orden sin recorte alfabético. Coordenadas nullable y edición admin validada. Pruebas de distancia, permisos y fallback.
 - [x] 4. Composición compartida: ajustes/tema, navegación por contexto, cabeceras/filas compactas, seguimiento y barra. Realtime principal; fallback solo desconectado y acotado. Errores diferenciados y refresco ante conflicto.
 - [x] 5. Aplicar solo migraciones revisadas en onza-dev; verificar flujos reales, carrera, aislamiento y recuperación. Typecheck, lint, tests, build; 360/390/1440, claro/oscuro; pocas capturas saneadas e inspeccionadas.
-- [ ] 6. Documentar evidencia y límites, comprobar automatizaciones demo, commits coherentes y push sin merge.
+- [x] 6. Documentar evidencia y límites, comprobar automatizaciones demo, commits coherentes y push sin merge.
 
 ## Foco de revisión
 
@@ -23,3 +23,5 @@ Credenciales no visibles a staff; pedidos previos sin rotación de clave; QR fal
 - Decisión: implementación incremental sobre componentes/RPC existentes. Se omite una nueva auditoría y aprobación de diseño por instrucción explícita de ejecución autónoma.
 
 - Verificación de etapas 1–5: `docs/hosted-ux-verification.md`. Dos revisiones estáticas del retiro/Realtime y revisión final de allowlist sin bloqueos. No hubo cambios de configuración de Vercel ni rotación de claves.
+
+- Cierre: código e1e8987 publicado, GitHub Actions 43937917513 exitoso y Preview READY con nueve controles HTTPS reales aprobados. Evidencia y límites en el informe; main/producción/settings sin cambios.

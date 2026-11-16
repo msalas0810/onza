@@ -2,7 +2,7 @@
 
 Fecha de trabajo: 16 de noviembre de 2026 (America/Costa_Rica).
 
-**Hito actual:** carrito/contexto, retiro seguro, Realtime y composición compartida implementados y probados contra `onza-dev`. Migraciones 005–007 ya estaban aplicadas; únicamente 008/009 se aplicaron en esta sesión. El registro de pendientes de imágenes inferior es histórico. Ver [verificación del hito](hosted-ux-verification.md) y D-2026-11-16-04 del diario. Publicación y Preview se registran al cierre.
+**Hito actual:** carrito/contexto, retiro seguro, Realtime y composición compartida implementados y probados contra `onza-dev`. Migraciones 005–007 ya estaban aplicadas; únicamente 008/009 se aplicaron en esta sesión. El registro de pendientes de imágenes inferior es histórico. Ver [verificación del hito](hosted-ux-verification.md) y D-2026-11-16-04 del diario. Código `e1e8987` publicado, CI aprobado y Preview READY con nueve controles HTTPS reales aprobados; cierre en D-2026-11-16-05.
 
 **ACTUALIZACIÓN ALOJADA: conexión y flujo real ya verificados; ver sección final de esta continuación. Los bloqueos de Supabase/Docker descritos debajo son el registro histórico de la ejecución local anterior.**
 
@@ -180,3 +180,11 @@ Revisión hecha por el mismo agente conforme al pedido explícito de trabajar so
 - Realtime conserva WebSocket; no hay polling conectado. Refetch pendiente si llega evento durante lectura, refetch al volver/conectar, cuatro reintentos visibles por desconexión y un refresco puntual al vencimiento. Sin scheduler durable cuando no hay tráfico ni clientes abiertos.
 - Evidencia: typecheck/lint/build; 74 pruebas de dominio/SQL/servicio; 11 casos E2E relevantes con onza-dev, 7 casos de componentes y 29 controles alojados (Storage real incluido). 42 combinaciones de rutas cliente/tamaño/tema y 12 de personal/admin, sin desborde; cinco PNG representativos y ticket redactado. Permisos de ubicación/cámara no disponible emulados, no sensores físicos. Detalles y comandos en el informe enlazado.
 - Preview: se confirmó Git conectado a `msalas0810/onza`, rama de producción `main` y creación automática de deployments deshabilitada. Push solo dispara el CI existente. No se cambian settings/variables/protección ni recursos pagados; únicamente se actualiza el Preview demo al cierre.
+
+
+### Cierre publicado
+
+- Código: `e1e8987` en origin/fix/hosted-integration; main permanece en `cd0faa6`. CI del código: [checks y supabase-integration aprobados](https://github.com/msalas0810/onza/actions/runs/43937917513).
+- [Preview probado](https://onza-demo-ml94rxfry-msalas0810s-projects.vercel.app), deployment `dpl_3m1TeU5CtKXozzjJKtBDmYDFtjn4`, READY, target=null. Nueve controles HTTPS reales cliente/barra y cero errores de ejecución, incluido el retiro por código privado y rechazo de su reutilización.
+- Comparación administrativa antes/después: proyecto, deployment de producción, rama de producción, automatización Git y protección sin cambios. No se cambiaron variables ni se desplegó main. La inspección en seco excluyó .env.local y archivos privados.
+- Reproducción segura: `node --env-file=.env.local scripts/verify-hosted-ux-preview.mjs https://onza-demo-ml94rxfry-msalas0810s-projects.vercel.app` crea un pedido demo y lo entrega con pago mock; sin fotos, trazas ni credenciales impresas. No ejecutar en otro entorno.
