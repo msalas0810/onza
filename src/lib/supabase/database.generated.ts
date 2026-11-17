@@ -253,6 +253,30 @@ export type Database = {
         };
         Relationships: [];
       };
+      staff_accounts: {
+        Row: {
+          user_id: string;
+          display_name: string;
+          must_change_password: boolean;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          display_name: string;
+          must_change_password?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          display_name?: string;
+          must_change_password?: boolean;
+          created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       venues: {
         Row: {
           id: string;
@@ -345,6 +369,28 @@ export type Database = {
       business_date_at: { Args: { instant: string }; Returns: string };
       update_venue_branding: { Args: { input: Json }; Returns: Json };
       update_product_image: { Args: { input: Json }; Returns: Json };
+      list_venue_team: { Args: { venue: string }; Returns: Json };
+      team_set_role: {
+        Args: { venue: string; member: string; new_role: string };
+        Returns: Json;
+      };
+      team_revoke: { Args: { venue: string; member: string }; Returns: Json };
+      team_lookup_email: { Args: { lookup: string }; Returns: Json };
+      team_attach: {
+        Args: {
+          venue: string;
+          member: string;
+          member_name: string;
+          member_role: string;
+          actor: string;
+          fresh: boolean;
+        };
+        Returns: Json;
+      };
+      complete_password_change: {
+        Args: { member: string };
+        Returns: undefined;
+      };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

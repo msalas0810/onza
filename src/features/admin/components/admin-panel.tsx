@@ -2,39 +2,95 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { BarChart3, Receipt, Store, ToggleLeft, Users, Wine } from "lucide-react";
 import type { Product, Venue } from "@/features/catalog/server/queries";
 import { summarySchema, type VenueSummary } from "@/features/analytics/types";
-import { Button, TextField, Price } from "@/components/ui/primitives";
+import {
+  Button,
+  EmptyState,
+  Notice,
+  Price,
+  SegmentedControl,
+  StatusBadge,
+  TextField,
+  Toggle,
+} from "@/components/ui/primitives";
+import { Sheet } from "@/components/ui/sheet";
 import { ProductEditor } from "./product-editor";
 import { VenueProfile } from "./venue-profile";
 import { ProductImage } from "@/features/catalog/components/product-image";
 import { productImageSrc } from "@/features/catalog/product-image-src";
-import { sendCommand } from "@/features/orders/client-api";
+import {
+  sendCommand,
+  isSessionError,
+  isPasswordChangeError,
+} from "@/features/orders/client-api";
 import { useLiveOrders } from "@/features/orders/use-live-orders";
 import { statusLabels, paymentLabels } from "@/features/orders/types";
+import { SessionExpiredSheet } from "@/features/orders/components/session-expired-sheet";
+import { TeamPanel } from "@/features/team/components/team-panel";
+
+export const adminTabs = [
+  { id: "resumen", label: "Resumen", Icon: BarChart3 },
+  { id: "pedidos", label: "Pedidos", Icon: Receipt },
+  { id: "menu", label: "Menú", Icon: Wine },
+  { id: "disponibilidad", label: "Disponibilidad", Icon: ToggleLeft },
+  { id: "negocio", label: "Negocio", Icon: Store },
+  { id: "equipo", label: "Equipo", Icon: Users },
+] as const;
+export type AdminTab = (typeof adminTabs)[number]["id"];
+
+type Support = {
+  title: string;
+  description: string;
+  min: number;
+  confirm: string;
+  tone: "primary" | "danger";
+  build: (reason: string) => Record<string, unknown>;
+};
+type Availability = "open" | "paused" | "closed";
+const availabilityOptions = [
+  { value: "open", label: "Abierto" },
+  { value: "paused", label: "Pausado" },
+  { value: "closed", label: "Cerrado" },
+] as const;
+const availabilityCopy: Record<Availability, string> = {
+  open: "Los clientes ven el menú y pueden pedir.",
+  paused: "Visible, pero nadie puede pedir. Sirve para picos de trabajo.",
+  closed: "Fuera de horario. El menú no se muestra a los clientes.",
+};
+
 export function AdminPanel({
   venue,
   products,
   categories,
   summary,
+  tab,
 }: {
   venue: Venue;
   products: Product[];
   categories: { id: string; label: string }[];
   summary: VenueSummary;
+  tab: AdminTab;
 }) {
-  const [tab, setTab] = useState("Resumen");
   const [date, setDate] = useState(summary.business_date);
   const [metrics, setMetrics] = useState(summary);
   const [filter, setFilter] = useState("");
   const [edit, setEdit] = useState<Product | null | undefined>(undefined);
   const [error, setError] = useState("");
+  const [saved, setSaved] = useState("");
   const [busy, setBusy] = useState(false);
+  const [expired, setExpired] = useState(false);
+  const [support, setSupport] = useState<{ spec: Support; reason: string; problem: string } | null>(null);
+  const [archive, setArchive] = useState<Product | null>(null);
+  const [orderFilter, setOrderFilter] = useState<"active" | "all">("active");
+  const [capacity, setCapacity] = useState(String(venue.capacity));
   const { orders, refresh } = useLiveOrders({ venueId: venue.id });
   const router = useRouter();
-  const revision = orders
-    .map((order) => `${order.id}:${order.version}`)
-    .join("|");
+  const revision = orders.map((order) => `${order.id}:${order.version}`).join("|");
+  const state: Availability =
+    venue.open_state !== "open" ? "closed" : venue.paused ? "paused" : "open";
+
   useEffect(() => {
     const controller = new AbortController();
     async function update() {
@@ -44,472 +100,621 @@ export function AdminPanel({
           { signal: controller.signal, cache: "no-store" },
         );
         if (!response.ok) throw new Error();
-        const data = summarySchema.parse(await response.json());
-        setMetrics(data);
+        setMetrics(summarySchema.parse(await response.json()));
       } catch {
         if (!controller.signal.aborted)
           setError(
-            "No pudimos actualizar las ventas. Los valores anteriores se conservan hasta volver a consultar.",
+            "No pudimos actualizar las ventas. Se conservan los valores anteriores hasta volver a consultar.",
           );
       }
     }
     void update();
     return () => controller.abort();
   }, [venue.id, date, revision]);
-  const run = async (input: Record<string, unknown>) => {
+
+  const run = async (input: Record<string, unknown>, message = "") => {
     setBusy(true);
     setError("");
+    setSaved("");
     try {
       await sendCommand(input);
+      if (message) setSaved(message);
       refresh();
       router.refresh();
+      return true;
     } catch (e) {
-      setError(e instanceof Error ? e.message : "No se guardó el cambio.");
+      if (isSessionError(e)) setExpired(true);
+      else if (isPasswordChangeError(e)) router.push("/equipo/clave");
+      else setError(e instanceof Error ? e.message : "No se guardó el cambio.");
+      return false;
     } finally {
       setBusy(false);
     }
   };
+  const ask = (spec: Support) => setSupport({ spec, reason: "", problem: "" });
+  const nav = adminTabs.map(({ id, label, Icon }) => (
+    <Link
+      key={id}
+      href={`/admin/${venue.id}?tab=${id}`}
+      aria-current={tab === id ? "page" : undefined}
+    >
+      <Icon size={16} aria-hidden="true" className="side-icon" />
+      {label}
+    </Link>
+  ));
+  const hours = metrics.median_preparation_seconds;
+  const shownOrders = orders.filter((o) =>
+    orderFilter === "all"
+      ? true
+      : ["pending_authorization", "queued", "preparing", "ready"].includes(o.status),
+  );
+  const grouped = categories
+    .map((c) => ({
+      category: c,
+      list: products.filter(
+        (p) => p.category_id === c.id && p.name.toLowerCase().includes(filter.toLowerCase()),
+      ),
+    }))
+    .filter((g) => g.list.length);
   return (
     <>
-      <p className="eyebrow">Administración</p>
-      <div className="row between wrap">
-        <h1>{venue.name}</h1>
-        <Link className="button secondary" href={`/staff/${venue.id}`}>
+      <div className="row between wrap" style={{ marginBottom: 16 }}>
+        <div>
+          <p className="eyebrow">Administración</p>
+          <h1 className="t-title">{venue.name}</h1>
+        </div>
+        <Link className="btn secondary sm" href={`/staff/${venue.id}`}>
           Abrir barra
         </Link>
       </div>
-      <nav className="tabs" aria-label="Administración">
-        {["Resumen", "Pedidos", "Menú", "Perfil", "Ajustes"].map((name) => (
-          <button
-            aria-current={tab === name ? "page" : undefined}
-            key={name}
-            onClick={() => setTab(name)}
-          >
-            {name}
-          </button>
-        ))}
-      </nav>
-      {error && (
-        <p role="alert" className="notice error">
-          {error}
-        </p>
-      )}
-      {tab === "Resumen" && (
-        <section className="stack">
-          <h2>Ventas de Onza</h2>
-          <p className="muted">
-            Solo operaciones de esta demo. Fecha operativa: 06:00 a 06:00,
-            America/Costa_Rica. No representa todas las ventas del
-            establecimiento.
-          </p>
-          <form
-            className="row wrap"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setBusy(true);
-              try {
-                const response = await fetch(
-                  `/api/summary?venue=${venue.id}&day=${date}`,
-                );
-                const data = await response.json();
-                if (!response.ok) throw new Error(data.message);
-                setMetrics(summarySchema.parse(data));
-                setError("");
-              } catch {
-                setError("No pudimos cargar el resumen.");
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            <TextField
-              label="Fecha operativa"
-              type="date"
-              required
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-            <Button variant="secondary" type="submit" loading={busy}>
-              Consultar
-            </Button>
-          </form>
-          <div className="summary-grid">
-            <div>
-              <span className="muted">Cobro neto simulado</span>
-              <strong>
-                <Price
-                  amount={metrics.captured_minor - metrics.refunded_minor}
+      <div className="admin">
+        <nav className="side" aria-label="Administración">{nav}</nav>
+        <div>
+          <nav className="tabs" aria-label="Administración">{nav}</nav>
+          {error && (
+            <div style={{ marginBottom: 16 }}>
+              <Notice tone="danger">{error}</Notice>
+            </div>
+          )}
+          {saved && (
+            <p role="status" className="saved" style={{ marginBottom: 16 }}>
+              {saved}
+            </p>
+          )}
+          {tab === "resumen" && (
+            <section className="stack">
+              <div className="row between wrap">
+                <h2>Resumen</h2>
+                <TextField
+                  label="Fecha operativa"
+                  type="date"
+                  required
+                  value={date}
+                  onChange={(e) => setDate(e.target.value)}
                 />
-              </strong>
-            </div>
-            <div>
-              <span className="muted">Reservado</span>
-              <strong>
-                <Price amount={metrics.reserved_minor} />
-              </strong>
-            </div>
-            <div>
-              <span className="muted">Entregados</span>
-              <strong>{metrics.delivered_orders}</strong>
-            </div>
-            <div>
-              <span className="muted">Mediana de preparación</span>
-              <strong>
-                {metrics.median_preparation_seconds === null
-                  ? "—"
-                  : metrics.median_preparation_seconds < 60
-                    ? "<1 min"
-                    : `${Math.round(metrics.median_preparation_seconds / 60)} min`}
-              </strong>
-              <small>N = {metrics.preparation_n}</small>
-            </div>
-          </div>
-          <p>
-            Capturado: <Price amount={metrics.captured_minor} /> · Devuelto:{" "}
-            <Price amount={metrics.refunded_minor} />
-          </p>
-          <p className="muted">
-            Las reservas no son ventas ni depósitos. Las ventas por producto
-            corresponden a pedidos entregados; pueden diferir del cobro neto por
-            devoluciones o entregas pendientes.
-          </p>
-          <div className="table-scroll">
-            <table>
-              <thead>
-                <tr>
-                  <th>Producto</th>
-                  <th>Unidades entregadas</th>
-                  <th>Venta entregada</th>
-                </tr>
-              </thead>
-              <tbody>
-                {metrics.products.map((p) => (
-                  <tr key={p.product_id + p.name_snapshot}>
-                    <td>{p.name_snapshot}</td>
-                    <td>{p.units}</td>
-                    <td>
-                      <Price amount={p.total_minor} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            {!metrics.products.length && (
-              <p className="muted">Sin entregas en esta fecha operativa.</p>
-            )}
-          </div>
-        </section>
-      )}
-      {tab === "Pedidos" && (
-        <section className="stack">
-          <h2>Pedidos e incidencias</h2>
-          {orders.map((o) => (
-            <article className="order-card" key={o.id}>
-              <h3>
-                #{o.public_code} · {statusLabels[o.status]}
-              </h3>
-              <p>
-                {paymentLabels[o.payment_state]} ·{" "}
-                <Price amount={o.total_minor} />
+              </div>
+              <p className="muted t-label">
+                Solo operaciones de esta demo. Día operativo de 06:00 a 06:00
+                (Costa Rica). Las reservas no son ventas.
               </p>
-              {o.status === "pending_authorization" &&
-                o.payment_state === "unknown" && (
-                  <div className="stack">
-                    <p className="warning">
-                      Reserva sin referencia confirmada. No se repetirá la
-                      autorización.
-                    </p>
-                    <Button
-                      variant="secondary"
-                      loading={busy}
-                      onClick={() => {
-                        const reason = prompt(
-                          "Motivo / evidencia simulada de autorización confirmada (mínimo 5 caracteres):",
-                        );
-                        if (
-                          reason &&
-                          confirm(
-                            "Solo DEMO: ¿simular evidencia de proveedor que confirma la reserva, sin crear otra autorización?",
-                          )
-                        )
-                          void run({
-                            action: "reconcile_authorization",
-                            orderId: o.id,
-                            outcome: "authorized",
-                            providerResultConfirmed: true,
-                            reason,
-                          });
-                      }}
-                    >
-                      Simular conciliación de reserva aprobada
-                    </Button>
-                    <Button
-                      variant="danger"
-                      loading={busy}
-                      onClick={() => {
-                        const reason = prompt(
-                          "Motivo / evidencia simulada de reserva anulada (mínimo 5 caracteres):",
-                        );
-                        if (
-                          reason &&
-                          confirm(
-                            "Solo DEMO: ¿simular evidencia de proveedor de que no hay reserva/cobro vigente?",
-                          )
-                        )
-                          void run({
-                            action: "reconcile_authorization",
-                            orderId: o.id,
-                            outcome: "voided",
-                            providerResultConfirmed: true,
-                            reason,
-                          });
-                      }}
-                    >
-                      Simular conciliación de reserva anulada
-                    </Button>
-                  </div>
+              <div className="metrics">
+                <div className="metric">
+                  <span className="muted t-label">Cobro neto simulado</span>
+                  <span className="v">
+                    <Price amount={metrics.captured_minor - metrics.refunded_minor} />
+                  </span>
+                </div>
+                <div className="metric">
+                  <span className="muted t-label">Reservado</span>
+                  <span className="v">
+                    <Price amount={metrics.reserved_minor} />
+                  </span>
+                </div>
+                <div className="metric">
+                  <span className="muted t-label">Entregados</span>
+                  <span className="v">{metrics.delivered_orders}</span>
+                </div>
+                <div className="metric">
+                  <span className="muted t-label">Mediana de preparación</span>
+                  <span className="v">
+                    {hours === null ? "—" : hours < 60 ? "<1 min" : `${Math.round(hours / 60)} min`}
+                  </span>
+                  <span className="hint">N = {metrics.preparation_n}</span>
+                </div>
+              </div>
+              <p className="muted t-label">
+                Capturado <Price amount={metrics.captured_minor} /> · Devuelto{" "}
+                <Price amount={metrics.refunded_minor} />
+              </p>
+              <div className="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Producto</th>
+                      <th>Unidades</th>
+                      <th>Venta entregada</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {metrics.products.map((p) => (
+                      <tr key={p.product_id + p.name_snapshot}>
+                        <td>{p.name_snapshot}</td>
+                        <td className="num">{p.units}</td>
+                        <td>
+                          <Price amount={p.total_minor} />
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {!metrics.products.length && (
+                  <p className="muted t-label" style={{ paddingTop: 12 }}>
+                    Sin entregas en esta fecha.
+                  </p>
                 )}
-              {o.status === "ready" && o.claimed_elsewhere && (
-                <Button
-                  variant="secondary"
-                  loading={busy}
-                  onClick={() => {
-                    const reason = prompt(
-                      "Verificá físicamente que NO se entregó. Motivo de transferencia (mínimo 5 caracteres):",
-                    );
-                    if (
-                      reason &&
-                      confirm(
-                        "¿Verificaste físicamente que el pedido aún no fue entregado?",
-                      )
-                    )
-                      void run({
-                        action: "transfer",
-                        orderId: o.id,
-                        physicalCheck: "not_delivered",
-                        reason,
-                      });
-                  }}
-                >
-                  Transferir retiro a mi sesión
-                </Button>
+              </div>
+            </section>
+          )}
+          {tab === "pedidos" && (
+            <section className="stack">
+              <div className="row between wrap">
+                <h2>Pedidos e incidencias</h2>
+                <SegmentedControl<"active" | "all">
+                  label="Filtro de pedidos"
+                  value={orderFilter}
+                  options={[
+                    { value: "active", label: "Activos" },
+                    { value: "all", label: "Todos" },
+                  ]}
+                  onChange={setOrderFilter}
+                />
+              </div>
+              {!shownOrders.length && (
+                <EmptyState icon={Receipt} title="Sin pedidos activos" />
               )}
-              {o.payment_state === "captured" && (
-                <Button
-                  variant="danger"
-                  loading={busy}
-                  onClick={() => {
-                    const reason = prompt(
-                      "Motivo de devolución completa (mínimo 5 caracteres):",
-                    );
-                    if (
-                      reason &&
-                      confirm("¿Confirmar devolución ficticia completa?")
-                    )
-                      void run({ action: "refund", orderId: o.id, reason });
-                  }}
-                >
-                  Devolver monto simulado
-                </Button>
-              )}
-              {["queued", "preparing", "ready"].includes(o.status) &&
-                o.payment_state === "authorized" &&
-                ((!o.claim_id && !o.claimed_elsewhere) ||
-                  o.capture_state === "declined") && (
-                  <Button
-                    variant="danger"
-                    loading={busy}
-                    onClick={() => {
-                      const reason = prompt(
-                        "Motivo de cancelación (mínimo 3 caracteres):",
-                      );
-                      if (reason)
-                        void run({
-                          action: "cancel",
-                          orderId: o.id,
-                          expectedVersion: o.version,
-                          idempotencyKey: crypto.randomUUID(),
-                          reason,
-                        });
-                    }}
-                  >
-                    Cancelar mediante soporte
-                  </Button>
-                )}
-            </article>
-          ))}
-        </section>
-      )}
-      {tab === "Menú" && (
-        <section className="stack">
-          <div className="row between">
-            <h2>Menú publicado</h2>
-            <Button onClick={() => setEdit(null)}>Crear producto</Button>
-          </div>
-          <TextField
-            label="Filtrar productos"
-            value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-          />
-          {edit !== undefined ? (
-            <div>
-              <Button variant="quiet" onClick={() => setEdit(undefined)}>
-                ← Cerrar edición
-              </Button>
-              <ProductEditor
-                key={edit?.id ?? "new"}
-                venueId={venue.id}
-                product={edit}
-                categories={categories}
-                onSaved={(warning) => {
-                  setEdit(undefined);
-                  setError(warning ?? "");
-                  router.refresh();
-                }}
-              />
-            </div>
-          ) : (
-            products
-              .filter((p) =>
-                p.name.toLowerCase().includes(filter.toLowerCase()),
-              )
-              .map((p) => (
-                <article className="product-row" key={p.id}>
-                  <ProductImage name={p.name} src={productImageSrc(p)} />
-                  <div className="product-copy">
-                    <h3>{p.name}</h3>
-                    <Price amount={p.price_minor} />
-                    <p className="muted">
-                      {p.available ? "Disponible" : "Agotado"}
-                    </p>
-                  </div>
-                  <div className="stack">
-                    <Button variant="secondary" onClick={() => setEdit(p)}>
-                      Editar
-                    </Button>
-                    <Button
-                      variant="quiet"
-                      loading={busy}
-                      onClick={() =>
-                        void run({
-                          action: "product_save",
-                          venueId: venue.id,
-                          productId: p.id,
-                          expectedVersion: p.version,
-                          available: !p.available,
-                        })
+              {shownOrders.map((o) => (
+                <article className="panel stack tight" key={o.id}>
+                  <div className="row between wrap">
+                    <strong className="num">#{o.public_code}</strong>
+                    <StatusBadge
+                      tone={
+                        o.status === "delivered"
+                          ? "success"
+                          : ["canceled", "expired", "uncollected"].includes(o.status)
+                            ? "danger"
+                            : o.status === "ready"
+                              ? "brand"
+                              : "neutral"
                       }
                     >
-                      {p.available ? "Agotar" : "Habilitar"}
-                    </Button>
-                    <Button
-                      variant="quiet"
-                      loading={busy}
-                      onClick={() => {
-                        if (
-                          confirm(
-                            "¿Archivar este producto? Los pedidos históricos conservarán sus datos.",
-                          )
-                        )
-                          void run({
-                            action: "product_save",
-                            venueId: venue.id,
-                            productId: p.id,
-                            expectedVersion: p.version,
-                            archived: true,
-                          });
-                      }}
-                    >
-                      Archivar
-                    </Button>
+                      {statusLabels[o.status]}
+                    </StatusBadge>
+                  </div>
+                  <p className="muted t-label">
+                    {paymentLabels[o.payment_state]} · <Price amount={o.total_minor} />
+                  </p>
+                  {o.status === "pending_authorization" && o.payment_state === "unknown" && (
+                    <>
+                      <Notice tone="warning">
+                        Reserva sin referencia confirmada. No se repetirá la autorización.
+                      </Notice>
+                      <div className="row wrap">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() =>
+                            ask({
+                              title: "Conciliar reserva aprobada",
+                              description: "Solo DEMO: simula evidencia del proveedor de que la reserva está confirmada, sin crear otra autorización.",
+                              min: 5,
+                              confirm: "Confirmar reserva",
+                              tone: "primary",
+                              build: (reason) => ({
+                                action: "reconcile_authorization",
+                                orderId: o.id,
+                                outcome: "authorized",
+                                providerResultConfirmed: true,
+                                reason,
+                              }),
+                            })
+                          }
+                        >
+                          Reserva aprobada
+                        </Button>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() =>
+                            ask({
+                              title: "Conciliar reserva anulada",
+                              description: "Solo DEMO: simula evidencia de que no hay reserva ni cobro vigente.",
+                              min: 5,
+                              confirm: "Anular reserva",
+                              tone: "danger",
+                              build: (reason) => ({
+                                action: "reconcile_authorization",
+                                orderId: o.id,
+                                outcome: "voided",
+                                providerResultConfirmed: true,
+                                reason,
+                              }),
+                            })
+                          }
+                        >
+                          Reserva anulada
+                        </Button>
+                      </div>
+                    </>
+                  )}
+                  <div className="row wrap">
+                    {o.status === "ready" && o.claimed_elsewhere && (
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        onClick={() =>
+                          ask({
+                            title: "Transferir el retiro a mi sesión",
+                            description: "Verificá físicamente que el pedido NO se entregó. Indicá el motivo.",
+                            min: 5,
+                            confirm: "Ya verifiqué: transferir",
+                            tone: "primary",
+                            build: (reason) => ({
+                              action: "transfer",
+                              orderId: o.id,
+                              physicalCheck: "not_delivered",
+                              reason,
+                            }),
+                          })
+                        }
+                      >
+                        Transferir retiro
+                      </Button>
+                    )}
+                    {o.payment_state === "captured" && (
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        onClick={() =>
+                          ask({
+                            title: "Devolver el monto simulado",
+                            description: "Devolución ficticia completa. Indicá el motivo.",
+                            min: 5,
+                            confirm: "Devolver",
+                            tone: "danger",
+                            build: (reason) => ({ action: "refund", orderId: o.id, reason }),
+                          })
+                        }
+                      >
+                        Devolver monto
+                      </Button>
+                    )}
+                    {["queued", "preparing", "ready"].includes(o.status) &&
+                      o.payment_state === "authorized" &&
+                      ((!o.claim_id && !o.claimed_elsewhere) || o.capture_state === "declined") && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() =>
+                            ask({
+                              title: `Cancelar #${o.public_code}`,
+                              description: "Cancelación por soporte. El cliente ve el motivo.",
+                              min: 3,
+                              confirm: "Cancelar pedido",
+                              tone: "danger",
+                              build: (reason) => ({
+                                action: "cancel",
+                                orderId: o.id,
+                                expectedVersion: o.version,
+                                idempotencyKey: crypto.randomUUID(),
+                                reason,
+                              }),
+                            })
+                          }
+                        >
+                          Cancelar por soporte
+                        </Button>
+                      )}
                   </div>
                 </article>
-              ))
+              ))}
+            </section>
           )}
-        </section>
-      )}
-      {tab === "Perfil" && <VenueProfile venue={venue} />}
-      {tab === "Ajustes" && (
-        <form
-          className="stack"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const f = new FormData(e.currentTarget);
-            void run({
-              action: "venue_update",
-              venueId: venue.id,
-              pickupLabel: String(f.get("pickup")),
-              supportContact: String(f.get("contact")),
-              hours: String(f.get("hours")),
-              etaMinutes: Number(f.get("eta")),
-              capacity: Number(f.get("capacity")),
-              paused: f.get("paused") === "on",
-              openState: String(f.get("state")),
-            });
-          }}
-        >
-          <h2>Operación del local</h2>
-          <p className="muted">
-            El nombre, la ubicación, la portada y el logo se editan en la
-            pestaña Perfil.
-          </p>
-          <TextField
-            name="pickup"
-            label="Barra de retiro"
-            required
-            defaultValue={venue.pickup_label}
+          {tab === "menu" && (
+            <section className="stack">
+              <div className="row between wrap">
+                <h2>Menú</h2>
+                <Button size="sm" onClick={() => setEdit(null)}>
+                  Nuevo producto
+                </Button>
+              </div>
+              {edit !== undefined ? (
+                <div className="stack">
+                  <Button variant="quiet" size="sm" onClick={() => setEdit(undefined)} style={{ alignSelf: "flex-start" }}>
+                    ← Cerrar edición
+                  </Button>
+                  <ProductEditor
+                    key={edit?.id ?? "new"}
+                    venueId={venue.id}
+                    product={edit}
+                    categories={categories}
+                    onSaved={(warning) => {
+                      setEdit(undefined);
+                      setError(warning ?? "");
+                      router.refresh();
+                    }}
+                  />
+                </div>
+              ) : (
+                <>
+                  <div className="search">
+                    <svg className="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                    <input
+                      type="search"
+                      aria-label="Buscar producto"
+                      placeholder="Buscar producto"
+                      value={filter}
+                      onChange={(e) => setFilter(e.target.value)}
+                    />
+                  </div>
+                  {grouped.map(({ category, list }) => (
+                    <div key={category.id}>
+                      <h3 className="eyebrow section-label" style={{ marginTop: 16 }}>{category.label}</h3>
+                      <div className="rows">
+                        {list.map((p) => (
+                          <div className="r wrap" key={p.id}>
+                            <span className="thumb">
+                              <ProductImage name={p.name} src={productImageSrc(p)} />
+                            </span>
+                            <div className="grow">
+                              <div style={{ fontWeight: 600 }}>{p.name}</div>
+                              <div className="sub">
+                                <Price amount={p.price_minor} />
+                                {p.available ? "" : " · Agotado"}
+                              </div>
+                            </div>
+                            <Toggle
+                              label={<span className="sr-only">Disponible: {p.name}</span>}
+                              checked={p.available}
+                              disabled={busy}
+                              onChange={(available) =>
+                                void run({
+                                  action: "product_save",
+                                  venueId: venue.id,
+                                  productId: p.id,
+                                  expectedVersion: p.version,
+                                  available,
+                                })
+                              }
+                            />
+                            <Button variant="quiet" size="sm" onClick={() => setEdit(p)}>
+                              Editar
+                            </Button>
+                            <Button variant="quiet" size="sm" onClick={() => setArchive(p)}>
+                              Archivar
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  {!grouped.length && (
+                    <EmptyState icon={Wine} title={filter ? "Sin resultados" : "El menú está vacío"} />
+                  )}
+                </>
+              )}
+            </section>
+          )}
+          {tab === "disponibilidad" && (
+            <div className="stack loose">
+              <section className="block-card">
+                <h2>Estado del local</h2>
+                <SegmentedControl<Availability>
+                  block
+                  label="Estado del local"
+                  value={state}
+                  options={availabilityOptions}
+                  onChange={(next) =>
+                    void run(
+                      {
+                        action: "venue_update",
+                        venueId: venue.id,
+                        openState: next === "closed" ? "closed" : "open",
+                        paused: next === "paused",
+                      },
+                      "Guardado",
+                    )
+                  }
+                />
+                <p className="muted">{availabilityCopy[state]}</p>
+              </section>
+              <section className="block-card">
+                <h2>Capacidad</h2>
+                <form
+                  className="stack"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    void run(
+                      { action: "venue_update", venueId: venue.id, capacity: Number(capacity) },
+                      "Guardado",
+                    );
+                  }}
+                >
+                  <TextField
+                    label="Pedidos activos al mismo tiempo"
+                    type="number"
+                    min={1}
+                    max={100}
+                    value={capacity}
+                    hint="Al llegar al máximo, el checkout avisa y no crea pedidos."
+                    onChange={(e) => setCapacity(e.target.value)}
+                    style={{ maxWidth: 160 }}
+                  />
+                  <div>
+                    <Button type="submit" variant="secondary" size="sm" loading={busy}>
+                      Guardar
+                    </Button>
+                  </div>
+                </form>
+              </section>
+              <section className="block-card">
+                <h2>Agotados ahora</h2>
+                {products.some((p) => !p.available) ? (
+                  <div className="rows">
+                    {products
+                      .filter((p) => !p.available)
+                      .map((p) => (
+                        <div className="r" key={p.id}>
+                          <span className="grow">{p.name}</span>
+                          <Toggle
+                            label={<span className="t-label">Disponible</span>}
+                            checked={false}
+                            disabled={busy}
+                            onChange={() =>
+                              void run({
+                                action: "product_save",
+                                venueId: venue.id,
+                                productId: p.id,
+                                expectedVersion: p.version,
+                                available: true,
+                              })
+                            }
+                          />
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <p className="muted">Todo disponible.</p>
+                )}
+              </section>
+            </div>
+          )}
+          {tab === "negocio" && (
+            <div className="stack loose">
+              <div className="block-card">
+                <VenueProfile venue={venue} />
+              </div>
+              <form
+                className="block-card"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const f = new FormData(e.currentTarget);
+                  void run(
+                    {
+                      action: "venue_update",
+                      venueId: venue.id,
+                      pickupLabel: String(f.get("pickup")),
+                      supportContact: String(f.get("contact")),
+                      hours: String(f.get("hours")),
+                      etaMinutes: Number(f.get("eta")),
+                    },
+                    "Guardado",
+                  );
+                }}
+              >
+                <h2>Retiro y atención</h2>
+                <TextField name="pickup" label="Punto de retiro" required defaultValue={venue.pickup_label} />
+                <TextField
+                  name="eta"
+                  label="Preparación estimada (minutos)"
+                  type="number"
+                  min={1}
+                  max={120}
+                  defaultValue={venue.eta_minutes}
+                  style={{ maxWidth: 160 }}
+                />
+                <TextField
+                  name="hours"
+                  label="Horario informado"
+                  defaultValue={venue.hours}
+                  hint="Texto que ven los clientes."
+                />
+                <TextField name="contact" label="Contacto de soporte" defaultValue={venue.support_contact} />
+                <div>
+                  <Button type="submit" variant="secondary" size="sm" loading={busy}>
+                    Guardar
+                  </Button>
+                </div>
+              </form>
+            </div>
+          )}
+          {tab === "equipo" && <TeamPanel venueId={venue.id} venueName={venue.name} />}
+        </div>
+      </div>
+      <Sheet
+        open={!!support}
+        onOpenChange={(open) => !open && setSupport(null)}
+        title={support?.spec.title ?? ""}
+        description={support?.spec.description}
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setSupport(null)}>
+              Volver
+            </Button>
+            <Button
+              variant={support?.spec.tone === "danger" ? "danger" : "primary"}
+              loading={busy}
+              onClick={async () => {
+                if (!support) return;
+                const reason = support.reason.trim();
+                if (reason.length < support.spec.min) {
+                  setSupport({ ...support, problem: `Escribí un motivo de al menos ${support.spec.min} caracteres.` });
+                  return;
+                }
+                if (await run(support.spec.build(reason))) setSupport(null);
+                else setSupport(null);
+              }}
+            >
+              {support?.spec.confirm}
+            </Button>
+          </>
+        }
+      >
+        <label className="field">
+          <span>Motivo</span>
+          <textarea
+            value={support?.reason ?? ""}
+            aria-invalid={!!support?.problem}
+            onChange={(e) => support && setSupport({ ...support, reason: e.target.value, problem: "" })}
           />
-          <TextField
-            name="contact"
-            label="Contacto de soporte"
-            defaultValue={venue.support_contact}
-          />
-          <TextField
-            name="hours"
-            label="Horario informado"
-            defaultValue={venue.hours}
-          />
-          <TextField
-            name="eta"
-            label="Tiempo de preparación informado (minutos)"
-            type="number"
-            min={1}
-            max={120}
-            defaultValue={venue.eta_minutes}
-          />
-          <TextField
-            name="capacity"
-            label="Capacidad de pedidos activos"
-            type="number"
-            min={1}
-            max={100}
-            defaultValue={venue.capacity}
-          />
-          <label className="field">
-            Estado
-            <select name="state" defaultValue={venue.open_state}>
-              <option value="open">Abierto</option>
-              <option value="closed">Cerrado</option>
-            </select>
-          </label>
-          <label className="checkbox">
-            <input
-              name="paused"
-              type="checkbox"
-              defaultChecked={venue.paused}
-            />
-            <span>Pausar nuevos pedidos</span>
-          </label>
-          <p className="muted">
-            Políticas demo-v1: aceptación 2 minutos, retiro 20 minutos, sin
-            penalidad por no recogida. Para cambiarlas se requiere versionar el
-            contrato y las reglas del backend juntos.
-          </p>
-          <Button type="submit" loading={busy}>
-            Guardar ajustes
-          </Button>
-        </form>
-      )}
+          {support?.problem && (
+            <span role="alert" className="field-error">
+              {support.problem}
+            </span>
+          )}
+        </label>
+      </Sheet>
+      <Sheet
+        open={!!archive}
+        onOpenChange={(open) => !open && setArchive(null)}
+        title={archive ? `¿Archivar ${archive.name}?` : "Archivar"}
+        description="Los pedidos históricos conservan sus datos."
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setArchive(null)}>
+              Volver
+            </Button>
+            <Button
+              variant="danger"
+              loading={busy}
+              onClick={async () => {
+                if (!archive) return;
+                const product = archive;
+                setArchive(null);
+                await run({
+                  action: "product_save",
+                  venueId: venue.id,
+                  productId: product.id,
+                  expectedVersion: product.version,
+                  archived: true,
+                });
+              }}
+            >
+              Archivar
+            </Button>
+          </>
+        }
+      />
+      <SessionExpiredSheet open={expired} area="equipo" next={`/admin/${venue.id}?tab=${tab}`} />
     </>
   );
 }

@@ -75,4 +75,18 @@ describe("política de acceso", () => {
     expect(accountsRequired({})).toBe(false);
     expect(accountsRequired({ ACCOUNTS_REQUIRED: "true" })).toBe(true);
   });
+  it("una cuenta del equipo con contraseña temporal pendiente solo puede cambiarla", () => {
+    const pending = { kind: "staff", onboarded: false, mustChangePassword: true } as const;
+    for (const p of ["/staff/x", "/admin/x", "/onza", "/equipo/locales"])
+      expect(decideAccess(p, pending)).toBe("/equipo/clave");
+    expect(decideAccess("/equipo/clave", pending)).toBeNull();
+    expect(decideAccess("/staff/x", staff)).toBeNull();
+    expect(decideAccess("/equipo/locales", staff)).toBeNull();
+  });
+  it("el cambio de clave y los locales del equipo no están abiertos a clientes ni a quien no inició sesión", () => {
+    expect(decideAccess("/equipo/clave", customer)).toBe("/sesion-activa?want=equipo");
+    expect(decideAccess("/equipo/locales", none)).toBe(
+      `/equipo/acceso?next=${encodeURIComponent("/equipo/locales")}`,
+    );
+  });
 });

@@ -5,7 +5,7 @@ import { PGlite } from "@electric-sql/pglite";
 import { readFileSync, writeFileSync } from "node:fs";
 const db = new PGlite();
 await db.exec(
-  `create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql as $$select null::uuid$$;create function auth.jwt() returns jsonb language sql as $$select '{}'::jsonb$$;`,
+  `create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key,email text);create function auth.uid() returns uuid language sql as $$select null::uuid$$;create function auth.jwt() returns jsonb language sql as $$select '{}'::jsonb$$;`,
 );
 await db.exec(
   readFileSync("supabase/migrations/202611150001_core.sql", "utf8"),
@@ -28,6 +28,9 @@ await db.exec(
 await db.exec(
   readFileSync("supabase/migrations/202611170010_customer_accounts.sql", "utf8"),
 );
+await db.exec(
+  readFileSync("supabase/migrations/202611170011_team_management.sql", "utf8"),
+);
 const { rows } = await db.query(
   `select table_name,column_name,data_type,is_nullable,column_default from information_schema.columns where table_schema='public' order by table_name,ordinal_position`,
 );
@@ -44,7 +47,7 @@ for (const [table, columns] of Object.entries(groups)) {
     })[c.data_type] ?? "string") + (c.is_nullable === "YES" ? " | null" : "");
   output += `${table}: { Row: {${columns.map((c) => `${c.column_name}: ${tsType(c)}`).join(";")}}; Insert: {${columns.map((c) => `${c.column_name}${c.column_default || c.is_nullable === "YES" ? "?" : ""}: ${tsType(c)}`).join(";")}}; Update: {${columns.map((c) => `${c.column_name}?: ${tsType(c)}`).join(";")}}; Relationships: [] };\n`;
 }
-output += `}; Views: Record<never, never>; Functions: { current_account: { Args: Record<never, never>; Returns: Json }; complete_onboarding: { Args: { input: Json }; Returns: Json }; update_preferences: { Args: { news: boolean; offers: boolean }; Returns: undefined }; order_list: { Args: { venue_filter?: string; order_filter?: string; before_time?: string }; Returns: Json }; has_platform_access: { Args: Record<never,never>; Returns: boolean }; platform_command: { Args: { input: Json }; Returns: Json }; onza_command: { Args: { input: Json }; Returns: Json }; sweep_orders: { Args: Record<never,never>; Returns: number }; has_venue_access: { Args: { venue: string; admin_only?: boolean }; Returns: boolean }; venue_summary: { Args: { venue: string; day: string }; Returns: Json }; business_date_at: { Args: { instant: string }; Returns: string }; update_venue_branding: { Args: { input: Json }; Returns: Json }; update_product_image: { Args: { input: Json }; Returns: Json } }; Enums: Record<never,never>; CompositeTypes: Record<never,never> } };\n`;
+output += `}; Views: Record<never, never>; Functions: { current_account: { Args: Record<never, never>; Returns: Json }; complete_onboarding: { Args: { input: Json }; Returns: Json }; update_preferences: { Args: { news: boolean; offers: boolean }; Returns: undefined }; order_list: { Args: { venue_filter?: string; order_filter?: string; before_time?: string }; Returns: Json }; has_platform_access: { Args: Record<never,never>; Returns: boolean }; platform_command: { Args: { input: Json }; Returns: Json }; onza_command: { Args: { input: Json }; Returns: Json }; sweep_orders: { Args: Record<never,never>; Returns: number }; has_venue_access: { Args: { venue: string; admin_only?: boolean }; Returns: boolean }; venue_summary: { Args: { venue: string; day: string }; Returns: Json }; business_date_at: { Args: { instant: string }; Returns: string }; update_venue_branding: { Args: { input: Json }; Returns: Json }; update_product_image: { Args: { input: Json }; Returns: Json }; list_venue_team: { Args: { venue: string }; Returns: Json }; team_set_role: { Args: { venue: string; member: string; new_role: string }; Returns: Json }; team_revoke: { Args: { venue: string; member: string }; Returns: Json }; team_lookup_email: { Args: { lookup: string }; Returns: Json }; team_attach: { Args: { venue: string; member: string; member_name: string; member_role: string; actor: string; fresh: boolean }; Returns: Json }; complete_password_change: { Args: { member: string }; Returns: undefined } }; Enums: Record<never,never>; CompositeTypes: Record<never,never> } };\n`;
 writeFileSync(
   "src/lib/supabase/database.generated.ts",
   await format(output, { parser: "typescript" }),

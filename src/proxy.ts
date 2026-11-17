@@ -7,6 +7,7 @@ import {
   type Account,
 } from "@/lib/access-policy";
 const PASS_THROUGH = /^\/(api|auth)(\/|$)/;
+const STAFF_AREA = /^\/(staff|admin|onza)(\/|$)|^\/equipo\/locales$/;
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
   if (!isConfigured()) return response;
@@ -27,7 +28,21 @@ export async function proxy(request: NextRequest) {
   const { data } = await db.auth.getUser();
   if (pathname === "/login")
     return redirect(request, response, "/equipo/acceso");
-  if (!accountsRequired() || PASS_THROUGH.test(pathname)) return response;
+  if (!accountsRequired() || PASS_THROUGH.test(pathname)) {
+    // Aun sin cuentas obligatorias, una clave temporal pendiente no puede operar el área del equipo.
+    if (
+      !PASS_THROUGH.test(pathname) &&
+      STAFF_AREA.test(pathname) &&
+      data.user &&
+      !data.user.is_anonymous
+    ) {
+      const { data: result } = await db.rpc("current_account");
+      const value = result as Partial<Account> | null;
+      if (value?.kind === "staff" && value.mustChangePassword)
+        return redirect(request, response, "/equipo/clave");
+    }
+    return response;
+  }
   let account: Account = { kind: "none", onboarded: false };
   if (data.user) {
     // The account kind is decided in the database (membership), never by the browser.
@@ -36,6 +51,7 @@ export async function proxy(request: NextRequest) {
     account = {
       kind: value?.kind ?? (data.user.is_anonymous ? "guest" : "customer"),
       onboarded: value?.onboarded === true,
+      mustChangePassword: value?.mustChangePassword === true,
     };
   }
   const target = decideAccess(pathname, account);

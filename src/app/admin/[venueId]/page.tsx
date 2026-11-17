@@ -1,42 +1,58 @@
-import Link from "next/link";
-import { requireVenue } from "@/lib/supabase/guards";
+import { StaffShell } from "@/components/ui/staff-shell";
+import { staffGate } from "@/components/ui/staff-gate";
 import { getPublishedMenu } from "@/features/catalog/server/queries";
 import { getVenueSummary } from "@/features/analytics/server/queries";
 import { businessDate } from "@/features/analytics/business-date";
-import { AdminPanel } from "@/features/admin/components/admin-panel";
+import {
+  AdminPanel,
+  adminTabs,
+  type AdminTab,
+} from "@/features/admin/components/admin-panel";
+import { loadStaffContext } from "@/features/team/server/staff-context";
 import { ConfigurationState } from "@/components/ui/configuration-state";
+
 export const dynamic = "force-dynamic";
 export default async function Page({
   params,
+  searchParams,
 }: {
   params: Promise<{ venueId: string }>;
+  searchParams: Promise<{ tab?: string }>;
 }) {
   const { venueId } = await params;
-  let venue, menu, summary;
+  const { tab } = await searchParams;
+  const current: AdminTab = adminTabs.some((t) => t.id === tab)
+    ? (tab as AdminTab)
+    : "resumen";
+  const context = await loadStaffContext(venueId, true);
+  const gate = staffGate(context, `/admin/${venueId}?tab=${current}`);
+  if (gate || !context.ok) return gate;
+  let data;
   try {
-    const { db } = await requireVenue(venueId, true);
-    const [v, m, s] = await Promise.all([
-      db.from("venues").select("*").eq("id", venueId).single(),
+    const [menu, summary] = await Promise.all([
       getPublishedMenu(venueId),
       getVenueSummary(venueId, businessDate()),
     ]);
-    if (v.error) throw v.error;
-    venue = v.data;
-    menu = m;
-    summary = s;
+    data = { menu, summary };
   } catch (error) {
     return (
-      <div className="page">
+      <StaffShell venue={context.venue} person={context.person}>
         <ConfigurationState error={error} />
-        <Link className="link-button" href="/login">
-          Iniciar sesión de personal
-        </Link>
-      </div>
+      </StaffShell>
     );
   }
   return (
-    <div className="page operations">
-      <AdminPanel venue={venue} {...menu} summary={summary} />
-    </div>
+    <StaffShell
+      venue={context.venue}
+      person={context.person}
+      canSwitch={context.venueCount > 1}
+    >
+      <AdminPanel
+        venue={context.venue}
+        {...data.menu}
+        summary={data.summary}
+        tab={current}
+      />
+    </StaffShell>
   );
 }

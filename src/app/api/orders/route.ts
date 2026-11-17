@@ -31,7 +31,7 @@ export async function GET(request: Request) {
         status:
           code === "SESSION_REQUIRED"
             ? 401
-            : code === "NOT_AUTHORIZED"
+            : code === "NOT_AUTHORIZED" || code === "PASSWORD_CHANGE_REQUIRED"
               ? 403
               : 503,
         headers: { "Cache-Control": "no-store" },

@@ -1,7 +1,8 @@
-import Link from "next/link";
-import { requireVenue } from "@/lib/supabase/guards";
-import { ConfigurationState } from "@/components/ui/configuration-state";
+import { StaffShell } from "@/components/ui/staff-shell";
+import { staffGate } from "@/components/ui/staff-gate";
 import { StaffQueue } from "@/features/staff/components/queue";
+import { loadStaffContext } from "@/features/team/server/staff-context";
+
 export const dynamic = "force-dynamic";
 export default async function Page({
   params,
@@ -9,29 +10,16 @@ export default async function Page({
   params: Promise<{ venueId: string }>;
 }) {
   const { venueId } = await params;
-  let venue;
-  try {
-    const { db } = await requireVenue(venueId);
-    const result = await db
-      .from("venues")
-      .select("*")
-      .eq("id", venueId)
-      .single();
-    if (result.error) throw result.error;
-    venue = result.data;
-  } catch (error) {
-    return (
-      <div className="page">
-        <ConfigurationState error={error} />
-        <Link className="link-button" href="/login">
-          Iniciar sesión de personal
-        </Link>
-      </div>
-    );
-  }
+  const context = await loadStaffContext(venueId);
+  const gate = staffGate(context, `/staff/${venueId}`);
+  if (gate || !context.ok) return gate;
   return (
-    <div className="page operations">
-      <StaffQueue venue={venue} />
-    </div>
+    <StaffShell
+      venue={context.venue}
+      person={context.person}
+      canSwitch={context.venueCount > 1}
+    >
+      <StaffQueue venue={context.venue} />
+    </StaffShell>
   );
 }

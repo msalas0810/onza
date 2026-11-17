@@ -1,12 +1,30 @@
 "use client";
-import { useState, useRef, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
+import { Clock, History, ScanLine, Volume2, VolumeX } from "lucide-react";
 import { useLiveOrders } from "@/features/orders/use-live-orders";
-import { sendCommand } from "@/features/orders/client-api";
-import { Button, EmptyState } from "@/components/ui/primitives";
+import {
+  sendCommand,
+  CommandError,
+  isSessionError,
+} from "@/features/orders/client-api";
+import type { Order } from "@/features/orders/types";
+import {
+  Button,
+  EmptyState,
+  Notice,
+  StatusBadge,
+  Toggle,
+  buttonClass,
+} from "@/components/ui/primitives";
+import { Sheet } from "@/components/ui/sheet";
+import { ReconnectingBanner } from "@/components/ui/connection-banner";
+import { SessionExpiredSheet } from "@/features/orders/components/session-expired-sheet";
 import { PickupPanel } from "@/features/pickup/components/pickup-panel";
+import { useOnline } from "@/lib/use-online";
 import type { Venue } from "@/features/catalog/server/queries";
+
 const ScanSheet = dynamic(
   () => import("@/features/pickup/components/scan-sheet"),
   { ssr: false },
@@ -16,135 +34,276 @@ const lanes = [
   ["preparing", "Preparando"],
   ["ready", "Listos"],
 ] as const;
+const FINAL = ["delivered", "canceled", "expired", "uncollected"];
+const rejectReasons = [
+  "Sin stock",
+  "No podemos prepararlo ahora",
+  "Pedido duplicado",
+  "Otro motivo",
+] as const;
+
+const minutesSince = (iso: string, now: number) =>
+  Math.max(0, Math.floor((now - new Date(iso).getTime()) / 60000));
+
+/** Reloj para los minutos de espera: se actualiza solo, sin pedir datos nuevos. */
+function useNow(interval = 30000) {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), interval);
+    return () => clearInterval(timer);
+  }, [interval]);
+  return now;
+}
+
 export function StaffQueue({ venue }: { venue: Venue }) {
-  const { orders, loading, error, connection, refresh } = useLiveOrders({
-    venueId: venue.id,
-  });
-  const [tab, setTab] = useState("queued");
-  const [actionError, setActionError] = useState("");
-  const [errorOrder, setErrorOrder] = useState<{
-    id: string;
-    version: number;
-  } | null>(null);
+  const { orders, loading, error, connection, refresh, sessionExpired, access } =
+    useLiveOrders({ venueId: venue.id });
+  const online = useOnline();
+  const now = useNow();
+  const [tab, setTab] = useState<string>("queued");
+  const [cardErrors, setCardErrors] = useState<Record<string, { message: string; version: number }>>({});
+  const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [paused, setPaused] = useState(venue.paused);
   const [scan, setScan] = useState(false);
+  const [pickup, setPickup] = useState(false);
   const [credential, setCredential] = useState<string | null>(null);
   const [resumeOrderId, setResumeOrderId] = useState<string | null>(null);
   const [pickupRevision, setPickupRevision] = useState(0);
-  const pickupInput = useRef<HTMLElement | null>(null);
-  const handleScanResult = useCallback((value: string) => {
-    setResumeOrderId(null);
-    setPickupRevision((n) => n + 1);
-    setCredential(value);
-    setScan(false);
-  }, []);
+  const [rejecting, setRejecting] = useState<Order | null>(null);
+  const [reason, setReason] = useState<string>(rejectReasons[0]);
+  const [detail, setDetail] = useState("");
+  const [reasonError, setReasonError] = useState("");
+  const [fresh, setFresh] = useState<Set<string>>(new Set());
+  const [sound, setSound] = useState(false);
+  const [expired, setExpired] = useState(false);
+  const audio = useRef<AudioContext | null>(null);
+  const seen = useRef<Set<string> | null>(null);
   const keys = useRef(new Map<string, string>());
   const lock = useRef(false);
+
+  // Pedido nuevo: se resalta dos segundos y, con el sonido activado (tras un gesto), suena un tono corto.
+  useEffect(() => {
+    if (loading) return;
+    const ids = new Set(orders.map((o) => o.id));
+    if (seen.current === null) {
+      seen.current = ids;
+      return;
+    }
+    const known = seen.current;
+    const added = orders.filter((o) => o.status === "queued" && !known.has(o.id));
+    seen.current = ids;
+    if (!added.length) return;
+    const timer = setTimeout(() => {
+      setFresh((current) => new Set([...current, ...added.map((o) => o.id)]));
+      if (sound && audio.current?.state === "running") {
+        const osc = audio.current.createOscillator();
+        const gain = audio.current.createGain();
+        osc.connect(gain);
+        gain.connect(audio.current.destination);
+        osc.frequency.value = 660;
+        gain.gain.setValueAtTime(0.08, audio.current.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, audio.current.currentTime + 0.3);
+        osc.start();
+        osc.stop(audio.current.currentTime + 0.3);
+      }
+    }, 0);
+    const clear = setTimeout(() => setFresh(new Set()), 2400);
+    return () => {
+      clearTimeout(timer);
+      clearTimeout(clear);
+    };
+  }, [orders, loading, sound]);
+  useEffect(
+    () => () => {
+      void audio.current?.close();
+    },
+    [],
+  );
+
+  const openPickup = (options: { resume?: string } = {}) => {
+    setCredential(null);
+    setResumeOrderId(options.resume ?? null);
+    setPickupRevision((n) => n + 1);
+    setPickup(true);
+  };
   const act = async (
-    orderId: string,
+    order: Order,
     action: "accept" | "ready" | "cancel",
+    why?: string,
   ) => {
     if (lock.current) return;
-    const order = orders.find((o) => o.id === orderId);
-    if (!order) return;
-    let reason: string | undefined;
-    if (action === "cancel") {
-      reason =
-        prompt("Motivo de rechazo/cancelación (mínimo 3 caracteres)") ??
-        undefined;
-      if (!reason || reason.trim().length < 3) return;
-    }
     lock.current = true;
-    setBusy(orderId);
-    setActionError("");
+    setBusy(order.id);
+    setNotice("");
     const key = `${order.id}:${action}:${order.version}`;
     if (!keys.current.has(key)) keys.current.set(key, crypto.randomUUID());
     try {
       await sendCommand({
         action,
-        orderId,
+        orderId: order.id,
         expectedVersion: order.version,
         idempotencyKey: keys.current.get(key),
-        reason,
+        reason: why,
       });
       keys.current.delete(key);
-      refresh();
+      setCardErrors((current) => {
+        const { [order.id]: _removed, ...rest } = current;
+        void _removed;
+        return rest;
+      });
     } catch (e) {
-      refresh();
-      setErrorOrder({ id: order.id, version: order.version });
-      setActionError(
-        e instanceof Error ? e.message : "No pudimos completar la acción.",
-      );
+      if (isSessionError(e)) setExpired(true);
+      else if (e instanceof CommandError && e.code === "VERSION_CONFLICT")
+        setNotice(
+          `#${order.public_code} cambió en otro dispositivo o el cliente lo canceló. Mostramos su estado actual.`,
+        );
+      else
+        setCardErrors((current) => ({
+          ...current,
+          [order.id]: {
+            message: e instanceof Error ? e.message : "No pudimos completar la acción.",
+            version: order.version,
+          },
+        }));
     } finally {
+      refresh();
       setBusy(null);
       lock.current = false;
     }
   };
-  const active = orders.filter((o) =>
-    ["queued", "preparing", "ready"].includes(o.status),
-  );
+  const submitReject = async () => {
+    if (!rejecting) return;
+    const text =
+      reason === "Otro motivo" ? detail.trim() : `${reason}${detail.trim() ? `: ${detail.trim()}` : ""}`;
+    if (text.length < 3) {
+      setReasonError("Escribí un motivo de al menos 3 caracteres.");
+      return;
+    }
+    const order = rejecting;
+    setRejecting(null);
+    setDetail("");
+    setReason(rejectReasons[0]);
+    await act(order, "cancel", text);
+  };
+  async function toggleSound(next: boolean) {
+    if (!next) return setSound(false);
+    try {
+      const context = audio.current ?? new AudioContext();
+      audio.current = context;
+      await context.resume();
+      setSound(context.state === "running");
+    } catch {
+      setSound(false);
+    }
+  }
+
+  if (sessionExpired || expired)
+    return <SessionExpiredSheet open area="equipo" next={`/staff/${venue.id}`} />;
+  if (access !== "ok")
+    return (
+      <EmptyState
+        title={
+          access === "password"
+            ? "Cambiá tu contraseña temporal"
+            : "Ya no tenés acceso a este local"
+        }
+        action={
+          <Link
+            className={buttonClass({ variant: "secondary" })}
+            href={access === "password" ? "/equipo/clave" : "/equipo/locales"}
+          >
+            {access === "password" ? "Cambiar contraseña" : "Ver mis locales"}
+          </Link>
+        }
+      >
+        {access === "password"
+          ? "Hasta cambiarla no podés operar."
+          : "Si es un error, pedile al administrador del local que te dé acceso."}
+      </EmptyState>
+    );
+
+  const active = orders.filter((o) => ["queued", "preparing", "ready"].includes(o.status));
+  const waiting = orders.filter((o) => ["queued", "preparing"].includes(o.status));
+  const longest = waiting.length
+    ? Math.max(...waiting.map((o) => minutesSince(o.created_at, now)))
+    : 0;
   const incidents = orders.filter(
     (o) =>
       (o.payment_state === "captured" || o.payment_state === "unknown") &&
       o.status !== "delivered" &&
       o.status !== "canceled",
   );
+  const closed = orders.filter((o) => FINAL.includes(o.status)).slice(0, 20);
+  const closedVenue = venue.open_state === "closed";
   return (
     <>
-      <div className="row between wrap">
-        <div>
-          <p className="eyebrow">Barra · {venue.pickup_label}</p>
-          <h1>{venue.name}</h1>
-          <p role="status" className="muted">
-            {connection} · {active.length} pedidos activos
+      <ReconnectingBanner show={/Reconect/.test(connection)} />
+      <div className="board-head">
+        <div className="grow">
+          <h1 className="t-title">Barra</h1>
+          <p className="muted t-label" role="status">
+            {venue.pickup_label}
+            {waiting.length > 0 && (
+              <>
+                {" "}· Espera más larga <strong className="num">{longest} min</strong>
+              </>
+            )}
+            {!active.length && !loading && " · Sin pedidos activos"}
           </p>
         </div>
-        <div className="row wrap">
-          <Button
-            variant="secondary"
-            onClick={async () => {
+        <button
+          type="button"
+          className="btn secondary sm"
+          aria-pressed={sound}
+          aria-label={`Sonido de pedidos nuevos: ${sound ? "activado" : "desactivado"}`}
+          onClick={() => void toggleSound(!sound)}
+        >
+          {sound ? <Volume2 size={16} aria-hidden="true" /> : <VolumeX size={16} aria-hidden="true" />}
+          <span>Sonido</span>
+        </button>
+        {closedVenue ? (
+          <StatusBadge>Cerrado por el administrador</StatusBadge>
+        ) : (
+          <Toggle
+            label="Recibiendo pedidos"
+            checked={!paused}
+            disabled={!online}
+            onChange={async (receiving) => {
               try {
                 await sendCommand({
                   action: "venue_update",
                   venueId: venue.id,
-                  paused: !paused,
+                  paused: !receiving,
                 });
-                setPaused(!paused);
+                setPaused(!receiving);
               } catch (e) {
-                setActionError(
-                  e instanceof Error
-                    ? e.message
-                    : "No pudimos cambiar la pausa.",
-                );
+                if (isSessionError(e)) setExpired(true);
+                else
+                  setNotice(
+                    e instanceof Error ? e.message : "No pudimos cambiar la pausa.",
+                  );
               }
             }}
-          >
-            {paused ? "Reanudar pedidos" : "Pausar pedidos"}
-          </Button>
-          <Button onClick={() => setScan(true)}>Escanear retiro</Button>
-        </div>
+          />
+        )}
+        <Button size="lg" disabled={!online} onClick={() => openPickup()}>
+          <ScanLine size={20} aria-hidden="true" />
+          Validar retiro
+        </Button>
       </div>
-      {paused && (
-        <p className="notice warning">
-          Pedidos pausados. Continuá atendiendo la cola actual.
-        </p>
-      )}
-      {(error ||
-        (actionError &&
-          (!errorOrder ||
-            orders.some(
-              (o) => o.id === errorOrder.id && o.version === errorOrder.version,
-            )))) && (
-        <p role="alert" className="notice error">
-          {error || actionError}
-        </p>
-      )}
-      <div
-        className="staff-mobile-tabs tabs"
-        role="tablist"
-        aria-label="Cola de pedidos"
-      >
+      <div className="stack" style={{ marginBottom: 16 }}>
+        {paused && !closedVenue && (
+          <Notice tone="warning" title="Pedidos pausados">
+            Los clientes ven el local en pausa y no pueden pedir. Seguí con la
+            cola actual.
+          </Notice>
+        )}
+        {(error || notice) && (
+          <Notice tone={error ? "danger" : "warning"}>{error || notice}</Notice>
+        )}
+      </div>
+      <div className="tabs board-tabs" role="tablist" aria-label="Cola de pedidos">
         {lanes.map(([state, label]) => (
           <button
             key={state}
@@ -152,173 +311,263 @@ export function StaffQueue({ venue }: { venue: Venue }) {
             aria-selected={tab === state}
             onClick={() => setTab(state)}
           >
-            {label} · {orders.filter((o) => o.status === state).length}
+            {label}
+            <span className="n">{orders.filter((o) => o.status === state).length}</span>
           </button>
         ))}
       </div>
-      {loading && <p>Consultando la cola…</p>}
-      <div className="queue">
-        {lanes.map(([state, label]) => (
-          <section
-            key={state}
-            className={`queue-lane ${tab === state ? "mobile-active" : ""}`}
-          >
-            <h2>
-              {label}{" "}
-              <span className="muted">
-                {orders.filter((o) => o.status === state).length}
-              </span>
-            </h2>
-            {orders
-              .filter((o) => o.status === state)
-              .sort((a, b) => a.created_at.localeCompare(b.created_at))
-              .map((o) => (
-                <article key={o.id} className="order-card">
-                  <div className="row between">
-                    <h2>#{o.public_code}</h2>
-                    <time dateTime={o.created_at}>
-                      {new Date(o.created_at).toLocaleTimeString("es-CR", {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                        timeZone: "America/Costa_Rica",
-                      })}
-                    </time>
-                  </div>
-                  <p className="muted">
-                    Recibido hace{" "}
-                    {Math.max(
-                      0,
-                      Math.floor(
-                        (Date.now() - new Date(o.created_at).getTime()) / 60000,
-                      ),
-                    )}{" "}
-                    min
+      {loading && (
+        <div className="stack" aria-busy="true" aria-label="Consultando la cola">
+          <div className="sk" style={{ height: 160 }} />
+        </div>
+      )}
+      <div className="board">
+        {lanes.map(([state, label]) => {
+          const list = orders
+            .filter((o) => o.status === state)
+            .sort((a, b) => a.created_at.localeCompare(b.created_at));
+          return (
+            <section key={state} className="col" hidden={tab !== state} aria-label={label}>
+              <div className="col-head">
+                <h2>{label}</h2>
+                <span className="count-pill">{list.length}</span>
+              </div>
+              <div className="col col-scroll">
+                {list.map((o) => {
+                  const minutes = minutesSince(
+                    state === "ready" ? (o.ready_at ?? o.created_at) : o.created_at,
+                    now,
+                  );
+                  const late = state !== "ready" && minutes >= 10;
+                  const failure = cardErrors[o.id];
+                  const disabled = !online || busy === o.id;
+                  return (
+                    <article
+                      key={o.id}
+                      className={`ocard ${fresh.has(o.id) ? "new" : ""}`}
+                      aria-label={`Pedido ${o.public_code}`}
+                    >
+                      <div className="row between">
+                        <span className="num">#{o.public_code}</span>
+                        <span className={`wait ${late ? "late" : ""}`}>
+                          <Clock size={16} aria-hidden="true" />
+                          {state === "ready" ? `Listo hace ${minutes} min` : `Espera ${minutes} min`}
+                        </span>
+                      </div>
+                      <ul className="items">
+                        {o.items.map((i) => (
+                          <li key={i.id}>
+                            <span className="q">{i.quantity}×</span>
+                            {i.name_snapshot}
+                          </li>
+                        ))}
+                      </ul>
+                      <div className="by">
+                        {o.items.reduce((n, i) => n + i.quantity, 0)} productos
+                      </div>
+                      {failure && failure.version === o.version && (
+                        <p className="inline-error" role="alert">
+                          {failure.message}
+                        </p>
+                      )}
+                      {state === "queued" && (
+                        <div className="acts">
+                          <Button
+                            variant="danger"
+                            size="lg"
+                            disabled={disabled}
+                            onClick={() => {
+                              setReasonError("");
+                              setRejecting(o);
+                            }}
+                          >
+                            Rechazar
+                          </Button>
+                          <Button
+                            size="lg"
+                            loading={busy === o.id}
+                            disabled={!online}
+                            onClick={() => void act(o, "accept")}
+                          >
+                            Aceptar
+                          </Button>
+                        </div>
+                      )}
+                      {state === "preparing" && (
+                        <div className="acts one">
+                          <Button
+                            size="lg"
+                            loading={busy === o.id}
+                            disabled={!online}
+                            onClick={() => void act(o, "ready")}
+                          >
+                            Marcar listo
+                          </Button>
+                        </div>
+                      )}
+                      {state === "ready" && (
+                        <div className="acts one">
+                          <Button
+                            variant="secondary"
+                            size="lg"
+                            disabled={!online}
+                            onClick={() => openPickup()}
+                          >
+                            <ScanLine size={20} aria-hidden="true" />
+                            Validar retiro
+                          </Button>
+                        </div>
+                      )}
+                    </article>
+                  );
+                })}
+                {!list.length && !loading && (
+                  <p className="muted t-label" style={{ padding: "16px 0" }}>
+                    {state === "queued"
+                      ? "Sin pedidos nuevos."
+                      : state === "preparing"
+                        ? "Nada en preparación."
+                        : "Nada esperando retiro."}
                   </p>
-                  <ul>
-                    {o.items.map((i) => (
-                      <li key={i.id}>
-                        {i.quantity} × {i.name_snapshot}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="stack">
-                    {state === "queued" && (
-                      <Button
-                        loading={busy === o.id}
-                        onClick={() => void act(o.id, "accept")}
-                      >
-                        Aceptar y preparar
-                      </Button>
-                    )}
-                    {state === "preparing" && (
-                      <Button
-                        loading={busy === o.id}
-                        onClick={() => void act(o.id, "ready")}
-                      >
-                        Marcar listo
-                      </Button>
-                    )}
-                    {state === "ready" && (
-                      <Button
-                        onClick={() => {
-                          setCredential(null);
-                          setResumeOrderId(null);
-                          setPickupRevision((n) => n + 1);
-                          pickupInput.current?.scrollIntoView({
-                            block: "start",
-                          });
-                          pickupInput.current
-                            ?.querySelector("input")
-                            ?.focus({ preventScroll: true });
-                        }}
-                      >
-                        Validar retiro
-                      </Button>
-                    )}
-                    {state === "queued" && (
-                      <Button
-                        variant="danger"
-                        loading={busy === o.id}
-                        onClick={() => void act(o.id, "cancel")}
-                      >
-                        Rechazar pedido
-                      </Button>
-                    )}
-                  </div>
-                </article>
-              ))}
-            {!orders.some((o) => o.status === state) && (
-              <EmptyState title="Sin pedidos">
-                La cola se actualiza automáticamente.
-              </EmptyState>
-            )}
-          </section>
-        ))}
+                )}
+              </div>
+            </section>
+          );
+        })}
       </div>
       {incidents.length > 0 && (
-        <section className="stack">
-          <h2>Incidencias de cobro / entrega</h2>
+        <section className="stack" style={{ marginTop: 32 }}>
+          <h2>Incidencias de cobro o entrega</h2>
           {incidents.map((o) => (
-            <div className="notice" key={o.id}>
-              <h3>#{o.public_code}</h3>
-              <p>
-                {o.payment_state === "captured"
-                  ? "Cobrado, entrega pendiente. Retomá el retiro sin volver a cobrar."
-                  : "Resultado sin confirmar. Conservá el responsable del retiro."}
-              </p>
-              {o.claim_id && (
-                <Button
-                  variant="secondary"
-                  onClick={() => {
-                    setCredential(null);
-                    setResumeOrderId(o.id);
-                    setPickupRevision((n) => n + 1);
-                    pickupInput.current?.scrollIntoView({ block: "start" });
-                  }}
-                >
-                  Retomar retiro validado
-                </Button>
-              )}
-            </div>
+            <Notice
+              key={o.id}
+              tone="warning"
+              title={`#${o.public_code}`}
+              action={
+                o.claim_id ? (
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => openPickup({ resume: o.id })}
+                  >
+                    Retomar retiro validado
+                  </Button>
+                ) : undefined
+              }
+            >
+              {o.payment_state === "captured"
+                ? "Cobrado, entrega pendiente. Retomá el retiro sin volver a cobrar."
+                : "Resultado sin confirmar. Conservá el responsable del retiro."}
+            </Notice>
           ))}
         </section>
       )}
-      <section className="stack" ref={pickupInput}>
-        <h2>Retiro con código</h2>
-        <p className="muted">
-          Escaneá el QR del cliente o pedile su código de retiro. El número del
-          pedido no autoriza la entrega.
-        </p>
+      {closed.length > 0 && (
+        <details style={{ marginTop: 32 }}>
+          <summary
+            className="t-label"
+            style={{ cursor: "pointer", minHeight: 44, display: "flex", alignItems: "center", gap: 8 }}
+          >
+            <History size={16} aria-hidden="true" />
+            Cerrados hoy ({closed.length})
+          </summary>
+          <div className="rows" style={{ marginTop: 8 }}>
+            {closed.map((o) => (
+              <div className="r" key={o.id}>
+                <span className="num" style={{ fontWeight: 600 }}>#{o.public_code}</span>
+                <span className="grow sub">
+                  {o.items.map((i) => `${i.quantity}× ${i.name_snapshot}`).join(", ")}
+                </span>
+                <StatusBadge tone={o.status === "delivered" ? "success" : "danger"}>
+                  {o.status === "delivered" ? "Entregado" : "Cerrado"}
+                </StatusBadge>
+              </div>
+            ))}
+          </div>
+        </details>
+      )}
+      <Sheet
+        open={pickup}
+        onOpenChange={(open) => {
+          setPickup(open);
+          if (!open) refresh();
+        }}
+        title="Validar retiro"
+        description="Pedí el código privado al cliente o escaneá su QR. El número del pedido no autoriza la entrega."
+      >
         <PickupPanel
           key={pickupRevision}
           venueId={venue.id}
           credential={credential}
           resumeOrderId={resumeOrderId}
           onChanged={refresh}
+          onScan={() => setScan(true)}
         />
-      </section>
+      </Sheet>
       {scan && (
-        <ScanSheet onClose={() => setScan(false)} onResult={handleScanResult} />
+        <ScanSheet
+          onClose={() => setScan(false)}
+          onResult={(value) => {
+            setResumeOrderId(null);
+            setPickupRevision((n) => n + 1);
+            setCredential(value);
+            setScan(false);
+          }}
+        />
       )}
-      <div className="stack">
-        <h2>Historial reciente</h2>
-        {orders
-          .filter((o) =>
-            ["delivered", "canceled", "expired", "uncollected"].includes(
-              o.status,
-            ),
-          )
-          .slice(0, 20)
-          .map((o) => (
-            <p key={o.id}>
-              #{o.public_code} ·{" "}
-              {o.status === "delivered" ? "Entregado" : "Cerrado"}
-            </p>
+      <Sheet
+        open={!!rejecting}
+        onOpenChange={(open) => !open && setRejecting(null)}
+        title={rejecting ? `Rechazar #${rejecting.public_code}` : "Rechazar pedido"}
+        description="El cliente ve el motivo."
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setRejecting(null)}>
+              Volver
+            </Button>
+            <Button variant="danger" onClick={() => void submitReject()}>
+              Rechazar pedido
+            </Button>
+          </>
+        }
+      >
+        <fieldset className="stack tight" style={{ border: 0, padding: 0, margin: 0 }}>
+          <legend className="t-label" style={{ marginBottom: 8, fontWeight: 500 }}>
+            Motivo
+          </legend>
+          {rejectReasons.map((r) => (
+            <label className="toggle" key={r}>
+              <input
+                type="radio"
+                name="reject-reason"
+                value={r}
+                checked={reason === r}
+                onChange={() => setReason(r)}
+                style={{ width: 20, height: 20 }}
+              />
+              <span className="grow">{r}</span>
+            </label>
           ))}
-        <Link className="link-button" href="/login">
-          Cambiar espacio de trabajo
-        </Link>
-      </div>
+        </fieldset>
+        <label className="field" style={{ marginTop: 16 }}>
+          <span>
+            {reason === "Otro motivo" ? "Detalle" : "Detalle (opcional)"}
+          </span>
+          <textarea
+            value={detail}
+            aria-invalid={!!reasonError}
+            onChange={(e) => {
+              setDetail(e.target.value);
+              setReasonError("");
+            }}
+          />
+          {reasonError && (
+            <span role="alert" className="field-error">
+              {reasonError}
+            </span>
+          )}
+        </label>
+      </Sheet>
     </>
   );
 }

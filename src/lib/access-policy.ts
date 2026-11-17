@@ -5,14 +5,19 @@
  * the wrong kind is never closed automatically: the person chooses (/sesion-activa).
  */
 export type AccountKind = "none" | "guest" | "customer" | "staff";
-export type Account = { kind: AccountKind; onboarded: boolean };
+export type Account = {
+  kind: AccountKind;
+  onboarded: boolean;
+  /** Cuenta del equipo con contraseña temporal pendiente: no opera hasta cambiarla. */
+  mustChangePassword?: boolean;
+};
 
 export const accountsRequired = (
   env: Record<string, string | undefined> = process.env,
 ) => env.ACCOUNTS_REQUIRED === "true";
 
 const CUSTOMER = /^\/(v|cart|checkout|orders|cuenta|settings)(\/|$)|^\/$/;
-const STAFF = /^\/(staff|admin|onza)(\/|$)/;
+const STAFF = /^\/(staff|admin|onza)(\/|$)|^\/equipo\/(locales|clave)$/;
 const CUSTOMER_ENTRY = /^\/(acceso|confirmar|recuperar)$/;
 
 /** Only same-site relative paths survive as post-login destinations. */
@@ -42,6 +47,9 @@ export function decideAccess(path: string, account: Account): string | null {
   if (STAFF.test(path)) {
     if (signedOutCustomer) return `/equipo/acceso?next=${here}`;
     if (account.kind === "customer") return "/sesion-activa?want=equipo";
+    // Contraseña temporal pendiente: lo único permitido es cambiarla, en la navegación y en la API.
+    if (account.mustChangePassword && path !== "/equipo/clave")
+      return "/equipo/clave";
     return null;
   }
   if (CUSTOMER_ENTRY.test(path)) {

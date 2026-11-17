@@ -13,7 +13,7 @@ export const ids = {
 export async function database() {
   const db = new PGlite();
   await db.exec(
-    `create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key);create function auth.uid() returns uuid language sql stable as $$select (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid$$;`,
+    `create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key,email text);create function auth.uid() returns uuid language sql stable as $$select (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid$$;`,
   );
   await db.exec(
     `create function auth.jwt() returns jsonb language sql stable as $$select nullif(current_setting('request.jwt.claims',true),'')::jsonb$$; grant usage on schema auth to authenticated,anon;grant execute on all functions in schema auth to authenticated,anon;`,
@@ -47,6 +47,9 @@ export async function database() {
   );
   await db.exec(
     readFileSync("supabase/migrations/202611170010_customer_accounts.sql", "utf8"),
+  );
+  await db.exec(
+    readFileSync("supabase/migrations/202611170011_team_management.sql", "utf8"),
   );
   await db.exec(readFileSync("supabase/seed.sql", "utf8"));
   await db.exec(

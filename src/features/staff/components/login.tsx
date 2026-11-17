@@ -1,140 +1,99 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { browserDb } from "@/lib/supabase/browser";
-import { Button, TextField } from "@/components/ui/primitives";
+import { Button, TextField, Notice } from "@/components/ui/primitives";
 import { errorMessage } from "@/lib/errors";
-type Membership = { venue_id: string; role: string };
-export function StaffLogin() {
+
+/** Ingreso del equipo: solo correo y contraseña (sin registro abierto ni Google). Una cuenta personal no entra por acá. */
+export function StaffLogin({
+  next,
+  email: initialEmail = "",
+}: {
+  next?: string;
+  email?: string;
+}) {
   const router = useRouter();
-  const [memberships, setMemberships] = useState<Membership[]>([]);
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(initialEmail);
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  useEffect(() => {
-    let active = true;
-    async function load() {
-      try {
-        const db = browserDb();
-        const { data } = await db.from("memberships").select("venue_id,role");
-        if (active) setMemberships(data ?? []);
-      } catch {
-        /* Display configuration error after an explicit login attempt. */
-      }
-    }
-    void load();
-    return () => {
-      active = false;
-    };
-  }, []);
   return (
-    <>
-      <p className="muted">
-        Las cuentas del equipo las crea el administrador de tu local.
-      </p>
-      <form
-        className="stack"
-        onSubmit={async (event) => {
-          event.preventDefault();
-          setBusy(true);
-          setError("");
-          try {
-            const db = browserDb();
-            const { error } = await db.auth.signInWithPassword({
-              email,
-              password,
-            });
-            if (error)
-              throw new Error(
-                error.name === "AuthRetryableFetchError" ||
-                  (error.status && error.status >= 500)
-                  ? "CONNECTION_ERROR"
-                  : "Correo o contraseña incorrectos.",
-              );
-            const { data, error: membershipError } = await db
-              .from("memberships")
-              .select("venue_id,role");
-            if (membershipError) throw membershipError;
-            if (!data?.length)
-              throw new Error("La cuenta no tiene un local asignado.");
-            setMemberships(data);
-            router.refresh();
-          } catch (e) {
-            setError(
-              e instanceof Error &&
-                /SUPABASE_NOT_CONFIGURED|CONNECTION_ERROR/.test(e.message)
-                ? errorMessage(e)
-                : e instanceof Error
-                  ? e.message
-                  : "No pudimos iniciar sesión.",
+    <form
+      className="stack tight"
+      noValidate
+      onSubmit={async (event) => {
+        event.preventDefault();
+        setBusy(true);
+        setError("");
+        try {
+          const db = browserDb();
+          const { error: failure } = await db.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (failure)
+            throw new Error(
+              failure.name === "AuthRetryableFetchError" ||
+                (failure.status && failure.status >= 500)
+                ? "CONNECTION_ERROR"
+                : "Correo o contraseña incorrectos.",
             );
-          } finally {
-            setBusy(false);
+          // El tipo de cuenta lo decide la base: una cuenta personal no queda abierta en el portal del equipo.
+          const { data } = await db.rpc("current_account");
+          const kind = (data as { kind?: string } | null)?.kind;
+          if (kind !== "staff") {
+            await db.auth.signOut();
+            throw new Error(
+              "Esta es una cuenta personal. Para pedir, usá el acceso de clientes.",
+            );
           }
-        }}
-      >
-        <TextField
-          label="Correo del personal"
-          type="email"
-          autoComplete="username"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <TextField
-          label="Contraseña"
-          type="password"
-          autoComplete="current-password"
-          required
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <Button type="submit" loading={busy}>
-          Iniciar sesión
-        </Button>
-        {error && (
-          <p className="notice error" role="alert">
-            {error}
-          </p>
-        )}
-      </form>
-      {memberships.length > 0 && (
-        <section className="stack">
-          <h2>Tus espacios de trabajo</h2>
-          {memberships.some((m) => m.role === "onza") && (
-            <Link className="button secondary" href="/onza">
-              Configuración global Onza
-            </Link>
-          )}
-          {memberships.map((m) => (
-            <div key={m.venue_id} className="stack">
-              <Link className="button primary" href={`/staff/${m.venue_id}`}>
-                Abrir barra
-              </Link>
-              {["admin", "onza"].includes(m.role) && (
-                <Link
-                  className="button secondary"
-                  href={`/admin/${m.venue_id}`}
-                >
-                  Administrar local
-                </Link>
-              )}
-            </div>
-          ))}
-          <Button
-            variant="quiet"
-            onClick={async () => {
-              await browserDb().auth.signOut();
-              setMemberships([]);
-              router.refresh();
-            }}
-          >
-            Cerrar sesión
-          </Button>
-        </section>
-      )}
-    </>
+          // La página de acceso decide el destino según los locales de la cuenta y el cambio de clave pendiente.
+          router.replace(
+            next ? `/equipo/acceso?next=${encodeURIComponent(next)}` : "/equipo/acceso",
+          );
+          router.refresh();
+        } catch (e) {
+          setError(
+            e instanceof Error &&
+              /SUPABASE_NOT_CONFIGURED|CONNECTION_ERROR/.test(e.message)
+              ? errorMessage(e)
+              : e instanceof Error
+                ? e.message
+                : "No pudimos iniciar sesión.",
+          );
+        } finally {
+          setBusy(false);
+        }
+      }}
+    >
+      <TextField
+        label="Correo del trabajo"
+        type="email"
+        autoComplete="username"
+        required
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+      />
+      <TextField
+        label="Contraseña"
+        type="password"
+        autoComplete="current-password"
+        required
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+      />
+      {error && <Notice tone="danger">{error}</Notice>}
+      <Button type="submit" loading={busy}>
+        Ingresar
+      </Button>
+      <p className="muted center t-label" style={{ marginTop: 16 }}>
+        ¿Querés pedir tragos?{" "}
+        <Link href="/acceso" style={{ color: "inherit" }}>
+          Acceso para clientes
+        </Link>
+      </p>
+    </form>
   );
 }

@@ -27,6 +27,7 @@ export async function POST(request: Request) {
           : code === "RESOURCE_NOT_FOUND"
             ? 404
             : code === "NOT_AUTHORIZED" ||
+                code === "PASSWORD_CHANGE_REQUIRED" ||
                 code === "STAFF_CANNOT_ORDER" ||
                 code === "ONBOARDING_REQUIRED"
               ? 403
