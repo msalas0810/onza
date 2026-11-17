@@ -70,8 +70,20 @@ export function parseCart(raw: string): Cart | null {
     return null;
   }
 }
-const storageKey = "onza-cart-draft";
+const baseKey = "onza-cart-draft";
 const change = "onza-cart-change";
+/**
+ * Identificador opaco de la cuenta activa (id de usuario): el carrito de cada cuenta vive en su propia clave, de modo que
+ * otra cuenta en el mismo dispositivo nunca lo ve. Lo fija el layout (servidor) antes de renderizar los consumidores.
+ */
+let scope = "";
+export function setCartScope(id: string | null) {
+  scope = id ?? "";
+}
+const storageKey = () => (scope ? `${baseKey}:${scope}` : `${baseKey}:anon`);
+/** Clave del carrito de una cuenta (para pruebas y para limpiar datos locales al cerrar sesión). */
+export const cartStorageKey = (id: string | null) =>
+  id ? `${baseKey}:${id}` : `${baseKey}:anon`;
 function subscribe(callback: () => void) {
   window.addEventListener(change, callback);
   window.addEventListener("storage", callback);
@@ -82,7 +94,7 @@ function subscribe(callback: () => void) {
 }
 function snapshot() {
   try {
-    return localStorage.getItem(storageKey) ?? "";
+    return localStorage.getItem(storageKey()) ?? "";
   } catch {
     return "";
   }
@@ -97,8 +109,8 @@ export function readCart(): Cart | null {
 }
 export function writeCart(cart: Cart | null) {
   if (cart && cart.items.length)
-    localStorage.setItem(storageKey, JSON.stringify(cart));
-  else localStorage.removeItem(storageKey);
+    localStorage.setItem(storageKey(), JSON.stringify(cart));
+  else localStorage.removeItem(storageKey());
   window.dispatchEvent(new Event(change));
 }
 export function useCart() {

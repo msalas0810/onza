@@ -3,8 +3,9 @@ export const messages: Record<string, string> = {
     "El ticket no está disponible en este momento. Volvé a consultar o pedí ayuda al local.",
   SUPABASE_NOT_CONFIGURED:
     "El servicio no está disponible en este momento. Intentá nuevamente más tarde.",
-  SESSION_REQUIRED:
-    "No hay una sesión activa. Abrí tus pedidos desde el navegador donde hiciste el pedido o iniciá sesión si sos del personal.",
+  SESSION_REQUIRED: "Tu sesión venció. Volvé a entrar para continuar.",
+  PASSWORD_CHANGE_REQUIRED:
+    "Cambiá tu contraseña temporal para continuar. Hasta entonces no podés operar.",
   CONNECTION_ERROR:
     "No pudimos conectar con el servicio. Revisá tu conexión y volvé a consultar el estado.",
   RESOURCE_NOT_FOUND:
@@ -65,6 +66,18 @@ export const messages: Record<string, string> = {
   UNDERAGE: "Necesitás tener 18 años o más para usar Onza.",
   TERMS_REQUIRED: "Aceptá las condiciones y la política de privacidad.",
   INVALID_PROFILE: "Revisá los datos del perfil.",
+  TEAM_ADMIN_NOT_CONFIGURED:
+    "Agregar personas no está configurado en este entorno. Falta la clave de servidor del proyecto.",
+  CUSTOMER_EMAIL:
+    "Ese correo ya es de una cuenta personal. Usá otro correo para la cuenta laboral.",
+  ALREADY_MEMBER: "Esa persona ya es parte del equipo de este local.",
+  INVALID_EMAIL: "Escribí un correo válido.",
+  INVALID_ROLE: "El permiso no es válido.",
+  NOT_MEMBER: "Esa persona ya no es parte del equipo de este local.",
+  SELF_CHANGE: "No podés cambiar tu propio permiso ni quitarte el acceso.",
+  LAST_ADMIN: "El local necesita al menos un administrador.",
+  WEAK_PASSWORD: "Usá al menos 10 caracteres.",
+  SAME_PASSWORD: "La contraseña nueva tiene que ser distinta de la temporal.",
 };
 export function errorCode(error: unknown) {
   if (error instanceof Error && error.name === "AuthSessionMissingError")

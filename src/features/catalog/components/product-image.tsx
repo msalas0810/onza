@@ -5,8 +5,8 @@ import { useImageFailure } from "@/lib/use-image-failure";
 
 /**
  * Fixed-size, rounded drink image. Without an image, or if it fails to load, the placeholder takes exactly the same
- * space, so the list never shifts or shows a broken box. `thumb` is the 88x110 tile of the menu rows; `detail` fills the
- * 4:5 frame of the product page.
+ * space, so the list never shifts or shows a broken box. `thumb` is the 72 px square of the menu rows; `detail` fills the
+ * 4:3 frame of the product page.
  */
 export function ProductImage({
   name,
@@ -27,7 +27,7 @@ export function ProductImage({
       <Image
         unoptimized
         fill
-        sizes={size === "thumb" ? "88px" : "(min-width: 480px) 480px, 100vw"}
+        sizes={size === "thumb" ? "72px" : "(min-width: 480px) 480px, 100vw"}
         src={image.usable}
         alt={size === "detail" ? name : ""}
         loading={eager ? "eager" : undefined}

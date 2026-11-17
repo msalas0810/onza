@@ -1,25 +1,68 @@
 "use client";
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { Bell, ChevronLeft } from "lucide-react";
 import { useLiveOrders } from "../use-live-orders";
-import { statusLabels, paymentLabels } from "../types";
-import { Button, Price, ErrorState } from "@/components/ui/primitives";
-import { sendCommand } from "../client-api";
+import { statusLabels, paymentLabels, type Order } from "../types";
+import {
+  Button,
+  Price,
+  ErrorState,
+  Notice,
+  StatusBadge,
+} from "@/components/ui/primitives";
+import { Sheet } from "@/components/ui/sheet";
+import { sendCommand, CommandError, isSessionError } from "../client-api";
 import { ReadySound } from "@/features/notifications/ready-sound";
+import { OrderTimeline } from "./order-timeline";
+import { SessionExpiredSheet } from "./session-expired-sheet";
+import { ReconnectingBanner } from "@/components/ui/connection-banner";
+
+const tone = (status: Order["status"]) =>
+  status === "ready"
+    ? "brand"
+    : status === "delivered"
+      ? "success"
+      : status === "preparing"
+        ? "warning"
+        : ["canceled", "expired", "uncollected"].includes(status)
+          ? "danger"
+          : "neutral";
+
+/** Mantiene la pantalla encendida mientras se muestra el ticket (donde el navegador lo permite). Si falla, no pasa nada. */
+function useWakeLock(active: boolean) {
+  useEffect(() => {
+    if (!active || !("wakeLock" in navigator)) return;
+    let lock: WakeLockSentinel | null = null;
+    let cancelled = false;
+    navigator.wakeLock
+      .request("screen")
+      .then((sentinel) => {
+        if (cancelled) void sentinel.release();
+        else lock = sentinel;
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+      void lock?.release().catch(() => undefined);
+    };
+  }, [active]);
+}
+
 export function OrderDetail({ id }: { id: string }) {
-  const { order, orders, loading, error, connection, refresh } = useLiveOrders({
-    orderId: id,
-  });
-  const [actionError, setActionError] = useState<{
-    message: string;
-    version: number;
-  } | null>(null);
+  const { order, orders, loading, error, connection, refresh, sessionExpired } =
+    useLiveOrders({ orderId: id });
+  const [notice, setNotice] = useState("");
+  const [confirmCancel, setConfirmCancel] = useState(false);
+  const [expired, setExpired] = useState(false);
   const [busy, setBusy] = useState(false);
   const actionKey = useRef<string | null>(null);
+  useWakeLock(order?.status === "ready" && !!order.pickup_code);
   const act = async (action: string) => {
     if (!order || busy) return;
     setBusy(true);
-    setActionError(null);
+    setNotice("");
     try {
       actionKey.current ??= crypto.randomUUID();
       await sendCommand({
@@ -29,19 +72,25 @@ export function OrderDetail({ id }: { id: string }) {
         idempotencyKey: actionKey.current,
         reason: "Cancelación solicitada por cliente",
       });
-      actionKey.current = null;
-      refresh();
     } catch (e) {
-      setActionError({
-        message: e instanceof Error ? e.message : "Error al consultar",
-        version: order.version,
-      });
-      actionKey.current = null;
-      refresh();
+      if (isSessionError(e)) setExpired(true);
+      else
+        setNotice(
+          e instanceof CommandError && e.code === "VERSION_CONFLICT"
+            ? "El local ya aceptó tu pedido. Ya no se puede cancelar."
+            : e instanceof Error
+              ? e.message
+              : "No pudimos completar la acción.",
+        );
     } finally {
+      actionKey.current = null;
       setBusy(false);
+      setConfirmCancel(false);
+      refresh();
     }
   };
+  if (sessionExpired || expired)
+    return <SessionExpiredSheet open next={`/orders/${id}`} />;
   if (loading) return <p role="status">Consultando tu pedido…</p>;
   if (error)
     return (
@@ -53,128 +102,145 @@ export function OrderDetail({ id }: { id: string }) {
     );
   if (!order)
     return (
-      <ErrorState message="No encontramos este pedido en tu sesión. El código de retiro no recupera una sesión perdida." />
+      <ErrorState message="No encontramos este pedido en tu cuenta.">
+        <Link className="btn secondary" href="/orders">
+          Mis pedidos
+        </Link>
+      </ErrorState>
     );
   const financial =
     paymentLabels[order.payment_state] ?? "Estado de pago pendiente";
+  const ready = order.status === "ready";
   return (
     <>
-      <p className="eyebrow">
-        {order.venue.name} · #{order.public_code}
-      </p>
-      <div aria-live="polite">
-        <h1>{statusLabels[order.status]}</h1>
-        <p>
-          {order.status === "queued"
-            ? "El local todavía no aceptó tu pedido. Podés cancelarlo mientras esperás."
-            : order.status === "preparing"
-              ? "La barra está preparando tu pedido."
-              : order.status === "ready"
-                ? "Tu pedido está listo. Acercate a la barra."
-                : order.status === "delivered"
-                  ? "La entrega quedó confirmada."
-                  : order.status === "pending_authorization"
-                    ? "Estamos confirmando el pedido. Todavía no entró a la cola."
-                    : "La barra no continuará este pedido."}
-        </p>
-      </div>
-      {order.status === "ready" && (
-        <section className="ticket" aria-label="Ticket de retiro">
-          <h2>{order.venue.pickup_label}</h2>
-          {order.qr_data_url && (
-            <p>
-              <Image
-                unoptimized
-                src={order.qr_data_url}
-                width={224}
-                height={224}
-                alt="QR de autorización de retiro"
-              />
-            </p>
-          )}
-          {order.pickup_code ? (
-            <>
-              <p className="muted">Código de retiro</p>
-              <div className="code" data-private="pickup">
-                {order.pickup_code.match(/.{1,4}/g)?.join(" ")}
-              </div>
-              {!order.qr_data_url && (
-                <p role="status">
-                  El QR no está disponible. La barra puede validar este código.
-                </p>
-              )}
-              <p>Mostrá este ticket al retirar. No lo compartás.</p>
-            </>
-          ) : (
-            <div role="alert">
-              <p>
-                No pudimos abrir tu ticket. Tu pedido sigue listo; volvé a
-                consultar o pedí ayuda en la barra.
-              </p>
-              <Button variant="secondary" onClick={refresh}>
-                Reintentar ticket
-              </Button>
-            </div>
-          )}
-        </section>
-      )}
-      <p className="muted financial-note">
-        Demo · {financial.toLocaleLowerCase("es-CR")} ·{" "}
-        <Price amount={order.total_minor} />. Sin dinero real.
-      </p>
-      {connection !== "Conectado" && connection !== "Sincronizado" && (
-        <p className="muted" role="status">
-          {connection}
-        </p>
-      )}
-      {order.payment_state === "unknown" && (
-        <div className="notice error" role="alert">
-          Resultado pendiente de conciliación. No iniciés otro pedido para
-          intentar resolver esta reserva. Consultá al local.
-        </div>
-      )}
-      <section className="stack">
-        <h2>Tu pedido</h2>
-        {order.items.map((i) => (
-          <div key={i.id} className="row between">
-            <span>
-              {i.quantity} × {i.name_snapshot}
-            </span>
-            <Price amount={i.line_total_minor} />
-          </div>
-        ))}
+      <Link className="back" href="/orders">
+        <ChevronLeft size={16} aria-hidden="true" />
+        Pedidos
+      </Link>
+      <ReconnectingBanner show={/Reconect/.test(connection)} />
+      <div className="page-head">
+        <p className="eyebrow">{order.venue.name}</p>
         <div className="row between">
-          <strong>Total final</strong>
+          <h1 className="t-title num">#{order.public_code}</h1>
+          <StatusBadge tone={tone(order.status)}>
+            {statusLabels[order.status]}
+          </StatusBadge>
+        </div>
+      </div>
+      <div className="stack" aria-live="polite">
+        {notice && <Notice tone="warning">{notice}</Notice>}
+        {ready && (
+          <div className="ready-head" role="status">
+            <Bell size={24} className="anim-bell" aria-hidden="true" />
+            <div className="grow">
+              <h2>Listo para retirar</h2>
+              <span className="t-label">
+                Mostrá el código o el QR en {order.venue.pickup_label}.
+              </span>
+            </div>
+          </div>
+        )}
+        {ready && (
+          <section className="ticket" aria-label="Ticket de retiro">
+            <div>
+              <div className="small">Retirá en</div>
+              <div className="where">{order.venue.pickup_label}</div>
+            </div>
+            {order.qr_data_url && (
+              <div className="qr">
+                <Image
+                  unoptimized
+                  src={order.qr_data_url}
+                  width={184}
+                  height={184}
+                  alt="QR de autorización de retiro"
+                />
+              </div>
+            )}
+            {order.pickup_code ? (
+              <>
+                <div>
+                  <div className="small">Código privado</div>
+                  <div className="code num" data-private="pickup" aria-label={`Código ${order.pickup_code.split("").join(" ")}`}>
+                    {order.pickup_code
+                      .match(/.{1,4}/g)
+                      ?.map((group) => <span key={group}>{group}</span>)}
+                  </div>
+                </div>
+                {!order.qr_data_url && (
+                  <p role="status" className="small">
+                    El QR no está disponible. La barra puede validar este código.
+                  </p>
+                )}
+                <p className="small">
+                  Pedido #{order.public_code} · El número no sirve para retirar.
+                  No compartas este código.
+                </p>
+              </>
+            ) : (
+              <div role="alert">
+                <p className="small">
+                  No pudimos abrir tu ticket. Tu pedido sigue listo; volvé a
+                  consultar o pedí ayuda en la barra.
+                </p>
+                <Button variant="secondary" onClick={refresh} style={{ marginTop: 12 }}>
+                  Reintentar ticket
+                </Button>
+              </div>
+            )}
+          </section>
+        )}
+        {order.status === "canceled" && (
+          <Notice tone="danger" title="Pedido cancelado">
+            La barra no continuará este pedido.
+          </Notice>
+        )}
+        {["expired", "uncollected"].includes(order.status) && (
+          <Notice tone="danger" title={statusLabels[order.status]}>
+            {order.status === "expired"
+              ? "El local no lo aceptó a tiempo y la reserva se anuló."
+              : "No se retiró a tiempo y la reserva se anuló."}
+          </Notice>
+        )}
+        {order.status === "delivered" && (
+          <Notice tone="success" title="Entregado">
+            Gracias por pedir con Onza.
+          </Notice>
+        )}
+        {order.status === "pending_authorization" && (
+          <Notice title="Confirmando pedido">
+            Todavía no entró a la cola del local.
+          </Notice>
+        )}
+        {!ready &&
+          ["queued", "preparing", "delivered"].includes(order.status) && (
+            <OrderTimeline order={order} />
+          )}
+        {["queued", "preparing"].includes(order.status) && (
+          <ReadySound orders={orders} />
+        )}
+        <div className="lines">
+          {order.items.map((i) => (
+            <div key={i.id} className="line">
+              <span className="q">{i.quantity}×</span>
+              <span>{i.name_snapshot}</span>
+              <span className="amt">
+                <Price amount={i.line_total_minor} />
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="total-row">
+          <span>Total</span>
           <Price amount={order.total_minor} />
         </div>
-        <h2>Seguimiento</h2>
-        <ol className="timeline">
-          {order.events.map((e) => (
-            <li key={e.id}>
-              <span>
-                {e.to_status && e.to_status in statusLabels
-                  ? statusLabels[e.to_status as keyof typeof statusLabels]
-                  : "Actualización del pedido"}
-              </span>
-              <br />
-              <time className="muted" dateTime={e.created_at}>
-                {new Date(e.created_at).toLocaleString("es-CR", {
-                  timeZone: "America/Costa_Rica",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </time>
-            </li>
-          ))}
-        </ol>
-        {order.status === "queued" && (
-          <Button
-            variant="danger"
-            loading={busy}
-            onClick={() => void act("cancel")}
-          >
-            Cancelar pedido
-          </Button>
+        <p className="hint">
+          Demo · {financial.toLocaleLowerCase("es-CR")} · sin dinero real
+        </p>
+        {order.payment_state === "unknown" && (
+          <Notice tone="danger" title="Resultado pendiente de conciliación">
+            No inicies otro pedido para resolver esta reserva. Consultá al local.
+          </Notice>
         )}
         {order.status === "pending_authorization" &&
           order.payment_state === "authorizing" && (
@@ -182,21 +248,35 @@ export function OrderDetail({ id }: { id: string }) {
               Simular confirmación de reserva
             </Button>
           )}
-        {actionError && actionError.version === order.version && (
-          <p role="alert" className="notice error">
-            {actionError.message}
-          </p>
+        {order.status === "queued" && (
+          <Button variant="danger" block onClick={() => setConfirmCancel(true)}>
+            Cancelar pedido
+          </Button>
         )}
-        <Button variant="secondary" onClick={refresh}>
+        <Button variant="quiet" onClick={refresh}>
           Actualizar estado
         </Button>
-        <ReadySound orders={orders} />
-        <h2>Ayuda del local</h2>
-        <p>
-          {order.venue.support_contact ||
-            "Solicitá ayuda presencial en la barra."}
+        <p className="hint">
+          Ayuda del local:{" "}
+          {order.venue.support_contact || "solicitá ayuda presencial en la barra."}
         </p>
-      </section>
+      </div>
+      <Sheet
+        open={confirmCancel}
+        onOpenChange={setConfirmCancel}
+        title={`¿Cancelar #${order.public_code}?`}
+        description="El local todavía no lo aceptó. Si lo acepta antes, ya no se puede cancelar."
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirmCancel(false)}>
+              Volver
+            </Button>
+            <Button variant="danger" loading={busy} onClick={() => void act("cancel")}>
+              Sí, cancelar pedido
+            </Button>
+          </>
+        }
+      />
     </>
   );
 }

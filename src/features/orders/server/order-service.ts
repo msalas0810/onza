@@ -12,6 +12,7 @@ import { assertMockPayments } from "@/features/payments/server/provider";
 import { orderSchema } from "../types";
 import QRCode from "qrcode";
 import { accountsRequired } from "@/lib/access-policy";
+import { passwordChangePending } from "@/lib/supabase/guards";
 import { scenariosEnabled } from "@/features/payments/server/provider";
 export async function executeCommand(raw: unknown) {
   assertMockPayments();
@@ -52,17 +53,29 @@ export async function executeCommand(raw: unknown) {
   const { error: sweepError } = await db.rpc("sweep_orders");
   if (sweepError) throw new Error(sweepError.message);
   const { data, error } = await db.rpc("onza_command", { input });
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(await explainDenied(db, error.message));
   if (
     data &&
     typeof data === "object" &&
     !Array.isArray(data) &&
     "error" in data
   )
-    throw new Error(String(data.error));
+    throw new Error(await explainDenied(db, String(data.error)));
   if (command.action === "venue_update" || command.action === "product_save")
     return data;
   return enrichOrder(data);
+}
+/**
+ * Un "no autorizado" de una cuenta del equipo con contraseña temporal pendiente se informa como tal, para que la pantalla
+ * lleve a cambiarla en lugar de mostrar un permiso perdido. Se consulta solo en el camino de fallo.
+ */
+async function explainDenied(
+  db: Awaited<ReturnType<typeof serverDb>>,
+  message: string,
+) {
+  if (message.includes("NOT_AUTHORIZED") && (await passwordChangePending(db)))
+    return "PASSWORD_CHANGE_REQUIRED";
+  return message;
 }
 /** Work accounts never buy; with accounts required a customer needs a session and a completed profile. */
 async function assertCanOrder(
@@ -149,7 +162,7 @@ export async function listOrders(
     order_filter: orderId,
     before_time: before,
   });
-  if (error) throw new Error(error.message);
+  if (error) throw new Error(await explainDenied(db, error.message));
   if (!Array.isArray(data)) throw new Error("INVALID_RESPONSE");
   return Promise.all(data.map(enrichOrder));
 }

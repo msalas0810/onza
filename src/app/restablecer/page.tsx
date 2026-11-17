@@ -1,9 +1,10 @@
 import { ResetPasswordForm } from "@/features/account/components/simple-forms";
+import { AccessFrame } from "@/components/ui/access-frame";
+
 export default function Page() {
   return (
-    <div className="page narrow auth-page">
-      <h1>Nueva contraseña</h1>
+    <AccessFrame title="Nueva contraseña">
       <ResetPasswordForm />
-    </div>
+    </AccessFrame>
   );
 }

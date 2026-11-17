@@ -115,7 +115,7 @@ export function AuthForm({ next, notice }: { next: string; notice?: string }) {
         </Button>
       </div>
       <details className="email-access" open={notice ? true : undefined}>
-        <summary className="button secondary auth-provider">
+        <summary className="btn secondary auth-provider">
           <Mail size={20} aria-hidden="true" />
           Continuar con correo
         </summary>

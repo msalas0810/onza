@@ -2,32 +2,74 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { ChevronLeft, Lock } from "lucide-react";
 import { browserDb } from "@/lib/supabase/browser";
 import { errorMessage } from "@/lib/errors";
 import { useCart, cartTotal, writeCart, readCart } from "../cart-store";
-import { Button, Price, EmptyState } from "@/components/ui/primitives";
-import { sendCommand } from "../client-api";
-import { orderSchema } from "../types";
+import {
+  Button,
+  Price,
+  EmptyState,
+  Notice,
+  buttonClass,
+} from "@/components/ui/primitives";
+import { Sheet } from "@/components/ui/sheet";
+import { sendCommand, CommandError, isSessionError } from "../client-api";
+import { orderSchema, type Order } from "../types";
+import { SessionExpiredSheet } from "./session-expired-sheet";
+import { useOnline } from "@/lib/use-online";
+
 export function Checkout({ accounts = false }: { accounts?: boolean }) {
   const cart = useCart();
   const router = useRouter();
-  // With accounts, age and terms were accepted (with date and version) during onboarding.
+  const online = useOnline();
+  // Con cuentas, la mayoría de edad y las condiciones se aceptaron (con fecha y versión) en el perfil.
   const [adult, setAdult] = useState(accounts);
   const [policy, setPolicy] = useState(accounts);
-  const [error, setError] = useState("");
+  const [error, setError] = useState<{ code: string; message: string } | null>(
+    null,
+  );
   const [busy, setBusy] = useState(false);
+  const [expired, setExpired] = useState(false);
+  const [confirmRetry, setConfirmRetry] = useState(false);
+  const [placed, setPlaced] = useState<Order | null>(null);
   const lock = useRef(false);
+  if (placed)
+    return (
+      <div className="state" role="status" aria-live="polite" style={{ paddingTop: 64 }}>
+        <div className="vaso">
+          <span className="outline" />
+          <span className="fill" />
+        </div>
+        <h1 className="t-title">Pedido enviado</h1>
+        <p>
+          #{placed.public_code} · {placed.venue.name}
+          <br />
+          Te avisamos cuando esté listo.
+        </p>
+        <Link className={buttonClass({ variant: "secondary" })} href={`/orders/${placed.id}`}>
+          Ver pedido
+        </Link>
+      </div>
+    );
   if (!cart?.items.length)
     return (
-      <EmptyState title="Tu carrito está vacío">
-        <Link href="/">Explorar locales</Link>
+      <EmptyState
+        title="Tu carrito está vacío"
+        action={
+          <Link className={buttonClass()} href="/">
+            Explorar locales
+          </Link>
+        }
+      >
+        Elegí un local y armá tu ronda.
       </EmptyState>
     );
   const submit = async () => {
     if (lock.current) return;
     lock.current = true;
     setBusy(true);
-    setError("");
+    setError(null);
     try {
       const db = browserDb();
       const {
@@ -35,7 +77,7 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       } = await db.auth.getUser();
       if (accounts) {
         if (!user || user.is_anonymous) {
-          router.push("/acceso?next=%2Fcheckout");
+          setExpired(true);
           return;
         }
       } else if (!user) {
@@ -64,10 +106,11 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       const fingerprint = JSON.stringify(input);
       const saved = localStorage.getItem("onza-checkout-attempt");
       const previous = saved ? JSON.parse(saved) : null;
-      // Preserve the same key after network loss. A different draft needs an explicit new attempt.
+      // Se conserva la misma clave tras perder la red. Un carrito distinto exige un intento nuevo explícito.
       if (previous && previous.fingerprint !== fingerprint)
-        throw new Error(
-          "Hay un intento anterior sin resolver. Consultá Pedidos antes de cambiar el carrito o la simulación.",
+        throw new CommandError(
+          "Hay un intento anterior sin resolver. Consultá Pedidos antes de cambiar el carrito.",
+          "ATTEMPT_PENDING",
         );
       const attempt = previous ?? { fingerprint, key: crypto.randomUUID() };
       localStorage.setItem("onza-checkout-attempt", JSON.stringify(attempt));
@@ -76,46 +119,75 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       );
       if (JSON.stringify(readCart()) === JSON.stringify(cart)) writeCart(null);
       localStorage.removeItem("onza-checkout-attempt");
-      router.push(`/orders/${order.id}`);
+      setPlaced(order);
+      setTimeout(() => router.push(`/orders/${order.id}`), 1800);
     } catch (e) {
-      setError(
-        e instanceof Error && e.message.includes("SUPABASE_NOT_CONFIGURED")
-          ? errorMessage(e)
-          : e instanceof Error
+      if (isSessionError(e)) {
+        setExpired(true);
+        return;
+      }
+      setError({
+        code: e instanceof CommandError ? e.code : "UNKNOWN",
+        message:
+          e instanceof CommandError
             ? e.message
-            : errorMessage(e),
-      );
+            : e instanceof Error && e.message.includes("SUPABASE_NOT_CONFIGURED")
+              ? errorMessage(e)
+              : e instanceof Error
+                ? e.message
+                : errorMessage(e),
+      });
     } finally {
       lock.current = false;
       setBusy(false);
     }
   };
+  const total = cartTotal(cart);
+  const reviewable =
+    error && ["OUT_OF_STOCK", "PRICE_CHANGED"].includes(error.code);
+  const unresolved =
+    error &&
+    !reviewable &&
+    !["OFFLINE", "CONNECTION_ERROR", "VENUE_CLOSED", "VENUE_PAUSED", "VENUE_CAPACITY"].includes(error.code);
   return (
     <>
-      <p className="eyebrow">Último paso</p>
-      <h1>Confirmá tu pedido.</h1>
-      <p>
-        {cart.venueName} · retiro en {cart.pickupLabel}
-      </p>
+      <Link className="back" href="/cart">
+        <ChevronLeft size={16} aria-hidden="true" />
+        Carrito
+      </Link>
+      <div className="page-head">
+        <h1 className="t-title">Confirmar pedido</h1>
+      </div>
       <div className="stack">
-        {cart.items.map((i) => (
-          <div className="row between" key={i.productId}>
-            <span>
-              {i.quantity} × {i.name}
-            </span>
-            <Price amount={i.priceMinor * i.quantity} />
-          </div>
-        ))}
-        <div className="row between">
-          <h2>Total final</h2>
-          <Price amount={cartTotal(cart)} />
+        <div className="panel">
+          <strong>{cart.venueName}</strong>
+          <div className="muted t-label">Retiro: {cart.pickupLabel}</div>
         </div>
-        <div className="notice">
-          <strong>Reserva simulada, cobro al recoger</strong>
-          <p>
-            Reservaremos <Price amount={cartTotal(cart)} />. El cobro se
-            confirma al recoger tu pedido. No ingresés datos de tarjeta.
-          </p>
+        <div className="lines">
+          {cart.items.map((i) => (
+            <div className="line" key={i.productId}>
+              <span className="q">{i.quantity}×</span>
+              <span>{i.name}</span>
+              <span className="amt">
+                <Price amount={i.priceMinor * i.quantity} />
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="total-row">
+          <span>Total</span>
+          <Price amount={total} />
+        </div>
+        <div className="panel row">
+          <Lock size={20} aria-hidden="true" />
+          <div className="grow">
+            <strong className="t-label" style={{ fontWeight: 600 }}>
+              Pago simulado
+            </strong>
+            <div className="muted t-label">
+              Demo sin dinero real. No pedimos tarjeta.
+            </div>
+          </div>
         </div>
         {!accounts && (
           <>
@@ -138,52 +210,83 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
               />
               <span>
                 Acepto los{" "}
-                <Link href="/policies">
-                  términos y la política de privacidad del demo
-                </Link>{" "}
+                <Link href="/policies">términos y la política de privacidad del demo</Link>{" "}
                 (demo-v1).
               </span>
             </label>
           </>
         )}
-        <p className="muted">
-          Podés cancelar mientras el pedido esté en cola. Si el local no acepta
-          en 2 minutos, la reserva se anula. Sin recogida, se anula 20 minutos
-          después de estar listo; no hay penalidad oculta. Preparando: solicitá
-          ayuda al local.
+        <p className="muted t-label">
+          Podés cancelar hasta que el local acepte tu pedido.
         </p>
         {error && (
-          <div className="notice error" role="alert">
-            <p>{error}</p>
-            <Link className="link-button" href="/orders">
-              Consultar mis pedidos
-            </Link>
+          <Notice
+            tone="danger"
+            title={
+              error.code === "OFFLINE" ? "Sin conexión" : "No se hizo el pedido"
+            }
+            action={
+              reviewable ? (
+                <Link className={buttonClass({ variant: "secondary", size: "sm" })} href="/cart">
+                  Revisar carrito
+                </Link>
+              ) : unresolved ? (
+                <div className="row wrap">
+                  <Link className={buttonClass({ variant: "secondary", size: "sm" })} href="/orders">
+                    Consultar mis pedidos
+                  </Link>
+                  <Button variant="quiet" size="sm" onClick={() => setConfirmRetry(true)}>
+                    Ya revisé · nuevo intento
+                  </Button>
+                </div>
+              ) : error.code === "OFFLINE" || error.code === "CONNECTION_ERROR" ? (
+                <Button variant="secondary" size="sm" onClick={() => void submit()}>
+                  Reintentar
+                </Button>
+              ) : undefined
+            }
+          >
+            {error.message}
+          </Notice>
+        )}
+        <div className="sticky-cta">
+          <Button
+            size="lg"
+            block
+            onClick={submit}
+            disabled={!adult || !policy || !online}
+            loading={busy}
+          >
+            Pedir · <Price amount={total} />
+          </Button>
+          {!online && (
+            <p className="btn-note">Sin conexión: el pedido no se va a enviar.</p>
+          )}
+        </div>
+      </div>
+      <SessionExpiredSheet open={expired} next="/checkout" />
+      <Sheet
+        open={confirmRetry}
+        onOpenChange={setConfirmRetry}
+        title="¿Ya revisaste tus pedidos?"
+        description="Iniciar otro intento puede crear otro pedido si el anterior se confirmó."
+        actions={
+          <>
+            <Button variant="secondary" onClick={() => setConfirmRetry(false)}>
+              Volver
+            </Button>
             <Button
-              variant="secondary"
               onClick={() => {
-                if (
-                  confirm(
-                    "Verificá primero Pedidos: iniciar otro intento puede crear otro pedido si el anterior se confirmó. ¿Ya lo revisaste?",
-                  )
-                ) {
-                  localStorage.removeItem("onza-checkout-attempt");
-                  setError(
-                    "Podés revisar el carrito e iniciar un nuevo intento.",
-                  );
-                }
+                localStorage.removeItem("onza-checkout-attempt");
+                setError(null);
+                setConfirmRetry(false);
               }}
             >
-              Ya revisé mis pedidos · nuevo intento
+              Empezar un intento nuevo
             </Button>
-          </div>
-        )}
-        <Button onClick={submit} disabled={!adult || !policy} loading={busy}>
-          Confirmar y reservar <Price amount={cartTotal(cart)} />
-        </Button>
-        <Link className="link-button" href="/cart">
-          ← Revisar carrito
-        </Link>
-      </div>
+          </>
+        }
+      />
     </>
   );
 }

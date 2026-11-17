@@ -1,8 +1,11 @@
 import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
 import { getVenue, getPublishedMenu } from "@/features/catalog/server/queries";
 import { ProductMenu } from "@/features/catalog/components/product-menu";
+import { VenueHero } from "@/features/catalog/components/venue-hero";
 import { ConfigurationState } from "@/components/ui/configuration-state";
-import { StatusBadge } from "@/components/ui/primitives";
+import { Notice, buttonClass } from "@/components/ui/primitives";
+
 export const dynamic = "force-dynamic";
 export default async function MenuPage({
   params,
@@ -21,39 +24,35 @@ export default async function MenuPage({
       </div>
     );
   }
+  const closed = venue.open_state === "closed";
   return (
-    <div className="page">
-      <Link className="link-button" href="/">
-        ← Locales
+    <div className="page menu">
+      <Link className="back" href="/">
+        <ChevronLeft size={16} aria-hidden="true" />
+        Explorar
       </Link>
-      <header className="menu-header">
-        <p className="eyebrow">{venue.zone}</p>
-        <h1>{venue.name}</h1>
-        <p className="muted">
-          {venue.pickup_label}
-          {venue.hours !== "Consultar al local" && ` · ${venue.hours}`}
-        </p>
-        <StatusBadge
-          tone={
-            venue.paused || venue.open_state === "closed"
-              ? "warning"
-              : "success"
+      <VenueHero venue={venue} />
+      {closed ? (
+        <Notice
+          title="Cerrado"
+          action={
+            <Link className={buttonClass({ variant: "secondary", size: "sm" })} href="/orders">
+              Ver mis pedidos
+            </Link>
           }
         >
-          {venue.open_state === "closed"
-            ? "Cerrado"
-            : venue.paused
-              ? "Pedidos pausados"
-              : "Recibiendo pedidos"}
-        </StatusBadge>
-      </header>
-      {venue.open_state === "closed" ? (
-        <p className="notice">
-          Este local está cerrado y no recibe pedidos. Tus pedidos anteriores
-          siguen en <Link href="/orders">Pedidos</Link>.
-        </p>
+          Este local no recibe pedidos ahora. Tus pedidos anteriores siguen en
+          Pedidos.
+        </Notice>
       ) : (
-        <ProductMenu venue={venue} {...menu} />
+        <>
+          {venue.paused && (
+            <Notice tone="warning" title="Pedidos pausados">
+              Podés armar tu ronda. Vas a poder pedir cuando el local reanude.
+            </Notice>
+          )}
+          <ProductMenu venue={venue} {...menu} />
+        </>
       )}
     </div>
   );

@@ -2,7 +2,9 @@ import { OrderList } from "@/features/orders/components/order-list";
 export default function Page() {
   return (
     <div className="page">
-      <h1>Mis pedidos</h1>
+      <div className="page-head">
+        <h1>Pedidos</h1>
+      </div>
       <OrderList />
     </div>
   );

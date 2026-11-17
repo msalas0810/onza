@@ -5,12 +5,17 @@ const VenueChangeDialog = dynamic(() => import("./venue-change-dialog"), {
   ssr: false,
 });
 import type { Product, Venue } from "../server/queries";
-import { Button, QuantityStepper } from "@/components/ui/primitives";
+import {
+  Button,
+  QuantityStepper,
+  StatusBadge,
+} from "@/components/ui/primitives";
 import {
   addProduct,
   useCart,
   setProductQuantity,
 } from "@/features/orders/cart-store";
+
 export function AddProduct({
   product,
   venue,
@@ -26,8 +31,8 @@ export function AddProduct({
       ? (cart.items.find((item) => item.productId === product.id)?.quantity ??
         0)
       : 0;
-  const unavailable =
-    !product.available || venue.paused || venue.open_state !== "open";
+  const venueBlocked = venue.paused || venue.open_state !== "open";
+  const unavailable = !product.available || venueBlocked;
   const [open, setOpen] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [feedback, setFeedback] = useState("");
@@ -45,45 +50,56 @@ export function AddProduct({
       );
     }
   };
+  // Lo que ya está en el carrito siempre se puede bajar o quitar, aunque el producto se haya agotado: nada queda atrapado.
+  const stepper = (
+    <QuantityStepper
+      enter
+      value={inCart}
+      max={unavailable ? inCart : 10}
+      onChange={(value) => {
+        try {
+          setProductQuantity(product.id, value);
+        } catch {
+          setError("No pudimos guardar el carrito. Intentá nuevamente.");
+        }
+      }}
+    />
+  );
   return (
     <>
-      <div className={detail ? "stack" : "product-actions"}>
-        {detail && !inCart && (
+      <div className={detail ? "stack" : undefined}>
+        {detail && !inCart && !unavailable && (
           <QuantityStepper
             value={quantity}
-            onChange={(value) => setQuantity(Math.max(1, value))}
+            min={1}
+            onChange={(value) => setQuantity(value)}
           />
         )}
-        {inCart > 0 && !unavailable ? (
-          <QuantityStepper
-            value={inCart}
-            onChange={(value) => {
-              try {
-                setProductQuantity(product.id, value);
-              } catch {
-                setError("No pudimos guardar el carrito. Intentá nuevamente.");
-              }
-            }}
-          />
+        {inCart > 0 ? (
+          stepper
+        ) : !product.available ? (
+          <StatusBadge plain>Agotado</StatusBadge>
         ) : (
           <Button
             variant={detail ? "primary" : "secondary"}
-            disabled={
-              !product.available || venue.paused || venue.open_state !== "open"
-            }
+            size={detail ? "md" : "sm"}
+            block={detail}
+            className={detail ? "" : "add-btn"}
+            disabled={venueBlocked}
+            title={venueBlocked ? "El local no recibe pedidos ahora" : undefined}
             onClick={() => add()}
           >
-            {!product.available
-              ? "Agotado"
-              : venue.paused || venue.open_state !== "open"
-                ? "Pedidos no disponibles"
-                : "Agregar"}
+            Agregar
           </Button>
         )}
         <span role="status" className="sr-only">
           {feedback}
         </span>
-        {error && <p role="alert">{error}</p>}
+        {error && (
+          <p role="alert" className="field-error">
+            {error}
+          </p>
+        )}
       </div>
       {open && (
         <VenueChangeDialog

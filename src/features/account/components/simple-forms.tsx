@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { browserDb } from "@/lib/supabase/browser";
-import { Button, TextField } from "@/components/ui/primitives";
+import { Button, TextField, buttonClass } from "@/components/ui/primitives";
 export function ResendConfirmation({
   email,
   next,
@@ -55,7 +55,7 @@ export function RecoverForm() {
           Si {email} tiene una cuenta, te enviamos un enlace para crear una
           contraseña nueva.
         </p>
-        <Link className="button secondary" href="/acceso">
+        <Link className={buttonClass({ variant: "secondary" })} href="/acceso">
           Volver al acceso
         </Link>
       </div>

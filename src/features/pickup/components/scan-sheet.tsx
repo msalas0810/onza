@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import * as Dialog from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/primitives";
+import { Sheet } from "@/components/ui/sheet";
 type Detector = {
   detect: (video: HTMLVideoElement) => Promise<{ rawValue: string }[]>;
 };
@@ -76,27 +76,25 @@ export default function ScanSheet({
     };
   }, [onResult]);
   return (
-    <Dialog.Root
+    <Sheet
       open
       onOpenChange={(open) => {
         if (!open) onClose();
       }}
+      title="Escanear retiro"
+      description="Apuntá al QR del pedido. La cámara requiere permiso y HTTPS o localhost."
+      actions={
+        <Button variant="secondary" onClick={onClose}>
+          Cerrar y usar el código
+        </Button>
+      }
     >
-      <Dialog.Portal>
-        <Dialog.Overlay className="overlay" />
-        <Dialog.Content className="sheet">
-          <Dialog.Title>Escanear retiro</Dialog.Title>
-          <Dialog.Description>
-            Apuntá al QR del pedido. La cámara requiere permiso y HTTPS o
-            localhost.
-          </Dialog.Description>
-          <video ref={video} muted playsInline aria-label="Vista de cámara" />
-          {error && <p role="alert">{error}</p>}
-          <Dialog.Close asChild>
-            <Button variant="secondary">Cerrar y usar código manual</Button>
-          </Dialog.Close>
-        </Dialog.Content>
-      </Dialog.Portal>
-    </Dialog.Root>
+      <video ref={video} muted playsInline aria-label="Vista de cámara" />
+      {error && (
+        <p role="alert" className="field-error" style={{ marginTop: 12 }}>
+          {error}
+        </p>
+      )}
+    </Sheet>
   );
 }

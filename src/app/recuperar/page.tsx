@@ -1,12 +1,13 @@
 import { RecoverForm } from "@/features/account/components/simple-forms";
+import { AccessFrame } from "@/components/ui/access-frame";
+
 export default function Page() {
   return (
-    <div className="page narrow auth-page">
-      <h1>Recuperá tu contraseña</h1>
-      <p className="muted">
-        Ingresá tu correo y te enviamos un enlace para crear una nueva.
-      </p>
+    <AccessFrame
+      title="Recuperá tu contraseña"
+      subtitle="Te enviamos un enlace a tu correo para crear una nueva."
+    >
       <RecoverForm />
-    </div>
+    </AccessFrame>
   );
 }

@@ -13,6 +13,8 @@ export function useLiveOrders({
   const [error, setError] = useState("");
   const [connection, setConnection] = useState("Conectando");
   const [revision, setRevision] = useState(0);
+  const [sessionExpired, setSessionExpired] = useState(false);
+  const [access, setAccess] = useState<"ok" | "lost" | "password">("ok");
   const refresh = useCallback(() => setRevision((n) => n + 1), []);
   useEffect(() => {
     const controller = new AbortController();
@@ -42,6 +44,17 @@ export function useLiveOrders({
           { cache: "no-store", signal: controller.signal },
         );
         const json: unknown = await response.json();
+        if (response.status === 401) setSessionExpired(true);
+        if (response.status === 403)
+          setAccess(
+            typeof json === "object" &&
+              json &&
+              "error" in json &&
+              json.error === "PASSWORD_CHANGE_REQUIRED"
+              ? "password"
+              : "lost",
+          );
+        else if (response.ok) setAccess("ok");
         if (!response.ok)
           throw new Error(
             typeof json === "object" && json && "message" in json
@@ -100,6 +113,7 @@ export function useLiveOrders({
         if (!user) {
           setLoading(false);
           setConnection("Sin sesión");
+          setSessionExpired(true);
           setError(errorMessage(new Error("SESSION_REQUIRED")));
           return;
         }
@@ -177,5 +191,7 @@ export function useLiveOrders({
     error,
     connection,
     refresh,
+    sessionExpired,
+    access,
   };
 }

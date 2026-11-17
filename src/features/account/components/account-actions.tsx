@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { browserDb } from "@/lib/supabase/browser";
-import { Button } from "@/components/ui/primitives";
+import { Button, Toggle } from "@/components/ui/primitives";
 /** Voluntary logout clears local data (cart, checkout attempt, drafts); the theme is a device preference and stays. */
 export function clearLocalData() {
   try {
@@ -18,15 +18,21 @@ export function clearLocalData() {
 export function LogoutButton({
   to = "/acceso",
   label = "Cerrar sesión",
+  compact = false,
 }: {
   to?: string;
   label?: string;
+  /** Botón chico para cabeceras: en pantallas angostas queda solo el ícono (con nombre accesible). */
+  compact?: boolean;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   return (
     <Button
       variant="secondary"
+      size={compact ? "sm" : "md"}
+      block={!compact}
+      aria-label={label}
       loading={busy}
       onClick={async () => {
         setBusy(true);
@@ -36,8 +42,8 @@ export function LogoutButton({
         router.refresh();
       }}
     >
-      <LogOut size={20} aria-hidden="true" />
-      {label}
+      <LogOut size={compact ? 16 : 20} aria-hidden="true" />
+      <span className="label">{label}</span>
     </Button>
   );
 }
@@ -46,6 +52,7 @@ export function SwitchAccountButton({ to }: { to: string }) {
   return (
     <Button
       variant="secondary"
+      block
       onClick={async () => {
         await browserDb().auth.signOut();
         router.replace(to);
@@ -76,24 +83,18 @@ export function PreferenceToggles({
   }
   return (
     <div className="stack tight">
-      <label className="checkbox">
-        <input
-          type="checkbox"
-          checked={state.news}
-          onChange={(e) => void save({ ...state, news: e.target.checked })}
-        />
-        <span>Novedades de Onza</span>
-      </label>
-      <label className="checkbox">
-        <input
-          type="checkbox"
-          checked={state.offers}
-          onChange={(e) => void save({ ...state, offers: e.target.checked })}
-        />
-        <span>Ofertas de mis discotecas favoritas</span>
-      </label>
+      <Toggle
+        label="Novedades de Onza"
+        checked={state.news}
+        onChange={(checked) => void save({ ...state, news: checked })}
+      />
+      <Toggle
+        label="Ofertas de mis locales favoritos"
+        checked={state.offers}
+        onChange={(checked) => void save({ ...state, offers: checked })}
+      />
       {message && (
-        <p role="status" className="muted">
+        <p role="status" className="hint">
           {message}
         </p>
       )}
