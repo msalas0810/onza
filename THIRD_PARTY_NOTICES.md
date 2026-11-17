@@ -30,5 +30,11 @@ Versions are fixed in package-lock.json. Unmodified upstream license files remai
 | Vitest (tests only) | 5.1.0 | MIT |
 | Supabase CLI (development only) | 3.1.0 | MIT |
 | Prettier (development only) | 3.10.1 | MIT |
+| Three.js | 0.187.0 | MIT; upstream LICENSE retained in the installed npm package |
+| @types/three (development only) | 0.187.0 | MIT |
 
 No Lucide Animated, Motion, SF Pro, scraped photography or bank/network artwork was added. The earlier planned-dependencies paragraph describes the original kit; the table records what was actually installed.
+
+## Particle Wave
+
+Particle Wave by Hossain Jahed (@jahed), published at https://21st.dev/@jahed/components/particle-wave. The original Component.tsx was supplied by the project owner on 2026-11-17. `src/components/backgrounds/particle-wave.tsx` retains its vertex equations, square point fragment, camera and desktop grid; adaptations add Onza colors, delta-time animation, responsive density, visibility/reduced-motion handling and resource cleanup. The supplied source did not include a separate license statement; none is invented here.

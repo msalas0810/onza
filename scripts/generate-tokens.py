@@ -13,6 +13,8 @@ def outputs():
         return '\n'.join(f'  --onza-{k}: {v};' for k, v in tokens['color'][theme].items())
     css = '/* Generated from tokens.json. Update JSON and run python3 scripts/generate-tokens.py. */\n'
     css += ':root {\n' + rules('light') + '\n'
+    for key, value in tokens.get('access', {}).items():
+        css += f'  --onza-access-{key}: {value};\n'
     for group in ['space', 'radius', 'size']:
         for key, value in tokens[group].items():
             css += f'  --onza-{group}-{key}: {value}px;\n'

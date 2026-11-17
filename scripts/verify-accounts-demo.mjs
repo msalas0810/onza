@@ -31,6 +31,7 @@ try {
   b.on("pageerror", () => runtimeErrors++);
   await a.goto(origin);
   check("accounts required at public entry", new URL(a.url()).pathname === "/acceso");
+  await a.getByText("Continuar con correo", { exact: true }).click();
   await a.getByLabel("Correo", { exact: true }).fill(process.env.DEMO_CUSTOMER_EMAIL);
   await a.getByLabel("Contraseña", { exact: true }).fill(process.env.DEMO_CUSTOMER_PASSWORD);
   await a.locator("form").getByRole("button", { name: "Ingresar", exact: true }).click();

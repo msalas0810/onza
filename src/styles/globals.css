@@ -1,5 +1,12 @@
 @import "../../design/tokens.css";
 @import "../../design/fonts.css";
+/* Only the customer access screen replaces the shared application header. */
+body:has(.access-screen) {
+  background: var(--onza-access-bg);
+}
+body:has(.access-screen) > .header {
+  display: none;
+}
 * {
   box-sizing: border-box;
 }

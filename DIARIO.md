@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`. Código activado: `d2de7de`; cierre documental local posterior en git log. Sin merge a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`. Acceso visual Particle Wave original: commit de D-2026-11-17-03 (hash en git log). Se conserva el cierre local previo `dde9764`. Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
 | Commit desplegado en Vercel | `d2de7de` en `fix/hosted-integration`, Preview **READY**, deployment `dpl_BvikC3oVNDNYytjyLGeBUgk374fU`; cuentas activadas y 16 controles HTTPS aprobados |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Probar cliente en teléfono físico y bartender en computadora con las cuentas locales (docs/vercel-demo.md). Migración 010 aplicada y ACCOUNTS_REQUIRED=true. Google/SMTP, borrado de cuenta, revisión legal, R5/R6, dispositivos físicos y pagos reales siguen pendientes; no implementar sin encargo. |
+| Siguiente tarea exacta | Publicar y verificar el acceso visual en el proyecto Vercel existente. Después, prueba física del dueño. Migración 010 aplicada y ACCOUNTS_REQUIRED=true, sin cambios en esta sesión. Google/SMTP y los demás pendientes funcionales siguen fuera de alcance. |
 
 ### Pendientes abiertos
 
@@ -89,6 +89,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-17-03 · Rediseñar el acceso con Particle Wave original
+
+- **Fecha y hora:** 2026-11-17 00:23 (America/Costa_Rica)
+- **Persona:** Manu
+- **IA:** Codex · GPT-6 (identificador exacto no expuesto)
+- **Rama y commits:** `fix/hosted-integration` · commit de esta entrada, hash en git log; `dde9764` previo conservado.
+- **Qué cambió:** solo acceso cliente y fondo reutilizable. Component.tsx original de Hossain Jahed suministrado por Manu: mismas ecuaciones, puntos cuadrados, cámara y grilla de escritorio; oxblood, velocidad 60% con delta time, fade ligado al alto del titular. SVG originales del vaso y wordmark, ivory sobre negro; Google, Apple deshabilitado y correo desplegable con registro/recuperación; portal laboral conservado. Densidad/DPR móvil limitados, pausa oculta, reduced motion estático, liberación de WebGL y fallback negro. Sin cambios de Supabase, banderas, permisos, pedidos ni main.
+- **Archivos clave:** `src/components/backgrounds/particle-wave.tsx`, `src/app/acceso/`, `src/features/account/components/auth-form.tsx`, tokens de acceso, dependencias y atribución en `THIRD_PARTY_NOTICES.md`. Verificador existente adaptado para abrir correo; sin suites nuevas.
+- **Verificado:** `npm run typecheck`, `npm run build`, ESLint de los TSX modificados y del verificador, Prettier y `git diff --check`. Chromium contra build local: 28 controles puntuales, capturas 1440×900 y 390×844 inspeccionadas, 320 px sin desborde, scroll al abrir correo, foco de teclado, registro/validación/recuperación, OAuth con destino conservado (navegación interceptada), reduced motion, visibilidad simulada, pérdida/fallo WebGL y cero errores de ejecución. Limpieza de buffers/programa/contexto al navegar y login real con cuenta demo existente hasta el menú de destino. Evidencia en `docs/evidence/access/`.
+- **No verificado:** todavía publicación de este cambio; Google completo y correos reales, teléfonos físicos. No se repitieron auditorías de pedidos ni la suite global, por alcance explícito.
+- **Decisiones:** código de 21st.dev bloqueado en la consulta inicial; no se fabricó sustituto. Se retomó únicamente tras recibir el original. Revisión estática independiente: se corrigió ubicación del error de correo para que quede junto al envío en móvil.
+- **Pendientes / siguiente paso:** push y verificación del despliegue existente, con Preview manual del mismo proyecto solo si el automático no aparece. Sin recursos nuevos ni pagos.
 
 ### D-2026-11-16-06 · Activar cuentas en el demo existente y verificar retiro
 

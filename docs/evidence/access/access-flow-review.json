@@ -1,0 +1,25 @@
+{
+  "origin": "http://127.0.0.1:3005",
+  "checks": [
+    {
+      "name": "client navigation disposes WebGL buffers, program and context",
+      "passed": true
+    },
+    {
+      "name": "email disclosure has visible keyboard focus",
+      "passed": true
+    },
+    {
+      "name": "email disclosure opens with keyboard",
+      "passed": true
+    },
+    {
+      "name": "recovery link retained",
+      "passed": true
+    },
+    {
+      "name": "existing demo customer logs in through real form with QR destination",
+      "passed": true
+    }
+  ]
+}
