@@ -6,7 +6,11 @@ import type { Venue } from "@/features/catalog/server/queries";
 import type { serverDb } from "@/lib/supabase/server";
 
 export type StaffRole = "admin" | "bartender" | "onza";
-export type StaffPerson = { name: string; email: string | null; role: StaffRole };
+export type StaffPerson = {
+  name: string;
+  email: string | null;
+  role: StaffRole;
+};
 export type StaffContext =
   | {
       ok: true;
@@ -16,7 +20,11 @@ export type StaffContext =
       person: StaffPerson;
       venueCount: number;
     }
-  | { ok: false; reason: "login" | "password" | "denied" | "error"; error?: unknown };
+  | {
+      ok: false;
+      reason: "login" | "password" | "denied" | "error";
+      error?: unknown;
+    };
 
 export const roleLabel = (role: StaffRole) =>
   role === "admin" ? "Administrador" : role === "onza" ? "Onza" : "Empleado";

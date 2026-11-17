@@ -11,11 +11,10 @@ test("cámara no disponible mantiene alternativa manual", async ({ page }) => {
     Object.defineProperty(window, "BarcodeDetector", { value: undefined }),
   );
   await page.reload();
-  await page.getByRole("button", { name: "Escanear retiro" }).click();
+  await page.getByRole("button", { name: "Validar retiro" }).first().click();
+  await page.getByRole("button", { name: "Escanear QR" }).click();
   await expect(page.getByText(/Este navegador no tiene escáner/)).toBeVisible();
-  await page
-    .getByRole("button", { name: "Cerrar y usar código manual" })
-    .click();
+  await page.getByRole("button", { name: "Cerrar y usar el código" }).click();
   await expect(
     page.getByLabel("Código de retiro (12 caracteres)"),
   ).toBeVisible();

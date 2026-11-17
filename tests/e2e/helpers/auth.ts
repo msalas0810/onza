@@ -31,8 +31,7 @@ export async function loginStaff(page: Page, alias = "BARTENDER") {
       sameSite: "Lax" as const,
     })),
   );
-  await page.goto("/login");
-  await expect(
-    page.getByRole("heading", { name: "Tus espacios de trabajo" }),
-  ).toBeVisible();
+  // Con la sesión del equipo, el acceso entra directo a la barra (un local) o a la lista de locales.
+  await page.goto("/equipo/acceso");
+  await expect(page).toHaveURL(/\/(staff\/|equipo\/locales)/);
 }

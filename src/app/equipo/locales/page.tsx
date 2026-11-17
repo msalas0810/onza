@@ -2,10 +2,18 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { Store } from "lucide-react";
 import { StaffShell } from "@/components/ui/staff-shell";
-import { EmptyState, StatusBadge, buttonClass } from "@/components/ui/primitives";
+import {
+  EmptyState,
+  StatusBadge,
+  buttonClass,
+} from "@/components/ui/primitives";
 import { VenueMark } from "@/features/catalog/components/venue-parts";
-import { venueStatus } from "@/features/catalog/components/venue-card";
-import { personFor, roleLabel, type StaffRole } from "@/features/team/server/staff-context";
+import { venueStatus } from "@/features/catalog/components/venue-status";
+import {
+  personFor,
+  roleLabel,
+  type StaffRole,
+} from "@/features/team/server/staff-context";
 import { serverDb } from "@/lib/supabase/server";
 import { ConfigurationState } from "@/components/ui/configuration-state";
 
@@ -18,11 +26,16 @@ export default async function Page() {
   if (!user || user.is_anonymous)
     redirect("/equipo/acceso?next=%2Fequipo%2Flocales");
   const { data: account } = await db.rpc("current_account");
-  const state = account as { kind?: string; mustChangePassword?: boolean } | null;
+  const state = account as {
+    kind?: string;
+    mustChangePassword?: boolean;
+  } | null;
   if (state?.kind === "customer") redirect("/sesion-activa?want=equipo");
   if (state?.mustChangePassword) redirect("/equipo/clave");
   const { person } = await personFor(db, user);
-  const { data: memberships, error } = await db.from("memberships").select("venue_id,role");
+  const { data: memberships, error } = await db
+    .from("memberships")
+    .select("venue_id,role");
   const ids = (memberships ?? []).map((m) => m.venue_id);
   const { data: venues } = ids.length
     ? await db.from("venues").select("*").in("id", ids).order("name")
@@ -43,7 +56,9 @@ export default async function Page() {
       {venues && venues.length > 0 ? (
         <div className="stack">
           {venues.map((venue) => {
-            const role = (memberships ?? []).find((m) => m.venue_id === venue.id)?.role as StaffRole;
+            const role = (memberships ?? []).find(
+              (m) => m.venue_id === venue.id,
+            )?.role as StaffRole;
             const status = venueStatus(venue);
             return (
               <div className="panel row wrap" key={venue.id}>
@@ -56,12 +71,18 @@ export default async function Page() {
                   </div>
                 </div>
                 <div className="row">
-                  <Link className={buttonClass({ size: "sm" })} href={`/staff/${venue.id}`}>
+                  <Link
+                    className={buttonClass({ size: "sm" })}
+                    href={`/staff/${venue.id}`}
+                  >
                     Abrir barra
                   </Link>
                   {(role === "admin" || role === "onza") && (
                     <Link
-                      className={buttonClass({ variant: "secondary", size: "sm" })}
+                      className={buttonClass({
+                        variant: "secondary",
+                        size: "sm",
+                      })}
                       href={`/admin/${venue.id}`}
                     >
                       Administrar

@@ -24,7 +24,10 @@ export function staffGate(context: StaffContext, next: string) {
       <EmptyState
         title="Ya no tenés acceso a este local"
         action={
-          <Link className={buttonClass({ variant: "secondary" })} href="/equipo/locales">
+          <Link
+            className={buttonClass({ variant: "secondary" })}
+            href="/equipo/locales"
+          >
             Ver mis locales
           </Link>
         }

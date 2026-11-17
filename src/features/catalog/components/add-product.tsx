@@ -86,7 +86,9 @@ export function AddProduct({
             block={detail}
             className={detail ? "" : "add-btn"}
             disabled={venueBlocked}
-            title={venueBlocked ? "El local no recibe pedidos ahora" : undefined}
+            title={
+              venueBlocked ? "El local no recibe pedidos ahora" : undefined
+            }
             onClick={() => add()}
           >
             Agregar

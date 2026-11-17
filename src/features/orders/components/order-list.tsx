@@ -64,7 +64,9 @@ export function OrderList() {
             #{o.public_code} ·{" "}
             {o.items.map((i) => `${i.quantity}× ${i.name_snapshot}`).join(", ")}
           </span>
-          <StatusBadge tone={tone(o.status)}>{statusLabels[o.status]}</StatusBadge>
+          <StatusBadge tone={tone(o.status)}>
+            {statusLabels[o.status]}
+          </StatusBadge>
         </div>
       </div>
     </Link>

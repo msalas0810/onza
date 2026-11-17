@@ -297,6 +297,7 @@ export type Database = {
           logo_url: string | null;
           latitude: number | null;
           longitude: number | null;
+          demo_listed: boolean;
         };
         Insert: {
           id?: string;
@@ -317,6 +318,7 @@ export type Database = {
           logo_url?: string | null;
           latitude?: number | null;
           longitude?: number | null;
+          demo_listed?: boolean;
         };
         Update: {
           id?: string;
@@ -337,6 +339,7 @@ export type Database = {
           logo_url?: string | null;
           latitude?: number | null;
           longitude?: number | null;
+          demo_listed?: boolean;
         };
         Relationships: [];
       };

@@ -41,7 +41,9 @@ export type TeamCommand = z.infer<typeof teamCommandSchema>;
 export function temporaryPassword() {
   const alphabet = "abcdefghjkmnpqrstuvwxyz23456789";
   const group = () =>
-    Array.from({ length: 4 }, () => alphabet[randomInt(alphabet.length)]).join("");
+    Array.from({ length: 4 }, () => alphabet[randomInt(alphabet.length)]).join(
+      "",
+    );
   return `${group()}-${group()}-${group()}`;
 }
 
@@ -99,7 +101,9 @@ export async function executeTeamCommand(raw: unknown) {
       const again = (
         await admin.rpc("team_lookup_email", { lookup: command.email })
       ).data as { kind: string };
-      throw new Error(again?.kind === "customer" ? "CUSTOMER_EMAIL" : "INVALID_EMAIL");
+      throw new Error(
+        again?.kind === "customer" ? "CUSTOMER_EMAIL" : "INVALID_EMAIL",
+      );
     }
     memberId = data.user.id;
   }
@@ -134,12 +138,16 @@ export async function changeTemporaryPassword(password: string) {
   const { error } = await db.auth.updateUser({ password });
   if (error) {
     if (/different|same/i.test(error.message)) throw new Error("SAME_PASSWORD");
-    if (/weak|short|least/i.test(error.message)) throw new Error("WEAK_PASSWORD");
+    if (/weak|short|least/i.test(error.message))
+      throw new Error("WEAK_PASSWORD");
     throw new Error("CONNECTION_ERROR");
   }
-  const { error: closeError } = await adminDb().rpc("complete_password_change", {
-    member: user.id,
-  });
+  const { error: closeError } = await adminDb().rpc(
+    "complete_password_change",
+    {
+      member: user.id,
+    },
+  );
   if (closeError) throw new Error("CONNECTION_ERROR");
   return { ok: true };
 }

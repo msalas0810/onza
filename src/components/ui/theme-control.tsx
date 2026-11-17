@@ -30,7 +30,9 @@ export function ThemeControl() {
     <SegmentedControl<Theme>
       block
       label="Apariencia"
-      value={(choices.some((c) => c.value === theme) ? theme : "system") as Theme}
+      value={
+        (choices.some((c) => c.value === theme) ? theme : "system") as Theme
+      }
       options={choices}
       onChange={(value) => {
         try {

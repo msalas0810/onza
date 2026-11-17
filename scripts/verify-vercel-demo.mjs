@@ -64,7 +64,7 @@ try {
   await a.goto(origin + "/checkout");
   await a.getByRole("checkbox").nth(0).check();
   await a.getByRole("checkbox").nth(1).check();
-  await a.getByRole("button", { name: /Confirmar y reservar/ }).click();
+  await a.getByRole("button", { name: /^Pedir/ }).click();
   await a
     .getByRole("heading", { name: "Pedido recibido", exact: true })
     .waitFor({ timeout: 30000 });
@@ -115,7 +115,7 @@ try {
       exact: true,
     }),
   });
-  await card.getByRole("button", { name: "Aceptar y preparar" }).click();
+  await card.getByRole("button", { name: "Aceptar", exact: true }).click();
   await a
     .getByRole("heading", { name: "Preparando", exact: true })
     .waitFor({ timeout: 25000 });

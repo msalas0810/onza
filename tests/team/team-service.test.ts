@@ -9,7 +9,9 @@ describe("servicio de equipo", () => {
     const seen = new Set<string>();
     for (let i = 0; i < 200; i++) {
       const password = temporaryPassword();
-      expect(password).toMatch(/^[a-hjkmnp-z2-9]{4}-[a-hjkmnp-z2-9]{4}-[a-hjkmnp-z2-9]{4}$/);
+      expect(password).toMatch(
+        /^[a-hjkmnp-z2-9]{4}-[a-hjkmnp-z2-9]{4}-[a-hjkmnp-z2-9]{4}$/,
+      );
       seen.add(password);
     }
     expect(seen.size).toBe(200);
@@ -33,7 +35,13 @@ describe("servicio de equipo", () => {
         }),
       ).toThrow();
     expect(() =>
-      teamCommandSchema.parse({ action: "create", venueId: "x", email: "a@b.c", name: "A", role: "admin" }),
+      teamCommandSchema.parse({
+        action: "create",
+        venueId: "x",
+        email: "a@b.c",
+        name: "A",
+        role: "admin",
+      }),
     ).toThrow();
   });
 });

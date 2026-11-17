@@ -2,7 +2,14 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BarChart3, Receipt, Store, ToggleLeft, Users, Wine } from "lucide-react";
+import {
+  BarChart3,
+  Receipt,
+  Store,
+  ToggleLeft,
+  Users,
+  Wine,
+} from "lucide-react";
 import type { Product, Venue } from "@/features/catalog/server/queries";
 import { summarySchema, type VenueSummary } from "@/features/analytics/types";
 import {
@@ -29,16 +36,16 @@ import { useLiveOrders } from "@/features/orders/use-live-orders";
 import { statusLabels, paymentLabels } from "@/features/orders/types";
 import { SessionExpiredSheet } from "@/features/orders/components/session-expired-sheet";
 import { TeamPanel } from "@/features/team/components/team-panel";
+import { adminTabIds, adminTabLabels, type AdminTab } from "../admin-tabs";
 
-export const adminTabs = [
-  { id: "resumen", label: "Resumen", Icon: BarChart3 },
-  { id: "pedidos", label: "Pedidos", Icon: Receipt },
-  { id: "menu", label: "Menú", Icon: Wine },
-  { id: "disponibilidad", label: "Disponibilidad", Icon: ToggleLeft },
-  { id: "negocio", label: "Negocio", Icon: Store },
-  { id: "equipo", label: "Equipo", Icon: Users },
-] as const;
-export type AdminTab = (typeof adminTabs)[number]["id"];
+const tabIcons = {
+  resumen: BarChart3,
+  pedidos: Receipt,
+  menu: Wine,
+  disponibilidad: ToggleLeft,
+  negocio: Store,
+  equipo: Users,
+} as const;
 
 type Support = {
   title: string;
@@ -81,13 +88,19 @@ export function AdminPanel({
   const [saved, setSaved] = useState("");
   const [busy, setBusy] = useState(false);
   const [expired, setExpired] = useState(false);
-  const [support, setSupport] = useState<{ spec: Support; reason: string; problem: string } | null>(null);
+  const [support, setSupport] = useState<{
+    spec: Support;
+    reason: string;
+    problem: string;
+  } | null>(null);
   const [archive, setArchive] = useState<Product | null>(null);
   const [orderFilter, setOrderFilter] = useState<"active" | "all">("active");
   const [capacity, setCapacity] = useState(String(venue.capacity));
   const { orders, refresh } = useLiveOrders({ venueId: venue.id });
   const router = useRouter();
-  const revision = orders.map((order) => `${order.id}:${order.version}`).join("|");
+  const revision = orders
+    .map((order) => `${order.id}:${order.version}`)
+    .join("|");
   const state: Availability =
     venue.open_state !== "open" ? "closed" : venue.paused ? "paused" : "open";
 
@@ -132,27 +145,34 @@ export function AdminPanel({
     }
   };
   const ask = (spec: Support) => setSupport({ spec, reason: "", problem: "" });
-  const nav = adminTabs.map(({ id, label, Icon }) => (
-    <Link
-      key={id}
-      href={`/admin/${venue.id}?tab=${id}`}
-      aria-current={tab === id ? "page" : undefined}
-    >
-      <Icon size={16} aria-hidden="true" className="side-icon" />
-      {label}
-    </Link>
-  ));
+  const nav = adminTabIds.map((id) => {
+    const Icon = tabIcons[id];
+    return (
+      <Link
+        key={id}
+        href={`/admin/${venue.id}?tab=${id}`}
+        aria-current={tab === id ? "page" : undefined}
+      >
+        <Icon size={16} aria-hidden="true" className="side-icon" />
+        {adminTabLabels[id]}
+      </Link>
+    );
+  });
   const hours = metrics.median_preparation_seconds;
   const shownOrders = orders.filter((o) =>
     orderFilter === "all"
       ? true
-      : ["pending_authorization", "queued", "preparing", "ready"].includes(o.status),
+      : ["pending_authorization", "queued", "preparing", "ready"].includes(
+          o.status,
+        ),
   );
   const grouped = categories
     .map((c) => ({
       category: c,
       list: products.filter(
-        (p) => p.category_id === c.id && p.name.toLowerCase().includes(filter.toLowerCase()),
+        (p) =>
+          p.category_id === c.id &&
+          p.name.toLowerCase().includes(filter.toLowerCase()),
       ),
     }))
     .filter((g) => g.list.length);
@@ -168,9 +188,13 @@ export function AdminPanel({
         </Link>
       </div>
       <div className="admin">
-        <nav className="side" aria-label="Administración">{nav}</nav>
+        <nav className="side" aria-label="Administración">
+          {nav}
+        </nav>
         <div>
-          <nav className="tabs" aria-label="Administración">{nav}</nav>
+          <nav className="tabs" aria-label="Administración">
+            {nav}
+          </nav>
           {error && (
             <div style={{ marginBottom: 16 }}>
               <Notice tone="danger">{error}</Notice>
@@ -201,7 +225,9 @@ export function AdminPanel({
                 <div className="metric">
                   <span className="muted t-label">Cobro neto simulado</span>
                   <span className="v">
-                    <Price amount={metrics.captured_minor - metrics.refunded_minor} />
+                    <Price
+                      amount={metrics.captured_minor - metrics.refunded_minor}
+                    />
                   </span>
                 </div>
                 <div className="metric">
@@ -217,7 +243,11 @@ export function AdminPanel({
                 <div className="metric">
                   <span className="muted t-label">Mediana de preparación</span>
                   <span className="v">
-                    {hours === null ? "—" : hours < 60 ? "<1 min" : `${Math.round(hours / 60)} min`}
+                    {hours === null
+                      ? "—"
+                      : hours < 60
+                        ? "<1 min"
+                        : `${Math.round(hours / 60)} min`}
                   </span>
                   <span className="hint">N = {metrics.preparation_n}</span>
                 </div>
@@ -280,7 +310,9 @@ export function AdminPanel({
                       tone={
                         o.status === "delivered"
                           ? "success"
-                          : ["canceled", "expired", "uncollected"].includes(o.status)
+                          : ["canceled", "expired", "uncollected"].includes(
+                                o.status,
+                              )
                             ? "danger"
                             : o.status === "ready"
                               ? "brand"
@@ -291,61 +323,66 @@ export function AdminPanel({
                     </StatusBadge>
                   </div>
                   <p className="muted t-label">
-                    {paymentLabels[o.payment_state]} · <Price amount={o.total_minor} />
+                    {paymentLabels[o.payment_state]} ·{" "}
+                    <Price amount={o.total_minor} />
                   </p>
-                  {o.status === "pending_authorization" && o.payment_state === "unknown" && (
-                    <>
-                      <Notice tone="warning">
-                        Reserva sin referencia confirmada. No se repetirá la autorización.
-                      </Notice>
-                      <div className="row wrap">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() =>
-                            ask({
-                              title: "Conciliar reserva aprobada",
-                              description: "Solo DEMO: simula evidencia del proveedor de que la reserva está confirmada, sin crear otra autorización.",
-                              min: 5,
-                              confirm: "Confirmar reserva",
-                              tone: "primary",
-                              build: (reason) => ({
-                                action: "reconcile_authorization",
-                                orderId: o.id,
-                                outcome: "authorized",
-                                providerResultConfirmed: true,
-                                reason,
-                              }),
-                            })
-                          }
-                        >
-                          Reserva aprobada
-                        </Button>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          onClick={() =>
-                            ask({
-                              title: "Conciliar reserva anulada",
-                              description: "Solo DEMO: simula evidencia de que no hay reserva ni cobro vigente.",
-                              min: 5,
-                              confirm: "Anular reserva",
-                              tone: "danger",
-                              build: (reason) => ({
-                                action: "reconcile_authorization",
-                                orderId: o.id,
-                                outcome: "voided",
-                                providerResultConfirmed: true,
-                                reason,
-                              }),
-                            })
-                          }
-                        >
-                          Reserva anulada
-                        </Button>
-                      </div>
-                    </>
-                  )}
+                  {o.status === "pending_authorization" &&
+                    o.payment_state === "unknown" && (
+                      <>
+                        <Notice tone="warning">
+                          Reserva sin referencia confirmada. No se repetirá la
+                          autorización.
+                        </Notice>
+                        <div className="row wrap">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() =>
+                              ask({
+                                title: "Conciliar reserva aprobada",
+                                description:
+                                  "Solo DEMO: simula evidencia del proveedor de que la reserva está confirmada, sin crear otra autorización.",
+                                min: 5,
+                                confirm: "Confirmar reserva",
+                                tone: "primary",
+                                build: (reason) => ({
+                                  action: "reconcile_authorization",
+                                  orderId: o.id,
+                                  outcome: "authorized",
+                                  providerResultConfirmed: true,
+                                  reason,
+                                }),
+                              })
+                            }
+                          >
+                            Reserva aprobada
+                          </Button>
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() =>
+                              ask({
+                                title: "Conciliar reserva anulada",
+                                description:
+                                  "Solo DEMO: simula evidencia de que no hay reserva ni cobro vigente.",
+                                min: 5,
+                                confirm: "Anular reserva",
+                                tone: "danger",
+                                build: (reason) => ({
+                                  action: "reconcile_authorization",
+                                  orderId: o.id,
+                                  outcome: "voided",
+                                  providerResultConfirmed: true,
+                                  reason,
+                                }),
+                              })
+                            }
+                          >
+                            Reserva anulada
+                          </Button>
+                        </div>
+                      </>
+                    )}
                   <div className="row wrap">
                     {o.status === "ready" && o.claimed_elsewhere && (
                       <Button
@@ -354,7 +391,8 @@ export function AdminPanel({
                         onClick={() =>
                           ask({
                             title: "Transferir el retiro a mi sesión",
-                            description: "Verificá físicamente que el pedido NO se entregó. Indicá el motivo.",
+                            description:
+                              "Verificá físicamente que el pedido NO se entregó. Indicá el motivo.",
                             min: 5,
                             confirm: "Ya verifiqué: transferir",
                             tone: "primary",
@@ -377,11 +415,16 @@ export function AdminPanel({
                         onClick={() =>
                           ask({
                             title: "Devolver el monto simulado",
-                            description: "Devolución ficticia completa. Indicá el motivo.",
+                            description:
+                              "Devolución ficticia completa. Indicá el motivo.",
                             min: 5,
                             confirm: "Devolver",
                             tone: "danger",
-                            build: (reason) => ({ action: "refund", orderId: o.id, reason }),
+                            build: (reason) => ({
+                              action: "refund",
+                              orderId: o.id,
+                              reason,
+                            }),
                           })
                         }
                       >
@@ -390,14 +433,16 @@ export function AdminPanel({
                     )}
                     {["queued", "preparing", "ready"].includes(o.status) &&
                       o.payment_state === "authorized" &&
-                      ((!o.claim_id && !o.claimed_elsewhere) || o.capture_state === "declined") && (
+                      ((!o.claim_id && !o.claimed_elsewhere) ||
+                        o.capture_state === "declined") && (
                         <Button
                           variant="danger"
                           size="sm"
                           onClick={() =>
                             ask({
                               title: `Cancelar #${o.public_code}`,
-                              description: "Cancelación por soporte. El cliente ve el motivo.",
+                              description:
+                                "Cancelación por soporte. El cliente ve el motivo.",
                               min: 3,
                               confirm: "Cancelar pedido",
                               tone: "danger",
@@ -429,7 +474,12 @@ export function AdminPanel({
               </div>
               {edit !== undefined ? (
                 <div className="stack">
-                  <Button variant="quiet" size="sm" onClick={() => setEdit(undefined)} style={{ alignSelf: "flex-start" }}>
+                  <Button
+                    variant="quiet"
+                    size="sm"
+                    onClick={() => setEdit(undefined)}
+                    style={{ alignSelf: "flex-start" }}
+                  >
                     ← Cerrar edición
                   </Button>
                   <ProductEditor
@@ -447,7 +497,10 @@ export function AdminPanel({
               ) : (
                 <>
                   <div className="search">
-                    <svg className="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+                    <svg className="ico" viewBox="0 0 24 24" aria-hidden="true">
+                      <circle cx="11" cy="11" r="8" />
+                      <path d="m21 21-4.3-4.3" />
+                    </svg>
                     <input
                       type="search"
                       aria-label="Buscar producto"
@@ -458,12 +511,20 @@ export function AdminPanel({
                   </div>
                   {grouped.map(({ category, list }) => (
                     <div key={category.id}>
-                      <h3 className="eyebrow section-label" style={{ marginTop: 16 }}>{category.label}</h3>
+                      <h3
+                        className="eyebrow section-label"
+                        style={{ marginTop: 16 }}
+                      >
+                        {category.label}
+                      </h3>
                       <div className="rows">
                         {list.map((p) => (
                           <div className="r wrap" key={p.id}>
                             <span className="thumb">
-                              <ProductImage name={p.name} src={productImageSrc(p)} />
+                              <ProductImage
+                                name={p.name}
+                                src={productImageSrc(p)}
+                              />
                             </span>
                             <div className="grow">
                               <div style={{ fontWeight: 600 }}>{p.name}</div>
@@ -473,7 +534,11 @@ export function AdminPanel({
                               </div>
                             </div>
                             <Toggle
-                              label={<span className="sr-only">Disponible: {p.name}</span>}
+                              label={
+                                <span className="sr-only">
+                                  Disponible: {p.name}
+                                </span>
+                              }
                               checked={p.available}
                               disabled={busy}
                               onChange={(available) =>
@@ -486,10 +551,18 @@ export function AdminPanel({
                                 })
                               }
                             />
-                            <Button variant="quiet" size="sm" onClick={() => setEdit(p)}>
+                            <Button
+                              variant="quiet"
+                              size="sm"
+                              onClick={() => setEdit(p)}
+                            >
                               Editar
                             </Button>
-                            <Button variant="quiet" size="sm" onClick={() => setArchive(p)}>
+                            <Button
+                              variant="quiet"
+                              size="sm"
+                              onClick={() => setArchive(p)}
+                            >
                               Archivar
                             </Button>
                           </div>
@@ -498,7 +571,10 @@ export function AdminPanel({
                     </div>
                   ))}
                   {!grouped.length && (
-                    <EmptyState icon={Wine} title={filter ? "Sin resultados" : "El menú está vacío"} />
+                    <EmptyState
+                      icon={Wine}
+                      title={filter ? "Sin resultados" : "El menú está vacío"}
+                    />
                   )}
                 </>
               )}
@@ -534,7 +610,11 @@ export function AdminPanel({
                   onSubmit={(e) => {
                     e.preventDefault();
                     void run(
-                      { action: "venue_update", venueId: venue.id, capacity: Number(capacity) },
+                      {
+                        action: "venue_update",
+                        venueId: venue.id,
+                        capacity: Number(capacity),
+                      },
                       "Guardado",
                     );
                   }}
@@ -550,7 +630,12 @@ export function AdminPanel({
                     style={{ maxWidth: 160 }}
                   />
                   <div>
-                    <Button type="submit" variant="secondary" size="sm" loading={busy}>
+                    <Button
+                      type="submit"
+                      variant="secondary"
+                      size="sm"
+                      loading={busy}
+                    >
                       Guardar
                     </Button>
                   </div>
@@ -612,7 +697,12 @@ export function AdminPanel({
                 }}
               >
                 <h2>Retiro y atención</h2>
-                <TextField name="pickup" label="Punto de retiro" required defaultValue={venue.pickup_label} />
+                <TextField
+                  name="pickup"
+                  label="Punto de retiro"
+                  required
+                  defaultValue={venue.pickup_label}
+                />
                 <TextField
                   name="eta"
                   label="Preparación estimada (minutos)"
@@ -628,16 +718,27 @@ export function AdminPanel({
                   defaultValue={venue.hours}
                   hint="Texto que ven los clientes."
                 />
-                <TextField name="contact" label="Contacto de soporte" defaultValue={venue.support_contact} />
+                <TextField
+                  name="contact"
+                  label="Contacto de soporte"
+                  defaultValue={venue.support_contact}
+                />
                 <div>
-                  <Button type="submit" variant="secondary" size="sm" loading={busy}>
+                  <Button
+                    type="submit"
+                    variant="secondary"
+                    size="sm"
+                    loading={busy}
+                  >
                     Guardar
                   </Button>
                 </div>
               </form>
             </div>
           )}
-          {tab === "equipo" && <TeamPanel venueId={venue.id} venueName={venue.name} />}
+          {tab === "equipo" && (
+            <TeamPanel venueId={venue.id} venueName={venue.name} />
+          )}
         </div>
       </div>
       <Sheet
@@ -657,7 +758,10 @@ export function AdminPanel({
                 if (!support) return;
                 const reason = support.reason.trim();
                 if (reason.length < support.spec.min) {
-                  setSupport({ ...support, problem: `Escribí un motivo de al menos ${support.spec.min} caracteres.` });
+                  setSupport({
+                    ...support,
+                    problem: `Escribí un motivo de al menos ${support.spec.min} caracteres.`,
+                  });
                   return;
                 }
                 if (await run(support.spec.build(reason))) setSupport(null);
@@ -674,7 +778,10 @@ export function AdminPanel({
           <textarea
             value={support?.reason ?? ""}
             aria-invalid={!!support?.problem}
-            onChange={(e) => support && setSupport({ ...support, reason: e.target.value, problem: "" })}
+            onChange={(e) =>
+              support &&
+              setSupport({ ...support, reason: e.target.value, problem: "" })
+            }
           />
           {support?.problem && (
             <span role="alert" className="field-error">
@@ -714,7 +821,11 @@ export function AdminPanel({
           </>
         }
       />
-      <SessionExpiredSheet open={expired} area="equipo" next={`/admin/${venue.id}?tab=${tab}`} />
+      <SessionExpiredSheet
+        open={expired}
+        area="equipo"
+        next={`/admin/${venue.id}?tab=${tab}`}
+      />
     </>
   );
 }

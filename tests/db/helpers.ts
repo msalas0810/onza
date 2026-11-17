@@ -46,10 +46,19 @@ export async function database() {
     ),
   );
   await db.exec(
-    readFileSync("supabase/migrations/202611170010_customer_accounts.sql", "utf8"),
+    readFileSync(
+      "supabase/migrations/202611170010_customer_accounts.sql",
+      "utf8",
+    ),
   );
   await db.exec(
-    readFileSync("supabase/migrations/202611170011_team_management.sql", "utf8"),
+    readFileSync(
+      "supabase/migrations/202611170011_team_management.sql",
+      "utf8",
+    ),
+  );
+  await db.exec(
+    readFileSync("supabase/migrations/202611170012_demo_listing.sql", "utf8"),
   );
   await db.exec(readFileSync("supabase/seed.sql", "utf8"));
   await db.exec(

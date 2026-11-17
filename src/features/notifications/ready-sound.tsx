@@ -38,7 +38,10 @@ export function ReadySound({ orders }: { orders: Order[] }) {
           }
         }
       }
-      localStorage.setItem("onza-ready-events", JSON.stringify(seen.slice(-200)));
+      localStorage.setItem(
+        "onza-ready-events",
+        JSON.stringify(seen.slice(-200)),
+      );
     } catch {
       /* El estado visual sigue siendo la fuente de verdad. */
     }

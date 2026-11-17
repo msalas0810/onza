@@ -1,5 +1,6 @@
 import "server-only";
 import { serverDb } from "@/lib/supabase/server";
+import { isConfigured } from "@/lib/supabase/config";
 import type { Account } from "@/lib/access-policy";
 export type CurrentAccount = {
   account: Account;
@@ -16,6 +17,13 @@ export type CurrentAccount = {
 };
 /** Account kind comes from the database (membership), never from the browser. */
 export async function currentAccount(): Promise<CurrentAccount> {
+  // Sin servicio configurado no hay cuenta: las pantallas de preferencias del dispositivo (apariencia) siguen disponibles.
+  if (!isConfigured())
+    return {
+      account: { kind: "none", onboarded: false },
+      email: null,
+      profile: null,
+    };
   const db = await serverDb();
   const {
     data: { user },

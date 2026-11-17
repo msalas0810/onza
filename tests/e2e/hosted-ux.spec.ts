@@ -14,13 +14,9 @@ test("carrito real: cantidades, quitar, vaciar/refrescar, conservar/reemplazar l
     has: page.getByRole("heading", { name: "Paloma", exact: true }),
   });
   await product.getByRole("button", { name: "Agregar", exact: true }).click();
-  await expect(
-    page.getByRole("link", { name: /Ver carrito · 1/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /1 producto/ })).toBeVisible();
   await product.getByRole("button", { name: "Agregar una unidad" }).click();
-  await expect(
-    page.getByRole("link", { name: /Ver carrito · 2/ }),
-  ).toBeVisible();
+  await expect(page.getByRole("link", { name: /2 productos/ })).toBeVisible();
   await page.goto("/v/sala-norte/p/30000000-0000-4000-8000-000000000001");
   await expect(page.getByRole("link", { name: /Ver carrito/ })).toBeVisible();
   await page.goto("/");
@@ -28,7 +24,7 @@ test("carrito real: cantidades, quitar, vaciar/refrescar, conservar/reemplazar l
   await expect(
     page.getByRole("link", { name: /Carrito de Sala Norte/ }),
   ).toBeVisible();
-  const cards = page.locator(".venue-card");
+  const cards = page.locator(".vcard");
   expect(await cards.last().getByText("Cerrado", { exact: true }).count()).toBe(
     1,
   );
@@ -42,14 +38,24 @@ test("carrito real: cantidades, quitar, vaciar/refrescar, conservar/reemplazar l
   await page.getByRole("button", { name: "Conservar mi carrito" }).click();
   expect(
     await page.evaluate(
-      () => JSON.parse(localStorage.getItem("onza-cart-draft")!).venueSlug,
+      () =>
+        JSON.parse(
+          Object.entries(localStorage).find(([k]) =>
+            k.startsWith("onza-cart-draft"),
+          )?.[1] ?? null!,
+        ).venueSlug,
     ),
   ).toBe("sala-norte");
   await patio.getByRole("button", { name: "Agregar", exact: true }).click();
   await page.getByRole("button", { name: "Vaciar y cambiar de local" }).click();
   expect(
     await page.evaluate(
-      () => JSON.parse(localStorage.getItem("onza-cart-draft")!).venueSlug,
+      () =>
+        JSON.parse(
+          Object.entries(localStorage).find(([k]) =>
+            k.startsWith("onza-cart-draft"),
+          )?.[1] ?? null!,
+        ).venueSlug,
     ),
   ).toBe("patio-central");
   await page.goto("/cart");
@@ -78,7 +84,12 @@ test("carrito real: cantidades, quitar, vaciar/refrescar, conservar/reemplazar l
     .click();
   await page.reload();
   expect(
-    await page.evaluate(() => localStorage.getItem("onza-cart-draft")),
+    await page.evaluate(
+      () =>
+        Object.entries(localStorage).find(([k]) =>
+          k.startsWith("onza-cart-draft"),
+        )?.[1] ?? null,
+    ),
   ).toBeNull();
   await page.goto("/v/club-cero");
   await expect(page.getByText(/Este local está cerrado/)).toBeVisible();
@@ -115,14 +126,14 @@ for (const mode of ["accepted", "denied", "imprecise", "timeout"] as const)
     await page
       .getByRole("button", { name: "Usar mi ubicación", exact: true })
       .click();
-    await expect(page.getByRole("status")).toContainText(
+    await expect(page.locator(".notice, .row").first()).toContainText(
       mode === "denied"
-        ? "No diste permiso"
+        ? "Sin permiso de ubicación"
         : mode === "timeout"
           ? "tardó demasiado"
           : mode === "imprecise"
             ? "demasiado imprecisa"
-            : "Ordenados por distancia",
+            : "Ubicación activa",
     );
     if (mode === "accepted") {
       await expect(
@@ -130,12 +141,10 @@ for (const mode of ["accepted", "denied", "imprecise", "timeout"] as const)
           /No encontramos locales abiertos con ubicación confirmada/,
         ),
       ).toBeVisible();
-      await expect(
-        page.getByText("Abierto cerca de vos", { exact: true }),
-      ).toHaveCount(0);
+      await expect(page.getByText("Más cerca", { exact: true })).toHaveCount(0);
     }
     await page.getByLabel("Buscar local").fill("Sala Norte");
-    await expect(page.locator(".venue-card")).toHaveCount(1);
+    await expect(page.locator(".vcard")).toHaveCount(1);
     expect(
       await page.evaluate(() =>
         Object.keys(localStorage).some((k) =>
@@ -184,7 +193,7 @@ test("layout real 360/390/1440 claro y oscuro, ajustes y foco", async ({
             await new Promise(requestAnimationFrame);
             await new Promise(requestAnimationFrame);
           });
-          const last = await page.locator(".product-row").last().boundingBox(),
+          const last = await page.locator("article.prow").last().boundingBox(),
             dock = await page.locator(".dock").boundingBox();
           expect(last!.y + last!.height).toBeLessThan(dock!.y);
         }
@@ -227,7 +236,7 @@ test("onza-dev: aceptar/cancelar concurrentes, cancelación posterior denegada y
     await a.goto("/checkout");
     await a.getByRole("checkbox").nth(0).check();
     await a.getByRole("checkbox").nth(1).check();
-    await a.getByRole("button", { name: /Confirmar y reservar/ }).click();
+    await a.getByRole("button", { name: /^Pedir/ }).click();
     await expect(
       a.getByRole("heading", { name: "Pedido recibido", exact: true }),
     ).toBeVisible();
@@ -370,7 +379,7 @@ test("vencimiento real con Realtime conectado: refresco puntual, sin polling con
   await page.goto("/checkout");
   await page.getByRole("checkbox").nth(0).check();
   await page.getByRole("checkbox").nth(1).check();
-  await page.getByRole("button", { name: /Confirmar y reservar/ }).click();
+  await page.getByRole("button", { name: /^Pedir/ }).click();
   await expect(
     page.getByRole("heading", { name: "Pedido recibido", exact: true }),
   ).toBeVisible();
@@ -382,17 +391,13 @@ test("vencimiento real con Realtime conectado: refresco puntual, sin polling con
 });
 
 test("login real del personal desde formulario", async ({ page }) => {
-  await page.goto("/login");
+  await page.goto("/equipo/acceso");
   await page
-    .getByLabel("Correo del personal")
+    .getByLabel("Correo del trabajo")
     .fill(process.env.DEMO_BARTENDER_EMAIL!);
   await page
     .getByLabel("Contraseña", { exact: true })
     .fill(process.env.DEMO_BARTENDER_PASSWORD!);
-  await page
-    .getByRole("button", { name: "Iniciar sesión", exact: true })
-    .click();
-  await expect(
-    page.getByRole("heading", { name: "Tus espacios de trabajo" }),
-  ).toBeVisible();
+  await page.getByRole("button", { name: "Ingresar", exact: true }).click();
+  await expect(page).toHaveURL(/\/(staff\/|equipo\/locales)/);
 });

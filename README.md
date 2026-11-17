@@ -105,3 +105,7 @@ El barrido demo se ejecuta al consultar/mutar y no necesita que el navegador que
 Ver [CONTRIBUTING.md](CONTRIBUTING.md) y [docs/github-vercel.md](docs/github-vercel.md). Git local y commits por hitos, sin remoto/push/despliegue. No usa el filesystem de Vercel como base de datos. Los flags de entorno no habilitan un banco: BAC permanece sin configurar. Faltan acuerdo/manual y condiciones del documento 03 antes de cualquier cobro real.
 
 No se incluyeron fotografías licenciadas; las fixtures conservan `photo_path=null`. SVG e Inter originales con licencias en `brand` y THIRD_PARTY_NOTICES.md. No se inventaron comercios afiliados, métricas ni logos bancarios.
+
+## Verificación local del flujo completo (sin Supabase remoto)
+
+`node scripts/verify-local-flow.mjs [--shots]` levanta un servidor de verificación (`scripts/local-shim/`: las migraciones reales sobre PGlite detrás de la parte de la API de Supabase que usa la app) y recorre con Chromium: cliente pide → barra recibe y acepta → marca listo → cliente muestra el ticket → barra valida y entrega, más cancelación, rechazo, permisos entre locales, clave temporal, quitar acceso, stock que cambia, sesión vencida y desconexión. Guarda `docs/evidence/v1/flow-verification.json` y capturas. **No es Supabase**: no prueba Realtime, Storage, correo, Google ni límites de tasa; no sustituye la verificación contra `onza-dev`.

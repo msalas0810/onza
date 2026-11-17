@@ -13,9 +13,19 @@ const OWN_FRAME =
 const FOCUSED = /^\/(onboarding|sesion-activa)(\/|$)/;
 
 const items = [
-  { href: "/", match: /^\/$|^\/v(\/|$)|^\/cart|^\/checkout/, label: "Explorar", Icon: Compass },
+  {
+    href: "/",
+    match: /^\/$|^\/v(\/|$)|^\/cart|^\/checkout/,
+    label: "Explorar",
+    Icon: Compass,
+  },
   { href: "/orders", match: /^\/orders/, label: "Pedidos", Icon: Receipt },
-  { href: "/cuenta", match: /^\/(cuenta|settings|policies)/, label: "Cuenta", Icon: User },
+  {
+    href: "/cuenta",
+    match: /^\/(cuenta|settings|policies)/,
+    label: "Cuenta",
+    Icon: User,
+  },
 ] as const;
 
 export function AppHeader() {

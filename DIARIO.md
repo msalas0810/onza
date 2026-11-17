@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`. Plan V1 (`docs/plan-v1.md`) y maquetas F1 (`design/maquetas-v1/`) en el commit de D-2026-11-17-05 (hash en git log). App sin cambios desde `346df98`. Sin merge a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`. F1 `8cb0b41`; F2–F6 implementados en los commits de D-2026-11-17-06 (hash en git log). Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
 | Commit desplegado en Vercel | `346df98` en `fix/hosted-integration`, Preview automático **READY**, deployment `dpl_DKAJXz6f2NgWYEPjHdMnc7DvpcFS`; acceso visual y 28 controles HTTPS puntuales aprobados |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | **Revisión visual de Manu de las maquetas F1** (`design/maquetas-v1/`, guía `GUIA.md`) y decisión de P-1–P-7 y de las contradicciones de `GUIA.md` §9. Solo después: F2 de `docs/plan-v1.md`. Sigue pendiente la prueba física del recorrido teléfono + computadora. |
+| Siguiente tarea exacta | **Pasos manuales de `docs/vercel-demo.md` ("V1")**: aplicar migraciones 011 y 012 a `onza-dev` (tras confirmar el proyecto), definir `SUPABASE_SERVICE_ROLE_KEY` en el Preview, `npm run demo:seed-real-venues`, y recorrer el Preview con teléfono + computadora. Aportar fotos/logos y coordenadas verificadas de los locales. Decidir P-1–P-7. |
 
 ### Pendientes abiertos
 
@@ -89,6 +89,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-17-06 · Implementar F2–F6 del rediseño V1 y verificar el recorrido real en local
+
+- **Fecha y hora:** 2026-11-17 09:00 (America/Costa_Rica)
+- **Persona:** Manu
+- **IA:** Claude Code (identificador de modelo no se registra en el repo por política de la sesión)
+- **Rama y commits:** `fix/hosted-integration` · commits de F2, F3, F4–F5 y F6–F7 (ver `git log`); F1 `8cb0b41` intacta.
+- **Qué cambió:** tokens negro/ivory/oxblood y hoja global portada de las maquetas; primitivas (Button, Field, Toggle, SegmentedControl, QuantityStepper con papelera, Notice, Sheet, ConnectionBanner). Cliente: Explorar con portada protagonista y sin distancias inventadas, menú compacto, carrito por cuenta con revisión de agotados y precios, checkout con errores por código y confirmación con vasito, pedido con línea de tiempo y ticket, hoja de sesión vencida. Equipo: marco propio, acceso directo al local, `/equipo/locales`, `/equipo/clave`, barra densa con rechazo en hoja y validar retiro en hoja. Administración con pestañas por URL (Resumen, Pedidos, Menú, Disponibilidad, Negocio, Equipo). Migración **011** (staff_accounts, clave temporal en base de datos, equipo por local) y **012** (`demo_listed`), ambas aditivas. Seed de cinco locales reales con menús y precios simulados. Sin dependencias nuevas; el acceso con Particle Wave conserva su composición.
+- **Archivos clave:** `src/styles/globals.css`, `src/components/ui/*`, `src/features/{catalog,orders,staff,admin,team,pickup}`, `src/app/{equipo,staff,admin,v,cart,checkout,orders,cuenta}`, `supabase/migrations/20261117001{1,2}_*.sql`, `fixtures/real-venues.json`, `scripts/{local-shim,seed-real-venues.mjs,verify-local-flow.mjs}`.
+- **Verificado (local):** `tsc`, `eslint`, `vitest` (107 pruebas, incluidas 9 de SQL del equipo en PGlite, política de acceso y seed), `next build`; Playwright de `design-system`, `venue-card`, `product-image` y `local-ui` contra la app; `scripts/verify-local-flow.mjs`: **65 controles** del recorrido real (cliente pide → barra acepta → listo → ticket → validar → entregar; cancelar antes de aceptar y carrera aceptar/cancelar; rechazo con motivo; aislamiento entre cuentas y locales; alta con contraseña temporal, cambio obligatorio también por API, quitar acceso a un solo local y rechazo posterior; agotado y precio nuevo; sesión vencida; sin conexión; 14 pedidos en la barra). Capturas en `docs/evidence/v1/`.
+- **No verificado:** **nada contra `onza-dev` ni el Preview** (la red del entorno bloqueó Vercel y `*.supabase.co`; el conector de Supabase ve otra organización). El servidor local es PGlite con las migraciones reales, **no Supabase**: sin Realtime, Storage, correo, Google ni límites de tasa. Teléfonos físicos, lector de pantalla, sonido/vibración/Wake Lock. Las pruebas E2E en vivo (`full-demo`, `hosted-ux`, `pickup`) y `scripts/verify-*.mjs` se ajustaron a la interfaz nueva pero no se ejecutaron.
+- **Decisiones:** coordenadas, fotos y logos de los locales quedan vacíos (no se inventan; la carpeta `public/demo-venues/real/` documenta cómo agregarlos con procedencia); el frontend nuevo no depende de la migración 012 (si falta la columna lista todos); Explorar y el resto conservan el comportamiento existente donde P-1–P-7 siguen pendientes; el rechazo, la clave temporal y el quitar acceso se resuelven en SQL y en la API, no solo en la interfaz.
+- **Pendientes / siguiente paso:** ver "Siguiente tarea exacta". Sin resolver: R3 y R5 (P-4), `onza_command` no impide a una cuenta del equipo crear pedidos llamando el RPC directo (la ruta de la app sí lo impide), PEN-001.
 
 ### D-2026-11-17-05 · Plan V1 y maquetas navegables F1 (sin tocar la app)
 

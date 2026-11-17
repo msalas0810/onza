@@ -13,6 +13,7 @@ import { VenueCard } from "@/features/catalog/components/venue-card";
 import { VenueProfile } from "@/features/admin/components/venue-profile";
 import { ProductMenu } from "@/features/catalog/components/product-menu";
 import { ProductEditorSample } from "./product-editor-sample";
+import { ControlsSample } from "./controls-sample";
 import type { Product, Venue } from "@/features/catalog/server/queries";
 import type { VenueCardData } from "@/features/catalog/components/venue-card";
 
@@ -36,6 +37,7 @@ const sampleVenue: Venue = {
   longitude: null,
   cover_url: "/demo-venues/sala-norte-cover.jpg",
   logo_url: "/demo-venues/sala-norte-logo.png",
+  demo_listed: true,
 };
 
 // Sample drinks for reviewing the menu rows and the drink editor. Nothing here is saved.
@@ -175,71 +177,81 @@ export default function DesignSystem() {
   )
     notFound();
   return (
-    <div className="page">
+    <div className="page wide">
       <p className="eyebrow">Onza · componentes</p>
       <h1>Sistema de diseño</h1>
       <p className="muted">
         Una misma identidad para elegir, preparar y recoger.
       </p>
-      <section className="stack">
-        <h2>Acciones</h2>
-        <Button>
-          Confirmar y reservar <Price amount={950000} />
-        </Button>
-        <Button variant="secondary">Aceptar y preparar</Button>
-        <Button variant="quiet">Volver al menú</Button>
-        <Button variant="danger">Cancelar pedido</Button>
-        <Button loading>Confirmando pedido</Button>
-        <Button disabled>No disponible</Button>
-        <IconButton label="Agregar">
-          <Plus size={20} />
-        </IconButton>
-      </section>
-      <section className="stack" aria-labelledby="venue-cards">
-        <h2 id="venue-cards">Tarjeta de local</h2>
-        <div className="stack">
-          {venueSamples.map(({ title, venue }) => (
-            <div className="stack" key={venue.slug} data-sample={venue.slug}>
-              <p className="muted">{title}</p>
-              <VenueCard preview venue={venue} />
-            </div>
-          ))}
-        </div>
-      </section>
-      <section className="stack" aria-label="Menú de tragos">
-        <h2>Menú de tragos</h2>
-        <ProductMenu
-          venue={sampleVenue}
-          products={sampleProducts}
-          categories={[{ id: sampleCategory, label: "Cocteles" }]}
-        />
-      </section>
-      <section className="stack" aria-label="Editor de trago">
-        <h2>Editor de trago</h2>
-        <ProductEditorSample
-          venueId={sampleVenue.id}
-          product={sampleProducts[0]}
-          categories={[{ id: sampleCategory, label: "Cocteles" }]}
-        />
-      </section>
-      <section className="stack" aria-label="Perfil del local">
-        <VenueProfile venue={sampleVenue} />
-      </section>
-      <section className="stack">
-        <h2>Estados y formularios</h2>
-        <StatusBadge>Pedido recibido</StatusBadge>
-        <StatusBadge tone="success">Listo para recoger</StatusBadge>
-        <StatusBadge tone="warning">
-          Reserva pendiente de confirmación
-        </StatusBadge>
-        <TextField label="Código de retiro" placeholder="ABC234" />
-        <TextField
-          label="Nombre del producto"
-          error="Ingresá un nombre antes de publicar."
-        />
-        <PhotoFallback name="Paloma" />
-        <ErrorState message="No pudimos confirmar el cobro. Consultá el estado antes de reintentar." />
-      </section>
+      <div className="stack loose" style={{ marginTop: 32 }}>
+        <section className="stack">
+          <h2>Acciones</h2>
+          <Button>
+            Pedir · <Price amount={950000} />
+          </Button>
+          <Button variant="secondary">Aceptar y preparar</Button>
+          <Button variant="quiet">Volver al menú</Button>
+          <Button variant="danger">Cancelar pedido</Button>
+          <Button loading>Confirmando pedido</Button>
+          <Button disabled>No disponible</Button>
+          <IconButton label="Agregar">
+            <Plus size={20} />
+          </IconButton>
+        </section>
+        <section className="stack" aria-label="Controles">
+          <h2>Controles y estados</h2>
+          <ControlsSample />
+        </section>
+        <section className="stack" aria-labelledby="venue-cards">
+          <h2 id="venue-cards">Tarjeta de local</h2>
+          <div className="vgrid">
+            {venueSamples.map(({ title, venue }) => (
+              <div
+                className="stack tight"
+                key={venue.slug}
+                data-sample={venue.slug}
+              >
+                <p className="muted">{title}</p>
+                <VenueCard preview venue={venue} />
+              </div>
+            ))}
+          </div>
+        </section>
+        <section className="stack" aria-label="Menú de tragos">
+          <h2>Menú de tragos</h2>
+          <ProductMenu
+            venue={sampleVenue}
+            products={sampleProducts}
+            categories={[{ id: sampleCategory, label: "Cocteles" }]}
+          />
+        </section>
+        <section className="stack" aria-label="Editor de trago">
+          <h2>Editor de trago</h2>
+          <ProductEditorSample
+            venueId={sampleVenue.id}
+            product={sampleProducts[0]}
+            categories={[{ id: sampleCategory, label: "Cocteles" }]}
+          />
+        </section>
+        <section className="stack" aria-label="Perfil del local">
+          <VenueProfile venue={sampleVenue} />
+        </section>
+        <section className="stack">
+          <h2>Estados y formularios</h2>
+          <StatusBadge>Pedido recibido</StatusBadge>
+          <StatusBadge tone="success">Listo para recoger</StatusBadge>
+          <StatusBadge tone="warning">
+            Reserva pendiente de confirmación
+          </StatusBadge>
+          <TextField label="Código de retiro" placeholder="ABC234" />
+          <TextField
+            label="Nombre del producto"
+            error="Ingresá un nombre antes de publicar."
+          />
+          <PhotoFallback name="Paloma" />
+          <ErrorState message="No pudimos confirmar el cobro. Consultá el estado antes de reintentar." />
+        </section>
+      </div>
     </div>
   );
 }

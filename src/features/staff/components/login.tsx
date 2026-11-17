@@ -51,7 +51,9 @@ export function StaffLogin({
           }
           // La página de acceso decide el destino según los locales de la cuenta y el cambio de clave pendiente.
           router.replace(
-            next ? `/equipo/acceso?next=${encodeURIComponent(next)}` : "/equipo/acceso",
+            next
+              ? `/equipo/acceso?next=${encodeURIComponent(next)}`
+              : "/equipo/acceso",
           );
           router.refresh();
         } catch (e) {

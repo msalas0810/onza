@@ -7,7 +7,11 @@ export function PasswordChangeForm({ next }: { next?: string }) {
   const router = useRouter();
   const [password, setPassword] = useState("");
   const [repeat, setRepeat] = useState("");
-  const [errors, setErrors] = useState<{ password?: string; repeat?: string; form?: string }>({});
+  const [errors, setErrors] = useState<{
+    password?: string;
+    repeat?: string;
+    form?: string;
+  }>({});
   const [busy, setBusy] = useState(false);
   return (
     <form
@@ -16,8 +20,10 @@ export function PasswordChangeForm({ next }: { next?: string }) {
       onSubmit={async (event) => {
         event.preventDefault();
         const found: typeof errors = {};
-        if (password.length < 10) found.password = "Usá al menos 10 caracteres.";
-        else if (password !== repeat) found.repeat = "Las contraseñas no coinciden.";
+        if (password.length < 10)
+          found.password = "Usá al menos 10 caracteres.";
+        else if (password !== repeat)
+          found.repeat = "Las contraseñas no coinciden.";
         setErrors(found);
         if (Object.keys(found).length) return;
         setBusy(true);
@@ -27,7 +33,9 @@ export function PasswordChangeForm({ next }: { next?: string }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ password }),
           });
-          const body: { message?: string; error?: string } = await response.json().catch(() => ({}));
+          const body: { message?: string; error?: string } = await response
+            .json()
+            .catch(() => ({}));
           if (!response.ok) {
             setErrors(
               body.error === "SAME_PASSWORD" || body.error === "WEAK_PASSWORD"
@@ -36,10 +44,16 @@ export function PasswordChangeForm({ next }: { next?: string }) {
             );
             return;
           }
-          router.replace(next ? `/equipo/acceso?next=${encodeURIComponent(next)}` : "/equipo/acceso");
+          router.replace(
+            next
+              ? `/equipo/acceso?next=${encodeURIComponent(next)}`
+              : "/equipo/acceso",
+          );
           router.refresh();
         } catch {
-          setErrors({ form: "No pudimos conectar. Revisá tu conexión y probá de nuevo." });
+          setErrors({
+            form: "No pudimos conectar. Revisá tu conexión y probá de nuevo.",
+          });
         } finally {
           setBusy(false);
         }

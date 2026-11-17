@@ -36,7 +36,12 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
   const lock = useRef(false);
   if (placed)
     return (
-      <div className="state" role="status" aria-live="polite" style={{ paddingTop: 64 }}>
+      <div
+        className="state"
+        role="status"
+        aria-live="polite"
+        style={{ paddingTop: 64 }}
+      >
         <div className="vaso">
           <span className="outline" />
           <span className="fill" />
@@ -47,7 +52,10 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           <br />
           Te avisamos cuando esté listo.
         </p>
-        <Link className={buttonClass({ variant: "secondary" })} href={`/orders/${placed.id}`}>
+        <Link
+          className={buttonClass({ variant: "secondary" })}
+          href={`/orders/${placed.id}`}
+        >
           Ver pedido
         </Link>
       </div>
@@ -131,7 +139,8 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
         message:
           e instanceof CommandError
             ? e.message
-            : e instanceof Error && e.message.includes("SUPABASE_NOT_CONFIGURED")
+            : e instanceof Error &&
+                e.message.includes("SUPABASE_NOT_CONFIGURED")
               ? errorMessage(e)
               : e instanceof Error
                 ? e.message
@@ -148,7 +157,13 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
   const unresolved =
     error &&
     !reviewable &&
-    !["OFFLINE", "CONNECTION_ERROR", "VENUE_CLOSED", "VENUE_PAUSED", "VENUE_CAPACITY"].includes(error.code);
+    ![
+      "OFFLINE",
+      "CONNECTION_ERROR",
+      "VENUE_CLOSED",
+      "VENUE_PAUSED",
+      "VENUE_CAPACITY",
+    ].includes(error.code);
   return (
     <>
       <Link className="back" href="/cart">
@@ -210,7 +225,9 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
               />
               <span>
                 Acepto los{" "}
-                <Link href="/policies">términos y la política de privacidad del demo</Link>{" "}
+                <Link href="/policies">
+                  términos y la política de privacidad del demo
+                </Link>{" "}
                 (demo-v1).
               </span>
             </label>
@@ -227,20 +244,38 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
             }
             action={
               reviewable ? (
-                <Link className={buttonClass({ variant: "secondary", size: "sm" })} href="/cart">
+                <Link
+                  className={buttonClass({ variant: "secondary", size: "sm" })}
+                  href="/cart"
+                >
                   Revisar carrito
                 </Link>
               ) : unresolved ? (
                 <div className="row wrap">
-                  <Link className={buttonClass({ variant: "secondary", size: "sm" })} href="/orders">
+                  <Link
+                    className={buttonClass({
+                      variant: "secondary",
+                      size: "sm",
+                    })}
+                    href="/orders"
+                  >
                     Consultar mis pedidos
                   </Link>
-                  <Button variant="quiet" size="sm" onClick={() => setConfirmRetry(true)}>
+                  <Button
+                    variant="quiet"
+                    size="sm"
+                    onClick={() => setConfirmRetry(true)}
+                  >
                     Ya revisé · nuevo intento
                   </Button>
                 </div>
-              ) : error.code === "OFFLINE" || error.code === "CONNECTION_ERROR" ? (
-                <Button variant="secondary" size="sm" onClick={() => void submit()}>
+              ) : error.code === "OFFLINE" ||
+                error.code === "CONNECTION_ERROR" ? (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => void submit()}
+                >
                   Reintentar
                 </Button>
               ) : undefined
@@ -260,7 +295,9 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
             Pedir · <Price amount={total} />
           </Button>
           {!online && (
-            <p className="btn-note">Sin conexión: el pedido no se va a enviar.</p>
+            <p className="btn-note">
+              Sin conexión: el pedido no se va a enviar.
+            </p>
           )}
         </div>
       </div>

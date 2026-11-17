@@ -21,7 +21,7 @@ for (const width of [390, 1280])
       await page.goto("/cart");
       await page.evaluate(() =>
         localStorage.setItem(
-          "onza-cart-draft",
+          "onza-cart-draft:anon",
           JSON.stringify({
             venueId: "20000000-0000-4000-8000-000000000001",
             venueName: "Sala Norte",
@@ -42,11 +42,9 @@ for (const width of [390, 1280])
       await expect(page.getByRole("heading", { name: "Paloma" })).toBeVisible();
       await page.getByRole("link", { name: "Continuar", exact: true }).click();
       await expect(
-        page.getByRole("heading", { name: "Confirmá tu pedido." }),
+        page.getByRole("heading", { name: "Confirmar pedido" }),
       ).toBeVisible();
-      await expect(
-        page.getByRole("button", { name: /Confirmar y reservar/ }),
-      ).toBeDisabled();
+      await expect(page.getByRole("button", { name: /^Pedir/ })).toBeDisabled();
       expect(
         await page
           .locator('input[type="text"],input[autocomplete="cc-number"]')

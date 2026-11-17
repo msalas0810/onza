@@ -36,7 +36,10 @@ export default async function MenuPage({
         <Notice
           title="Cerrado"
           action={
-            <Link className={buttonClass({ variant: "secondary", size: "sm" })} href="/orders">
+            <Link
+              className={buttonClass({ variant: "secondary", size: "sm" })}
+              href="/orders"
+            >
               Ver mis pedidos
             </Link>
           }

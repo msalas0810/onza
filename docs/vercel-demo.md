@@ -36,3 +36,26 @@ node --env-file=.env.local scripts/verify-accounts-demo.mjs https://onza-demo.ve
 ```
 
 **Pendientes explícitos, fuera de este encargo:** Google OAuth, SMTP propio y correo real de confirmación/recuperación, plantillas de correo, borrado de cuenta, revisión legal, nueva aceptación de condiciones y borrador tras sesión vencida. No se implementaron ni se prometen. Las cuentas sembradas están confirmadas para este demo. Cámara, audio, GPS y funcionamiento en Safari/iPhone/Android físicos siguen pendientes; Chromium con tamaño móvil no sustituye esos dispositivos. Pagos reales deshabilitados.
+
+## V1 · pasos manuales para activar el rediseño en el demo desplegado
+
+El código V1 ya está en `fix/hosted-integration`, pero **no se aplicó nada a `onza-dev` ni a Vercel desde la sesión que lo escribió** (sin acceso al proyecto remoto). Orden recomendado (expandir → desplegar → verificar, regla R4). Las dos migraciones son aditivas y compatibles con el commit desplegado `346df98`:
+
+```bash
+# 1. Comprobar que el proyecto es onza-dev (identificador ukdjuubekpanizcmppod) y aplicar solo las migraciones nuevas
+npx supabase db push --dry-run
+npx supabase db push        # aplica 202611170011_team_management.sql y 202611170012_demo_listing.sql
+```
+
+2. En Vercel (variables de **Preview**, solo servidor): `SUPABASE_SERVICE_ROLE_KEY`. La ruta `/api/team` la usa únicamente para dar de alta cuentas laborales y cerrar el cambio de contraseña temporal. Sin ella, esas dos acciones responden "Agregar personas no está configurado en este entorno"; todo lo demás funciona.
+3. El Preview se genera solo al hacer push a `fix/hosted-integration`.
+4. Datos del demo (locales reales con menús y precios simulados; oculta los locales ficticios sin borrarlos):
+
+```bash
+npm run demo:seed-real-venues
+```
+
+5. Fotos y logos: agregarlos en `public/demo-venues/real/` con su entrada en `SOURCES.json` (ver el README de esa carpeta) y volver a ejecutar el seed. Coordenadas: agregarlas en `fixtures/real-venues.json` solo con `source` y `verified_on`; sin ellas la app no muestra distancias para ese local.
+6. Verificación contra el Preview: `scripts/verify-hosted-ux-preview.mjs` y `scripts/verify-accounts-demo.mjs` se ajustaron a la interfaz nueva pero **no se re-ejecutaron**.
+
+Reversible: para volver a listar los locales ficticios, `update public.venues set demo_listed = true where slug in ('sala-norte','patio-central','club-cero');`.

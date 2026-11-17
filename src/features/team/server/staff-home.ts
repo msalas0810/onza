@@ -13,7 +13,9 @@ export async function staffHome(next?: string) {
     return "/equipo/clave";
   const destination = safeNext(next, "");
   if (/^\/(staff|admin)\/[0-9a-f-]{36}/.test(destination)) return destination;
-  const { data: memberships } = await db.from("memberships").select("venue_id,role");
+  const { data: memberships } = await db
+    .from("memberships")
+    .select("venue_id,role");
   const rows = memberships ?? [];
   if (rows.length === 1 && rows[0].role !== "onza")
     return `/staff/${rows[0].venue_id}`;

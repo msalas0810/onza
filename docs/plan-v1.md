@@ -6,13 +6,13 @@ Rama: `fix/hosted-integration`. Sin ramas nuevas, sin tocar `main`. Plan aprobad
 
 | Fase | Estado | Entregables / siguiente paso |
 | --- | --- | --- |
-| F1 · Maquetas y sistema visual | **Terminada, pendiente de revisión visual de Manu** | `design/maquetas-v1/` (maquetas, assets, `GUIA.md`, `verificacion.json`, `capturas/`), `scripts/verify-maquetas.mjs`. 51/51 controles. Commit en `DIARIO.md` (entrada D-2026-11-17-05) |
-| F2 · Tokens y primitivas | Pendiente — **no empezar sin la aprobación visual de F1** | Ver §5 F2 |
-| F3 · Cliente | Pendiente | Ver §5 F3 |
-| F4 · Equipo | Pendiente | Ver §5 F4 |
-| F5 · Administración y equipo | Pendiente; bloqueos 2 y 4 de §9 | Ver §5 F5 |
-| F6 · Datos del demo | Pendiente; bloqueos 1 y 6 de §9 | Ver §5 F6 |
-| F7 · Verificación integral y Preview | Pendiente; bloqueos 2 y 3 de §9 | Ver §5 F7 |
+| F1 · Maquetas y sistema visual | ✅ Terminada y aprobada por Manu como base visual (commit `8cb0b41`) | `design/maquetas-v1/` |
+| F2 · Tokens y primitivas | ✅ Implementada | `design/tokens.json` → `tokens.css` (42 pares de contraste), `src/styles/globals.css`, `primitives.tsx`, `sheet.tsx`, `connection-banner.tsx`, `/design-system` actualizado. `NumberFlow` no se añadió (P-7 sigue pendiente). Falta: los íconos animados son solo CSS (campana, check, vasito, dock) |
+| F3 · Cliente | ✅ Implementada | Explorar (portada, más cercano solo con ubicación fiable, cerrados al final), local, producto, carrito por cuenta con revisión, checkout con errores por código, pedido con ticket, cuenta, sesión vencida. Pendiente: fotos/logos reales (sin fuente verificable) y P-1 (menú de local cerrado) |
+| F4 · Equipo | ✅ Implementada | `StaffShell`, `/equipo/acceso` (directo al local), `/equipo/locales`, `/equipo/clave`, barra densa con rechazo en hoja y validar retiro en hoja |
+| F5 · Administración y equipo | ✅ Código y pruebas; **migración 011 sin aplicar a `onza-dev`** | Pestañas por URL, Disponibilidad, Negocio, Equipo; `/api/team` y `/api/team/password` (necesitan `SUPABASE_SERVICE_ROLE_KEY` de servidor). Pendiente: R3/R5 (P-4) |
+| F6 · Datos del demo | ✅ Código y seed; **migración 012 y seed sin aplicar** | `fixtures/real-venues.json` (hechos con fuente vs. simulado), `npm run demo:seed-real-venues`. Pendiente: coordenadas, fotos y logos (sin acceso a fuentes) |
+| F7 · Verificación y Preview | 🟡 Parcial | Local: typecheck, lint, 107 pruebas, build, 65 controles del recorrido real sobre PGlite. **Sin hacer**: migraciones y seed en `onza-dev`, verificación en el Preview, teléfonos físicos. Pasos exactos en `docs/vercel-demo.md` |
 
 Para continuar (Sonnet u otra IA): leer `DIARIO.md` → este archivo → `design/maquetas-v1/GUIA.md` → abrir las maquetas. La guía es la fuente visual; este plan, la fuente de alcance, tareas y criterios.
 

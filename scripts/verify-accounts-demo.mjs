@@ -20,7 +20,7 @@ const customer = await browser.newContext({
 const checks = [];
 const check = (name, ok) => {
   checks.push({ name, passed: !!ok });
-  console.log(JSON.stringify({check: name, passed: !!ok}));
+  console.log(JSON.stringify({ check: name, passed: !!ok }));
   if (!ok) throw new Error(`CHECK_FAILED: ${name}`);
 };
 let runtimeErrors = 0;
@@ -30,12 +30,25 @@ try {
   a.on("pageerror", () => runtimeErrors++);
   b.on("pageerror", () => runtimeErrors++);
   await a.goto(origin);
-  check("accounts required at public entry", new URL(a.url()).pathname === "/acceso");
+  check(
+    "accounts required at public entry",
+    new URL(a.url()).pathname === "/acceso",
+  );
   await a.getByText("Continuar con correo", { exact: true }).click();
-  await a.getByLabel("Correo", { exact: true }).fill(process.env.DEMO_CUSTOMER_EMAIL);
-  await a.getByLabel("Contraseña", { exact: true }).fill(process.env.DEMO_CUSTOMER_PASSWORD);
-  await a.locator("form").getByRole("button", { name: "Ingresar", exact: true }).click();
-  await a.waitForURL(url => url.pathname === "/onboarding" || url.pathname === "/", { timeout: 30000 });
+  await a
+    .getByLabel("Correo", { exact: true })
+    .fill(process.env.DEMO_CUSTOMER_EMAIL);
+  await a
+    .getByLabel("Contraseña", { exact: true })
+    .fill(process.env.DEMO_CUSTOMER_PASSWORD);
+  await a
+    .locator("form")
+    .getByRole("button", { name: "Ingresar", exact: true })
+    .click();
+  await a.waitForURL(
+    (url) => url.pathname === "/onboarding" || url.pathname === "/",
+    { timeout: 30000 },
+  );
   check("customer password login", true);
   if (new URL(a.url()).pathname === "/onboarding") {
     await a.getByLabel("Nombre", { exact: true }).fill("Cliente Demo");
@@ -46,27 +59,38 @@ try {
     await a.getByLabel("Año", { exact: true }).selectOption("2000");
     await a.getByRole("checkbox", { name: /Acepto las/ }).check();
     await a.getByRole("button", { name: "Continuar", exact: true }).click();
-    await a.waitForURL(url => url.pathname === "/", { timeout: 30000 });
+    await a.waitForURL((url) => url.pathname === "/", { timeout: 30000 });
     check("onboarding persists fictional demo profile", true);
   }
   await b.goto(origin + "/equipo/acceso");
-  await b.getByLabel("Correo del personal", { exact: true }).fill(process.env.DEMO_BARTENDER_EMAIL);
-  await b.getByLabel("Contraseña", { exact: true }).fill(process.env.DEMO_BARTENDER_PASSWORD);
-  await b.getByRole("button", { name: "Iniciar sesión", exact: true }).click();
-  await b.getByRole("link", { name: "Abrir barra", exact: true }).waitFor({ timeout: 30000 });
+  await b
+    .getByLabel("Correo del trabajo", { exact: true })
+    .fill(process.env.DEMO_BARTENDER_EMAIL);
+  await b
+    .getByLabel("Contraseña", { exact: true })
+    .fill(process.env.DEMO_BARTENDER_PASSWORD);
+  await b.getByRole("button", { name: "Ingresar", exact: true }).click();
+  await b
+    .getByRole("link", { name: "Abrir barra", exact: true })
+    .waitFor({ timeout: 30000 });
   check("independent bartender password login", true);
   await a.goto(origin + "/v/sala-norte/p/30000000-0000-4000-8000-000000000001");
   await a.getByRole("button", { name: "Agregar", exact: true }).click();
   await a.goto(origin + "/checkout");
-  check("payment scenario selector absent", await a.locator("select").count() === 0);
-  await a.getByRole("button", { name: /Confirmar y reservar/ }).click();
+  check(
+    "payment scenario selector absent",
+    (await a.locator("select").count()) === 0,
+  );
+  await a.getByRole("button", { name: /^Pedir/ }).click();
   await a
     .getByRole("heading", { name: "Pedido recibido", exact: true })
     .waitFor({ timeout: 25000 });
   check("Preview accepts its own Origin and creates mock order", true);
   const orderId = new URL(a.url()).pathname.split("/").at(-1);
   await a.reload();
-  await a.getByRole("heading", { name: "Pedido recibido", exact: true }).waitFor();
+  await a
+    .getByRole("heading", { name: "Pedido recibido", exact: true })
+    .waitFor();
   check("customer order survives reload", true);
   const get = async () => {
     const r = await a.request.get(origin + `/api/orders?order=${orderId}`);
@@ -74,17 +98,13 @@ try {
   };
   let order = await get();
   await b.goto(origin + `/staff/${venue}`);
-  const card = b
-    .locator("article")
-    .filter({
-      has: b.getByRole("heading", {
-        name: `#${order.public_code}`,
-        exact: true,
-      }),
-    });
-  await card
-    .getByRole("button", { name: "Aceptar y preparar", exact: true })
-    .click();
+  const card = b.locator("article").filter({
+    has: b.getByRole("heading", {
+      name: `#${order.public_code}`,
+      exact: true,
+    }),
+  });
+  await card.getByRole("button", { name: "Aceptar", exact: true }).click();
   await a
     .getByRole("heading", { name: "Preparando", exact: true })
     .waitFor({ timeout: 25000 });
@@ -106,6 +126,7 @@ try {
   check("public number rejected", !publicAttempt.ok());
   await card
     .getByRole("button", { name: "Validar retiro", exact: true })
+    .first()
     .click();
   check(
     "staff action does not prefill credential",
@@ -147,9 +168,15 @@ try {
     !consumed.ok() && (await consumed.json()).error === "ALREADY_DELIVERED",
   );
   await a.goto(origin + "/equipo/acceso");
-  check("customer cannot enter team portal", new URL(a.url()).pathname === "/sesion-activa");
+  check(
+    "customer cannot enter team portal",
+    new URL(a.url()).pathname === "/sesion-activa",
+  );
   await b.goto(origin + "/acceso");
-  check("staff cannot enter customer area", new URL(b.url()).pathname === "/sesion-activa");
+  check(
+    "staff cannot enter customer area",
+    new URL(b.url()).pathname === "/sesion-activa",
+  );
   check("no runtime errors", runtimeErrors === 0);
   writeFileSync(
     "docs/evidence/accounts-demo-verification.json",
@@ -170,7 +197,13 @@ try {
   );
   console.log(JSON.stringify({ passed: checks.length, runtimeErrors, origin }));
 } catch (error) {
-  console.error(JSON.stringify({lastPassed: checks.at(-1)?.name ?? "browser startup", passed: checks.length, errorType: error.name}));
+  console.error(
+    JSON.stringify({
+      lastPassed: checks.at(-1)?.name ?? "browser startup",
+      passed: checks.length,
+      errorType: error.name,
+    }),
+  );
   console.error(
     error.message.startsWith("CHECK_FAILED:")
       ? error.message

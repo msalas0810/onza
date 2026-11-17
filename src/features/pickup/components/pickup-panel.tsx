@@ -139,13 +139,19 @@ export function PickupPanel({
       <div className="stack">
         <div className="result ok" role="status">
           <span className="big">
-            <svg className="ico anim-check" viewBox="0 0 24 24" aria-hidden="true">
+            <svg
+              className="ico anim-check"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
               <path d="M20 6 9 17l-5-5" />
             </svg>
           </span>
           <strong className="t-heading">Entregado #{order.public_code}</strong>
           <span>
-            {order.items.map((i) => `${i.quantity}× ${i.name_snapshot}`).join(", ")}
+            {order.items
+              .map((i) => `${i.quantity}× ${i.name_snapshot}`)
+              .join(", ")}
           </span>
         </div>
         <Button block onClick={reset}>
@@ -177,7 +183,12 @@ export function PickupPanel({
           />
           <div className="row">
             {onScan && (
-              <Button type="button" variant="secondary" size="lg" onClick={onScan}>
+              <Button
+                type="button"
+                variant="secondary"
+                size="lg"
+                onClick={onScan}
+              >
                 <ScanLine size={20} aria-hidden="true" />
                 Escanear QR
               </Button>
@@ -227,7 +238,12 @@ export function PickupPanel({
               )}
               {order.payment_state === "authorized" &&
                 order.capture_state !== "declined" && (
-                  <Button size="lg" block loading={busy} onClick={() => void act("capture")}>
+                  <Button
+                    size="lg"
+                    block
+                    loading={busy}
+                    onClick={() => void act("capture")}
+                  >
                     Confirmar cobro simulado
                   </Button>
                 )}

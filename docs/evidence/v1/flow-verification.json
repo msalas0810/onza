@@ -1,0 +1,334 @@
+{
+  "date": "2026-11-17T09:17:34.821Z",
+  "note": "Servidor local sobre PGlite con migraciones reales; no es Supabase.",
+  "passed": 65,
+  "failed": 0,
+  "results": [
+    {
+      "name": "Sin sesión, la entrada pide acceso",
+      "ok": true,
+      "detail": "http://127.0.0.1:3000/acceso?next=%2F"
+    },
+    {
+      "name": "El acceso del equipo ofrece correo y contraseña, sin registro ni Google",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Explorar lista los locales reales abiertos y no los ficticios",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Otro Bar queda en Cerrados con estado evidente",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sin ubicación se ofrece sin inventar distancias",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Una cuenta personal no entra a la barra y se le explica",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Una cuenta del equipo no entra al área de clientes",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Con un solo local, el equipo entra directo a la barra",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Agregar abre el stepper y el dock resume la ronda",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El carrito vive en la clave de la cuenta",
+      "ok": true,
+      "detail": "onza-cart-draft:10000000-0000-4000-8000-0000000000b1"
+    },
+    {
+      "name": "Con cantidad 1, quitar elimina la línea",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El carrito muestra la ronda y el total",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Confirmación con el vasito tras pedir",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El pedido nace Recibido y se puede cancelar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El carrito se vacía al pedir",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "La barra recibe el pedido con número, productos y tiempo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Aceptar pasa el pedido a Preparando",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El cliente ve Preparando y ya no puede cancelar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El cliente ve Listo con QR y código privado de 12 caracteres",
+      "ok": true,
+      "detail": "12 caracteres"
+    },
+    {
+      "name": "El número público no es el código privado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Un código que no es el privado se rechaza",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cobro simulado y entrega confirmados",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El código consumido no sirve otra vez",
+      "ok": true,
+      "detail": "Este retiro ya fue utilizado. El pedido está entregado; no lo entregués otra vez"
+    },
+    {
+      "name": "El cliente ve Entregado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El cliente cancela antes de que el local acepte",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cancelar después de que el local aceptó se rechaza con un mensaje claro",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El rechazo exige un motivo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El cliente ve el pedido rechazado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Otra cuenta no ve el pedido de María",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Otra cuenta no tiene pedidos ajenos en su lista",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Un cliente no puede operar la barra por la API",
+      "ok": true,
+      "detail": "HTTP 409 VERSION_CONFLICT"
+    },
+    {
+      "name": "Un empleado de un local no entra a otro",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Un empleado no administra el local",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El sonido de la barra es opcional y se activa con un gesto",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Con dos locales, el equipo elige entre ellos por nombre",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El correo de un cliente no se convierte en cuenta laboral",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "La contraseña temporal se muestra una sola vez",
+      "ok": true,
+      "detail": "••••••••••••••"
+    },
+    {
+      "name": "La persona nueva queda con clave temporal pendiente",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Con clave temporal, el equipo debe crear la suya antes de operar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "La API rechaza operar con la clave temporal pendiente",
+      "ok": true,
+      "detail": "HTTP 403 PASSWORD_CHANGE_REQUIRED"
+    },
+    {
+      "name": "La navegación también lo bloquea",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "No se acepta repetir la contraseña temporal",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Tras cambiarla, entra a su barra",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Quitar acceso lo confirma sin tocar a otras personas",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Quien perdió el acceso ya no entra a ese local",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sus acciones posteriores en ese local se rechazan en el servidor",
+      "ok": true,
+      "detail": "HTTP 403 NOT_AUTHORIZED"
+    },
+    {
+      "name": "Conserva el acceso a su otro local",
+      "ok": true,
+      "detail": "staff/c99db59c-5920-4878-8fb4-afe769077fa3 Saltar al contenido Stiefel Pub Pablo Mora · Empleado Salir Barra  Barra de grif"
+    },
+    {
+      "name": "Pausar el local se refleja para el cliente y bloquea Agregar",
+      "ok": true,
+      "detail": "true 1"
+    },
+    {
+      "name": "Un producto agotado se rechaza con salida clara",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El carrito marca el agotado y bloquea Continuar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El agotado se puede quitar: nada queda atrapado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sin conexión aparece el aviso y Pedir queda bloqueado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Con la sesión vencida se ofrece volver a entrar sin cerrar nada solo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El carrito se conserva para la misma cuenta",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Volver a entrar conserva el destino",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Con la sesión de vuelta, el carrito sigue ahí",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Se crearon 14 pedidos para probar la densidad de la barra",
+      "ok": true,
+      "detail": "14 creados"
+    },
+    {
+      "name": "Con muchos pedidos, las columnas desplazan sin perder la cabecera de la barra",
+      "ok": true,
+      "detail": "15 tarjetas, desplaza: true"
+    },
+    {
+      "name": "La cabecera con Validar retiro sigue a la vista tras desplazar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Las acciones de la barra tienen al menos 56 px de alto",
+      "ok": true,
+      "detail": "mínimo 56 px"
+    },
+    {
+      "name": "En el teléfono, la última tarjeta y su acción se alcanzan desplazando",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "La barra del teléfono no desborda horizontalmente",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Las pestañas Nuevos/Preparando/Listos cambian la lista en el teléfono",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El tema oscuro renderiza sin errores",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cero errores de ejecución en el navegador",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "errors": []
+}

@@ -64,7 +64,7 @@ try {
   await a.goto(origin + "/checkout");
   await a.getByRole("checkbox").nth(0).check();
   await a.getByRole("checkbox").nth(1).check();
-  await a.getByRole("button", { name: /Confirmar y reservar/ }).click();
+  await a.getByRole("button", { name: /^Pedir/ }).click();
   await a
     .getByRole("heading", { name: "Pedido recibido", exact: true })
     .waitFor({ timeout: 25000 });
@@ -76,17 +76,13 @@ try {
   };
   let order = await get();
   await b.goto(origin + `/staff/${venue}`);
-  const card = b
-    .locator("article")
-    .filter({
-      has: b.getByRole("heading", {
-        name: `#${order.public_code}`,
-        exact: true,
-      }),
-    });
-  await card
-    .getByRole("button", { name: "Aceptar y preparar", exact: true })
-    .click();
+  const card = b.locator("article").filter({
+    has: b.getByRole("heading", {
+      name: `#${order.public_code}`,
+      exact: true,
+    }),
+  });
+  await card.getByRole("button", { name: "Aceptar", exact: true }).click();
   await a
     .getByRole("heading", { name: "Preparando", exact: true })
     .waitFor({ timeout: 25000 });
@@ -108,6 +104,7 @@ try {
   check("public number rejected", !publicAttempt.ok());
   await card
     .getByRole("button", { name: "Validar retiro", exact: true })
+    .first()
     .click();
   check(
     "staff action does not prefill credential",

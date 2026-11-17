@@ -1,6 +1,11 @@
 export default function Loading() {
   return (
-    <div className="page wide" role="status" aria-busy="true" aria-label="Cargando">
+    <div
+      className="page wide"
+      role="status"
+      aria-busy="true"
+      aria-label="Cargando"
+    >
       <div className="sk" style={{ height: 38, width: 180 }} />
       <div className="vgrid three" style={{ marginTop: 32 }}>
         {[1, 2, 3].map((n) => (

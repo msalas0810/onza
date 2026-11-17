@@ -161,15 +161,20 @@ export function OrderDetail({ id }: { id: string }) {
               <>
                 <div>
                   <div className="small">Código privado</div>
-                  <div className="code num" data-private="pickup" aria-label={`Código ${order.pickup_code.split("").join(" ")}`}>
-                    {order.pickup_code
-                      .match(/.{1,4}/g)
-                      ?.map((group) => <span key={group}>{group}</span>)}
+                  <div
+                    className="code num"
+                    data-private="pickup"
+                    aria-label={`Código ${order.pickup_code.split("").join(" ")}`}
+                  >
+                    {order.pickup_code.match(/.{1,4}/g)?.map((group) => (
+                      <span key={group}>{group}</span>
+                    ))}
                   </div>
                 </div>
                 {!order.qr_data_url && (
                   <p role="status" className="small">
-                    El QR no está disponible. La barra puede validar este código.
+                    El QR no está disponible. La barra puede validar este
+                    código.
                   </p>
                 )}
                 <p className="small">
@@ -183,7 +188,11 @@ export function OrderDetail({ id }: { id: string }) {
                   No pudimos abrir tu ticket. Tu pedido sigue listo; volvé a
                   consultar o pedí ayuda en la barra.
                 </p>
-                <Button variant="secondary" onClick={refresh} style={{ marginTop: 12 }}>
+                <Button
+                  variant="secondary"
+                  onClick={refresh}
+                  style={{ marginTop: 12 }}
+                >
                   Reintentar ticket
                 </Button>
               </div>
@@ -239,7 +248,8 @@ export function OrderDetail({ id }: { id: string }) {
         </p>
         {order.payment_state === "unknown" && (
           <Notice tone="danger" title="Resultado pendiente de conciliación">
-            No inicies otro pedido para resolver esta reserva. Consultá al local.
+            No inicies otro pedido para resolver esta reserva. Consultá al
+            local.
           </Notice>
         )}
         {order.status === "pending_authorization" &&
@@ -258,7 +268,8 @@ export function OrderDetail({ id }: { id: string }) {
         </Button>
         <p className="hint">
           Ayuda del local:{" "}
-          {order.venue.support_contact || "solicitá ayuda presencial en la barra."}
+          {order.venue.support_contact ||
+            "solicitá ayuda presencial en la barra."}
         </p>
       </div>
       <Sheet
@@ -271,7 +282,11 @@ export function OrderDetail({ id }: { id: string }) {
             <Button variant="secondary" onClick={() => setConfirmCancel(false)}>
               Volver
             </Button>
-            <Button variant="danger" loading={busy} onClick={() => void act("cancel")}>
+            <Button
+              variant="danger"
+              loading={busy}
+              onClick={() => void act("cancel")}
+            >
               Sí, cancelar pedido
             </Button>
           </>

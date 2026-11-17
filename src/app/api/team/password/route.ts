@@ -27,7 +27,9 @@ export async function POST(request: Request) {
         status:
           code === "SESSION_REQUIRED"
             ? 401
-            : code === "WEAK_PASSWORD" || code === "SAME_PASSWORD" || code === "INVALID_INPUT"
+            : code === "WEAK_PASSWORD" ||
+                code === "SAME_PASSWORD" ||
+                code === "INVALID_INPUT"
               ? 422
               : 503,
         headers,

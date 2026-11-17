@@ -22,7 +22,9 @@ export function ReconnectingBanner({ show }: { show: boolean }) {
   return (
     <div className="banner" role="status">
       <RefreshCw size={16} aria-hidden="true" />
-      <span className="grow">Reconectando… volvemos a consultar al conectar.</span>
+      <span className="grow">
+        Reconectando… volvemos a consultar al conectar.
+      </span>
     </div>
   );
 }

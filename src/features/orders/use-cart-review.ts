@@ -45,14 +45,17 @@ export function useCartReview(cart: Cart | null) {
       const current = readCart();
       for (const item of current?.items ?? []) {
         const product = menu.find((p) => p.id === item.productId);
-        if (!product || !product.available) next[item.productId] = { code: "OUT_OF_STOCK" };
+        if (!product || !product.available)
+          next[item.productId] = { code: "OUT_OF_STOCK" };
         else if (product.version !== item.version) {
           if (product.price_minor === item.priceMinor && current)
             // Cambió el producto pero no el precio: se actualiza la versión sin molestar a la persona.
             writeCart({
               ...current,
               items: current.items.map((i) =>
-                i.productId === item.productId ? { ...i, version: product.version } : i,
+                i.productId === item.productId
+                  ? { ...i, version: product.version }
+                  : i,
               ),
             });
           else
@@ -71,7 +74,11 @@ export function useCartReview(cart: Cart | null) {
         .maybeSingle();
       if (data)
         setVenue(
-          data.open_state !== "open" ? "closed" : data.paused ? "paused" : "open",
+          data.open_state !== "open"
+            ? "closed"
+            : data.paused
+              ? "paused"
+              : "open",
         );
     } catch {
       setFailed(true);

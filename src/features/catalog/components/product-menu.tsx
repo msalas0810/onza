@@ -3,11 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Search } from "lucide-react";
 import type { Venue, Product } from "../server/queries";
-import {
-  Price,
-  EmptyState,
-  Button,
-} from "@/components/ui/primitives";
+import { Price, EmptyState, Button } from "@/components/ui/primitives";
 import { CartDock } from "@/features/orders/components/cart-dock";
 import { useCart } from "@/features/orders/cart-store";
 import { AddProduct } from "./add-product";

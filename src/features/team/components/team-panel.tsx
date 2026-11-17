@@ -52,7 +52,13 @@ async function call(input: Record<string, unknown>) {
 }
 
 /** Equipo del local: alta con contraseña temporal (se muestra una sola vez), cambio de permiso y retiro de acceso. */
-export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: string }) {
+export function TeamPanel({
+  venueId,
+  venueName,
+}: {
+  venueId: string;
+  venueName: string;
+}) {
   const [members, setMembers] = useState<Member[] | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -62,16 +68,29 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
     | { type: "revoke"; member: Member }
     | null
   >(null);
-  const [form, setForm] = useState({ name: "", email: "", role: "bartender" as Role });
-  const [formError, setFormError] = useState<{ name?: string; email?: string; form?: string }>({});
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    role: "bartender" as Role,
+  });
+  const [formError, setFormError] = useState<{
+    name?: string;
+    email?: string;
+    form?: string;
+  }>({});
   const [newRole, setNewRole] = useState<Role>("bartender");
-  const [created, setCreated] = useState<{ password: string | null; name: string } | null>(null);
+  const [created, setCreated] = useState<{
+    password: string | null;
+    name: string;
+  } | null>(null);
   const [copied, setCopied] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const load = useCallback(async () => {
     try {
-      const response = await fetch(`/api/team?venue=${venueId}`, { cache: "no-store" });
+      const response = await fetch(`/api/team?venue=${venueId}`, {
+        cache: "no-store",
+      });
       const body: unknown = await response.json();
       if (!response.ok)
         throw new Error(
@@ -90,7 +109,8 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
     return () => clearTimeout(timer);
   }, [load]);
 
-  const admins = members?.filter((m) => m.role === "admin" || m.role === "onza").length ?? 0;
+  const admins =
+    members?.filter((m) => m.role === "admin" || m.role === "onza").length ?? 0;
   const close = () => {
     setSheet(null);
     setCreated(null);
@@ -100,7 +120,8 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
   async function submitAdd(event: React.FormEvent) {
     event.preventDefault();
     const found: typeof formError = {};
-    if (form.name.trim().length < 2) found.name = "Escribí el nombre de la persona.";
+    if (form.name.trim().length < 2)
+      found.name = "Escribí el nombre de la persona.";
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(form.email.trim()))
       found.email = "Escribí un correo válido.";
     setFormError(found);
@@ -114,13 +135,21 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
         email: form.email,
         role: form.role,
       });
-      setCreated({ password: (result.password as string | null) ?? null, name: form.name.trim() });
+      setCreated({
+        password: (result.password as string | null) ?? null,
+        name: form.name.trim(),
+      });
       setForm({ name: "", email: "", role: "bartender" });
       setNotice("");
       await load();
     } catch (e) {
-      const message = e instanceof Error ? e.message : "No pudimos crear la cuenta.";
-      setFormError(/correo|cuenta personal/i.test(message) ? { email: message } : { form: message });
+      const message =
+        e instanceof Error ? e.message : "No pudimos crear la cuenta.";
+      setFormError(
+        /correo|cuenta personal/i.test(message)
+          ? { email: message }
+          : { form: message },
+      );
     } finally {
       setBusy(false);
     }
@@ -141,7 +170,10 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
       close();
       await load();
     } catch (e) {
-      setFormError({ form: e instanceof Error ? e.message : "No pudimos completar la acción." });
+      setFormError({
+        form:
+          e instanceof Error ? e.message : "No pudimos completar la acción.",
+      });
     } finally {
       setBusy(false);
     }
@@ -178,7 +210,9 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
           Agregá a la primera persona.
         </EmptyState>
       )}
-      {!members && !error && <div className="sk" style={{ height: 160 }} aria-busy="true" />}
+      {!members && !error && (
+        <div className="sk" style={{ height: 160 }} aria-busy="true" />
+      )}
       {members && members.length > 0 && (
         <div className="rows">
           {members.map((m) => {
@@ -186,24 +220,40 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
             const locked = m.self || m.role === "onza";
             return (
               <div className="r wrap" key={m.userId}>
-                <span className="mono" aria-hidden="true" style={{ width: 40, height: 40, fontSize: 14 }}>
+                <span
+                  className="mono"
+                  aria-hidden="true"
+                  style={{ width: 40, height: 40, fontSize: 14 }}
+                >
                   {initials(m.name)}
                 </span>
                 <div className="grow">
                   <div style={{ fontWeight: 600 }}>
                     {m.name}
-                    {m.self && <span className="muted t-label" style={{ fontWeight: 400 }}> (vos)</span>}
+                    {m.self && (
+                      <span
+                        className="muted t-label"
+                        style={{ fontWeight: 400 }}
+                      >
+                        {" "}
+                        (vos)
+                      </span>
+                    )}
                   </div>
                   <div className="sub">{m.email}</div>
                 </div>
                 <div className="row wrap" style={{ gap: 8 }}>
-                  {m.mustChangePassword && <StatusBadge tone="warning">Clave temporal</StatusBadge>}
+                  {m.mustChangePassword && (
+                    <StatusBadge tone="warning">Clave temporal</StatusBadge>
+                  )}
                   <StatusBadge plain>{label(m.role)}</StatusBadge>
                   <Button
                     variant="quiet"
                     size="sm"
                     disabled={locked}
-                    title={m.self ? "No podés cambiar tu propio permiso" : undefined}
+                    title={
+                      m.self ? "No podés cambiar tu propio permiso" : undefined
+                    }
                     onClick={() => {
                       setNewRole(m.role === "admin" ? "admin" : "bartender");
                       setFormError({});
@@ -268,7 +318,9 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
                 Pasale esta contraseña temporal a {created.name} en mano. Se
                 muestra una sola vez; al entrar va a tener que cambiarla.
               </p>
-              <div className="secret" data-private="temporary-password">{created.password}</div>
+              <div className="secret" data-private="temporary-password">
+                {created.password}
+              </div>
               <Button
                 variant="secondary"
                 onClick={async () => {
@@ -291,7 +343,12 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
             </p>
           )
         ) : (
-          <form id="add-member" className="stack" onSubmit={submitAdd} noValidate>
+          <form
+            id="add-member"
+            className="stack"
+            onSubmit={submitAdd}
+            noValidate
+          >
             <TextField
               label="Nombre"
               value={form.name}
@@ -329,7 +386,11 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
       <Sheet
         open={sheet?.type === "role"}
         onOpenChange={(open) => !open && close()}
-        title={sheet?.type === "role" ? `Permiso de ${sheet.member.name.split(" ")[0]}` : "Permiso"}
+        title={
+          sheet?.type === "role"
+            ? `Permiso de ${sheet.member.name.split(" ")[0]}`
+            : "Permiso"
+        }
         description={`En ${venueName}.`}
         actions={
           <>
@@ -338,7 +399,9 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
             </Button>
             <Button
               loading={busy}
-              onClick={() => sheet?.type === "role" && void change("role", sheet.member)}
+              onClick={() =>
+                sheet?.type === "role" && void change("role", sheet.member)
+              }
             >
               Guardar
             </Button>
@@ -375,7 +438,9 @@ export function TeamPanel({ venueId, venueName }: { venueId: string; venueName: 
             <Button
               variant="danger"
               loading={busy}
-              onClick={() => sheet?.type === "revoke" && void change("revoke", sheet.member)}
+              onClick={() =>
+                sheet?.type === "revoke" && void change("revoke", sheet.member)
+              }
             >
               Quitar acceso
             </Button>

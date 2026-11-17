@@ -28,7 +28,8 @@
     "demo:seed-venue-images": "node --env-file=.env.local scripts/seed-venue-images.mjs",
     "demo:generate-venue-art": "node scripts/generate-venue-placeholders.mjs",
     "demo:seed-product-images": "node --env-file=.env.local scripts/seed-product-images.mjs",
-    "demo:generate-drink-art": "node scripts/generate-product-illustrations.mjs"
+    "demo:generate-drink-art": "node scripts/generate-product-illustrations.mjs",
+    "demo:seed-real-venues": "node --env-file=.env.local scripts/seed-real-venues.mjs"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.3.1",

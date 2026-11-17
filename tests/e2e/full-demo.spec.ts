@@ -47,10 +47,10 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
       (request) =>
         request.url().endsWith("/api/commands") && request.method() === "POST",
     );
-    await a.getByRole("button", { name: /Confirmar y reservar/ }).click();
+    await a.getByRole("button", { name: /^Pedir/ }).click();
     const original = (await submitted).postDataJSON();
     await expect(
-      a.getByRole("heading", { name: "Pedido recibido", exact: true }),
+      a.locator(".badge", { hasText: "Pedido recibido" }),
     ).toBeVisible();
     const orderId = new URL(a.url()).pathname.split("/").at(-1)!;
     const duplicates = await Promise.all([
@@ -72,20 +72,15 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     const orders = await a.request.get("/api/orders");
     const list = await orders.json();
     const order = list.find((o: { id: string }) => o.id === orderId);
-    const card = b.locator("article").filter({
-      has: b.getByRole("heading", {
-        name: `#${order.public_code}`,
-        exact: true,
-      }),
+    const card = b.locator("article.ocard", {
+      hasText: `#${order.public_code}`,
     });
-    await card.getByRole("button", { name: "Aceptar y preparar" }).click();
-    await expect(
-      a.getByRole("heading", { name: "Preparando", exact: true }),
-    ).toBeVisible({ timeout: 25000 });
+    await card.getByRole("button", { name: "Aceptar", exact: true }).click();
+    await expect(a.locator(".badge", { hasText: "Preparando" })).toBeVisible({
+      timeout: 25000,
+    });
     await a.reload();
-    await expect(
-      a.getByRole("heading", { name: "Preparando", exact: true }),
-    ).toBeVisible();
+    await expect(a.locator(".badge", { hasText: "Preparando" })).toBeVisible();
     // Hold an old preparing snapshot while the real ready event arrives. The
     // pending refetch must run after this response, without connected polling.
     let release!: () => void, fetched!: () => void;
@@ -113,7 +108,7 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     await readySignal;
     release();
     await expect(
-      a.getByRole("heading", { name: "Listo para recoger", exact: true }),
+      a.locator(".badge", { hasText: "Listo para recoger" }),
     ).toBeVisible({ timeout: 25000 });
     await expect(a.getByAltText("QR de autorización de retiro")).toBeVisible();
     await a.unroute(`**/api/orders?order=${orderId}`);
@@ -122,7 +117,7 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     await a.addStyleTag({ content: "nextjs-portal{display:none}" });
     await a.screenshot({
       path: "docs/evidence/hosted-ux/ticket-390-dark-redacted.png",
-      mask: [a.locator(".ticket img,.code")],
+      mask: [a.locator(".ticket img,.ticket .code")],
       maskColor: "#66666D",
     });
     await b.evaluate(() => window.scrollTo(0, 0));
@@ -207,23 +202,19 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
       expect((await replay.json()).payment_state).toBe("captured");
 
     await owner.goto(`/staff/${venue}`);
-    const incident = owner
-      .locator(".notice")
-      .filter({
-        has: owner.getByRole("heading", {
-          name: `#${order.public_code}`,
-          exact: true,
-        }),
-      });
+    const incident = owner.locator(".notice", {
+      hasText: `#${order.public_code}`,
+    });
     await incident
       .getByRole("button", { name: "Retomar retiro validado", exact: true })
       .click();
     await expect(
-      owner.getByRole("heading", { name: "Podés entregar", exact: true }),
+      owner.getByText("Podés entregar", { exact: true }),
     ).toBeVisible();
+    // Al retomar, el formulario de código no se muestra: no queda ninguna credencial a la vista.
     await expect(
       owner.getByLabel("Código de retiro (12 caracteres)"),
-    ).toHaveValue("");
+    ).toHaveCount(0);
     await owner
       .getByRole("checkbox", {
         name: "Entregué físicamente el pedido completo.",
@@ -232,9 +223,9 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     await owner
       .getByRole("button", { name: "Confirmar entrega", exact: true })
       .click();
-    await expect(
-      owner.getByText("Ya entregado. No volver a cobrar ni entregar."),
-    ).toBeVisible();
+    await expect(owner.locator(".result.ok")).toContainText(
+      `Entregado #${order.public_code}`,
+    );
     const complete = {
       action: "complete",
       orderId,
@@ -252,13 +243,11 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     expect(consumed.ok()).toBe(false);
     expect((await consumed.json()).error).toBe("ALREADY_DELIVERED");
     await a.reload();
-    await expect(
-      a.getByRole("heading", { name: "Entregado", exact: true }),
-    ).toBeVisible();
+    await expect(a.locator(".badge", { hasText: "Entregado" })).toBeVisible();
     await login(admin, "ADMIN");
     await admin.goto(`/admin/${venue}`);
     await expect(
-      admin.getByRole("heading", { name: "Ventas de Onza" }),
+      admin.getByRole("heading", { name: "Resumen", exact: true }),
     ).toBeVisible();
     await expect(admin.getByText("Paloma", { exact: true })).toBeVisible();
   } finally {

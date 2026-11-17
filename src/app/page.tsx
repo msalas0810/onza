@@ -24,8 +24,7 @@ export default async function Home() {
       </div>
       <VenueList venues={venues} />
       <p className="hint" style={{ marginTop: 48 }}>
-        Menús, precios y horarios son de demostración. Los pagos son
-        simulados.
+        Menús, precios y horarios son de demostración. Los pagos son simulados.
       </p>
     </div>
   );

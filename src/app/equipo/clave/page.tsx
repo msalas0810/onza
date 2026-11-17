@@ -18,7 +18,10 @@ export default async function Page({
   } = await db.auth.getUser();
   if (!user || user.is_anonymous) redirect("/equipo/acceso");
   const { data: account } = await db.rpc("current_account");
-  const state = account as { kind?: string; mustChangePassword?: boolean } | null;
+  const state = account as {
+    kind?: string;
+    mustChangePassword?: boolean;
+  } | null;
   if (state?.kind === "customer") redirect("/sesion-activa?want=equipo");
   // Sin cambio pendiente no hay nada que hacer acá.
   if (!state?.mustChangePassword) redirect(await staffHome(next));
@@ -28,8 +31,8 @@ export default async function Page({
       <div className="page-head">
         <h1 className="t-title">Creá tu contraseña</h1>
         <p className="muted">
-          Tu contraseña temporal sirve solo para entrar esta vez. Hasta cambiarla
-          no podés operar.
+          Tu contraseña temporal sirve solo para entrar esta vez. Hasta
+          cambiarla no podés operar.
         </p>
       </div>
       <PasswordChangeForm next={next} />

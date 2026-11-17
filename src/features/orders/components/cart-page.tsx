@@ -47,7 +47,11 @@ export function CartPage() {
     <>
       <div className="page-head">
         <h1 className="t-title">Carrito</h1>
-        <Link className="t-label" href={`/v/${cart.venueSlug}`} style={{ fontWeight: 600 }}>
+        <Link
+          className="t-label"
+          href={`/v/${cart.venueSlug}`}
+          style={{ fontWeight: 600 }}
+        >
           {cart.venueName} · Retiro: {cart.pickupLabel}
         </Link>
       </div>
@@ -77,7 +81,10 @@ export function CartPage() {
                 key={item.productId}
               >
                 <div className="grow">
-                  <h2 className="name t-label" style={{ fontSize: 16, fontWeight: 600 }}>
+                  <h2
+                    className="name t-label"
+                    style={{ fontSize: 16, fontWeight: 600 }}
+                  >
                     {item.name}
                   </h2>
                   <div className="price">
@@ -119,7 +126,9 @@ export function CartPage() {
                   value={item.quantity}
                   max={issue?.code === "OUT_OF_STOCK" ? item.quantity : 10}
                   label={`Cantidad de ${item.name}`}
-                  onChange={(value) => setProductQuantity(item.productId, value)}
+                  onChange={(value) =>
+                    setProductQuantity(item.productId, value)
+                  }
                 />
               </article>
             );
@@ -146,7 +155,10 @@ export function CartPage() {
             </p>
           )}
           <div className="row between wrap">
-            <Link className={buttonClass({ variant: "quiet", size: "sm" })} href={`/v/${cart.venueSlug}`}>
+            <Link
+              className={buttonClass({ variant: "quiet", size: "sm" })}
+              href={`/v/${cart.venueSlug}`}
+            >
               Seguir eligiendo
             </Link>
             <Button
@@ -158,7 +170,11 @@ export function CartPage() {
               <RefreshCw size={16} aria-hidden="true" />
               Revisar precios
             </Button>
-            <Button variant="quiet" size="sm" onClick={() => setConfirmEmpty(true)}>
+            <Button
+              variant="quiet"
+              size="sm"
+              onClick={() => setConfirmEmpty(true)}
+            >
               Vaciar carrito
             </Button>
           </div>

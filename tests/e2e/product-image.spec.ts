@@ -15,7 +15,7 @@ const menu = (page: Page) =>
   page.getByRole("region", { name: "Menú de tragos" });
 const row = (page: Page, name: string) =>
   menu(page)
-    .locator(".product-row")
+    .locator("article.prow")
     .filter({ has: page.getByRole("heading", { name, exact: true }) });
 // The visual slot of a row: the loaded image frame or the placeholder, whichever is shown.
 const slot = (rowLocator: Locator) =>
@@ -32,25 +32,23 @@ for (const width of widths)
           () => document.documentElement.scrollWidth <= innerWidth,
         ),
       ).toBe(true);
-      const rows = await menu(page).locator(".product-row").all();
+      const rows = await menu(page).locator("article.prow").all();
       expect(rows.length).toBe(8);
       for (const r of rows) {
         await r.scrollIntoViewIfNeeded();
         const box = (await slot(r).boundingBox())!;
-        // Mismo tamaño con imagen o con marcador de posición: 88 x 110.
-        expect(Math.round(box.width)).toBe(88);
-        expect(Math.round(box.height)).toBe(110);
+        // Mismo tamaño con imagen o con marcador de posición: cuadrado de 72 px.
+        expect(Math.round(box.width)).toBe(72);
+        expect(Math.round(box.height)).toBe(72);
         const radius = await slot(r).evaluate((el) =>
           parseFloat(getComputedStyle(el).borderTopLeftRadius),
         );
         expect(radius).toBeGreaterThanOrEqual(12);
-        // La imagen queda a la derecha del texto y dentro de la fila.
+        // La imagen queda a la izquierda del texto y dentro de la fila.
         const rowBox = (await r.boundingBox())!;
-        const copy = (await r.locator(".product-copy").boundingBox())!;
-        expect(box.x).toBeGreaterThan(copy.x);
-        expect(box.x + box.width).toBeLessThanOrEqual(
-          rowBox.x + rowBox.width + 1,
-        );
+        const copy = (await r.locator(".grow").boundingBox())!;
+        expect(box.x).toBeLessThan(copy.x);
+        expect(box.x).toBeGreaterThanOrEqual(rowBox.x - 1);
       }
       // Paloma carga su ilustración de verdad (no una caja vacía).
       const paloma = row(page, "Paloma");
@@ -86,7 +84,7 @@ test("una imagen que no carga cae al marcador de posición sin dejar una caja ro
   await expect(r.locator(".photo-fallback")).toHaveCount(1);
   await expect(r.locator(".product-image")).toHaveCount(0);
   const box = (await slot(r).boundingBox())!;
-  expect([Math.round(box.width), Math.round(box.height)]).toEqual([88, 110]);
+  expect([Math.round(box.width), Math.round(box.height)]).toEqual([72, 72]);
 });
 
 test("un nombre largo no deforma ni desplaza la imagen", async ({ page }) => {
@@ -99,7 +97,7 @@ test("un nombre largo no deforma ni desplaza la imagen", async ({ page }) => {
     await long.scrollIntoViewIfNeeded();
     const box = (await slot(long).boundingBox())!;
     const rowBox = (await long.boundingBox())!;
-    expect([Math.round(box.width), Math.round(box.height)]).toEqual([88, 110]);
+    expect([Math.round(box.width), Math.round(box.height)]).toEqual([72, 72]);
     expect(box.x + box.width).toBeLessThanOrEqual(rowBox.x + rowBox.width + 1);
   }
 });

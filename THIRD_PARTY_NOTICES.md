@@ -38,3 +38,7 @@ No Lucide Animated, Motion, SF Pro, scraped photography or bank/network artwork 
 ## Particle Wave
 
 Particle Wave by Hossain Jahed (@jahed), published at https://21st.dev/@jahed/components/particle-wave. The original Component.tsx was supplied by the project owner on 2026-11-17. `src/components/backgrounds/particle-wave.tsx` retains its vertex equations, square point fragment, camera and desktop grid; adaptations add Onza colors, delta-time animation, responsive density, visibility/reduced-motion handling and resource cleanup. The supplied source did not include a separate license statement; none is invented here.
+
+## V1 (2026-11-17)
+
+Sin dependencias nuevas. La paleta, los componentes y el movimiento son propios; los íconos son Lucide (ya instalado) y el vasito, el wordmark y la tipografía Inter son los originales. `NumberFlow` y `lucide-animated` se evaluaron y no se adoptaron. Los nombres de los locales reales y sus datos públicos provienen de las fuentes citadas en `fixtures/real-venues.json`; no se incluye ninguna foto ni logo de terceros (`public/demo-venues/real/` está vacío a propósito). Onza no tiene relación comercial ni autorización de esos locales.

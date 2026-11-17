@@ -14,11 +14,7 @@ import {
 } from "lucide-react";
 
 export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "quiet"
-  | "danger"
-  | "inverse";
+  "primary" | "secondary" | "quiet" | "danger" | "inverse";
 type ButtonLook = {
   variant?: ButtonVariant;
   size?: "sm" | "md" | "lg";
@@ -32,13 +28,7 @@ export function buttonClass({
   block = false,
   className = "",
 }: ButtonLook = {}) {
-  return [
-    "btn",
-    variant,
-    size !== "md" && size,
-    block && "block",
-    className,
-  ]
+  return ["btn", variant, size !== "md" && size, block && "block", className]
     .filter(Boolean)
     .join(" ");
 }

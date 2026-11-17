@@ -1,0 +1,98 @@
+{
+  "note": "Locales reales de San José para el demo. 'facts' son datos publicados por terceros con su fuente; 'demo' es todo lo simulado (estado, horario, preparación, capacidad, menú y precios). Onza no tiene relación comercial ni autorización de estos locales: revisión de permisos pendiente antes del lanzamiento. Coordenadas, fotos y logos se agregan solo con fuente verificable.",
+  "researched_on": "2026-11-17",
+  "venues": [
+    {
+      "slug": "mil948",
+      "facts": {
+        "name": "Mil948",
+        "zone": "Barrio Escalante",
+        "address_published": "Edificio B, Calle Negritos, Barrio Escalante, San José",
+        "sources": [
+          "https://www.theworlds50best.com/discovery/Establishments/Costa-Rica/San-José/Mil948.html",
+          "https://www.larepublica.net/mil948-brinda-cultura-y-experiencia-de-consumo-con-mixologia/"
+        ],
+        "coordinates": null,
+        "coordinates_status": "por verificar"
+      },
+      "demo": { "open_state": "open", "hours": "Hasta la 1:00 a. m.", "pickup_label": "Barra principal", "eta_minutes": 8, "capacity": 25, "menu": "cocktails" }
+    },
+    {
+      "slug": "stiefel-pub",
+      "facts": {
+        "name": "Stiefel Pub",
+        "zone": "Barrio Otoya",
+        "address_published": "Junto a la Embajada de México, frente al CENAC, San José",
+        "sources": ["https://ticotimes.net/2013/10/08/stiefel-pub-raises-the-craft-beer-bar"],
+        "coordinates": null,
+        "coordinates_status": "por verificar"
+      },
+      "demo": { "open_state": "open", "hours": "Hasta las 12:00 a. m.", "pickup_label": "Barra de grifos", "eta_minutes": 5, "capacity": 30, "menu": "beer" }
+    },
+    {
+      "slug": "wilk",
+      "facts": {
+        "name": "Wilk Craft Beer",
+        "zone": "Barrio Escalante",
+        "address_published": "Avenida 9, Barrio Escalante, San José",
+        "sources": [
+          "https://www.lonelyplanet.com/articles/best-things-to-do-in-barrio-escalante",
+          "https://delfino.cr/2026/01/wilk-donde-la-cerveza-artesanal-se-encuentra-con-el-buen-rock"
+        ],
+        "coordinates": null,
+        "coordinates_status": "por verificar"
+      },
+      "demo": { "open_state": "open", "hours": "Hasta las 12:00 a. m.", "pickup_label": "Barra", "eta_minutes": 6, "capacity": 20, "menu": "beer-wine" }
+    },
+    {
+      "slug": "apotecario",
+      "facts": {
+        "name": "Apotecario",
+        "zone": "Barrio Escalante",
+        "address_published": "300 m este de la Iglesia Santa Teresita, Barrio Escalante",
+        "sources": ["https://www.kupi.com/en-ae/explore/costa-rica/san-jose/apotecario"],
+        "coordinates": null,
+        "coordinates_status": "por verificar (confirmar también en el sitio oficial del local)"
+      },
+      "demo": { "open_state": "open", "hours": "Hasta las 11:00 p. m.", "pickup_label": "Barra del patio", "eta_minutes": 10, "capacity": 15, "menu": "gin" }
+    },
+    {
+      "slug": "otro-bar",
+      "facts": {
+        "name": "Otro Bar",
+        "zone": "Barrio Escalante",
+        "address_published": "Barrio Escalante, San José (dirección exacta por verificar)",
+        "sources": ["https://www.theworlds50best.com/discovery/Establishments/Costa-Rica/San-José/Otro-Bar.html"],
+        "coordinates": null,
+        "coordinates_status": "por verificar"
+      },
+      "demo": { "open_state": "closed", "hours": "Abre a las 6:00 p. m.", "pickup_label": "Barra", "eta_minutes": 8, "capacity": 20, "menu": "cocktails-short" }
+    }
+  ],
+  "menus": {
+    "note": "Menús y precios SIMULADOS y genéricos: no reproducen la carta real de ningún local. Precios en colones.",
+    "cocktails": [
+      ["Cocteles", [["Negroni", "Gin, vermut rojo y bitter.", 6500, "cocktail"], ["Old fashioned", "Bourbon, azúcar y amargo de angostura.", 6800, "cocktail"], ["Margarita", "Tequila, limón y licor de naranja.", 6200, "cocktail"]]],
+      ["Altos", [["Gin tonic", "Gin, tónica y cáscara de limón.", 5800, "highball"], ["Paloma", "Tequila, toronja y soda.", 5600, "highball"]]],
+      ["Sin alcohol", [["Soda de jengibre", "Jengibre, limón y soda.", 3200, "soft"]]]
+    ],
+    "beer": [
+      ["Cervezas", [["IPA", "Pinta, 473 ml.", 3800, "beer"], ["Lager", "Pinta, 473 ml.", 3200, "beer"], ["Stout", "Pinta, 473 ml.", 3900, "beer"], ["Sour de frutas", "Copa, 330 ml.", 4200, "beer"]]],
+      ["Shots", [["Shot de guaro", "Con limón.", 2000, "shot"]]],
+      ["Sin alcohol", [["Agua con gas", "Botella, 500 ml.", 1500, "soft"]]]
+    ],
+    "beer-wine": [
+      ["Cervezas", [["Pale ale", "Pinta, 473 ml.", 3600, "beer"], ["Kölsch", "Pinta, 473 ml.", 3400, "beer"], ["Red IPA", "Pinta, 473 ml.", 3900, "beer"]]],
+      ["Vino", [["Copa de tinto", "Malbec.", 4200, "wine"]]]
+    ],
+    "gin": [
+      ["Gin tonics", [["Gin tonic clásico", "Gin, tónica y enebro.", 6200, "highball"], ["Gin tonic cítrico", "Gin, tónica y toronja.", 6400, "highball"]]],
+      ["Vino", [["Copa de blanco", "Sauvignon blanc.", 4500, "wine"], ["Copa de tinto", "Tempranillo.", 4500, "wine"]]],
+      ["Sin alcohol", [["Limonada de hierbas", "Limón, albahaca y soda.", 3000, "soft"]]]
+    ],
+    "cocktails-short": [
+      ["Cocteles", [["Daiquiri", "Ron, limón y azúcar.", 5900, "cocktail"], ["Mezcal sour", "Mezcal, limón y clara.", 6600, "cocktail"]]],
+      ["Shots", [["Shot de tequila", "Blanco, con sal y limón.", 2600, "shot"]]]
+    ]
+  }
+}

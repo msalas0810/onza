@@ -1,6 +1,6 @@
 "use client";
 import type { Venue } from "../server/queries";
-import { venueStatus } from "./venue-card";
+import { venueStatus } from "./venue-status";
 import { VenueCover, VenueMark, useCover } from "./venue-parts";
 
 /** Cabecera del local: foto (si hay), identidad, datos de retiro y nota de demo. */

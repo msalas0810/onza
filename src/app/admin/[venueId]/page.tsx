@@ -3,11 +3,8 @@ import { staffGate } from "@/components/ui/staff-gate";
 import { getPublishedMenu } from "@/features/catalog/server/queries";
 import { getVenueSummary } from "@/features/analytics/server/queries";
 import { businessDate } from "@/features/analytics/business-date";
-import {
-  AdminPanel,
-  adminTabs,
-  type AdminTab,
-} from "@/features/admin/components/admin-panel";
+import { AdminPanel } from "@/features/admin/components/admin-panel";
+import { isAdminTab, type AdminTab } from "@/features/admin/admin-tabs";
 import { loadStaffContext } from "@/features/team/server/staff-context";
 import { ConfigurationState } from "@/components/ui/configuration-state";
 
@@ -21,9 +18,7 @@ export default async function Page({
 }) {
   const { venueId } = await params;
   const { tab } = await searchParams;
-  const current: AdminTab = adminTabs.some((t) => t.id === tab)
-    ? (tab as AdminTab)
-    : "resumen";
+  const current: AdminTab = isAdminTab(tab) ? tab : "resumen";
   const context = await loadStaffContext(venueId, true);
   const gate = staffGate(context, `/admin/${venueId}?tab=${current}`);
   if (gate || !context.ok) return gate;

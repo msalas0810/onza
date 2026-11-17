@@ -21,9 +21,7 @@ export default async function ProductPage({
       <div className="page">
         <h1>{venue.name}</h1>
         <div style={{ marginTop: 16 }}>
-          <Notice title="Cerrado">
-            Este local no recibe pedidos ahora.
-          </Notice>
+          <Notice title="Cerrado">Este local no recibe pedidos ahora.</Notice>
         </div>
         <Link
           className={buttonClass({ variant: "secondary", className: "" })}

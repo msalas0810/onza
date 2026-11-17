@@ -56,12 +56,21 @@ function useNow(interval = 30000) {
 }
 
 export function StaffQueue({ venue }: { venue: Venue }) {
-  const { orders, loading, error, connection, refresh, sessionExpired, access } =
-    useLiveOrders({ venueId: venue.id });
+  const {
+    orders,
+    loading,
+    error,
+    connection,
+    refresh,
+    sessionExpired,
+    access,
+  } = useLiveOrders({ venueId: venue.id });
   const online = useOnline();
   const now = useNow();
   const [tab, setTab] = useState<string>("queued");
-  const [cardErrors, setCardErrors] = useState<Record<string, { message: string; version: number }>>({});
+  const [cardErrors, setCardErrors] = useState<
+    Record<string, { message: string; version: number }>
+  >({});
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [paused, setPaused] = useState(venue.paused);
@@ -91,7 +100,9 @@ export function StaffQueue({ venue }: { venue: Venue }) {
       return;
     }
     const known = seen.current;
-    const added = orders.filter((o) => o.status === "queued" && !known.has(o.id));
+    const added = orders.filter(
+      (o) => o.status === "queued" && !known.has(o.id),
+    );
     seen.current = ids;
     if (!added.length) return;
     const timer = setTimeout(() => {
@@ -103,7 +114,10 @@ export function StaffQueue({ venue }: { venue: Venue }) {
         gain.connect(audio.current.destination);
         osc.frequency.value = 660;
         gain.gain.setValueAtTime(0.08, audio.current.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.001, audio.current.currentTime + 0.3);
+        gain.gain.exponentialRampToValueAtTime(
+          0.001,
+          audio.current.currentTime + 0.3,
+        );
         osc.start();
         osc.stop(audio.current.currentTime + 0.3);
       }
@@ -162,7 +176,10 @@ export function StaffQueue({ venue }: { venue: Venue }) {
         setCardErrors((current) => ({
           ...current,
           [order.id]: {
-            message: e instanceof Error ? e.message : "No pudimos completar la acción.",
+            message:
+              e instanceof Error
+                ? e.message
+                : "No pudimos completar la acción.",
             version: order.version,
           },
         }));
@@ -175,7 +192,9 @@ export function StaffQueue({ venue }: { venue: Venue }) {
   const submitReject = async () => {
     if (!rejecting) return;
     const text =
-      reason === "Otro motivo" ? detail.trim() : `${reason}${detail.trim() ? `: ${detail.trim()}` : ""}`;
+      reason === "Otro motivo"
+        ? detail.trim()
+        : `${reason}${detail.trim() ? `: ${detail.trim()}` : ""}`;
     if (text.length < 3) {
       setReasonError("Escribí un motivo de al menos 3 caracteres.");
       return;
@@ -199,7 +218,9 @@ export function StaffQueue({ venue }: { venue: Venue }) {
   }
 
   if (sessionExpired || expired)
-    return <SessionExpiredSheet open area="equipo" next={`/staff/${venue.id}`} />;
+    return (
+      <SessionExpiredSheet open area="equipo" next={`/staff/${venue.id}`} />
+    );
   if (access !== "ok")
     return (
       <EmptyState
@@ -223,8 +244,12 @@ export function StaffQueue({ venue }: { venue: Venue }) {
       </EmptyState>
     );
 
-  const active = orders.filter((o) => ["queued", "preparing", "ready"].includes(o.status));
-  const waiting = orders.filter((o) => ["queued", "preparing"].includes(o.status));
+  const active = orders.filter((o) =>
+    ["queued", "preparing", "ready"].includes(o.status),
+  );
+  const waiting = orders.filter((o) =>
+    ["queued", "preparing"].includes(o.status),
+  );
   const longest = waiting.length
     ? Math.max(...waiting.map((o) => minutesSince(o.created_at, now)))
     : 0;
@@ -246,7 +271,9 @@ export function StaffQueue({ venue }: { venue: Venue }) {
             {venue.pickup_label}
             {waiting.length > 0 && (
               <>
-                {" "}· Espera más larga <strong className="num">{longest} min</strong>
+                {" "}
+                · Espera más larga{" "}
+                <strong className="num">{longest} min</strong>
               </>
             )}
             {!active.length && !loading && " · Sin pedidos activos"}
@@ -259,7 +286,11 @@ export function StaffQueue({ venue }: { venue: Venue }) {
           aria-label={`Sonido de pedidos nuevos: ${sound ? "activado" : "desactivado"}`}
           onClick={() => void toggleSound(!sound)}
         >
-          {sound ? <Volume2 size={16} aria-hidden="true" /> : <VolumeX size={16} aria-hidden="true" />}
+          {sound ? (
+            <Volume2 size={16} aria-hidden="true" />
+          ) : (
+            <VolumeX size={16} aria-hidden="true" />
+          )}
           <span>Sonido</span>
         </button>
         {closedVenue ? (
@@ -281,7 +312,9 @@ export function StaffQueue({ venue }: { venue: Venue }) {
                 if (isSessionError(e)) setExpired(true);
                 else
                   setNotice(
-                    e instanceof Error ? e.message : "No pudimos cambiar la pausa.",
+                    e instanceof Error
+                      ? e.message
+                      : "No pudimos cambiar la pausa.",
                   );
               }
             }}
@@ -303,7 +336,11 @@ export function StaffQueue({ venue }: { venue: Venue }) {
           <Notice tone={error ? "danger" : "warning"}>{error || notice}</Notice>
         )}
       </div>
-      <div className="tabs board-tabs" role="tablist" aria-label="Cola de pedidos">
+      <div
+        className="tabs board-tabs"
+        role="tablist"
+        aria-label="Cola de pedidos"
+      >
         {lanes.map(([state, label]) => (
           <button
             key={state}
@@ -312,12 +349,18 @@ export function StaffQueue({ venue }: { venue: Venue }) {
             onClick={() => setTab(state)}
           >
             {label}
-            <span className="n">{orders.filter((o) => o.status === state).length}</span>
+            <span className="n">
+              {orders.filter((o) => o.status === state).length}
+            </span>
           </button>
         ))}
       </div>
       {loading && (
-        <div className="stack" aria-busy="true" aria-label="Consultando la cola">
+        <div
+          className="stack"
+          aria-busy="true"
+          aria-label="Consultando la cola"
+        >
           <div className="sk" style={{ height: 160 }} />
         </div>
       )}
@@ -327,7 +370,12 @@ export function StaffQueue({ venue }: { venue: Venue }) {
             .filter((o) => o.status === state)
             .sort((a, b) => a.created_at.localeCompare(b.created_at));
           return (
-            <section key={state} className="col" hidden={tab !== state} aria-label={label}>
+            <section
+              key={state}
+              className="col"
+              hidden={tab !== state}
+              aria-label={label}
+            >
               <div className="col-head">
                 <h2>{label}</h2>
                 <span className="count-pill">{list.length}</span>
@@ -335,7 +383,9 @@ export function StaffQueue({ venue }: { venue: Venue }) {
               <div className="col col-scroll">
                 {list.map((o) => {
                   const minutes = minutesSince(
-                    state === "ready" ? (o.ready_at ?? o.created_at) : o.created_at,
+                    state === "ready"
+                      ? (o.ready_at ?? o.created_at)
+                      : o.created_at,
                     now,
                   );
                   const late = state !== "ready" && minutes >= 10;
@@ -351,13 +401,15 @@ export function StaffQueue({ venue }: { venue: Venue }) {
                         <span className="num">#{o.public_code}</span>
                         <span className={`wait ${late ? "late" : ""}`}>
                           <Clock size={16} aria-hidden="true" />
-                          {state === "ready" ? `Listo hace ${minutes} min` : `Espera ${minutes} min`}
+                          {state === "ready"
+                            ? `Listo hace ${minutes} min`
+                            : `Espera ${minutes} min`}
                         </span>
                       </div>
                       <ul className="items">
                         {o.items.map((i) => (
                           <li key={i.id}>
-                            <span className="q">{i.quantity}×</span>
+                            <span className="q">{i.quantity}×</span>{" "}
                             {i.name_snapshot}
                           </li>
                         ))}
@@ -466,7 +518,13 @@ export function StaffQueue({ venue }: { venue: Venue }) {
         <details style={{ marginTop: 32 }}>
           <summary
             className="t-label"
-            style={{ cursor: "pointer", minHeight: 44, display: "flex", alignItems: "center", gap: 8 }}
+            style={{
+              cursor: "pointer",
+              minHeight: 44,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
           >
             <History size={16} aria-hidden="true" />
             Cerrados hoy ({closed.length})
@@ -474,11 +532,17 @@ export function StaffQueue({ venue }: { venue: Venue }) {
           <div className="rows" style={{ marginTop: 8 }}>
             {closed.map((o) => (
               <div className="r" key={o.id}>
-                <span className="num" style={{ fontWeight: 600 }}>#{o.public_code}</span>
-                <span className="grow sub">
-                  {o.items.map((i) => `${i.quantity}× ${i.name_snapshot}`).join(", ")}
+                <span className="num" style={{ fontWeight: 600 }}>
+                  #{o.public_code}
                 </span>
-                <StatusBadge tone={o.status === "delivered" ? "success" : "danger"}>
+                <span className="grow sub">
+                  {o.items
+                    .map((i) => `${i.quantity}× ${i.name_snapshot}`)
+                    .join(", ")}
+                </span>
+                <StatusBadge
+                  tone={o.status === "delivered" ? "success" : "danger"}
+                >
                   {o.status === "delivered" ? "Entregado" : "Cerrado"}
                 </StatusBadge>
               </div>
@@ -518,7 +582,9 @@ export function StaffQueue({ venue }: { venue: Venue }) {
       <Sheet
         open={!!rejecting}
         onOpenChange={(open) => !open && setRejecting(null)}
-        title={rejecting ? `Rechazar #${rejecting.public_code}` : "Rechazar pedido"}
+        title={
+          rejecting ? `Rechazar #${rejecting.public_code}` : "Rechazar pedido"
+        }
         description="El cliente ve el motivo."
         actions={
           <>
@@ -531,8 +597,14 @@ export function StaffQueue({ venue }: { venue: Venue }) {
           </>
         }
       >
-        <fieldset className="stack tight" style={{ border: 0, padding: 0, margin: 0 }}>
-          <legend className="t-label" style={{ marginBottom: 8, fontWeight: 500 }}>
+        <fieldset
+          className="stack tight"
+          style={{ border: 0, padding: 0, margin: 0 }}
+        >
+          <legend
+            className="t-label"
+            style={{ marginBottom: 8, fontWeight: 500 }}
+          >
             Motivo
           </legend>
           {rejectReasons.map((r) => (

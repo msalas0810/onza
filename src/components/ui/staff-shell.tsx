@@ -3,7 +3,10 @@ import type { ReactNode } from "react";
 import { BrandMark, buttonClass } from "./primitives";
 import { ConnectionBanner } from "./connection-banner";
 import { LogoutButton } from "@/features/account/components/account-actions";
-import { roleLabel, type StaffPerson } from "@/features/team/server/staff-context";
+import {
+  roleLabel,
+  type StaffPerson,
+} from "@/features/team/server/staff-context";
 
 /**
  * Marco del portal del equipo: ningún enlace de acá lleva al área de clientes. Muestra el local, la persona y su rol, y
@@ -45,7 +48,11 @@ export function StaffShell({
         <span className="grow" />
         {canSwitch && venue && (
           <Link
-            className={buttonClass({ variant: "quiet", size: "sm", className: "wide-only" })}
+            className={buttonClass({
+              variant: "quiet",
+              size: "sm",
+              className: "wide-only",
+            })}
             href="/equipo/locales"
           >
             Cambiar de local

@@ -14,7 +14,10 @@ export function VenueMark({
 }) {
   const logo = useImageFailure(venue.logo_url);
   return (
-    <span className={`mono ${large ? "lg" : ""}`} data-has-logo={logo.usable ? "true" : "false"}>
+    <span
+      className={`mono ${large ? "lg" : ""}`}
+      data-has-logo={logo.usable ? "true" : "false"}
+    >
       {logo.usable ? (
         <Image
           unoptimized
