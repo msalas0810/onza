@@ -45,7 +45,7 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | Demo desplegada | https://onza-demo-ml94rxfry-msalas0810s-projects.vercel.app (Preview verificado; protección existente preservada, actualmente sin ssoProtection) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Pruebas en Safari/iPhone y Android físicos desde el Preview; cargar coordenadas y fotografías reales de locales. No activar pagos reales ni fusionar main. |
+| Siguiente tarea exacta | Activar y probar las cuentas (D-2026-11-17-02): aplicar migración 010 a `onza-dev`, desplegar, sembrar cliente, `ACCOUNTS_REQUIRED=true`, recorrido real en dos dispositivos. Bocetos aprobados (D-2026-11-17-01). Pendiente anterior: pruebas en Safari/iPhone y Android físicos desde el Preview; cargar coordenadas y fotografías reales de locales. No activar pagos reales ni fusionar main. |
 
 ### Pendientes abiertos
 
@@ -89,6 +89,34 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-17-02 · Integrar el diseño aprobado: cuentas, onboarding y portal del equipo (detrás de bandera)
+
+- **Fecha y hora:** 2026-11-17 (America/Costa_Rica)
+- **Persona:** Manu
+- **IA:** Claude Code · `claude-sonnet-5-5`
+- **Rama y commits:** `fix/hosted-integration` · hash en `git log` (commit de esta entrada)
+- **Qué cambió:** acceso `/acceso` (correo+contraseña con confirmación, Google, Apple deshabilitado "Próximamente", recuperación, "¿Sos personal?"), `/onboarding` (nombre, @usuario único, teléfono +506 no verificado, nacimiento con 18+ validado en SQL, condiciones con fecha y versión, dos preferencias desmarcadas), `/cuenta` (apariencia, preferencias, privacidad), `/equipo/acceso` (portal laboral; `/login` y `/settings` redirigen), `/sesion-activa` (sesión del tipo equivocado: continuar o usar otra cuenta, sin cierre automático). Política de acceso en `src/proxy.ts` + `src/lib/access-policy.ts`; QR conserva destino con `next`. Servidor: las cuentas con membresía nunca crean pedidos; con la bandera, hace falta sesión no anónima y perfil. Retirados los selectores de "resultado simulado" (cliente y barra); el servidor fuerza `approved` salvo `ENABLE_PAYMENT_SCENARIOS=true` (solo pruebas). Migración **aditiva** `202611170010_customer_accounts.sql` (tabla `profiles`, RPC `current_account`, `complete_onboarding`, `update_preferences`). Todo detrás de `ACCOUNTS_REQUIRED` (apagado por defecto): sin la variable el demo desplegado conserva el flujo invitado (R4). Reutilizados backend de pedidos, Realtime, retiro con código privado, cancelación antes de aceptación e idempotencia, sin cambios.
+- **Archivos clave:** `supabase/migrations/202611170010_customer_accounts.sql`, `src/proxy.ts`, `src/lib/access-policy.ts`, `src/lib/account.ts`, `src/features/account/`, `src/app/{acceso,onboarding,cuenta,sesion-activa,equipo,auth,confirmar,recuperar,restablecer}`, `src/features/orders/server/order-service.ts`, `tests/db/accounts.test.ts`, `tests/lib/access-policy.test.ts`, `docs/vercel-demo.md`.
+- **Verificado (offline, en este entorno):** `tsc --noEmit`, `eslint`, `vitest` completo (26 archivos, 88 pruebas: +6 SQL de cuentas y recorrido con dos sesiones registradas independientes —cliente→barra acepta→listo→número público no retira→código privado entrega una sola vez; cancelación solo antes de aceptar; otra cuenta no ve el pedido—, +8 de política de acceso), `next build`. Pantallas `/acceso`, `/recuperar`, `/equipo/acceso` renderizadas en 360/390/1440, claro/oscuro, sin desborde.
+- **No verificado:** este entorno no alcanza `*.supabase.co` ni Vercel y no tiene credenciales; el Supabase MCP conectado pertenece a otros proyectos y no se tocó. Por eso: la migración **no está aplicada** a `onza-dev`, **no hay deploy nuevo**, no se corrió el recorrido E2E con dos navegadores contra Supabase real, ni confirmación por correo, Google, `/auth/callback` ni onboarding en vivo; tampoco la revisión visual de menú y barra con datos reales ni pruebas en teléfono. Las pruebas SQL (PGlite) no sustituyen a Supabase real.
+- **Decisiones:** el tipo de cuenta lo decide la base (membresía), no el navegador ni metadatos. Staff creado fuera del autoservicio. Google solo en el acceso de clientes. Borrado de cuenta (R3), nueva versión de condiciones (R5) y borrador tras sesión vencida (R6) quedan sin implementar.
+- **Pendientes / siguiente paso:** ver `docs/vercel-demo.md` ("Cuentas de cliente y portal del equipo"): aplicar migración 010, desplegar, `npm run demo:seed-users` con `DEMO_CUSTOMER_*`, Redirect URLs de Auth, luego `ACCOUNTS_REQUIRED=true` y redeploy; después ejecutar el recorrido real en teléfono + computadora y ajustar menú/barra al boceto; R3, R5, R6; Google y SMTP propio.
+
+
+### D-2026-11-17-01 · Consolidar decisiones y bocetos navegables (sin tocar la app)
+
+- **Fecha y hora:** 2026-11-17 (America/Costa_Rica)
+- **Persona:** Manu
+- **IA:** Claude Code · `claude-sonnet-5-5`
+- **Rama y commits:** `fix/hosted-integration` sobre `820faec` · sin commit ni push (cambios en el árbol de trabajo; ZIP entregado aparte)
+- **Qué cambió:** **Documentación (E0):** sección 0 nueva en `Onza-Product-Blueprint-v3.md` con lo acordado, dependencias manuales, lo implementado/verificado (con la evidencia existente) y lo pendiente, más las reglas R1–R6 (identidades personal/laboral y linking de Auth, acceso equivocado, borrado de cuenta, migraciones expandir→desplegar→contraer, nuevas condiciones, logout vs. sesión vencida). Secciones contradictorias marcadas como históricas; `AGENTS.md` apunta al blueprint; `Onza-UX-v2.md` y `docs/hosted-ux-plan.md` con aviso/plan vigente. **Bocetos (E1):** prototipo estático en `design/bocetos/` (cliente, cuenta, equipo, barra y administración) con datos ficticios en memoria. **Son bocetos para aprobar, no funciones implementadas**; la app no cambió.
+- **Archivos clave:** `Onza-Product-Blueprint-v3.md` (sección 0), `AGENTS.md`, `docs/hosted-ux-plan.md`, `design/bocetos/` (README, `index.html`, `assets/`, `capturas/`).
+- **Verificado:** en Chromium (Playwright) recorrido cliente completo con guardas de sesión, carrito de un local con reemplazar/conservar, dock solo en el local dueño, ciclo Recibido→Preparando→Listo→Entregado con la barra, validación de retiro (número público rechazado, código inválido, código correcto), cancelación solo antes de aceptación, sesión equivocada sin cierre automático, empleado sin acceso a compra ni a administración. Sin desbordes horizontales en 360, 390 y 1440 px, claro y oscuro, en las 24 pantallas; sin errores de consola. Capturas inspeccionadas.
+- **No verificado:** no se ejecutó la suite de la app (no se tocó código de producto). Los bocetos no se probaron en teléfonos físicos ni con lector de pantalla. Lo descrito como "implementado" en el blueprint se tomó de entradas y evidencia previas; no se re-ejecutó. Comportamiento exacto del linking de Supabase: a confirmar en su documentación antes de implementar R1.
+- **Decisiones:** el plan canónico es `docs/hosted-ux-plan.md` (nueva sección "Plan vigente 2026-11-17"). Las reglas R1–R6 se especifican, no se implementan. Los textos legales del boceto son de ejemplo.
+- **Pendientes / siguiente paso:** Manu aprueba o ajusta los bocetos. Después, etapas E2–E6 del plan solo con autorización expresa, empezando por una migración aditiva (R4). Dependencias manuales en la sección 0.3 (Google OAuth, SMTP propio, URLs de Auth, textos legales).
+
 
 ### D-2026-11-16-05 · Publicar y comprobar el Preview del hito
 

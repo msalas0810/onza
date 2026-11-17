@@ -32,8 +32,7 @@ export function StaffLogin() {
   return (
     <>
       <p className="muted">
-        Acceso del personal con cuenta del proyecto demo. Para pedir como
-        cliente usá otro perfil o dispositivo.
+        Las cuentas del equipo las crea el administrador de tu local.
       </p>
       <form
         className="stack"

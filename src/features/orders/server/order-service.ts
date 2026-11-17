@@ -11,6 +11,8 @@ import {
 import { assertMockPayments } from "@/features/payments/server/provider";
 import { orderSchema } from "../types";
 import QRCode from "qrcode";
+import { accountsRequired } from "@/lib/access-policy";
+import { scenariosEnabled } from "@/features/payments/server/provider";
 export async function executeCommand(raw: unknown) {
   assertMockPayments();
   const command = commandSchema.parse(raw);
@@ -26,9 +28,13 @@ export async function executeCommand(raw: unknown) {
   )
     throw new Error("CONNECTION_ERROR");
   if (authError || !user) throw new Error("SESSION_REQUIRED");
+  if (command.action === "create") await assertCanOrder(db, user.is_anonymous);
   let input: Json = command;
+  // Simulated outcomes are for tests only: never selectable from the customer or bar UI.
+  if (!scenariosEnabled() && "scenario" in command)
+    input = { ...command, scenario: "approved" };
   if (command.action === "create")
-    input = { ...command, ...createPickupToken() };
+    input = { ...(input as object), ...createPickupToken() };
   if (command.action === "resolve" && command.token) {
     const { token, ...rest } = command;
     input = { ...rest, tokenHash: tokenHash(token) };
@@ -57,6 +63,24 @@ export async function executeCommand(raw: unknown) {
   if (command.action === "venue_update" || command.action === "product_save")
     return data;
   return enrichOrder(data);
+}
+/** Work accounts never buy; with accounts required a customer needs a session and a completed profile. */
+async function assertCanOrder(
+  db: Awaited<ReturnType<typeof serverDb>>,
+  anonymous: boolean | undefined,
+) {
+  const { data: membership } = await db
+    .from("memberships")
+    .select("venue_id")
+    .limit(1);
+  if (membership?.length) throw new Error("STAFF_CANNOT_ORDER");
+  if (!accountsRequired()) return;
+  if (anonymous) throw new Error("ACCOUNT_REQUIRED");
+  const { data: profile } = await db
+    .from("profiles")
+    .select("user_id")
+    .maybeSingle();
+  if (!profile) throw new Error("ONBOARDING_REQUIRED");
 }
 export async function enrichOrder(data: unknown) {
   const order = orderSchema.parse(data);

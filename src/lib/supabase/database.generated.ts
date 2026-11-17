@@ -199,6 +199,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      profiles: {
+        Row: {
+          user_id: string;
+          full_name: string;
+          username: string;
+          phone_country: string;
+          phone_e164: string;
+          phone_verified: boolean;
+          birth_date: string;
+          adult_declared: boolean;
+          terms_version: string;
+          privacy_version: string;
+          terms_accepted_at: string;
+          news_opt_in: boolean;
+          offers_opt_in: boolean;
+          onboarded_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          full_name: string;
+          username: string;
+          phone_country: string;
+          phone_e164: string;
+          phone_verified?: boolean;
+          birth_date: string;
+          adult_declared?: boolean;
+          terms_version: string;
+          privacy_version: string;
+          terms_accepted_at: string;
+          news_opt_in?: boolean;
+          offers_opt_in?: boolean;
+          onboarded_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          full_name?: string;
+          username?: string;
+          phone_country?: string;
+          phone_e164?: string;
+          phone_verified?: boolean;
+          birth_date?: string;
+          adult_declared?: boolean;
+          terms_version?: string;
+          privacy_version?: string;
+          terms_accepted_at?: string;
+          news_opt_in?: boolean;
+          offers_opt_in?: boolean;
+          onboarded_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       venues: {
         Row: {
           id: string;
@@ -265,6 +319,12 @@ export type Database = {
     };
     Views: Record<never, never>;
     Functions: {
+      current_account: { Args: Record<never, never>; Returns: Json };
+      complete_onboarding: { Args: { input: Json }; Returns: Json };
+      update_preferences: {
+        Args: { news: boolean; offers: boolean };
+        Returns: undefined;
+      };
       order_list: {
         Args: {
           venue_filter?: string;

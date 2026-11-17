@@ -13,6 +13,10 @@ export function assertMockPayments() {
   )
     throw new Error("PROVIDER_NOT_CONFIGURED");
 }
+/** Simulated payment outcomes exist for automated tests only (ENABLE_PAYMENT_SCENARIOS=true). */
+export function scenariosEnabled() {
+  return process.env.ENABLE_PAYMENT_SCENARIOS === "true";
+}
 /** Durable mock operations are implemented by private.payment_operations inside onza_command.
  * No in-memory ledger is used and no bank calls are made. */
 export class BacPaymentProvider implements PaymentProvider {

@@ -26,14 +26,18 @@ export async function POST(request: Request) {
           ? 401
           : code === "RESOURCE_NOT_FOUND"
             ? 404
-            : code === "NOT_AUTHORIZED"
+            : code === "NOT_AUTHORIZED" ||
+                code === "STAFF_CANNOT_ORDER" ||
+                code === "ONBOARDING_REQUIRED"
               ? 403
-              : code === "SUPABASE_NOT_CONFIGURED" ||
-                  code === "CONNECTION_ERROR"
-                ? 503
-                : code === "RATE_LIMITED"
-                  ? 429
-                  : 409;
+              : code === "ACCOUNT_REQUIRED"
+                ? 401
+                : code === "SUPABASE_NOT_CONFIGURED" ||
+                    code === "CONNECTION_ERROR"
+                  ? 503
+                  : code === "RATE_LIMITED"
+                    ? 429
+                    : 409;
     return NextResponse.json(
       { error: code, message: errorMessage(new Error(code)) },
       { status, headers: { "Cache-Control": "no-store" } },

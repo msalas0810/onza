@@ -1,5 +1,7 @@
 # Onza: funcionamiento y composición
 
+> Las etapas 1–6 de abajo son el plan del 2026-11-16, **completado** y ahora histórico. El plan vigente empieza en "Plan vigente 2026-11-17" al final de este archivo.
+
 Plan del 2026-11-16. Especificación: encargo de Manu y criterios AC01–AC12 de `Onza-UX-v2.md`. Ejecución autónoma en `fix/hosted-integration`, conservando Next, Supabase, RLS, Auth y pagos mock. Sin dependencias nuevas ni ramas.
 
 Dirección visual: blanco/grafito/borgoña, Inter y marca actuales; composición compacta para elegir local, agregar tragos y recoger. Sin hero ni movimiento ornamental. Reutilizar Button, QuantityStepper, TextField, VenueCard, ProductImage y tokens.
@@ -25,3 +27,20 @@ Credenciales no visibles a staff; pedidos previos sin rotación de clave; QR fal
 - Verificación de etapas 1–5: `docs/hosted-ux-verification.md`. Dos revisiones estáticas del retiro/Realtime y revisión final de allowlist sin bloqueos. No hubo cambios de configuración de Vercel ni rotación de claves.
 
 - Cierre: código e1e8987 publicado, GitHub Actions 43937917513 exitoso y Preview READY con nueve controles HTTPS reales aprobados. Evidencia y límites en el informe; main/producción/settings sin cambios.
+
+
+## Plan vigente 2026-11-17
+
+Fuente de decisiones: sección 0 de `Onza-Product-Blueprint-v3.md`. Rama `fix/hosted-integration`. Una persona/IA escribe la rama a la vez.
+
+| Etapa | Entrega | Estado |
+| --- | --- | --- |
+| E0 | Documentación consolidada (acordado / dependencias manuales / implementado / pendiente; reglas R1–R6) | Hecho 2026-11-17 |
+| E1 | Bocetos HTML navegables en `design/bocetos/`, comprobados en 360/390/1440 claro y oscuro | Hecho 2026-11-17; **pendiente aprobación de Manu** |
+| E2 | Cuentas de cliente: acceso, confirmación, Google, recuperación, onboarding, sesión/QR (R1, R2, R6). Migración aditiva primero (R4) | **Código listo 2026-11-17** tras `ACCOUNTS_REQUIRED`; migración 010 sin aplicar a `onza-dev`; R6 (borrador tras sesión vencida) pendiente |
+| E3 | Perfil, preferencias, páginas legales (borrador), versión de condiciones (R5), borrado de cuenta (R3) | Parcial: perfil, preferencias y aceptación con fecha/versión. Pendiente: R5 (pantalla de nueva versión), R3 (borrado), páginas legales propias |
+| E4 | Portal laboral `/equipo/acceso`; empleado/administrador; migración desde `bartender/admin/onza`; separación del acceso interno Onza | Parcial: `/equipo/acceso` y separación cliente/equipo en servidor. Pendiente: renombrar roles a empleado/administrador (migración contractiva) |
+| E5 | Pantallas de producción según bocetos aprobados; retirar el selector de resultado simulado | Parcial: selectores de resultado simulado retirados (cliente y barra); acceso, onboarding y cuenta nuevos. Pendiente: revisión visual de menú y barra contra el boceto |
+| E6 | Verificación completa, dispositivos físicos, dependencias manuales cerradas | No autorizado aún |
+
+Cada etapa de implementación: migración aditiva → despliegue y verificación del frontend → contracción posterior (R4). Ninguna etapa activa pagos reales ni toca dominios.

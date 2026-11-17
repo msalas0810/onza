@@ -15,3 +15,20 @@ Backend: onza-dev, ref ukdjuubekpanizcmppod, misma base y datos. Root '.', Next.
 Verificaciones HTTPS: catálogo, sesión invitada, pedido/reserva mock, persistencia, acceso bartender y Realtime WebSocket pasaron. No son pruebas físicas de Safari/iPhone. Reporte: docs/evidence/vercel-verification.json.
 
 **Pendiente del usuario:** no apareció código de retiro y la entrega no exigió validación. No se considera comprobada ni corregida esa validación. Esta ejecución no capturó ni entregó el pedido de prueba; se canceló después de Listo.
+
+
+## Cuentas de cliente y portal del equipo (2026-11-17)
+
+El código ya incluye acceso obligatorio, onboarding y portal separado, **apagados por defecto** para no romper el demo desplegado (R4). Orden obligatorio:
+
+1. Aplicar la migración aditiva `supabase/migrations/202611170010_customer_accounts.sql` a `onza-dev` (`supabase db push` o el flujo habitual). El demo desplegado sigue funcionando antes y después.
+2. Desplegar esta rama (Preview).
+3. Crear la cuenta personal de prueba localmente, sin imprimir contraseñas: definir `DEMO_CUSTOMER_EMAIL` y `DEMO_CUSTOMER_PASSWORD` (correo distinto de todas las cuentas del equipo) en `.env.local` y ejecutar `npm run demo:seed-users`.
+4. En Auth de Supabase agregar a Redirect URLs el origen exacto del Preview con `/auth/callback`.
+5. Recién entonces definir `ACCOUNTS_REQUIRED=true` en las variables Preview de Vercel y redeplegar. Sin la variable, el demo conserva el flujo invitado.
+
+Entrar como **cliente (teléfono)**: abrir el demo → `/acceso` → correo y contraseña de `DEMO_CUSTOMER_*` → completar el perfil (nombre, @usuario, teléfono, fecha de nacimiento 18+, aceptar condiciones) → Explorar → local → menú → carrito → confirmar.
+
+Entrar como **bartender (computadora)**: abrir `/equipo/acceso` con `DEMO_BARTENDER_EMAIL/PASSWORD` (Sala Norte) o `DEMO_BARTENDER_2_*` (Patio Central) → Abrir barra. El bartender no puede pedir: abrir `/acceso` con su sesión muestra "Ya hay una sesión iniciada".
+
+Dependencias manuales que siguen abiertas: Google OAuth (credenciales y proveedor en Supabase), SMTP propio para correos de confirmación y recuperación a clientes reales (el SMTP integrado de Supabase es solo para pruebas), plantillas de correo, y revisión legal de los textos borrador.

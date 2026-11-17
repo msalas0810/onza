@@ -6,6 +6,10 @@ Antes de escribir código, leer **`DIARIO.md`** (raíz): "Estado actual", "Pendi
 
 Al terminar, agregar una entrada nueva en `DIARIO.md` (fecha, persona, IA y modelo, rama y commits, qué cambió, qué se verificó y qué no) y actualizar "Estado actual". No borrar entradas previas. Si no se hizo, el trabajo no está terminado. Sin secretos ni afirmaciones sin evidencia.
 
+## Documento canónico de producto
+
+Las decisiones vigentes (acceso obligatorio, cuenta personal vs. laboral, dos permisos laborales, onboarding y privacidad, reglas R1–R6) están en la **sección 0 de `Onza-Product-Blueprint-v3.md`**. Ahí manda lo más reciente; donde otro documento (incluido `Onza-UX-v2.md`, `README.md` y `docs/01…`) lo contradiga, es histórico. Los bocetos de `design/bocetos/` son propuestas visuales, no funciones implementadas.
+
 ## Orden de lectura
 
 Después del diario, leer README.md, docs/01-producto-y-diseno.md, docs/02-arquitectura.md, docs/03-bac-y-pagos.md, docs/04-plan-de-construccion.md y docs/05-pruebas-y-demo.md antes de implementar. Si una decisión está resuelta allí, no volver a preguntarla. Resolver detalles rutinarios con esos criterios y documentarlos.
@@ -13,7 +17,7 @@ Después del diario, leer README.md, docs/01-producto-y-diseno.md, docs/02-arqui
 ## Producto
 
 - Construir solo el MVP descrito. Priorizar un recorrido completo entre dos dispositivos.
-- Cliente sin formulario de login obligatorio. Staff autenticado y autorizado por local.
+- ~~Cliente sin login~~ (histórico). Vigente: login obligatorio para clientes; cuenta laboral distinta que nunca compra; empleado y administrador por local. Ver blueprint, sección 0. El código actual todavía usa sesión invitada: no cambiarlo sin una etapa autorizada y la regla R4 de migraciones.
 - Next.js/React/TypeScript propuestos; si hay un repositorio existente, inspeccionarlo antes de cambiar stack.
 - Supabase para persistencia, Auth, Storage y Realtime. SQL versionado y tipos generados.
 - Monolito modular. No microservicios, Redis, Kubernetes, GraphQL ni agentes AI en el MVP.

@@ -8,12 +8,12 @@ import { useCart, cartTotal, writeCart, readCart } from "../cart-store";
 import { Button, Price, EmptyState } from "@/components/ui/primitives";
 import { sendCommand } from "../client-api";
 import { orderSchema } from "../types";
-export function Checkout() {
+export function Checkout({ accounts = false }: { accounts?: boolean }) {
   const cart = useCart();
   const router = useRouter();
-  const [adult, setAdult] = useState(false);
-  const [policy, setPolicy] = useState(false);
-  const [scenario, setScenario] = useState("approved");
+  // With accounts, age and terms were accepted (with date and version) during onboarding.
+  const [adult, setAdult] = useState(accounts);
+  const [policy, setPolicy] = useState(accounts);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const lock = useRef(false);
@@ -33,7 +33,12 @@ export function Checkout() {
       const {
         data: { user },
       } = await db.auth.getUser();
-      if (!user) {
+      if (accounts) {
+        if (!user || user.is_anonymous) {
+          router.push("/acceso?next=%2Fcheckout");
+          return;
+        }
+      } else if (!user) {
         const { error } = await db.auth.signInAnonymously();
         if (error)
           throw new Error(
@@ -55,7 +60,6 @@ export function Checkout() {
         termsVersion: "demo-v1",
         privacyVersion: "demo-v1",
         adult,
-        scenario,
       };
       const fingerprint = JSON.stringify(input);
       const saved = localStorage.getItem("onza-checkout-attempt");
@@ -113,45 +117,35 @@ export function Checkout() {
             confirma al recoger tu pedido. No ingresés datos de tarjeta.
           </p>
         </div>
-        <label className="field">
-          Resultado de la reserva simulada
-          <select
-            value={scenario}
-            onChange={(e) => setScenario(e.target.value)}
-          >
-            <option value="approved">Aprobada</option>
-            <option value="declined">Rechazada</option>
-            <option value="requires_action">Requiere confirmación</option>
-            <option value="timeout">
-              Respuesta perdida, resultado desconocido
-            </option>
-          </select>
-        </label>
-        <label className="checkbox">
-          <input
-            type="checkbox"
-            checked={adult}
-            onChange={(e) => setAdult(e.target.checked)}
-          />
-          <span>
-            Confirmo que soy mayor de edad. El local puede verificarlo al
-            retirar.
-          </span>
-        </label>
-        <label className="checkbox">
-          <input
-            type="checkbox"
-            checked={policy}
-            onChange={(e) => setPolicy(e.target.checked)}
-          />
-          <span>
-            Acepto los{" "}
-            <Link href="/policies">
-              términos y la política de privacidad del demo
-            </Link>{" "}
-            (demo-v1).
-          </span>
-        </label>
+        {!accounts && (
+          <>
+            <label className="checkbox">
+              <input
+                type="checkbox"
+                checked={adult}
+                onChange={(e) => setAdult(e.target.checked)}
+              />
+              <span>
+                Confirmo que soy mayor de edad. El local puede verificarlo al
+                retirar.
+              </span>
+            </label>
+            <label className="checkbox">
+              <input
+                type="checkbox"
+                checked={policy}
+                onChange={(e) => setPolicy(e.target.checked)}
+              />
+              <span>
+                Acepto los{" "}
+                <Link href="/policies">
+                  términos y la política de privacidad del demo
+                </Link>{" "}
+                (demo-v1).
+              </span>
+            </label>
+          </>
+        )}
         <p className="muted">
           Podés cancelar mientras el pedido esté en cola. Si el local no acepta
           en 2 minutos, la reserva se anula. Sin recogida, se anula 20 minutos

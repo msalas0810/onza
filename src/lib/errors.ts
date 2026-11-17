@@ -49,6 +49,22 @@ export const messages: Record<string, string> = {
     "La imagen del trago no es válida. Usá una imagen JPG, PNG o WebP de hasta 2 MB subida desde esta pantalla.",
   SUPERVISOR_REVIEW_REQUIRED:
     "Un supervisor debe verificar físicamente si se entregó antes de transferir el retiro.",
+  STAFF_CANNOT_ORDER:
+    "Las cuentas del equipo no pueden pedir. Usá tu cuenta personal.",
+  STAFF_ACCOUNT:
+    "Esta cuenta es del equipo y no puede usarse como cuenta de cliente.",
+  ACCOUNT_REQUIRED: "Ingresá con tu cuenta para pedir.",
+  ONBOARDING_REQUIRED: "Completá tu perfil para poder pedir.",
+  PROFILE_REQUIRED: "Completá tu perfil primero.",
+  INVALID_NAME: "Ingresá tu nombre (entre 2 y 100 caracteres).",
+  INVALID_USERNAME:
+    "Usá de 3 a 20 letras minúsculas, números, punto o guion bajo.",
+  USERNAME_TAKEN: "Ese @usuario ya existe. Elegí otro.",
+  INVALID_PHONE: "Ingresá un teléfono válido con su código de país.",
+  INVALID_BIRTH_DATE: "Ingresá una fecha de nacimiento válida.",
+  UNDERAGE: "Necesitás tener 18 años o más para usar Onza.",
+  TERMS_REQUIRED: "Aceptá las condiciones y la política de privacidad.",
+  INVALID_PROFILE: "Revisá los datos del perfil.",
 };
 export function errorCode(error: unknown) {
   if (error instanceof Error && error.name === "AuthSessionMissingError")

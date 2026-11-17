@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
 import { BrandMark } from "@/components/ui/primitives";
-import { Settings } from "lucide-react";
-import { CustomerNavigation, SavedCartLink } from "@/components/ui/navigation";
+import {
+  CustomerNavigation,
+  HeaderAccountLink,
+  SavedCartLink,
+} from "@/components/ui/navigation";
 import "@/styles/globals.css";
 export const metadata: Metadata = {
   title: "Onza · Pedí y recogé",
@@ -36,9 +39,7 @@ export default function RootLayout({
             <BrandMark />
           </Link>
           <span className="demo-label">DEMO · sin dinero real</span>
-          <Link className="settings-link" href="/settings" aria-label="Ajustes">
-            <Settings size={20} aria-hidden="true" />
-          </Link>
+          <HeaderAccountLink />
         </header>
         <SavedCartLink />
         <main id="main">{children}</main>

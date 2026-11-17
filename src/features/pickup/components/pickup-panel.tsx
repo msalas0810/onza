@@ -22,7 +22,6 @@ export function PickupPanel({
   const [order, setOrder] = useState<Order | null>(null);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-  const [scenario, setScenario] = useState("approved");
   const [physical, setPhysical] = useState(false);
   const lock = useRef(false);
   async function resolve(value: string) {
@@ -90,7 +89,6 @@ export function PickupPanel({
             action,
             orderId: order.id,
             claimId: order.claim_id,
-            scenario,
             physicalHandoff: physical,
           }),
         ),
@@ -169,20 +167,6 @@ export function PickupPanel({
               {order.payment_state === "authorized" &&
                 order.capture_state !== "declined" && (
                   <>
-                    <label className="field">
-                      Resultado de captura simulada
-                      <select
-                        value={scenario}
-                        onChange={(e) => setScenario(e.target.value)}
-                      >
-                        <option value="approved">Aprobada</option>
-                        <option value="declined">Rechazada</option>
-                        <option value="timeout_after_success">
-                          Cobro exitoso con respuesta perdida
-                        </option>
-                        <option value="unknown">Resultado desconocido</option>
-                      </select>
-                    </label>
                     <Button loading={busy} onClick={() => void act("capture")}>
                       Confirmar cobro simulado
                     </Button>

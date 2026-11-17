@@ -58,6 +58,45 @@ for (const [alias, venue_id, role] of definitions) {
   if (error) throw error;
   console.log(`Cuenta ${alias} asignada: ${user.id} (${role})`);
 }
+// Personal (customer) demo account: confirmed, no venue membership, never staff.
+// The profile is completed by the person in /onboarding (age, terms and preferences are theirs to give).
+{
+  const email = process.env.DEMO_CUSTOMER_EMAIL;
+  const password = process.env.DEMO_CUSTOMER_PASSWORD;
+  if (email || password) {
+    if (!email || !password || password.length < 12)
+      throw new Error(
+        "DEMO_CUSTOMER: correo y contraseña de al menos 12 caracteres requeridos.",
+      );
+    const staffEmails = definitions
+      .map(([alias]) => process.env[`DEMO_${alias}_EMAIL`])
+      .filter(Boolean);
+    if (staffEmails.includes(email))
+      throw new Error(
+        "DEMO_CUSTOMER debe ser un correo distinto de las cuentas del equipo.",
+      );
+    let user = existing.find((u) => u.email === email);
+    if (!user) {
+      const { data, error } = await db.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+      });
+      if (error) throw error;
+      user = data.user;
+    }
+    const { data: memberships, error } = await db
+      .from("memberships")
+      .select("venue_id")
+      .eq("user_id", user.id);
+    if (error) throw error;
+    if (memberships.length)
+      throw new Error(
+        "DEMO_CUSTOMER ya tiene permisos laborales: usá otro correo.",
+      );
+    console.log(`Cuenta CUSTOMER lista: ${user.id}`);
+  }
+}
 console.log(
   "Usuarios demo preparados. Las contraseñas existentes se conservan.",
 );

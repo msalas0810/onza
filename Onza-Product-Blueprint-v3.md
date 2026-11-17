@@ -8,7 +8,106 @@ Este documento organiza el producto completo, pero no autoriza implementar todas
 
 La captura nueva confirma un checkout con selector de resultado simulado, párrafo extenso sobre reservas y una alerta que obliga al empleado a abrir otro perfil para comprar. No prueba que todas las pantallas estén igual ni que los controles del retiro hayan regresado.
 
-Las instrucciones actuales de Manu reemplazan dos decisiones de Onza-UX-v2.md: el acceso al personal sale de Ajustes y la elección de tema deja de tener textos explicativos redundantes. La marca, los controles de seguridad ya corregidos y el stack se conservan. Al incorporar este documento al repo, consolidar las instrucciones vigentes y marcar las anteriores como históricas; no mantener dos mandatos opuestos.
+**Lectura obligatoria primero: sección 0 (registro consolidado).** Las instrucciones actuales de Manu reemplazan dos decisiones de Onza-UX-v2.md: el acceso al personal sale de Ajustes y la elección de tema deja de tener textos explicativos redundantes. La marca, los controles de seguridad ya corregidos y el stack se conservan. Al incorporar este documento al repo, consolidar las instrucciones vigentes y marcar las anteriores como históricas; no mantener dos mandatos opuestos.
+
+## 0. Registro consolidado · documento canónico (vigente desde 2026-11-17)
+
+Este bloque es la fuente vigente. **Reemplaza cualquier instrucción anterior que lo contradiga**: las secciones 2, 3, C1, C3 y 7–8 de más abajo, `Onza-UX-v2.md`, las reglas de acceso de `AGENTS.md` previas a esta fecha y los guiones de demo "invitado" del `README.md` y de `docs/01-producto-y-diseno.md`. Esas partes quedan como **históricas** (ver 0.6) y no se editan una por una. El plan de trabajo vigente está en [`docs/hosted-ux-plan.md`](docs/hosted-ux-plan.md) (sección "Plan vigente 2026-11-17"). Los bocetos aprobables están en [`design/bocetos/`](design/bocetos/README.md) y **no son funciones implementadas**.
+
+Las cuatro etiquetas de abajo no se mezclan: lo acordado no está implementado, y lo implementado no se amplía por estar acordado otra cosa.
+
+### 0.1 Acordado
+
+| # | Decisión |
+| --- | --- |
+| 1 | Onza es una web app. Sin landing por ahora. |
+| 2 | Login obligatorio desde la entrada. Explorar, menús, carrito y pedidos requieren sesión. Con sesión vigente se entra directo. Un QR de local conserva su destino durante acceso y onboarding. |
+| 3 | Acceso cliente: correo y contraseña con confirmación; Continuar con Google; Continuar con Apple visible, deshabilitado y con "Próximamente"; recuperación de contraseña; "¿Sos personal?" al pie. |
+| 4 | Cuenta personal y cuenta laboral son distintas. La personal compra; la laboral opera y nunca compra. Sin cambio de modo, sin transferencias de invitados, sin turnos. |
+| 5 | Navegación separada: área cliente y portal laboral. Hoy `/acceso` y `/equipo/acceso`. Futuro: dominio principal para clientes y `personal.<dominio>` para el equipo (sin configurar dominios ahora). |
+| 6 | Solo dos permisos laborales por local: **empleado** y **administrador**. Sin organizaciones, propietario ni gestión de cadenas. El acceso interno de Onza queda separado. |
+| 7 | Empleados con cuentas individuales y acceso asignado. Registrarse como cliente no concede permisos laborales. |
+| 8 | Supabase Free. No se contratan servicios ni se desactiva la confirmación por correo para evitar configurarla. |
+| 9 | Pagos mock. BAC e integración bancaria real quedan fuera. |
+| 10 | Pedidos invitados antiguos se conservan sin reasignarlos ni borrarlos. |
+
+**Onboarding y privacidad acordados**
+
+- Nombre, @usuario único, teléfono internacional (+506 por defecto) y fecha de nacimiento. Google aporta nombre y correo; se completa lo restante.
+- Teléfono normalizado y **explícitamente no verificado**. Sin SMS ni DNI.
+- Validación 18+ en servidor para el producto futuro. Una fecha declarada no se presenta como verificación documental.
+- Aceptación de condiciones y privacidad, con fecha y versión.
+- Dos preferencias opcionales y desmarcadas: novedades y ofertas de discotecas favoritas. Sin WhatsApp.
+- Perfil, preferencias, páginas legales (borradores) y borrado de cuenta funcional.
+- El personal no recibe correo, teléfono ni fecha de nacimiento del cliente.
+
+**Comportamiento de producto acordado (bocetos)**: Explorar con abiertos primero y destacado cercano si hay ubicación, alternativa sin ubicación, cerrados atenuados y no accionables. Menú con filas compactas y Agregar que pasa a cantidad. Carrito de un solo local con quitar, vaciar y reemplazar/conservar; dock solo en el local dueño. Checkout con resumen, total, condiciones materiales y una acción, sin selector de resultado simulado. Pedido cancelable solo antes de aceptación; Listo destaca punto de retiro, QR y código privado distinto del número público. Barra con Nuevos / Preparando / Listos y validación de retiro. Apariencia Sistema / Claro / Oscuro. Equipo fuera de Ajustes del cliente.
+
+### 0.2 Reglas especificadas (no implementadas)
+
+**R1 · Identidades personales y laborales no se mezclan.** Dos formularios no garantizan cuentas independientes: según la documentación de Supabase Auth, identidades con el mismo correo verificado pueden terminar vinculadas al mismo usuario (por ejemplo correo + Google). Verificar el comportamiento vigente en la documentación antes de implementar. Reglas:
+
+1. Un correo = un usuario de Auth = un tipo de cuenta (`customer` o `staff`), guardado en el perfil, asignado **en servidor** al crear la cuenta e inmutable desde el cliente.
+2. Cuentas laborales: solo correo y contraseña, creadas por alta del administrador del local (o de Onza). `/equipo/acceso` no ofrece registro abierto ni Google.
+3. El correo laboral debe ser distinto del personal. Si el correo invitado ya pertenece a una cuenta `customer`, la alta se rechaza con "Usá otro correo para la cuenta laboral". Nunca se convierte ni se vincula.
+4. Si alguien entra con Google en `/acceso` y el correo corresponde a una cuenta `staff`, el callback de servidor rechaza el ingreso, cierra la sesión creada y no vincula identidades.
+5. Comprar exige `account_kind = customer` verificado en servidor (RPC de checkout), no solo en la interfaz. Operar exige `account_kind = staff` **y** membresía vigente del local.
+6. Pruebas obligatorias antes de dar la regla por implementada: Google con correo laboral, registro por correo con correo existente, alta laboral con correo de cliente, y empleado intentando comprar vía API.
+
+**R2 · Abrir el acceso equivocado.** Abrir `/acceso` con una sesión laboral vigente (o `/equipo/acceso` con una personal) **no cierra la sesión**. Se muestra "Ya hay una sesión iniciada" con la cuenta activa y dos acciones: **Continuar al área correcta** y **Usar otra cuenta**. Solo esta última cierra la sesión actual, y solo después de elegirla. Un QR de local abierto con sesión laboral conserva su destino y ofrece Usar otra cuenta, porque la cuenta laboral no compra.
+
+**R3 · Borrado de cuenta sin script manual.** Flujo de producto en Cuenta → Privacidad: confirmación con reautenticación → ruta de servidor (`service_role` solo allí) que en una operación idempotente registra la solicitud, revoca sesiones, anonimiza perfil (nombre, @usuario, teléfono, nacimiento, preferencias) y elimina el usuario de Auth por la API de administración. Si algún paso falla queda `pending`, con reintento automático y estado visible ("Eliminación en curso"); nunca depende de que una persona ejecute un script. Los pedidos se conservan anonimizados, sin datos personales, por trazabilidad operativa. Pedidos activos bloquean el borrado hasta terminar o cancelarse. Cuenta laboral: el empleado no se borra solo; el administrador revoca el acceso y la eliminación de datos pasa por el mismo servicio. El plazo de retención es una decisión legal pendiente. Con pruebas automatizadas del flujo completo.
+
+**R4 · Migraciones coordinadas con el frontend desplegado.** El Preview desplegado usa el mismo proyecto `onza-dev`. Patrón expandir → desplegar → contraer:
+
+1. Migración **aditiva** compatible con el commit desplegado (tablas o columnas nuevas nullable, RPC nuevas, firmas existentes intactas).
+2. Desplegar el frontend que usa lo nuevo, detrás de un indicador, y verificar el Preview.
+3. Solo en una entrega posterior, migración de **contracción** (retirar columnas, endurecer RLS o constraints) cuando ningún frontend desplegado dependa de lo viejo.
+4. Prohibido en una sola entrega: renombrar o borrar columnas usadas, cambiar firmas de RPC, o endurecer una política que el demo desplegado viole. Ejemplo: la sesión anónima de Supabase y los permisos `bartender/admin/onza` actuales siguen vigentes hasta que el frontend nuevo esté desplegado y verificado; recién entonces se retiran.
+5. Cada migración registra en `DIARIO.md` con qué commit desplegado es compatible.
+
+**R5 · Nuevas versiones de condiciones.** Publicar una versión nueva no inserta aceptaciones. Si la persona no aceptó la versión vigente, al volver a la app ve una pantalla "Actualizamos las condiciones" con enlace al texto y **Aceptar y continuar**. Solo esa acción, ejecutada en servidor, registra usuario, documento, versión y fecha. Mientras tanto no puede comprar; sí puede leer el texto, cerrar sesión o borrar su cuenta.
+
+**R6 · Cierre de sesión y borradores.** **Logout voluntario** limpia los datos locales de Onza: carrito, destino de QR, borrador de onboarding y de formularios. La preferencia de apariencia se conserva porque es del dispositivo y no contiene datos personales. **Sesión vencida o revocada** no limpia: guarda el borrador asociado al identificador opaco de la cuenta, con caducidad (propuesta: 7 días) y sin contraseñas ni datos de pago. Al volver a entrar, el borrador se ofrece solo si es la misma cuenta; con otra cuenta se descarta sin mostrarse.
+
+### 0.3 Dependencias manuales (no las resuelve el código)
+
+| Dependencia | Qué falta | Quién |
+| --- | --- | --- |
+| Google OAuth | Pantalla de consentimiento y credenciales en Google Cloud; URI de redirección de Supabase; activar el proveedor en Supabase con el ID y el secreto. | Manu |
+| Envío de correos | El SMTP integrado de Supabase está pensado para pruebas y tiene límites estrictos (confirmar los vigentes en su documentación). Para clientes reales hace falta SMTP propio. Es una decisión de costo, no se desactiva la confirmación para evitarlo. | Manu |
+| URLs y plantillas de Auth | Site URL, Redirect URLs (incluido el destino QR) y plantillas en español de confirmación y recuperación. | Manu |
+| Sesiones anónimas | Retirar el inicio de sesión anónimo solo tras desplegar y verificar el frontend nuevo (R4). Es un ajuste de Supabase que requiere aprobación. | Manu |
+| Apple | Fuera de alcance. Botón visible y deshabilitado. | — |
+| Dominio futuro | DNS y Vercel para `personal.<dominio>`. Hoy no se configura. | Manu |
+| Textos legales | Condiciones y privacidad son borradores; requieren revisión legal, incluida la retención tras borrar cuenta y el criterio 18+. | Manu / asesoría |
+| Altas laborales | Alta inicial de administradores por Onza (sin autoservicio de comercios). | Manu |
+
+### 0.4 Implementado y verificado (evidencia existente, no re-verificada en esta sesión)
+
+Según `DIARIO.md` (D-2026-11-16-03 a 05) y [`docs/hosted-ux-verification.md`](docs/hosted-ux-verification.md): aplicación Next.js + Supabase alojado `onza-dev` con pagos **mock**; catálogo con abiertos primero y ubicación efímera opcional; carrito con quitar/vaciar, cambio explícito de local y dock contextual; retiro con credencial privada de 12 caracteres distinta del número público, intentos limitados y consumo único; cola de barra con Realtime; administración de menú e imágenes en Storage; `npm run check` (typecheck, lint, 74 pruebas, build), 11 casos E2E contra `onza-dev`, 29 controles alojados, CI run 43937917513 y Preview READY (`e1e8987`) con nueve controles HTTPS. Capturas en `docs/evidence/hosted-ux/`. Límites: sin pruebas en iPhone/Android físicos, GPS/cámara/audio ni cobros reales.
+
+**Actualización 2026-11-17 (código, sin desplegar):** cuentas de cliente, onboarding, `/acceso`, `/equipo/acceso`, `/sesion-activa`, `/cuenta` y la separación cliente/equipo en servidor están implementados detrás de `ACCOUNTS_REQUIRED` (apagado por defecto) con la migración aditiva `202611170010`. Verificado offline: typecheck, lint, 88 pruebas (incluye el recorrido SQL con dos sesiones y la política de acceso) y build. **No** aplicado a `onza-dev`, **no** desplegado y **no** probado con Supabase real ni en teléfono; ver `DIARIO.md` D-2026-11-17-02.
+
+Hasta activar esa bandera, lo implementado en producción **no** coincide con 0.1: el cliente entra como invitado anónimo de Supabase, los roles laborales son `bartender`, `admin` y `onza` en `memberships`, y el checkout conserva el simulador de resultado.
+
+### 0.5 Pendiente
+
+1. Aprobación visual de los bocetos (`design/bocetos/`).
+2. Cuentas de cliente: acceso, confirmación, Google, recuperación y onboarding (con R1, R2, R4–R6).
+3. Perfil, preferencias, páginas legales y borrado de cuenta (R3).
+4. Portal laboral separado, dos permisos (empleado/administrador) y migración desde `bartender/admin/onza` según R4.
+5. Rediseño de pantallas de producción según los bocetos aprobados; retiro del selector de resultado simulado de la experiencia cliente.
+6. Dependencias manuales de 0.3.
+7. Pruebas físicas, fotos con derechos, scheduler durable (PEN-002, PEN-003, PEN-005) y cobros reales (PEN-006, fuera de alcance).
+
+### 0.6 Instrucciones anteriores que pasan a ser históricas
+
+- Sección 2 de este documento (organizaciones, tabla de áreas con "organización/local") y sección 3 (organizaciones, propietario, plataforma como rol de la matriz, "navegar sin cuenta") y C1/C3 en lo que dependen de compra sin cuenta o invitado.
+- Sección 7 en lo relativo a organizaciones; sección 8, etapa 2 ("empleado compra y opera sin perfiles separados"): ahora la cuenta laboral nunca compra.
+- `Onza-UX-v2.md`: acceso del personal en Ajustes y subtítulos del tema (ya reemplazados antes), y el cliente invitado.
+- `AGENTS.md`: "Cliente sin formulario de login obligatorio" (reemplazada).
+- `README.md` y `docs/01-producto-y-diseno.md`: guiones de demo con cliente invitado sin login; describen el estado implementado, no el objetivo.
 
 ## 1. Producto y límite del primer lanzamiento
 
@@ -23,6 +122,9 @@ Fuera: tiquetera, bundles previos a eventos, fidelidad, promociones complejas, e
 No prometer eliminar las filas si la barra no tiene capacidad de preparación o un punto de retiro definido. La demanda digital también puede saturar el servicio: pausar pedidos debe ser una operación visible y rápida.
 
 ## 2. Arquitectura de experiencia
+> **HISTÓRICO desde 2026-11-17** — contradice el registro consolidado de la sección 0; no seguir donde difieran.
+
+
 
 Se consideraron tres caminos:
 
@@ -46,6 +148,9 @@ Son destinos de producto, no una orden de renombrar todas las rutas. El implemen
 En la página de acceso cliente hay un enlace secundario al pie: **¿Sos personal?**. En la web pública también puede existir un enlace discreto de pie a Equipo, sin ocupar la navegación principal. El empleado guarda la URL directa de su barra. No ponerlo en Ajustes ni exigir que cada cliente elija un rol al entrar.
 
 ## 3. Identidad, organizaciones y permisos
+> **HISTÓRICO desde 2026-11-17** — contradice el registro consolidado de la sección 0; no seguir donde difieran.
+
+
 
 Decisión propuesta, pendiente de ratificación de Manu: navegar sin cuenta; solicitar acceso al confirmar la primera compra y volver al mismo carrito. Esto cambia el MVP invitado y añade fricción y dependencias; no bloquear el demo actual esperando OAuth o correo ni fingir un login operativo. No imponer un formulario antes de ver el menú. La pantalla de acceso se ofrece también desde Cuenta.
 
@@ -73,6 +178,9 @@ Preservar pedidos invitados ya existentes y su acceso durante la migración. No 
 
 ### C1. Llegar y encontrar el local
 
+> **Parcialmente histórico:** Explorar y el QR requieren sesión; el QR conserva su destino durante acceso y onboarding (sección 0).
+
+
 QR del establecimiento → menú de ese local. No interponer Explorar ni redirigir al vecino por GPS.
 
 Entrada general → Explorar → local elegido. Búsqueda y selección manual siempre disponibles. “Usar ubicación” es opcional y contextual. Con posición útil y coordenadas fiables, destacar el abierto más cercano sin duplicarlo; después otros abiertos cercanos. No afirmar que alguien está dentro de un bar ni llamar cercano a uno arbitrariamente lejano. No guardar tracking preciso del cliente.
@@ -86,6 +194,9 @@ Menú → Agregar → cantidad → carrito. Foto/título abren detalle; el contr
 Un carrito por local y moneda. Quitar línea, bajar cantidad a cero y Vaciar deben ser descubribles. Navegar no borra el carrito. Añadir de otro local solicita reemplazarlo o conservarlo. El dock grande solo aparece en el local dueño; otros contextos tienen acceso discreto al carrito guardado con nombre del local.
 
 ### C3. Identificarse y confirmar
+
+> **Parcialmente histórico:** el login ya es obligatorio desde la entrada (sección 0); el resto del flujo de checkout sigue vigente.
+
 
 Carrito → acceso si hace falta → retorno al carrito/checkout preservado → revisión final → confirmar. Redirección cancelada o login fallido no pierde selección. Revalidar precios, disponibilidad, estado del local y total en servidor; mostrar cambios antes de enviar.
 

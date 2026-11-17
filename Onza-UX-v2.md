@@ -1,3 +1,5 @@
+> **Histórico parcial (2026-11-17):** donde este documento contradiga la sección 0 de `Onza-Product-Blueprint-v3.md` (cliente invitado, acceso del personal, organizaciones), manda el blueprint.
+
 # Onza · Flujos, dirección visual y auditoría v2
 
 16 de noviembre de 2026 · Propuesta para revisar la implementación existente.

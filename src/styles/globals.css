@@ -880,3 +880,104 @@ video {
     max-width: 280px;
   }
 }
+
+/* Cuenta, acceso y perfil (bocetos aprobados). Solo tokens existentes. */
+.page.narrow {
+  max-width: var(--onza-size-content-customer);
+}
+.auth-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--onza-space-20);
+}
+.auth-page h1 {
+  font-size: var(--onza-type-title-size);
+  line-height: var(--onza-type-title-line);
+}
+.stack.tight {
+  margin-top: 0;
+  gap: var(--onza-space-12);
+}
+.center {
+  text-align: center;
+}
+.hint {
+  color: var(--onza-text-muted);
+  font-size: var(--onza-type-caption-size);
+  line-height: var(--onza-type-caption-line);
+}
+.badge-line {
+  align-self: flex-start;
+  padding: var(--onza-space-4) var(--onza-space-12);
+  border-radius: 999px;
+  background: var(--onza-brand-soft);
+  color: var(--onza-brand-text);
+  font-size: var(--onza-type-caption-size);
+  font-weight: 600;
+}
+.divider-label {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-12);
+  color: var(--onza-text-muted);
+  font-size: var(--onza-type-label-size);
+}
+.divider-label::before,
+.divider-label::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--onza-border);
+}
+.soon {
+  padding: 2px var(--onza-space-8);
+  border-radius: 999px;
+  background: var(--onza-surface);
+  color: var(--onza-text-muted);
+  font-size: var(--onza-type-caption-size);
+  font-weight: 600;
+}
+.segmented {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--onza-space-4);
+  padding: var(--onza-space-4);
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-surface);
+}
+.segmented button {
+  min-height: var(--onza-size-touch-min);
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--onza-text-muted);
+  font-weight: 500;
+}
+.segmented button[aria-pressed="true"] {
+  background: var(--onza-surface-raised);
+  color: var(--onza-text);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--onza-control-border);
+}
+.phone-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 0.9fr) 1.4fr;
+  gap: var(--onza-space-8);
+}
+.dob-row {
+  display: grid;
+  grid-template-columns: 1fr 1.6fr 1.2fr;
+  gap: var(--onza-space-8);
+}
+.phone-row select,
+.dob-row select {
+  min-height: 48px;
+  width: 100%;
+  padding: 0 var(--onza-space-12);
+  background: var(--onza-bg);
+  color: var(--onza-text);
+  border: 1px solid var(--onza-control-border);
+  border-radius: var(--onza-radius-control);
+  font-size: 16px;
+}
