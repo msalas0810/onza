@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`. Acceso visual Particle Wave original: commit de D-2026-11-17-03 (hash en git log). Se conserva el cierre local previo `dde9764`. Sin merge a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`. Acceso visual Particle Wave original: `346df98`; cierre documental posterior en git log. Se conserva el cierre local previo `dde9764`. Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
-| Commit desplegado en Vercel | `d2de7de` en `fix/hosted-integration`, Preview **READY**, deployment `dpl_BvikC3oVNDNYytjyLGeBUgk374fU`; cuentas activadas y 16 controles HTTPS aprobados |
+| Commit desplegado en Vercel | `346df98` en `fix/hosted-integration`, Preview automático **READY**, deployment `dpl_DKAJXz6f2NgWYEPjHdMnc7DvpcFS`; acceso visual y 28 controles HTTPS puntuales aprobados |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Publicar y verificar el acceso visual en el proyecto Vercel existente. Después, prueba física del dueño. Migración 010 aplicada y ACCOUNTS_REQUIRED=true, sin cambios en esta sesión. Google/SMTP y los demás pendientes funcionales siguen fuera de alcance. |
+| Siguiente tarea exacta | Prueba física del dueño del acceso y del recorrido teléfono + computadora. Migración 010 aplicada y ACCOUNTS_REQUIRED=true, sin cambios en esta sesión. Google/SMTP y los demás pendientes funcionales siguen fuera de alcance. |
 
 ### Pendientes abiertos
 
@@ -89,6 +89,17 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-17-04 · Publicar y comprobar el acceso visual
+
+- **Fecha y hora:** 2026-11-17 00:27 (America/Costa_Rica)
+- **Persona:** Manu
+- **IA:** Codex · GPT-6 (identificador exacto no expuesto)
+- **Rama y commits:** `fix/hosted-integration` · `346df98` código publicado; cierre documental en el commit de esta entrada (hash en git log).
+- **Qué cambió:** push del hito y del cierre local previo preservado. Vercel generó automáticamente el Preview `dpl_DKAJXz6f2NgWYEPjHdMnc7DvpcFS`, READY, SHA exacto `346df9830520821bb0951385bcedf577bca6fc54`, target=null, source=git. Alias habitual actualizado automáticamente. Sin despliegue manual, cambios de configuración, Supabase, main ni recursos nuevos.
+- **Verificado:** 28 controles puntuales HTTPS contra `https://onza-demo.vercel.app`, iguales al alcance visual local; capturas de escritorio/móvil inspeccionadas. Login real por correo de la cuenta demo existente hasta `/v/sala-norte`, destino QR conservado; limpieza de WebGL al navegar al portal laboral; teclado, scroll, Apple deshabilitado, invocación OAuth interceptada, reduced motion, visibilidad simulada y fallos WebGL. Cero errores de ejecución. JSON en `docs/evidence/access/hosted-*.json`.
+- **No verificado:** Google completo, correo real de confirmación/recuperación, teléfonos físicos. No se ejecutaron flujos de pedido ni suites ajenas al cambio.
+- **Pendientes / siguiente paso:** prueba física de Manu; ningún bloqueo de publicación pendiente.
 
 ### D-2026-11-17-03 · Rediseñar el acceso con Particle Wave original
 

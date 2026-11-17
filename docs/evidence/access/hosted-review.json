@@ -1,0 +1,104 @@
+{
+  "origin": "https://onza-demo.vercel.app",
+  "checks": [
+    {
+      "name": "desktop original 200 x 200 grid",
+      "passed": true
+    },
+    {
+      "name": "original wave equations and square fragment retained",
+      "passed": true
+    },
+    {
+      "name": "delta-time speed near 60 percent of original",
+      "passed": true,
+      "detail": {
+        "unitsPerSecond": 1.791043884793704
+      }
+    },
+    {
+      "name": "shared header hidden only on customer access",
+      "passed": true
+    },
+    {
+      "name": "Apple disabled",
+      "passed": true
+    },
+    {
+      "name": "staff link correct",
+      "passed": true
+    },
+    {
+      "name": "exact headline and subtitle",
+      "passed": true
+    },
+    {
+      "name": "mobile reduced grid and resolution",
+      "passed": true
+    },
+    {
+      "name": "mobile no horizontal overflow",
+      "passed": true
+    },
+    {
+      "name": "mobile buttons at least 48px",
+      "passed": true
+    },
+    {
+      "name": "email form validation retained",
+      "passed": true
+    },
+    {
+      "name": "signup confirmation retained",
+      "passed": true
+    },
+    {
+      "name": "expanded email scrolls without overflow",
+      "passed": true
+    },
+    {
+      "name": "320px safe layout",
+      "passed": true
+    },
+    {
+      "name": "staff portal retains shared header",
+      "passed": true
+    },
+    {
+      "name": "Google invokes actual OAuth with preserved destination",
+      "passed": true
+    },
+    {
+      "name": "reduced motion renders stationary wave",
+      "passed": true
+    },
+    {
+      "name": "motion preference changes live",
+      "passed": true
+    },
+    {
+      "name": "hidden-tab simulation suspends draw loop",
+      "passed": true
+    },
+    {
+      "name": "visible-tab simulation resumes loop",
+      "passed": true
+    },
+    {
+      "name": "context loss leaves access available",
+      "passed": true
+    },
+    {
+      "name": "WebGL unavailable preserves email and staff access",
+      "passed": true
+    },
+    {
+      "name": "no browser runtime errors",
+      "passed": true,
+      "detail": {
+        "count": 0
+      }
+    }
+  ],
+  "pageErrors": []
+}

@@ -2,13 +2,13 @@
 
 Demo vigente: https://onza-demo.vercel.app
 
-Código desplegado: `d2de7de55c821a50c761d997f7c57d30c31631d7`, rama `fix/hosted-integration`. Preview READY `dpl_BvikC3oVNDNYytjyLGeBUgk374fU`; URL inmutable: https://onza-demo-gcm0egoey-msalas0810s-projects.vercel.app. El alias `onza-demo.vercel.app` se comprobó contra ese deployment. `main` no se modificó, fusionó ni desplegó. El proyecto existente `onza-demo` conserva sus controles de protección, actualmente sin SSO obligatorio.
+Código desplegado: `346df9830520821bb0951385bcedf577bca6fc54`, rama `fix/hosted-integration`. Preview automático READY `dpl_DKAJXz6f2NgWYEPjHdMnc7DvpcFS`; URL inmutable: https://onza-demo-ia2zq1796-msalas0810s-projects.vercel.app. El alias `onza-demo.vercel.app` se comprobó contra ese deployment. Acceso con Particle Wave original de Hossain Jahed, SVG de Onza, fondo negro, ivory y oxblood. `main` no se modificó, fusionó ni desplegó. El proyecto existente `onza-demo` conserva sus controles de protección, actualmente sin SSO obligatorio.
 
 ## Credenciales y recorrido
 
 Consultar **solo localmente** `.env.local` en la raíz del repo. No copiar el archivo al chat ni compartirlo: contiene también secretos de servidor.
 
-- Cliente en teléfono: `/acceso`, variables `DEMO_CUSTOMER_EMAIL` y `DEMO_CUSTOMER_PASSWORD`. Correo distinto de todas las cuentas laborales. La cuenta de prueba tiene un perfil ficticio (Cliente Demo), no datos personales de Manu.
+- Cliente en teléfono: `/acceso` → **Continuar con correo**, variables `DEMO_CUSTOMER_EMAIL` y `DEMO_CUSTOMER_PASSWORD`. Correo distinto de todas las cuentas laborales. La cuenta de prueba tiene un perfil ficticio (Cliente Demo), no datos personales de Manu.
 - Bartender en computadora: `/equipo/acceso`, variables `DEMO_BARTENDER_EMAIL` y `DEMO_BARTENDER_PASSWORD` para **Sala Norte**, el local utilizado en la verificación. Después pulsar **Abrir barra**.
 - Alternativa Patio Central: `DEMO_BARTENDER_2_EMAIL` y `DEMO_BARTENDER_2_PASSWORD`; elegir ese local también en el teléfono.
 
@@ -24,6 +24,8 @@ Usar sesiones independientes. Cliente: local → agregar producto → carrito �
 - Build nuevo desde el SHA exacto, READY. No se creó proyecto ni recurso pagado.
 
 ## Evidencia y pendientes
+
+Acceso visual (2026-11-17): `docs/evidence/access/` contiene capturas locales y 28 controles puntuales locales/HTTPS: diseño a 1440/390/320 px, botones, foco/scroll, login real con destino conservado, invocación OAuth interceptada (sin prometer Google configurado), movimiento reducido, visibilidad simulada, fallos y limpieza WebGL. `npm run typecheck`, `npm run build` y ESLint de los archivos modificados aprobados. Sin nuevas suites ni repetición del flujo de pedidos. No sustituye pruebas físicas.
 
 `docs/evidence/accounts-demo-verification.json`: **16 controles HTTPS aprobados**, dos contextos de Chromium independientes (390×844 cliente, 1440×900 barra), login por formularios, onboarding ficticio, pedido persistente al refrescar, preparación/listo, código público rechazado, validación privada, captura mock y entrega, código consumido rechazado, separación cliente/equipo y cero errores de ejecución. Sin galerías ni repetición de las 88 pruebas.
 
