@@ -49,9 +49,10 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     );
     await a.getByRole("button", { name: /^Pedir/ }).click();
     const original = (await submitted).postDataJSON();
+    // La confirmación con el vasito dura ~2 s antes de pasar al seguimiento; el servidor de desarrollo compila la ruta al entrar.
     await expect(
       a.locator(".badge", { hasText: "Pedido recibido" }),
-    ).toBeVisible();
+    ).toBeVisible({ timeout: 45000 });
     const orderId = new URL(a.url()).pathname.split("/").at(-1)!;
     const duplicates = await Promise.all([
       a.request.post("/api/commands", {
