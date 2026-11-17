@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es-CR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flujo cruzado · Maqueta Onza</title>
+<link rel="icon" href="assets/brand/favicon.svg">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+<style>
+  /* Solo de esta página de revisión. */
+  body { min-height: 100dvh; }
+  .flow { display: grid; gap: var(--onza-space-24); grid-template-columns: 390px 1fr; padding: var(--onza-space-24); align-items: start; }
+  .frame { display: grid; gap: var(--onza-space-8); }
+  .frame iframe { width: 100%; height: calc(100dvh - 170px); min-height: 640px; border: 1px solid var(--onza-border); border-radius: var(--onza-radius-sheet); background: var(--onza-bg); }
+  .frame .row { min-height: 44px; }
+  @media (max-width: 900px) { .flow { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<header class="hdr"><a class="brand" href="index.html"><picture><source srcset="assets/brand/onza-wordmark-white.svg" media="(prefers-color-scheme: dark)"><img src="assets/brand/onza-wordmark.svg" alt="onza" height="22"></picture><span class="tag">Maqueta · flujo cruzado</span></a><span class="spacer"></span>
+  <button class="btn secondary sm" id="reset">Reiniciar</button></header>
+<main class="flow">
+  <section class="frame" aria-label="Cliente en teléfono">
+    <div class="row between"><strong>Cliente · teléfono</strong><span class="muted t-label">María</span></div>
+    <iframe title="Cliente" src="app.html?marco=cliente&rol=cliente#/local/mil948"></iframe>
+  </section>
+  <section class="frame" aria-label="Equipo en escritorio">
+    <div class="row between wrap"><strong>Equipo · escritorio</strong>
+      <div class="seg" role="group" aria-label="Vista del equipo">
+        <button type="button" aria-pressed="true" data-src="app.html?marco=barra&rol=empleado#/barra/mil948">Barra (Jorge)</button>
+        <button type="button" aria-pressed="false" data-src="app.html?marco=admin&rol=admin#/admin/mil948/menu">Admin (Ana)</button>
+      </div></div>
+    <iframe id="staff" title="Equipo" src="app.html?marco=barra&rol=empleado#/barra/mil948"></iframe>
+  </section>
+</main>
+<p class="hint" style="padding:0 24px 24px">Pedí desde el teléfono y operá en la barra: los cambios llegan al otro marco como lo haría Realtime. Probá: cancelar mientras la barra acepta, agotar un producto desde Admin con el carrito abierto, o quitar el acceso de Jorge desde Admin › Equipo. Cada marco tiene su propia barra de revisión.</p>
+<script>
+  document.querySelectorAll("[data-src]").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-src]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    document.getElementById("staff").src = b.dataset.src;
+  }));
+  document.getElementById("reset").addEventListener("click", () => {
+    Object.keys(localStorage).filter((k) => k.startsWith("onza-maqueta-v1")).forEach((k) => localStorage.removeItem(k));
+    location.reload();
+  });
+</script>
+</body>
+</html>

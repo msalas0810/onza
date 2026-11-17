@@ -1,5 +1,7 @@
 # Onza: funcionamiento y composición
 
+> **Plan vigente desde 2026-11-17 (tarde): [`docs/plan-v1.md`](plan-v1.md)**, fases F1–F7 con estado. Las tablas de abajo (etapas 1–6 y E0–E6) son antecedentes.
+
 > Las etapas 1–6 de abajo son el plan del 2026-11-16, **completado** y ahora histórico. El plan vigente empieza en "Plan vigente 2026-11-17" al final de este archivo.
 
 Plan del 2026-11-16. Especificación: encargo de Manu y criterios AC01–AC12 de `Onza-UX-v2.md`. Ejecución autónoma en `fix/hosted-integration`, conservando Next, Supabase, RLS, Auth y pagos mock. Sin dependencias nuevas ni ramas.

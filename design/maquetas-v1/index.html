@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="es-CR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Maquetas Onza V1</title>
+<link rel="icon" href="assets/brand/favicon.svg">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+</head>
+<body>
+<header class="hdr"><span class="brand"><picture><source srcset="assets/brand/onza-wordmark-white.svg" media="(prefers-color-scheme: dark)"><img src="assets/brand/onza-wordmark.svg" alt="onza" height="22"></picture><span class="tag">Maquetas V1</span></span><span class="spacer"></span><span class="demo-chip">Propuesta para revisión</span></header>
+<main id="main" class="page explore" style="padding-bottom:64px">
+  <div class="page-head"><p class="eyebrow">F1 · sistema visual y recorridos</p><h1 class="t-display">Maquetas navegables de Onza</h1>
+    <p class="muted" style="max-width:62ch">Recorridos completos de cliente, empleado y administrador con la lógica del servidor simulada en el navegador: permisos, estados del pedido, doble envío, stock que cambia, sesión vencida, desconexión y revocación. No llaman a Supabase ni procesan pagos. Abrí la <strong>barra de revisión</strong> (botón “Revisión”) en cualquier pantalla para saltar, cambiar de cuenta, simular casos y ver los componentes usados.</p></div>
+
+  <div class="vgrid three">
+    <a class="block-card" href="flujo.html" style="text-decoration:none;color:inherit"><span class="badge brand plain">Empezá acá</span><h2 class="t-heading">Flujo cruzado</h2><p class="muted">Cliente en teléfono y barra o admin en escritorio, sincronizados.</p></a>
+    <a class="block-card" href="componentes.html" style="text-decoration:none;color:inherit"><h2 class="t-heading">Componentes</h2><p class="muted">Catálogo con estados y la correspondencia con la app.</p></a>
+    <a class="block-card" href="GUIA.md" style="text-decoration:none;color:inherit"><h2 class="t-heading">Guía</h2><p class="muted">Tokens, decisiones, movimiento, lógica y pendientes.</p></a>
+  </div>
+
+  <h2 class="eyebrow section-label">Cliente</h2>
+  <div class="rows">
+    <a class="r" href="app.html#/acceso" style="color:inherit;text-decoration:none"><span class="grow"><strong>1 · Acceso, registro, confirmación y perfil</strong><div class="sub">Acceso → Crear cuenta → Confirmar correo → Completar perfil (18+, usuario único) → Explorar</div></span></a>
+    <a class="r" href="app.html?rol=cliente#/explorar" style="color:inherit;text-decoration:none"><span class="grow"><strong>2 · Explorar</strong><div class="sub">Con y sin ubicación, permiso denegado, búsqueda sin resultados, cargando, error, sin conexión</div></span></a>
+    <a class="r" href="app.html?rol=cliente#/local/mil948" style="color:inherit;text-decoration:none"><span class="grow"><strong>3 · Local, carrito y checkout</strong><div class="sub">Agregar → stepper (el − con 1 quita) → carrito de un local → reemplazar carrito → pedir con idempotencia</div></span></a>
+    <a class="r" href="app.html?rol=cliente#/local/wilk" style="color:inherit;text-decoration:none"><span class="grow"><strong>4 · Local pausado y cerrado</strong><div class="sub">Wilk (pausado) y Otro Bar (cerrado); P-1 conmutable</div></span></a>
+    <a class="r" href="app.html?rol=cliente#/pedidos" style="color:inherit;text-decoration:none"><span class="grow"><strong>5 · Seguimiento, cancelación y retiro</strong><div class="sub">Recibido → Preparando → Listo (ticket, QR ilustrativo, código privado) → Entregado</div></span></a>
+  </div>
+
+  <h2 class="eyebrow section-label">Equipo</h2>
+  <div class="rows">
+    <a class="r" href="app.html#/equipo/acceso" style="color:inherit;text-decoration:none"><span class="grow"><strong>6 · Acceso del equipo</strong><div class="sub">1 local → directo a la barra; 2 locales → selector; clave temporal → cambio obligatorio</div></span></a>
+    <a class="r" href="app.html?rol=empleado#/barra/mil948" style="color:inherit;text-decoration:none"><span class="grow"><strong>7 · Barra</strong><div class="sub">Nuevos / Preparando / Listos, rechazo con motivo, validar retiro, pausa, sonido opcional</div></span></a>
+  </div>
+
+  <h2 class="eyebrow section-label">Administración</h2>
+  <div class="rows">
+    <a class="r" href="app.html?rol=admin#/admin/mil948/resumen" style="color:inherit;text-decoration:none"><span class="grow"><strong>8 · Resumen, pedidos, menú y disponibilidad</strong><div class="sub">Agotar y editar precio con efecto inmediato en carritos</div></span></a>
+    <a class="r" href="app.html?rol=admin#/admin/mil948/negocio" style="color:inherit;text-decoration:none"><span class="grow"><strong>9 · Negocio</strong><div class="sub">Imágenes pendientes, datos públicos con fuente, coordenadas por verificar</div></span></a>
+    <a class="r" href="app.html?rol=admin#/admin/mil948/equipo" style="color:inherit;text-decoration:none"><span class="grow"><strong>10 · Equipo</strong><div class="sub">Alta con contraseña temporal, cambio de rol, quitar acceso a un solo local, último admin protegido</div></span></a>
+  </div>
+
+  <p class="hint" style="margin-top:32px">Locales reales con datos de demo. Menús, precios, horarios, distancias y pedidos son simulados. Sin relación comercial ni autorización de los locales; fotos, logos y coordenadas pendientes de verificación. Para abrir: <code>python3 -m http.server 8080 --directory design/maquetas-v1</code> y entrá a <code>http://localhost:8080</code>.</p>
+</main>
+</body>
+</html>

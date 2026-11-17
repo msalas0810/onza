@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es-CR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Componentes · Maqueta Onza</title>
+<link rel="icon" href="assets/brand/favicon.svg">
+<link rel="stylesheet" href="assets/tokens.css">
+<link rel="stylesheet" href="assets/components.css">
+<style>
+  /* Solo de este catálogo: mostrar hojas y dock en su lugar, sin posición fija. */
+  .cat section.c { padding: var(--onza-space-32) 0; border-top: 1px solid var(--onza-border); display: grid; gap: var(--onza-space-16); }
+  .cat .meta-line { font: var(--onza-type-caption); color: var(--onza-text-muted); }
+  .cat .demo { display: flex; flex-wrap: wrap; gap: var(--onza-space-16); align-items: flex-start; }
+  .cat .static .sheet, .cat .static .dock { position: static; translate: none; animation: none; width: 100%; max-width: 480px; border-radius: var(--onza-radius-sheet); box-shadow: 0 0 0 1px var(--onza-border); }
+  .cat .static .dock { border-radius: var(--onza-radius-media); }
+  .cat .static .banner { position: static; }
+  .cat .swatch { width: 148px; border-radius: var(--onza-radius-control); border: 1px solid var(--onza-border); overflow: hidden; font: var(--onza-type-caption); }
+  .cat .swatch span { display: block; height: 56px; }
+  .cat .swatch div { padding: 8px; }
+  .cat .w360 { width: 100%; max-width: 360px; }
+  .cat .w480 { width: 100%; max-width: 480px; }
+  @media (max-width: 480px) { .hdr .brand .tag { display: none; } .hdr .seg button { padding: 0 10px; } }
+</style>
+</head>
+<body>
+<header class="hdr"><a class="brand" href="index.html"><picture><source srcset="assets/brand/onza-wordmark-white.svg" media="(prefers-color-scheme: dark)"><img src="assets/brand/onza-wordmark.svg" alt="onza" height="22"></picture><span class="tag">Componentes</span></a><span class="spacer"></span>
+  <div class="seg" role="group" aria-label="Tema"><button type="button" data-theme-set="" aria-pressed="true">Sistema</button><button type="button" data-theme-set="light" aria-pressed="false">Claro</button><button type="button" data-theme-set="dark" aria-pressed="false">Oscuro</button></div></header>
+<main id="main" class="page explore cat" style="padding-bottom:64px">
+  <div class="page-head"><p class="eyebrow">Catálogo vivo</p><h1 class="t-display">Componentes de Onza V1</h1>
+    <p class="muted" style="max-width:64ch">Cada bloque es una función de <code>assets/templates.js</code> y una clase de <code>assets/components.css</code>. La línea gris indica el componente React que la implementa en F2 y su procedencia (GUIA.md §4).</p></div>
+  <div id="catalog"></div>
+</main>
+<script src="data/venues.js"></script>
+<script src="assets/templates.js"></script>
+<script>
+(function () {
+  const U = window.OnzaUI;
+  const venue = (slug, patch) => ({ ...window.ONZA_FACTS.find((v) => v.slug === slug), ...window.ONZA_DEMO.venues[slug], ...patch });
+  const v1 = venue("mil948"), v2 = venue("wilk"), v3 = venue("otro-bar");
+  const prod = (name, desc, price, img, extra) => ({ id: name.replace(/\W/g, ""), name, desc, price, img, available: true, version: 1, ...extra });
+  const order = (status, extra) => ({ id: "x" + status, number: "0427", status, version: 1, createdAt: Date.now() - 4 * 60000, readyAt: Date.now() - 60000, customerName: "Camila", pickupCode: "K7M2X9PQ4RTA", items: [{ name: "Negroni", qty: 1, price: 6500 }, { name: "Gin tonic", qty: 2, price: 5800 }], total: 18100, ...extra });
+  const sec = (title, meta, body) => `<section class="c"><div><h2 class="t-heading">${title}</h2><p class="meta-line">${meta}</p></div>${body}</section>`;
+  const sw = (name, varName, note) => `<div class="swatch"><span style="background:var(${varName})"></span><div><strong>${name}</strong><br><code>${varName}</code><br>${note || ""}</div></div>`;
+  const html = [
+    sec("Color", "design/tokens.json → --onza-* · contrastes en GUIA.md §2", `<div class="demo">${sw("Fondo", "--onza-bg", "ivory / negro")}${sw("Superficie", "--onza-surface")}${sw("Elevada", "--onza-surface-raised")}${sw("Texto", "--onza-text", "17.3:1")}${sw("Texto secundario", "--onza-text-muted", "≥ 5.5:1")}${sw("Oxblood", "--onza-brand", "relleno · 9.4:1 con ivory")}${sw("Texto de marca", "--onza-brand-text", "oscuro: #E2A2AB")}${sw("Borde de control", "--onza-control-border", "≥ 3:1")}${sw("Éxito", "--onza-success-text")}${sw("Aviso", "--onza-warning-text")}${sw("Error", "--onza-danger-text")}</div>`),
+    sec("Tipografía", "Inter variable local · cifras tabulares en dinero, tiempos y códigos", `<div class="stack tight"><p class="t-display">Display 32/38 · Explorar</p><p class="t-title">Title 28/34 · Mil948</p><p class="t-heading">Heading 20/26 · Listo para retirar</p><p>Body 16/24 · Tequila, limón y licor de naranja.</p><p class="t-label">Label 14/20 · Retiro: Barra principal</p><p class="eyebrow">Eyebrow 12/16 · Más cerca</p><p class="num t-heading">₡18 100 · #0427 · 12 min</p></div>`),
+    sec("Button", "primitives.tsx Button · variantes primary, secondary, quiet, danger, inverse; tamaños sm 44, md 48, lg 56 (barra)", `<div class="demo">${U.btn("Pedir · ₡18 100", "primary")}${U.btn("Continuar", "secondary")}${U.btn("Vaciar carrito", "quiet")}${U.btn("Rechazar", "danger")}${U.btn("Continuar con Google", "inverse", "", "")}</div><div class="demo">${U.btn("Pedir", "primary", 'aria-busy="true"')}${U.btn("Pedir", "primary", "disabled")}${U.btn("Marcar listo", "primary lg")}${U.btn("Agregar", "secondary sm")}</div>`),
+    sec("Field · SegmentedControl · Toggle", "field.tsx, segmented-control.tsx, toggle.tsx", `<div class="vgrid"><div class="stack">${U.field("c1", "Correo", U.input("c1", 'value="maria@correo.demo"'))}${U.field("c2", "Contraseña", U.input("c2", 'type="password"', true), "Al menos 10 caracteres.", "Usá al menos 10 caracteres.")}${U.field("c3", "Código privado", '<input class="input code" id="c3" value="K7M2 X9PQ 4RTA">', "12 caracteres.")}</div><div class="stack">${U.seg("a", [["system", "Sistema"], ["light", "Claro"], ["dark", "Oscuro"]], "system", 'class="seg block"')}${U.toggle("t1", "Recibiendo pedidos", true)}${U.toggle("t2", "Ofertas de mis locales favoritos", false)}<div class="search">${U.ico("search")}<input class="input" placeholder="Buscar local o barrio" aria-label="Buscar"></div></div></div>`),
+    sec("StatusBadge", "status-badge.tsx · tonos open, paused, closed, success, warning, danger, brand", `<div class="demo">${U.badge("Abierto", "open")}${U.badge("Pausado", "paused")}${U.badge("Cerrado")}${U.badge("Entregado", "success")}${U.badge("Preparando", "warning")}${U.badge("Cancelado", "danger")}${U.badge("Listo", "brand")}${U.badge("Agotado", "", true)}</div>`),
+    sec("VenueCard · VenueRow", "venue-card.tsx · foto 16:9 con texto debajo; sin foto: “Foto pendiente” con el vasito, nunca stock genérico", `<div class="vgrid three">${U.venueCard(v1, { withDistance: true })}${U.venueCard(v2)}${U.venueCard(v3)}</div><div class="w480">${U.venueRow(v3)}</div>`),
+    sec("VenueCard con fotografía (tratamiento)", "Así se ve cuando el local aporte foto: 16:9, sin velos ni filtros, texto debajo. Imagen de ejemplo generada por el repo (public/demo-venues), no es de ningún local.", `<div class="vgrid three">${U.venueCard({ ...v1, name: "Local de ejemplo", zone: "Barrio de ejemplo", photo: "assets/ejemplo/portada-generada.jpg" }, { withDistance: true })}</div>`),
+    sec("VenueHero", "venue-hero.tsx · 3:2 en móvil, 21:9 desde 720 px; nota de demo obligatoria", `<div class="w480">${U.venueHero(v1)}</div>`),
+    sec("ProductRow · QuantityStepper", "product-row.tsx, quantity-stepper.tsx · el − con cantidad 1 es papelera (Quitar)", `<div class="w480">${U.productRow(prod("Negroni", "Gin, vermut rojo y bitter.", 6500, "cocktail"))}${U.productRow(prod("Gin tonic", "Gin, tónica y cáscara de limón.", 5800, "highball"), { qty: 1 })}${U.productRow(prod("IPA", "Pinta, 473 ml.", 3800, "beer"), { qty: 3 })}${U.productRow(prod("Paloma", "Tequila, toronja y soda.", 5600, "highball", { available: false }))}${U.productRow(prod("Stout", "Pinta, 473 ml.", 3900, "beer", { available: false }), { qty: 2 })}</div>`),
+    sec("CartDock", "cart-dock.tsx · solo en el local dueño del carrito; ícono baja 4 px y el total cambia al agregar", `<div class="static">${U.dock(v1, { count: 3, total: 18100 }, false)}</div>`),
+    sec("ConnectionBanner · Notice", "connection-banner.tsx, notice.tsx · persistentes mientras dure el estado; nunca toasts", `<div class="static stack w480">${U.banner("offline", "Sin conexión. Mostramos lo último que cargamos.")}${U.banner("reconnecting", "Reconectando… volvemos a consultar al conectar.", "")}${U.notice("warning", "Pedidos pausados", "Podés armar tu ronda. Vas a poder pedir cuando el local reanude.")}${U.notice("danger", "No se hizo el pedido", "Un producto se agotó. Quitalo para seguir.", U.btn("Revisar carrito", "secondary sm"))}${U.notice("success", "Entregado", "¡Salud!")}</div>`),
+    sec("EmptyState · ErrorState · Skeleton", "empty-state.tsx, error-state.tsx, skeleton.tsx (estático, sin brillo)", `<div class="vgrid">${U.emptyState("Todavía no pediste", "Tus pedidos y tickets aparecen acá.", U.btn("Explorar locales", "primary"), "brand")}${U.errorState("No pudimos cargar los locales", "Revisá tu conexión y probá de nuevo.", U.btn("Reintentar", "secondary", "", "refresh"))}</div>${U.skeletonCards(3)}`),
+    sec("Sheet", "sheet.tsx sobre @radix-ui/react-dialog · abajo en móvil, centrada desde 720 px", `<div class="static">${U.sheet("¿Cancelar #0427?", '<p class="muted">El local todavía no lo aceptó. Si lo acepta antes, ya no se puede cancelar.</p>', U.btn("Volver", "secondary") + U.btn("Cancelar pedido", "danger")).replace('<div class="scrim" data-act="close-sheet"></div>', "")}</div>`),
+    sec("OrderTimeline · PickupTicket", "order-timeline.tsx, pickup-ticket.tsx · ticket siempre en ivory para máximo contraste; QR ilustrativo en la maqueta", `<div class="vgrid"><div class="stack">${U.timeline(order("queued"))}${U.timeline(order("preparing"))}</div><div class="w360"><div class="ready-head">${U.ico("bell", "lg")}<div><strong class="t-heading" style="display:block">Listo para retirar</strong><span class="t-label" style="font-weight:400">Mostrá el código en la barra.</span></div></div><div style="height:12px"></div>${U.ticket(order("ready"), v1)}</div></div>`),
+    sec("OrderCard (barra)", "order-card.tsx variante barra · una acción primaria por estado, controles de 56 px", `<div class="vgrid three">${U.staffCard(order("queued"))}${U.staffCard(order("preparing", { createdAt: Date.now() - 12 * 60000 }))}${U.staffCard(order("ready"))}${U.staffCard(order("queued", { id: "e" }), { error: "No se pudo aceptar. Reintentá." })}${U.staffCard(order("preparing", { id: "off" }), { offline: true })}</div>`),
+    sec("Resultado de validación de retiro", "pickup-result.tsx · éxito con check dibujado (300 ms); error persistente, sin sacudida", `<div class="vgrid"><div class="result ok"><span class="big"><svg class="ico anim-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><strong class="t-heading">Entregado #0427</strong><span>1× Negroni, 2× Gin tonic</span></div><div class="result bad">${U.ico("alert", "lg")}<strong>Ese es el número público del pedido. Pedí el código privado del ticket o escaneá el QR.</strong></div></div>`),
+    sec("Movimiento", "Única animación de marca: el vasito se llena una vez (600 ms). Íconos animados en CSS sobre Lucide; reproducen una vez por evento.", `<div class="demo"><div class="stack tight" style="justify-items:center"><div class="vaso" id="vaso"><span class="outline"></span><span class="fill"></span></div><span class="hint">Pedido confirmado</span></div>
+      <div class="stack tight" style="justify-items:center"><span id="bell" style="color:var(--onza-brand-text)">${U.ico("bell", "lg")}</span><span class="hint">Pedido listo</span></div>
+      <div class="stack tight" style="justify-items:center"><span id="check" style="color:var(--onza-success-text)"><svg class="ico lg" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></span><span class="hint">Retiro validado</span></div>
+      <div class="stack tight" style="justify-items:center"><div class="static" style="width:260px">${U.dock(v1, { count: 1, total: 6500 }, false)}</div><span class="hint">Agregar al carrito</span></div></div>${U.btn("Reproducir", "secondary sm", 'id="replay"', "refresh")}`),
+    sec("MetricTile · Rows · SecretReveal", "metric-tile.tsx, rows.tsx, secret-reveal.tsx (contraseña temporal, se muestra una vez)", `<div class="metrics"><div class="metric"><span class="muted t-label">Pedidos hoy</span><span class="v">12</span></div><div class="metric"><span class="muted t-label">Ventas simuladas</span><span class="v">₡184 300</span></div></div><div class="secret w360">ronda-4821-k7m2</div>`),
+  ].join("");
+  document.getElementById("catalog").innerHTML = html;
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("#replay")) return;
+    const restart = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+    const vaso = document.querySelector("#vaso .fill"); vaso.style.animation = "none"; void vaso.offsetWidth; vaso.style.animation = "";
+    restart(document.querySelector("#bell svg"), "anim-bell");
+    restart(document.querySelector("#check svg"), "anim-check");
+    const bag = document.querySelectorAll(".dock .bag"); restart(bag[bag.length - 1], "drop");
+    const total = document.querySelectorAll(".dock .total"); restart(total[total.length - 1], "tick");
+  });
+  document.querySelectorAll("[data-theme-set]").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("[data-theme-set]").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    if (b.dataset.themeSet) document.documentElement.dataset.theme = b.dataset.themeSet; else delete document.documentElement.dataset.theme;
+    document.getElementById("catalog").innerHTML = html.replaceAll("onza-shot.svg", U.isDark() ? "onza-shot-white.svg" : "onza-shot.svg");
+  }));
+})();
+</script>
+</body>
+</html>

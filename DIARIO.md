@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`. Acceso visual Particle Wave original: `346df98`; cierre documental posterior en git log. Se conserva el cierre local previo `dde9764`. Sin merge a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`. Plan V1 (`docs/plan-v1.md`) y maquetas F1 (`design/maquetas-v1/`) en el commit de D-2026-11-17-05 (hash en git log). App sin cambios desde `346df98`. Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
 | Commit desplegado en Vercel | `346df98` en `fix/hosted-integration`, Preview automático **READY**, deployment `dpl_DKAJXz6f2NgWYEPjHdMnc7DvpcFS`; acceso visual y 28 controles HTTPS puntuales aprobados |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Prueba física del dueño del acceso y del recorrido teléfono + computadora. Migración 010 aplicada y ACCOUNTS_REQUIRED=true, sin cambios en esta sesión. Google/SMTP y los demás pendientes funcionales siguen fuera de alcance. |
+| Siguiente tarea exacta | **Revisión visual de Manu de las maquetas F1** (`design/maquetas-v1/`, guía `GUIA.md`) y decisión de P-1–P-7 y de las contradicciones de `GUIA.md` §9. Solo después: F2 de `docs/plan-v1.md`. Sigue pendiente la prueba física del recorrido teléfono + computadora. |
 
 ### Pendientes abiertos
 
@@ -89,6 +89,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-17-05 · Plan V1 y maquetas navegables F1 (sin tocar la app)
+
+- **Fecha y hora:** 2026-11-17 02:10 (America/Costa_Rica)
+- **Persona:** Manu
+- **IA:** Claude Code (identificador de modelo no se registra en el repo por política de la sesión)
+- **Rama y commits:** `fix/hosted-integration` · commit de esta entrada (hash en git log)
+- **Qué cambió:** plan ejecutable V1 con fases F1–F7, estado, instrucciones consolidadas, propuestas P-1–P-7, bloqueos y criterios pendientes (`docs/plan-v1.md`). F1 ejecutada: maquetas HTML navegables de cliente, empleado y administrador con plantillas compartidas, tokens negro/ivory/oxblood con contrastes medidos, catálogo de componentes con procedencia, reglas de movimiento y estados, lógica del servidor simulada (permisos, versiones, idempotencia, stock, sesión vencida, revocación por local, clave temporal) y vista de flujo cruzado. Guía de implementación `design/maquetas-v1/GUIA.md`. Bocetos anteriores marcados históricos; AGENTS y hosted-ux-plan apuntan al plan nuevo. **No se tocó la app, Supabase ni Vercel.**
+- **Archivos clave:** `docs/plan-v1.md`, `design/maquetas-v1/` (`index.html`, `app.html`, `flujo.html`, `componentes.html`, `GUIA.md`, `assets/`, `data/venues.js`, `verificacion.json`, `capturas/`), `scripts/verify-maquetas.mjs`.
+- **Verificado:** `node scripts/verify-maquetas.mjs` en Chromium: 51/51 controles (recorridos entre dos y tres marcos, desbordes en 360/390/1440 claro y oscuro, cero errores de consola); 9 capturas inspeccionadas.
+- **No verificado:** la app real (la red del contenedor bloqueó `onza-demo.vercel.app` y `*.supabase.co`; el conector de Supabase ve otra organización); teléfonos físicos, lector de pantalla real, sonido/vibración/Wake Lock en dispositivo; coordenadas, fotos y logos de los bares (OSM, Wikimedia y sitios bloqueados; quedaron `null`, sin inventar). El "hero adjunto" no llegó a la sesión; referencia: acceso actual del repo. No se ejecutó `npm run check` porque no cambió código de la app.
+- **Decisiones:** diseño F1 delegado por Manu y sujeto a su revisión; propuestas P-1–P-7 sin aprobar; sin dependencias nuevas (NumberFlow queda como P-7). Bares reales con fuentes, sin relación comercial ni autorización; permisos pendientes antes del lanzamiento.
+- **Pendientes / siguiente paso:** revisión visual de Manu; decidir P-1–P-7 y `GUIA.md` §9; luego F2. Bloqueos para F5–F7 en `docs/plan-v1.md` §9 (red, acceso a `onza-dev`, `SUPABASE_SERVICE_ROLE_KEY` de servidor en Vercel, fotos/logos).
 
 ### D-2026-11-17-04 · Publicar y comprobar el acceso visual
 

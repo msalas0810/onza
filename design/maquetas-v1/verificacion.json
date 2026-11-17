@@ -1,0 +1,263 @@
+{
+  "date": "2026-11-17T08:08:59.771Z",
+  "passed": 51,
+  "failed": 0,
+  "results": [
+    {
+      "name": "Sin sesión, Explorar redirige al acceso conservando el destino",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sin sesión, la barra redirige al acceso del equipo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Registro rechaza contraseña corta junto al campo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Registro lleva a confirmar el correo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Perfil valida 18+ en el formulario",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Perfil exige aceptar condiciones",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Usuario ya tomado se rechaza",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Perfil completo entra a Explorar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Agregar transforma el botón en stepper",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Con cantidad 1, el − es “Quitar”",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Quitar con cantidad 1 elimina la línea (nada atrapado)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Dock del carrito muestra 3 productos",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Carrito de otro local pide reemplazar o conservar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Pedir muestra estado de carga en el botón",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Confirmación con el vasito",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El pedido aparece en Nuevos de la barra sin recargar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Pedido nuevo resaltado en la barra",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cliente ve Preparando al aceptar la barra",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Ya no puede cancelar tras la aceptación",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cliente ve Listo con ticket y código privado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El número público no sirve para retirar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El código privado entrega el pedido",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El código consumido se rechaza",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cliente ve Entregado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cancelar después de que el local aceptó muestra el conflicto, sin cancelar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Checkout rechaza producto agotado con acción para revisar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Carrito marca agotado y precio nuevo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Continuar queda bloqueado mientras haya problemas",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Tras quitar el agotado y aceptar el precio, se puede continuar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Acción con sesión vencida abre “Tu sesión venció”",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reingreso con correo precargado y aviso",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Vuelve al checkout con el mismo carrito",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Banner de conexión persistente",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Pedir sin conexión no crea pedido y ofrece reintentar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reenviar el mismo intento no duplica el pedido",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Alta con correo de cliente rechazada (R1)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Alta nueva muestra contraseña temporal una vez",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "La persona nueva queda con clave temporal pendiente",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "No puede quitarse su propio acceso",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "La barra de Jorge pierde el acceso al local revocado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Revocar en un local no toca otras membresías",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Acción posterior a la revocación rechazada por las reglas",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Clave temporal lleva al cambio obligatorio",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "No puede abrir la barra sin cambiarla",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Comando con clave pendiente rechazado (equivale a la API)",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Tras cambiarla entra a su barra",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Cuenta del equipo en el área cliente ve “Ya hay una sesión iniciada”",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sin desborde horizontal en 360/390/1440, claro y oscuro",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Índice y catálogo sin desborde",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Capturas generadas",
+      "ok": true,
+      "detail": "design/maquetas-v1/capturas/"
+    },
+    {
+      "name": "Cero errores de consola o de página",
+      "ok": true,
+      "detail": ""
+    }
+  ],
+  "errors": []
+}

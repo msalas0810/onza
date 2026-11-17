@@ -1,0 +1,152 @@
+/* Onza V1 · tokens de las maquetas.
+   Propuesta para design/tokens.json (F2). Contrastes medidos (WCAG) en GUIA.md §2.
+   Base: negro #0D0D0E · ivory #F4F1ED · oxblood #741F2C. */
+@font-face {
+  font-family: "InterVariable";
+  src: url("fonts/InterVariable.woff2") format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  /* Marca (fijos en ambos temas) */
+  --onza-black: #0d0d0e;
+  --onza-ivory: #f4f1ed;
+  --onza-oxblood: #741f2c;
+
+  /* Tema claro (por defecto). Fondo ivory = propuesta P-2 (pendiente). */
+  --onza-bg: #f4f1ed;
+  --onza-surface: #eae6e0;
+  --onza-surface-raised: #fbfaf8;
+  --onza-text: #0d0d0e;
+  --onza-text-muted: #5f5a54;
+  --onza-border: #dcd6ce;
+  --onza-control-border: #8a847d;
+  --onza-brand: #741f2c;
+  --onza-brand-text: #741f2c;
+  --onza-brand-soft: #efe2e2;
+  --onza-on-brand: #f4f1ed;
+  --onza-success-text: #1f6b45;
+  --onza-success-soft: #e1ece4;
+  --onza-warning-text: #7a5300;
+  --onza-warning-soft: #f1e7d2;
+  --onza-danger-text: #a3283a;
+  --onza-danger-soft: #f3e0e0;
+  --onza-focus: #741f2c;
+  --onza-scrim: rgb(13 13 14 / 0.48);
+
+  /* Espaciado */
+  --onza-space-4: 4px;
+  --onza-space-8: 8px;
+  --onza-space-12: 12px;
+  --onza-space-16: 16px;
+  --onza-space-20: 20px;
+  --onza-space-24: 24px;
+  --onza-space-32: 32px;
+  --onza-space-40: 40px;
+  --onza-space-48: 48px;
+  --onza-space-64: 64px;
+
+  /* Radios y tamaños */
+  --onza-radius-control: 12px;
+  --onza-radius-media: 16px;
+  --onza-radius-sheet: 24px;
+  --onza-radius-pill: 999px;
+  --onza-size-touch-min: 44px;
+  --onza-size-control: 48px;
+  --onza-size-staff-control: 56px;
+  --onza-size-content-customer: 480px;
+  --onza-size-content-menu: 640px;
+  --onza-size-content-explore: 1040px;
+  --onza-size-content-operations: 1280px;
+  --onza-size-header: 56px;
+  --onza-size-bottom-nav: 64px;
+
+  /* Tipografía */
+  --onza-font: "InterVariable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --onza-type-display: 600 32px/38px var(--onza-font);
+  --onza-type-title: 600 28px/34px var(--onza-font);
+  --onza-type-heading: 600 20px/26px var(--onza-font);
+  --onza-type-body: 400 16px/24px var(--onza-font);
+  --onza-type-body-strong: 600 16px/24px var(--onza-font);
+  --onza-type-label: 500 14px/20px var(--onza-font);
+  --onza-type-caption: 500 12px/16px var(--onza-font);
+  --onza-type-staff-order: 600 18px/24px var(--onza-font);
+  --onza-tracking-display: -0.02em;
+  --onza-tracking-eyebrow: 0.06em;
+
+  /* Movimiento */
+  --onza-motion-press: 100ms;
+  --onza-motion-state: 160ms;
+  --onza-motion-sheet: 220ms;
+  --onza-motion-confirm: 300ms;
+  --onza-motion-celebrate: 600ms;
+  --onza-motion-ease: cubic-bezier(0.2, 0, 0, 1);
+
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --onza-bg: #0d0d0e;
+    --onza-surface: #18181a;
+    --onza-surface-raised: #202023;
+    --onza-text: #f4f1ed;
+    --onza-text-muted: #a8a29b;
+    --onza-border: #2c2b2d;
+    --onza-control-border: #77716b;
+    --onza-brand-text: #e2a2ab;
+    --onza-brand-soft: #2a1619;
+    --onza-success-text: #8cd3ac;
+    --onza-success-soft: #13241b;
+    --onza-warning-text: #ebc77e;
+    --onza-warning-soft: #2a2213;
+    --onza-danger-text: #ffa8b3;
+    --onza-danger-soft: #2c1418;
+    --onza-focus: #e2a2ab;
+    --onza-scrim: rgb(0 0 0 / 0.64);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --onza-bg: #0d0d0e;
+  --onza-surface: #18181a;
+  --onza-surface-raised: #202023;
+  --onza-text: #f4f1ed;
+  --onza-text-muted: #a8a29b;
+  --onza-border: #2c2b2d;
+  --onza-control-border: #77716b;
+  --onza-brand-text: #e2a2ab;
+  --onza-brand-soft: #2a1619;
+  --onza-success-text: #8cd3ac;
+  --onza-success-soft: #13241b;
+  --onza-warning-text: #ebc77e;
+  --onza-warning-soft: #2a2213;
+  --onza-danger-text: #ffa8b3;
+  --onza-danger-soft: #2c1418;
+  --onza-focus: #e2a2ab;
+  --onza-scrim: rgb(0 0 0 / 0.64);
+  color-scheme: dark;
+}
+/* Alternativa P-2 para comparar: fondo blanco en claro. */
+:root[data-bg="white"]:not([data-theme="dark"]) {
+  --onza-bg: #ffffff;
+  --onza-surface: #f4f1ed;
+  --onza-surface-raised: #ffffff;
+}
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --onza-motion-press: 0ms;
+    --onza-motion-state: 0ms;
+    --onza-motion-sheet: 0ms;
+    --onza-motion-confirm: 0ms;
+    --onza-motion-celebrate: 0ms;
+  }
+}
+/* Interruptor de revisión equivalente a prefers-reduced-motion. */
+:root[data-motion="reduce"] {
+  --onza-motion-press: 0ms;
+  --onza-motion-state: 0ms;
+  --onza-motion-sheet: 0ms;
+  --onza-motion-confirm: 0ms;
+  --onza-motion-celebrate: 0ms;
+}

@@ -1,5 +1,7 @@
 # Bocetos navegables de Onza
 
+> **Histórico (2026-11-17).** Reemplazados como propuesta vigente por [`design/maquetas-v1/`](../maquetas-v1/README.md) (F1 del plan `docs/plan-v1.md`). Se conservan como antecedente.
+
 > **Son bocetos visuales para aprobar, no funciones implementadas.** Nada de esta carpeta toca la aplicación real, Supabase, dominios ni Vercel. Decisiones de producto: sección 0 de [`Onza-Product-Blueprint-v3.md`](../../Onza-Product-Blueprint-v3.md).
 
 ## Cómo abrirlo
