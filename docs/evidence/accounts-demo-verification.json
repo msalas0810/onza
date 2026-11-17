@@ -1,0 +1,75 @@
+{
+  "verifiedAt": "2026-11-17T04:00:41.245Z",
+  "origin": "https://onza-demo.vercel.app",
+  "physicalDevicesTested": false,
+  "demoProfile": "fictional test data, not user personal information",
+  "commit": "d2de7de55c821a50c761d997f7c57d30c31631d7",
+  "project": "onza-dev",
+  "paymentProvider": "mock",
+  "checks": [
+    {
+      "name": "accounts required at public entry",
+      "passed": true
+    },
+    {
+      "name": "customer password login",
+      "passed": true
+    },
+    {
+      "name": "onboarding persists fictional demo profile",
+      "passed": true
+    },
+    {
+      "name": "independent bartender password login",
+      "passed": true
+    },
+    {
+      "name": "payment scenario selector absent",
+      "passed": true
+    },
+    {
+      "name": "Preview accepts its own Origin and creates mock order",
+      "passed": true
+    },
+    {
+      "name": "customer order survives reload",
+      "passed": true
+    },
+    {
+      "name": "acceptance reaches customer",
+      "passed": true
+    },
+    {
+      "name": "private ticket QR and manual code available",
+      "passed": true
+    },
+    {
+      "name": "public number rejected",
+      "passed": true
+    },
+    {
+      "name": "staff action does not prefill credential",
+      "passed": true
+    },
+    {
+      "name": "validated mock capture and physical confirmation reach delivered",
+      "passed": true
+    },
+    {
+      "name": "consumed pickup rejects reuse",
+      "passed": true
+    },
+    {
+      "name": "customer cannot enter team portal",
+      "passed": true
+    },
+    {
+      "name": "staff cannot enter customer area",
+      "passed": true
+    },
+    {
+      "name": "no runtime errors",
+      "passed": true
+    }
+  ]
+}

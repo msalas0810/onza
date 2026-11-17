@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`. Código del hito: `e1e8987`; `git log` muestra el cierre documental posterior. Sin merge a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`. Código activado: `d2de7de`; cierre documental local posterior en git log. Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
-| Commit desplegado en Vercel | `e1e8987` en `fix/hosted-integration`, Preview **READY**, deployment `dpl_3m1TeU5CtKXozzjJKtBDmYDFtjn4`; flujo HTTPS real completado |
-| Demo desplegada | https://onza-demo-ml94rxfry-msalas0810s-projects.vercel.app (Preview verificado; protección existente preservada, actualmente sin ssoProtection) |
+| Commit desplegado en Vercel | `d2de7de` en `fix/hosted-integration`, Preview **READY**, deployment `dpl_BvikC3oVNDNYytjyLGeBUgk374fU`; cuentas activadas y 16 controles HTTPS aprobados |
+| Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Activar y probar las cuentas (D-2026-11-17-02): aplicar migración 010 a `onza-dev`, desplegar, sembrar cliente, `ACCOUNTS_REQUIRED=true`, recorrido real en dos dispositivos. Bocetos aprobados (D-2026-11-17-01). Pendiente anterior: pruebas en Safari/iPhone y Android físicos desde el Preview; cargar coordenadas y fotografías reales de locales. No activar pagos reales ni fusionar main. |
+| Siguiente tarea exacta | Probar cliente en teléfono físico y bartender en computadora con las cuentas locales (docs/vercel-demo.md). Migración 010 aplicada y ACCOUNTS_REQUIRED=true. Google/SMTP, borrado de cuenta, revisión legal, R5/R6, dispositivos físicos y pagos reales siguen pendientes; no implementar sin encargo. |
 
 ### Pendientes abiertos
 
@@ -89,6 +89,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-16-06 · Activar cuentas en el demo existente y verificar retiro
+
+- **Fecha y hora:** 2026-11-16 22:00 (America/Costa_Rica)
+- **Persona:** Manu
+- **IA:** Codex · GPT-6 (identificador exacto no expuesto)
+- **Rama y commits:** `fix/hosted-integration` · `d2de7de` desplegado; cierre documental local posterior (hash en git log).
+- **Qué cambió:** fetch/pull --ff-only desde árbol limpio; migración aditiva 010 aplicada únicamente a onza-dev tras dry-run. Cliente demo con correo separado preparado mediante seed existente. Auth callbacks y variables Preview configurados conservando secretos y propiedades previas. Cuentas obligatorias activadas después de migración/cuentas; pagos mock, escenarios de prueba apagados. Nuevo Preview READY; alias onza-demo.vercel.app confirmado. Sin cambios al código de aplicación ni a main.
+- **Archivos clave:** `docs/vercel-demo.md`, `scripts/verify-accounts-demo.mjs`, `docs/evidence/accounts-demo-verification.json`.
+- **Verificado:** identidad onza-dev ukdjuubekpanizcmppod; dry-run posterior sin pendientes; build Vercel READY dpl_BvikC3oVNDNYytjyLGeBUgk374fU para SHA d2de7de55c821a50c761d997f7c57d30c31631d7. Dieciséis controles HTTPS reales en dos contextos independientes, login por formularios, onboarding con datos ficticios, pedido/refresco, preparar/listo, número público rechazado, retiro privado, entrega y código consumido rechazado; separación cliente/equipo; cero errores de navegador. Script revisado con node --check y ESLint. No se repitieron las 88 pruebas ni se generaron galerías.
+- **No verificado:** teléfonos físicos, cámara/audio/GPS, correos reales y Google. La confirmación de entrega fue simulada en navegador, sin bebida física.
+- **Decisiones:** conector Vercel devolvió 403 para variables; CLI local autorizada permitió configurarlas sin imprimir secretos. Se conservaron confirmación por correo, contraseñas previas, clave de tickets y controles de protección. El primer intento del verificador se detuvo por dos botones Ingresar; se acotó el selector al formulario, sin cambiar la aplicación.
+- **Pendientes / siguiente paso:** prueba física de Manu. Google/SMTP, borrado de cuenta, textos legales, R5/R6 y otros pendientes permanecen explícitos; fuera de este encargo.
 
 ### D-2026-11-17-02 · Integrar el diseño aprobado: cuentas, onboarding y portal del equipo (detrás de bandera)
 

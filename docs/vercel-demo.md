@@ -1,34 +1,36 @@
 # Probar Onza desde teléfono y computadora
 
-Demo: https://onza-demo-msalas0810.vercel.app
+Demo vigente: https://onza-demo.vercel.app
 
-Es un Preview protegido por Vercel Authentication. Primero iniciá sesión en Vercel con tu cuenta autorizada en cada dispositivo. Eso permite abrir la web, pero no concede permisos de bartender en Onza.
+Código desplegado: `d2de7de55c821a50c761d997f7c57d30c31631d7`, rama `fix/hosted-integration`. Preview READY `dpl_BvikC3oVNDNYytjyLGeBUgk374fU`; URL inmutable: https://onza-demo-gcm0egoey-msalas0810s-projects.vercel.app. El alias `onza-demo.vercel.app` se comprobó contra ese deployment. `main` no se modificó, fusionó ni desplegó. El proyecto existente `onza-demo` conserva sus controles de protección, actualmente sin SSO obligatorio.
 
-Cliente en teléfono: abrí el demo, elegí Patio Central y pedí como invitado con reserva simulada. Conservá cookies y el mismo navegador para recuperar tu pedido. No ingresés tarjetas.
+## Credenciales y recorrido
 
-Bartender en computadora: abrí /login. Patio Central usa `bartender2@onza.test`; consultá la contraseña únicamente en `.env.local`, variable DEMO_BARTENDER_2_PASSWORD. Sala Norte usa DEMO_BARTENDER_EMAIL/PASSWORD. Cada bartender solo opera su local.
+Consultar **solo localmente** `.env.local` en la raíz del repo. No copiar el archivo al chat ni compartirlo: contiene también secretos de servidor.
 
-Código desplegado: fix/hosted-integration, ee82a7bbf153e5033ea90c540b700d50cb1e169c. Documentación posterior puede avanzar la rama sin cambiar el deployment fijado por el alias estable. Main conserva la base anterior; no se fusionó.
+- Cliente en teléfono: `/acceso`, variables `DEMO_CUSTOMER_EMAIL` y `DEMO_CUSTOMER_PASSWORD`. Correo distinto de todas las cuentas laborales. La cuenta de prueba tiene un perfil ficticio (Cliente Demo), no datos personales de Manu.
+- Bartender en computadora: `/equipo/acceso`, variables `DEMO_BARTENDER_EMAIL` y `DEMO_BARTENDER_PASSWORD` para **Sala Norte**, el local utilizado en la verificación. Después pulsar **Abrir barra**.
+- Alternativa Patio Central: `DEMO_BARTENDER_2_EMAIL` y `DEMO_BARTENDER_2_PASSWORD`; elegir ese local también en el teléfono.
 
-Backend: onza-dev, ref ukdjuubekpanizcmppod, misma base y datos. Root '.', Next.js, Node 24. Variables del runtime solo en Preview para esta rama, sin service_role ni contraseñas demo. No cambiar PICKUP_TOKEN_ENCRYPTION_KEY sin migrar tickets existentes. No se habilitaron pagos reales.
+Usar sesiones independientes. Cliente: local → agregar producto → carrito → confirmar reserva mock. Bartender: Aceptar y preparar → Marcar listo → Validar retiro → introducir el código privado de 12 caracteres presentado por el cliente → confirmar cobro simulado → confirmar entrega. El número público del pedido no autoriza el retiro; el código privado consumido se rechaza.
 
-Verificaciones HTTPS: catálogo, sesión invitada, pedido/reserva mock, persistencia, acceso bartender y Realtime WebSocket pasaron. No son pruebas físicas de Safari/iPhone. Reporte: docs/evidence/vercel-verification.json.
+## Activación realizada (2026-11-16, America/Costa_Rica)
 
-**Pendiente del usuario:** no apareció código de retiro y la entrega no exigió validación. No se considera comprobada ni corregida esa validación. Esta ejecución no capturó ni entregó el pedido de prueba; se canceló después de Listo.
+- Identidad confirmada por CLI: Supabase **onza-dev**, ref `ukdjuubekpanizcmppod`, organización `uczkkbsouopgwhqpvzyw`. No se usaron Pedidos SaaS ni pedidos-staging.
+- `supabase db push --remote=ukdjuubekpanizcmppod --dry-run --skip-vault` mostró solo `202611170010_customer_accounts.sql`. Se revisó y aplicó únicamente esa migración aditiva, sin reset, roles ni seeds. Dry-run posterior: ninguna migración pendiente.
+- Cuenta cliente confirmada preparada con `npm run demo:seed-users`; contraseñas laborales y clave de tickets existentes conservadas. Perfil ficticio completado mediante el onboarding real para probar el flujo.
+- Auth Site URL: `https://onza-demo.vercel.app`. Se conservaron los redirect URLs anteriores y se agregaron `/auth/callback` y `/auth/callback**` para ese origen y para el Preview inmutable. `config diff` precedió a cada `config push`; diez propiedades remotas no declaradas se conservaron, incluida la confirmación por correo.
+- Variables **solo Preview de fix/hosted-integration**: `ACCOUNTS_REQUIRED=true` activada después de migración/cuentas; `ENABLE_PAYMENT_SCENARIOS=false`; `DEMO_MODE=true`, `PAYMENT_PROVIDER=mock`, `REAL_PAYMENTS_ENABLED=false`, `ENABLE_DESIGN_SYSTEM=false`, `APP_ORIGIN=https://onza-demo.vercel.app`, URL/clave pública de onza-dev y clave/versión existentes de tickets. Sin service_role ni contraseñas demo en Vercel.
+- Build nuevo desde el SHA exacto, READY. No se creó proyecto ni recurso pagado.
 
+## Evidencia y pendientes
 
-## Cuentas de cliente y portal del equipo (2026-11-17)
+`docs/evidence/accounts-demo-verification.json`: **16 controles HTTPS aprobados**, dos contextos de Chromium independientes (390×844 cliente, 1440×900 barra), login por formularios, onboarding ficticio, pedido persistente al refrescar, preparación/listo, código público rechazado, validación privada, captura mock y entrega, código consumido rechazado, separación cliente/equipo y cero errores de ejecución. Sin galerías ni repetición de las 88 pruebas.
 
-El código ya incluye acceso obligatorio, onboarding y portal separado, **apagados por defecto** para no romper el demo desplegado (R4). Orden obligatorio:
+Reproducción local (crea y entrega un pedido ficticio con pago mock):
 
-1. Aplicar la migración aditiva `supabase/migrations/202611170010_customer_accounts.sql` a `onza-dev` (`supabase db push` o el flujo habitual). El demo desplegado sigue funcionando antes y después.
-2. Desplegar esta rama (Preview).
-3. Crear la cuenta personal de prueba localmente, sin imprimir contraseñas: definir `DEMO_CUSTOMER_EMAIL` y `DEMO_CUSTOMER_PASSWORD` (correo distinto de todas las cuentas del equipo) en `.env.local` y ejecutar `npm run demo:seed-users`.
-4. En Auth de Supabase agregar a Redirect URLs el origen exacto del Preview con `/auth/callback`.
-5. Recién entonces definir `ACCOUNTS_REQUIRED=true` en las variables Preview de Vercel y redeplegar. Sin la variable, el demo conserva el flujo invitado.
+```sh
+node --env-file=.env.local scripts/verify-accounts-demo.mjs https://onza-demo.vercel.app
+```
 
-Entrar como **cliente (teléfono)**: abrir el demo → `/acceso` → correo y contraseña de `DEMO_CUSTOMER_*` → completar el perfil (nombre, @usuario, teléfono, fecha de nacimiento 18+, aceptar condiciones) → Explorar → local → menú → carrito → confirmar.
-
-Entrar como **bartender (computadora)**: abrir `/equipo/acceso` con `DEMO_BARTENDER_EMAIL/PASSWORD` (Sala Norte) o `DEMO_BARTENDER_2_*` (Patio Central) → Abrir barra. El bartender no puede pedir: abrir `/acceso` con su sesión muestra "Ya hay una sesión iniciada".
-
-Dependencias manuales que siguen abiertas: Google OAuth (credenciales y proveedor en Supabase), SMTP propio para correos de confirmación y recuperación a clientes reales (el SMTP integrado de Supabase es solo para pruebas), plantillas de correo, y revisión legal de los textos borrador.
+**Pendientes explícitos, fuera de este encargo:** Google OAuth, SMTP propio y correo real de confirmación/recuperación, plantillas de correo, borrado de cuenta, revisión legal, nueva aceptación de condiciones y borrador tras sesión vencida. No se implementaron ni se prometen. Las cuentas sembradas están confirmadas para este demo. Cámara, audio, GPS y funcionamiento en Safari/iPhone/Android físicos siguen pendientes; Chromium con tamaño móvil no sustituye esos dispositivos. Pagos reales deshabilitados.
