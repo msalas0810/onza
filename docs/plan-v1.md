@@ -12,7 +12,7 @@ Rama: `fix/hosted-integration`. Sin ramas nuevas, sin tocar `main`. Plan aprobad
 | F4 · Equipo | ✅ Implementada | `StaffShell`, `/equipo/acceso` (directo al local), `/equipo/locales`, `/equipo/clave`, barra densa con rechazo en hoja y validar retiro en hoja |
 | F5 · Administración y equipo | ✅ Código y pruebas; **migración 011 sin aplicar a `onza-dev`** | Pestañas por URL, Disponibilidad, Negocio, Equipo; `/api/team` y `/api/team/password` (necesitan `SUPABASE_SERVICE_ROLE_KEY` de servidor). Pendiente: R3/R5 (P-4) |
 | F6 · Datos del demo | ✅ Código y seed; **migración 012 y seed sin aplicar** | `fixtures/real-venues.json` (hechos con fuente vs. simulado), `npm run demo:seed-real-venues`. Pendiente: coordenadas, fotos y logos (sin acceso a fuentes) |
-| F7 · Verificación y Preview | 🟡 Parcial | Local: typecheck, lint, 107 pruebas, build, 65 controles del recorrido real sobre PGlite. **Sin hacer**: migraciones y seed en `onza-dev`, verificación en el Preview, teléfonos físicos. Pasos exactos en `docs/vercel-demo.md` |
+| F7 · Verificación y Preview | 🟡 Parcial | Local: typecheck, lint, 107 pruebas, build, 65 controles del recorrido real sobre PGlite. CI en verde en `709b42e` (incluye Supabase local real y E2E en vivo); Vercel construyó el Preview. **Sin hacer**: migraciones y seed en `onza-dev`, verificación en el Preview, teléfonos físicos. Pasos exactos en `docs/vercel-demo.md` |
 
 Para continuar (Sonnet u otra IA): leer `DIARIO.md` → este archivo → `design/maquetas-v1/GUIA.md` → abrir las maquetas. La guía es la fuente visual; este plan, la fuente de alcance, tareas y criterios.
 
