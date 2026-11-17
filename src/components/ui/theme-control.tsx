@@ -1,6 +1,7 @@
 "use client";
 import { useSyncExternalStore } from "react";
-import { Monitor, Sun, Moon } from "lucide-react";
+import { SegmentedControl } from "./primitives";
+
 function subscribe(callback: () => void) {
   window.addEventListener("onza-theme-change", callback);
   window.addEventListener("storage", callback);
@@ -17,35 +18,30 @@ function snapshot() {
   }
 }
 const choices = [
-  { value: "system", label: "Sistema", Icon: Monitor },
-  { value: "light", label: "Claro", Icon: Sun },
-  { value: "dark", label: "Oscuro", Icon: Moon },
+  { value: "system", label: "Sistema" },
+  { value: "light", label: "Claro" },
+  { value: "dark", label: "Oscuro" },
 ] as const;
+type Theme = (typeof choices)[number]["value"];
+
 export function ThemeControl() {
   const theme = useSyncExternalStore(subscribe, snapshot, () => "system");
   return (
-    <div className="theme-choices" role="group" aria-label="Apariencia">
-      {choices.map(({ value, label, Icon }) => (
-        <button
-          key={value}
-          className="button secondary"
-          aria-pressed={theme === value}
-          onClick={() => {
-            try {
-              localStorage.setItem("onza-theme", value);
-            } catch {
-              /* The current page still applies the choice. */
-            }
-            if (value === "system")
-              delete document.documentElement.dataset.theme;
-            else document.documentElement.dataset.theme = value;
-            window.dispatchEvent(new Event("onza-theme-change"));
-          }}
-        >
-          <Icon size={20} aria-hidden="true" />
-          {label}
-        </button>
-      ))}
-    </div>
+    <SegmentedControl<Theme>
+      block
+      label="Apariencia"
+      value={(choices.some((c) => c.value === theme) ? theme : "system") as Theme}
+      options={choices}
+      onChange={(value) => {
+        try {
+          localStorage.setItem("onza-theme", value);
+        } catch {
+          /* La página actual igual aplica la elección. */
+        }
+        if (value === "system") delete document.documentElement.dataset.theme;
+        else document.documentElement.dataset.theme = value;
+        window.dispatchEvent(new Event("onza-theme-change"));
+      }}
+    />
   );
 }

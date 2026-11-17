@@ -140,7 +140,7 @@
   color: var(--onza-text-muted);
 }
 
-.actions :global(.button) {
+.actions :global(.btn) {
   width: 100%;
   min-height: 52px;
   font-size: var(--onza-type-label-size);
@@ -149,24 +149,24 @@
   transform: none;
 }
 
-.actions :global(.button.primary) {
+.actions :global(.btn.primary) {
   border-color: var(--onza-text);
   background: var(--onza-text);
   color: var(--onza-bg);
 }
 
-.actions :global(.button.secondary) {
+.actions :global(.btn.secondary) {
   background: var(--onza-surface);
   border-color: var(--onza-border);
   color: var(--onza-text);
 }
 
-.actions :global(.button.secondary):hover:not(:disabled) {
+.actions :global(.btn.secondary):hover:not(:disabled) {
   border-color: var(--onza-control-border);
   background: var(--onza-surface-raised);
 }
 
-.actions :global(.button):disabled {
+.actions :global(.btn):disabled {
   opacity: 1;
   color: var(--onza-text-muted);
 }
@@ -208,7 +208,7 @@
   outline-offset: 4px;
 }
 
-.actions :global(.button):active:not(:disabled) {
+.actions :global(.btn):active:not(:disabled) {
   transform: none;
 }
 
@@ -274,4 +274,35 @@
   .title {
     font-size: clamp(26px, 7.5vw, 32px);
   }
+}
+
+.actions :global(.btn.primary):hover:not(:disabled) {
+  background: var(--onza-text);
+}
+
+/* Variante compacta para las pantallas de acceso secundarias (confirmar, recuperar, equipo). */
+.compact .brand {
+  gap: var(--onza-space-16);
+  margin-bottom: var(--onza-space-32);
+}
+.compact .shot {
+  width: 48px;
+  height: 54px;
+}
+.compact .wordmark {
+  width: 150px;
+  height: 40px;
+}
+.compact .title {
+  font-size: clamp(24px, 4vw, 32px);
+}
+.compact .actions {
+  margin-top: var(--onza-space-32);
+}
+.eyebrow {
+  margin: calc(-1 * var(--onza-space-8)) 0 var(--onza-space-16);
+  font-size: var(--onza-type-caption-size);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--onza-text-muted);
 }

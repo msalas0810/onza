@@ -29,7 +29,7 @@ def outputs():
     css += '@media (prefers-color-scheme: dark) {\n  :root:not([data-theme="light"]):not([data-theme="dark"]) {\n' + rules('dark') + '\n  color-scheme: dark;\n  }\n}\n'
     css += ':root[data-theme="dark"] {\n' + rules('dark') + '\n  color-scheme: dark;\n}\n'
     css += ':root[data-theme="light"] { color-scheme: light; }\n'
-    css += '@media (prefers-reduced-motion: reduce) {\n :root { --onza-motion-press: 0ms; --onza-motion-state: 0ms; --onza-motion-sheet: 0ms; --onza-motion-confirm: 0ms; }\n}\n'
+    css += '@media (prefers-reduced-motion: reduce) {\n :root { --onza-motion-press: 0ms; --onza-motion-state: 0ms; --onza-motion-sheet: 0ms; --onza-motion-confirm: 0ms; --onza-motion-celebrate: 0ms; }\n}\n'
     def luminance(value):
         rgb = [int(value[i:i+2], 16) / 255 for i in [1, 3, 5]]
         linear = [x / 12.92 if x <= .04045 else ((x + .055) / 1.055) ** 2.4 for x in rgb]

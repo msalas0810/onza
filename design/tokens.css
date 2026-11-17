@@ -1,23 +1,27 @@
 /* Generated from tokens.json. Update JSON and run python3 scripts/generate-tokens.py. */
 :root {
-  --onza-bg: #ffffff;
-  --onza-surface: #f5f5f7;
-  --onza-surface-raised: #ffffff;
-  --onza-text: #242426;
-  --onza-text-muted: #66666d;
-  --onza-border: #e5e5ea;
-  --onza-control-border: #85858e;
-  --onza-brand: #681d3b;
-  --onza-brand-text: #681d3b;
-  --onza-brand-soft: #f7eff2;
-  --onza-on-brand: #ffffff;
-  --onza-success-text: #17663f;
-  --onza-warning-text: #825600;
-  --onza-danger-text: #a12a35;
-  --onza-focus: #681d3b;
-  --onza-access-bg: #0d0d0e;
-  --onza-access-text: #f4f1ed;
-  --onza-access-accent: #741f2c;
+  --onza-bg: #F4F1ED;
+  --onza-surface: #EAE6E0;
+  --onza-surface-raised: #FBFAF8;
+  --onza-text: #0D0D0E;
+  --onza-text-muted: #5F5A54;
+  --onza-border: #DCD6CE;
+  --onza-control-border: #8A847D;
+  --onza-brand: #741F2C;
+  --onza-brand-text: #741F2C;
+  --onza-brand-soft: #EFE2E2;
+  --onza-on-brand: #F4F1ED;
+  --onza-success-text: #1F6B45;
+  --onza-success-soft: #E1ECE4;
+  --onza-warning-text: #7A5300;
+  --onza-warning-soft: #F1E7D2;
+  --onza-danger-text: #A3283A;
+  --onza-danger-soft: #F3E0E0;
+  --onza-focus: #741F2C;
+  --onza-scrim: #0D0D0E7A;
+  --onza-access-bg: #0D0D0E;
+  --onza-access-text: #F4F1ED;
+  --onza-access-accent: #741F2C;
   --onza-space-4: 4px;
   --onza-space-8: 8px;
   --onza-space-12: 12px;
@@ -31,13 +35,17 @@
   --onza-radius-control: 12px;
   --onza-radius-media: 16px;
   --onza-radius-sheet: 24px;
+  --onza-radius-pill: 999px;
   --onza-size-touch-min: 44px;
   --onza-size-control: 48px;
   --onza-size-staff-control: 56px;
   --onza-size-content-customer: 480px;
   --onza-size-content-menu: 640px;
-  --onza-size-content-explore: 960px;
+  --onza-size-content-explore: 1040px;
   --onza-size-content-operations: 1280px;
+  --onza-size-header: 56px;
+  --onza-size-header-staff: 64px;
+  --onza-size-bottom-nav: 64px;
   --onza-type-display-size: 32px;
   --onza-type-display-line: 38px;
   --onza-type-display-weight: 600;
@@ -56,62 +64,65 @@
   --onza-type-caption-size: 12px;
   --onza-type-caption-line: 16px;
   --onza-type-caption-weight: 500;
+  --onza-type-staff-order-size: 18px;
+  --onza-type-staff-order-line: 24px;
+  --onza-type-staff-order-weight: 600;
   --onza-motion-press: 100ms;
   --onza-motion-state: 160ms;
   --onza-motion-sheet: 220ms;
   --onza-motion-confirm: 300ms;
   --onza-motion-ease: cubic-bezier(0.2, 0, 0, 1);
-  --onza-font:
-    "InterVariable", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    sans-serif;
+  --onza-motion-celebrate: 600ms;
+  --onza-font: "InterVariable", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   color-scheme: light;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]):not([data-theme="dark"]) {
-    --onza-bg: #111113;
-    --onza-surface: #1b1b1f;
-    --onza-surface-raised: #242429;
-    --onza-text: #f5f5f7;
-    --onza-text-muted: #adadb7;
-    --onza-border: #34343b;
-    --onza-control-border: #777780;
-    --onza-brand: #681d3b;
-    --onza-brand-text: #e7a4be;
-    --onza-brand-soft: #302029;
-    --onza-on-brand: #ffffff;
-    --onza-success-text: #89d8ae;
-    --onza-warning-text: #f2cd80;
-    --onza-danger-text: #ffadb5;
-    --onza-focus: #e7a4be;
-    color-scheme: dark;
+  --onza-bg: #0D0D0E;
+  --onza-surface: #18181A;
+  --onza-surface-raised: #202023;
+  --onza-text: #F4F1ED;
+  --onza-text-muted: #A8A29B;
+  --onza-border: #2C2B2D;
+  --onza-control-border: #77716B;
+  --onza-brand: #741F2C;
+  --onza-brand-text: #E2A2AB;
+  --onza-brand-soft: #2A1619;
+  --onza-on-brand: #F4F1ED;
+  --onza-success-text: #8CD3AC;
+  --onza-success-soft: #13241B;
+  --onza-warning-text: #EBC77E;
+  --onza-warning-soft: #2A2213;
+  --onza-danger-text: #FFA8B3;
+  --onza-danger-soft: #2C1418;
+  --onza-focus: #E2A2AB;
+  --onza-scrim: #000000A3;
+  color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --onza-bg: #111113;
-  --onza-surface: #1b1b1f;
-  --onza-surface-raised: #242429;
-  --onza-text: #f5f5f7;
-  --onza-text-muted: #adadb7;
-  --onza-border: #34343b;
-  --onza-control-border: #777780;
-  --onza-brand: #681d3b;
-  --onza-brand-text: #e7a4be;
-  --onza-brand-soft: #302029;
-  --onza-on-brand: #ffffff;
-  --onza-success-text: #89d8ae;
-  --onza-warning-text: #f2cd80;
-  --onza-danger-text: #ffadb5;
-  --onza-focus: #e7a4be;
+  --onza-bg: #0D0D0E;
+  --onza-surface: #18181A;
+  --onza-surface-raised: #202023;
+  --onza-text: #F4F1ED;
+  --onza-text-muted: #A8A29B;
+  --onza-border: #2C2B2D;
+  --onza-control-border: #77716B;
+  --onza-brand: #741F2C;
+  --onza-brand-text: #E2A2AB;
+  --onza-brand-soft: #2A1619;
+  --onza-on-brand: #F4F1ED;
+  --onza-success-text: #8CD3AC;
+  --onza-success-soft: #13241B;
+  --onza-warning-text: #EBC77E;
+  --onza-warning-soft: #2A2213;
+  --onza-danger-text: #FFA8B3;
+  --onza-danger-soft: #2C1418;
+  --onza-focus: #E2A2AB;
+  --onza-scrim: #000000A3;
   color-scheme: dark;
 }
-:root[data-theme="light"] {
-  color-scheme: light;
-}
+:root[data-theme="light"] { color-scheme: light; }
 @media (prefers-reduced-motion: reduce) {
-  :root {
-    --onza-motion-press: 0ms;
-    --onza-motion-state: 0ms;
-    --onza-motion-sheet: 0ms;
-    --onza-motion-confirm: 0ms;
-  }
+ :root { --onza-motion-press: 0ms; --onza-motion-state: 0ms; --onza-motion-sheet: 0ms; --onza-motion-confirm: 0ms; --onza-motion-celebrate: 0ms; }
 }

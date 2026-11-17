@@ -1,72 +1,81 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { User } from "lucide-react";
+import { Compass, Receipt, ShoppingBag, User } from "lucide-react";
 import { useCart } from "@/features/orders/cart-store";
-const AUTH_PAGES =
-  /^\/(acceso|confirmar|recuperar|restablecer|onboarding|sesion-activa|equipo)(\/|$)/;
+import { BrandMark } from "./primitives";
+import { ConnectionBanner } from "./connection-banner";
+
+/** Rutas con su propio marco completo: acceso (pantalla oscura) y portal del equipo. */
+const OWN_FRAME =
+  /^\/(acceso|confirmar|recuperar|restablecer)(\/|$)|^\/equipo(\/|$)|^\/(staff|admin|onza)(\/|$)/;
+/** Rutas de una sola tarea: marca y nada más (sin navegación). */
+const FOCUSED = /^\/(onboarding|sesion-activa)(\/|$)/;
+
+const items = [
+  { href: "/", match: /^\/$|^\/v(\/|$)|^\/cart|^\/checkout/, label: "Explorar", Icon: Compass },
+  { href: "/orders", match: /^\/orders/, label: "Pedidos", Icon: Receipt },
+  { href: "/cuenta", match: /^\/(cuenta|settings|policies)/, label: "Cuenta", Icon: User },
+] as const;
+
+export function AppHeader() {
+  const path = usePathname();
+  const cart = useCart();
+  if (OWN_FRAME.test(path)) return null;
+  const focused = FOCUSED.test(path);
+  const count = cart?.items.reduce((n, item) => n + item.quantity, 0) ?? 0;
+  return (
+    <>
+      <header className="hdr">
+        <Link className="brand" href="/" aria-label="Onza, explorar">
+          <BrandMark />
+        </Link>
+        {!focused && (
+          <nav className="topnav" aria-label="Principal">
+            {items.map(({ href, match, label }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-current={match.test(path) ? "page" : undefined}
+              >
+                {label}
+              </Link>
+            ))}
+          </nav>
+        )}
+        <span className="spacer" />
+        <span className="demo-chip">Demo · sin dinero real</span>
+        {!focused && count > 0 && cart && (
+          <Link
+            className="icon-btn"
+            href="/cart"
+            aria-label={`Carrito de ${cart.venueName}: ${count} ${count === 1 ? "producto" : "productos"}`}
+          >
+            <ShoppingBag size={20} aria-hidden="true" />
+            <span className="count num">{count}</span>
+          </Link>
+        )}
+      </header>
+      <ConnectionBanner />
+    </>
+  );
+}
+
 export function CustomerNavigation() {
   const path = usePathname();
-  const staff = /^\/(staff|admin|onza)(\/|$)/.test(path);
-  if (AUTH_PAGES.test(path)) return null;
+  if (OWN_FRAME.test(path) || FOCUSED.test(path)) return null;
   return (
-    <nav
-      className="bottom-nav"
-      aria-label={staff ? "Navegación del personal" : "Navegación principal"}
-    >
-      {staff ? (
-        <>
-          <Link href="/equipo/acceso">Espacios de trabajo</Link>
-        </>
-      ) : (
-        <>
-          <Link href="/" aria-current={path === "/" ? "page" : undefined}>
-            Explorar
-          </Link>
-          <Link
-            href="/orders"
-            aria-current={path.startsWith("/orders") ? "page" : undefined}
-          >
-            Pedidos
-          </Link>
-          <Link
-            href="/cuenta"
-            aria-current={path.startsWith("/cuenta") ? "page" : undefined}
-          >
-            Cuenta
-          </Link>
-        </>
-      )}
+    <nav className="bnav" aria-label="Principal">
+      {items.map(({ href, match, label, Icon }) => (
+        <Link
+          key={href}
+          href={href}
+          aria-current={match.test(path) ? "page" : undefined}
+        >
+          <Icon size={20} aria-hidden="true" />
+          {label}
+        </Link>
+      ))}
     </nav>
-  );
-}
-export function SavedCartLink() {
-  const cart = useCart();
-  const path = usePathname();
-  if (
-    !cart?.items.length ||
-    path === `/v/${cart.venueSlug}` ||
-    path.startsWith(`/v/${cart.venueSlug}/`) ||
-    /^\/(staff|admin|onza|cart|checkout|acceso|equipo|onboarding|sesion-activa)(\/|$)/.test(
-      path,
-    )
-  )
-    return null;
-  return (
-    <div className="saved-cart">
-      <Link className="link-button" href="/cart">
-        Carrito de {cart.venueName} →
-      </Link>
-    </div>
-  );
-}
-export function HeaderAccountLink() {
-  const path = usePathname();
-  if (AUTH_PAGES.test(path) || /^\/(staff|admin|onza)(\/|$)/.test(path))
-    return null;
-  return (
-    <Link className="settings-link" href="/cuenta" aria-label="Cuenta">
-      <User size={20} aria-hidden="true" />
-    </Link>
   );
 }

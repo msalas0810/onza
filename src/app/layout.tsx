@@ -1,11 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import Link from "next/link";
-import { BrandMark } from "@/components/ui/primitives";
-import {
-  CustomerNavigation,
-  HeaderAccountLink,
-  SavedCartLink,
-} from "@/components/ui/navigation";
+import { AppHeader, CustomerNavigation } from "@/components/ui/navigation";
+import { CartScope } from "@/features/orders/components/cart-scope";
+import { currentUserId } from "@/lib/session-user";
 import "@/styles/globals.css";
 export const metadata: Metadata = {
   title: "Onza · Pedí y recogé",
@@ -20,7 +16,7 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 const themeScript = `try{var t=localStorage.getItem('onza-theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t}catch{}`;
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -34,14 +30,8 @@ export default function RootLayout({
         <a className="skip" href="#main">
           Saltar al contenido
         </a>
-        <header className="header">
-          <Link href="/" aria-label="Onza, explorar">
-            <BrandMark />
-          </Link>
-          <span className="demo-label">DEMO · sin dinero real</span>
-          <HeaderAccountLink />
-        </header>
-        <SavedCartLink />
+        <CartScope userId={await currentUserId()} />
+        <AppHeader />
         <main id="main">{children}</main>
         <CustomerNavigation />
       </body>
