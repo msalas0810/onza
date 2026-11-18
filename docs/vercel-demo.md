@@ -2,15 +2,15 @@
 
 Demo vigente: https://onza-demo.vercel.app
 
-Código desplegado: `346df9830520821bb0951385bcedf577bca6fc54`, rama `fix/hosted-integration`. Preview automático READY `dpl_DKAJXz6f2NgWYEPjHdMnc7DvpcFS`; URL inmutable: https://onza-demo-ia2zq1796-msalas0810s-projects.vercel.app. El alias `onza-demo.vercel.app` se comprobó contra ese deployment. Acceso con Particle Wave original de Hossain Jahed, SVG de Onza, fondo negro, ivory y oxblood. `main` no se modificó, fusionó ni desplegó. El proyecto existente `onza-demo` conserva sus controles de protección, actualmente sin SSO obligatorio.
+Código desplegado: `bea79075dfb74a6fae5a8d5f25ceca3f1814aaa2`, rama `fix/hosted-integration`. Preview automático READY `dpl_E2CuD4eFbPYKrjrQwNAxZDp6aSVd`; URL inmutable: https://onza-demo-dusmaiku2-msalas0810s-projects.vercel.app. El alias `onza-demo.vercel.app` se comprobó contra ese deployment. Acceso con Particle Wave original de Hossain Jahed, SVG de Onza, fondo negro, ivory y oxblood. `main` no se modificó, fusionó ni desplegó. El proyecto existente `onza-demo` conserva sus controles de protección, actualmente sin SSO obligatorio.
 
 ## Credenciales y recorrido
 
 Consultar **solo localmente** `.env.local` en la raíz del repo. No copiar el archivo al chat ni compartirlo: contiene también secretos de servidor.
 
 - Cliente en teléfono: `/acceso` → **Continuar con correo**, variables `DEMO_CUSTOMER_EMAIL` y `DEMO_CUSTOMER_PASSWORD`. Correo distinto de todas las cuentas laborales. La cuenta de prueba tiene un perfil ficticio (Cliente Demo), no datos personales de Manu.
-- Bartender en computadora: `/equipo/acceso`, variables `DEMO_BARTENDER_EMAIL` y `DEMO_BARTENDER_PASSWORD` para **Sala Norte**, el local utilizado en la verificación. Después pulsar **Abrir barra**.
-- Alternativa Patio Central: `DEMO_BARTENDER_2_EMAIL` y `DEMO_BARTENDER_2_PASSWORD`; elegir ese local también en el teléfono.
+- Bartender en computadora: `/equipo/acceso`, variables `DEMO_BARTENDER_EMAIL` y `DEMO_BARTENDER_PASSWORD` para **Mil948**, el local común preparado y verificado el 2026-11-17. Después pulsar **Abrir barra**.
+- Bartender alternativo: `DEMO_BARTENDER_2_EMAIL` y `DEMO_BARTENDER_2_PASSWORD`; también tiene acceso a Mil948. Administrador: `DEMO_ADMIN_EMAIL` y `DEMO_ADMIN_PASSWORD`, mismo local.
 
 Usar sesiones independientes. Cliente: local → agregar producto → carrito → confirmar reserva mock. Bartender: Aceptar y preparar → Marcar listo → Validar retiro → introducir el código privado de 12 caracteres presentado por el cliente → confirmar cobro simulado → confirmar entrega. El número público del pedido no autoriza el retiro; el código privado consumido se rechaza.
 
@@ -65,3 +65,5 @@ Reversible: para volver a listar los locales ficticios, `update public.venues se
 Rama actualizada a `af932d3`. Proyecto onza-dev confirmado; migraciones 011 y 012 aplicadas tras dry-run y dry-run posterior sin pendientes. `demo:seed-real-venues` ejecutado: cinco locales, menús simulados, membresías del equipo existente. Usar **Mil948** (`/v/mil948`) en el teléfono y el mismo local en barra/admin; sus dos bartenders y administrador tienen acceso. Cliente sin membresía laboral. Credenciales sincronizadas únicamente en `.env.local`.
 
 El formulario cliente aplicaba el mínimo de registro también al login; corregido para permitir credenciales existentes aceptadas por Auth. Comprobación local: cuatro logins independientes y acceso común; publicación de este ajuste y comprobación HTTPS registradas en el cierre del diario. No se ejecutaron pedidos ni suites completas.
+
+Cierre HTTPS: Preview `bea7907` READY y alias confirmado. Cuatro logins y acceso a Mil948 aprobados en sesiones independientes (cliente 390×844, personal 1440×900), sin crear pedidos. Evidencia: `docs/evidence/demo-access-ready.json`. No faltan credenciales locales para este alcance; prueba física pendiente.

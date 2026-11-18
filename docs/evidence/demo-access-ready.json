@@ -1,0 +1,46 @@
+{
+  "verifiedAt": "2026-11-18T00:54:52.138Z",
+  "origin": "https://onza-demo.vercel.app",
+  "venue": {
+    "id": "3904984d-1d0e-4d04-8286-c05d9984c36a",
+    "name": "Mil948",
+    "slug": "mil948",
+    "open_state": "open",
+    "demo_listed": true
+  },
+  "results": [
+    {
+      "alias": "CUSTOMER",
+      "login": true,
+      "localAccess": true,
+      "path": "/v/mil948",
+      "venue": "Mil948",
+      "customerWithoutMembership": true
+    },
+    {
+      "alias": "BARTENDER",
+      "login": true,
+      "localAccess": true,
+      "path": "/staff/3904984d-1d0e-4d04-8286-c05d9984c36a",
+      "venue": "Mil948"
+    },
+    {
+      "alias": "BARTENDER_2",
+      "login": true,
+      "localAccess": true,
+      "path": "/staff/3904984d-1d0e-4d04-8286-c05d9984c36a",
+      "venue": "Mil948"
+    },
+    {
+      "alias": "ADMIN",
+      "login": true,
+      "localAccess": true,
+      "path": "/admin/3904984d-1d0e-4d04-8286-c05d9984c36a",
+      "venue": "Mil948"
+    }
+  ],
+  "commit": "bea79075dfb74a6fae5a8d5f25ceca3f1814aaa2",
+  "deployment": "dpl_E2CuD4eFbPYKrjrQwNAxZDp6aSVd",
+  "physicalDevicesTested": false,
+  "scope": "Login and common venue access only; no orders or full suite"
+}

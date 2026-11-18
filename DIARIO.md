@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`, actualizada por fast-forward a `af932d3`; ajuste de validación de login en esta sesión. Sin merge a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`; corrección `bea7907` publicada; cierre documental posterior local (git log). Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
-| Commit desplegado en Vercel | `346df98` en `fix/hosted-integration`, Preview automático **READY**, deployment `dpl_DKAJXz6f2NgWYEPjHdMnc7DvpcFS`; acceso visual y 28 controles HTTPS puntuales aprobados |
+| Commit desplegado en Vercel | `bea79075dfb74a6fae5a8d5f25ceca3f1814aaa2`, Preview READY `dpl_E2CuD4eFbPYKrjrQwNAxZDp6aSVd`, alias confirmado; cuatro logins y acceso común por HTTPS aprobados |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Publicar y comprobar por HTTPS el ajuste mínimo del login; migraciones 011/012 y seed real ya aplicados a onza-dev. Luego prueba física teléfono + computadora. Alta laboral y cambio temporal de clave quedan fuera de esta comprobación puntual. |
+| Siguiente tarea exacta | Prueba física de Manu: cliente en teléfono y bartender en computadora, ambos en Mil948. Migraciones 011/012, seed real y accesos ya preparados. Alta laboral/cambio temporal, fotos y coordenadas siguen fuera de esta comprobación puntual. |
 
 ### Pendientes abiertos
 
@@ -99,8 +99,9 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 - **Qué cambió:** actualización por fast-forward desde árbol limpio. Identidad onza-dev confirmada por CLI, ref `ukdjuubekpanizcmppod`. Contraseñas de las cuatro cuentas demo existentes solicitadas actualizadas en Auth y sincronizadas solo en el entorno local; cuenta Onza intacta. Migraciones aditivas 011/012 revisadas con dry-run y aplicadas sin reset. Seed real ejecutado: cinco locales, 24 productos, tres locales ficticios ocultos y 15 asignaciones laborales. Cliente sin membresías; los dos bartenders y admin comparten Mil948 abierto.
 - **Corrección necesaria:** el login cliente rechazaba una contraseña aceptada por Auth con “Usá al menos 8 caracteres.”. Se reprodujo en Preview; el mínimo se aplica ahora solo al registro. No se versionan credenciales ni scripts temporales.
 - **Verificado:** typecheck, ESLint del formulario y diff-check; login por Auth y formulario, acceso al mismo local y roles en cuatro sesiones independientes contra servidor local con Supabase real. Preview existente READY y alias confirmados para `af932d3` antes del ajuste.
-- **No verificado:** todavía el ajuste por HTTPS; no se repitió suite completa ni pedidos, alta laboral, cambios temporales, cámara, audio ni teléfonos físicos.
-- **Pendientes / siguiente paso:** publicar la corrección y comprobar únicamente login/acceso por HTTPS; registrar cierre.
+- **No verificado:** no se repitió suite completa ni pedidos, alta laboral, cambios temporales, cámara, audio ni teléfonos físicos.
+- **Cierre HTTPS:** `bea7907` publicado, Preview READY `dpl_E2CuD4eFbPYKrjrQwNAxZDp6aSVd`; alias `https://onza-demo.vercel.app` confirmado. Los cuatro logins por Auth y formulario, roles, cliente sin membresías y acceso a Mil948 pasaron en sesiones independientes. Evidencia sin credenciales: `docs/evidence/demo-access-ready.json`. Configuración local sincronizada con cuentas obligatorias y escenarios de pago apagados; archivo ignorado, modo 0600. Scripts temporales eliminados.
+- **Pendientes / siguiente paso:** prueba física de Manu; sin credenciales locales faltantes para el alcance solicitado.
 
 
 ### D-2026-11-17-06 · Implementar F2–F6 del rediseño V1 y verificar el recorrido real en local
