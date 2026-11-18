@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`. F1 `8cb0b41`; F2–F6 implementados en los commits de D-2026-11-17-06 (hash en git log). Sin merge a `main` |
+| Rama vigente de trabajo | `fix/hosted-integration`, actualizada por fast-forward a `af932d3`; ajuste de validación de login en esta sesión. Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
 | Commit desplegado en Vercel | `346df98` en `fix/hosted-integration`, Preview automático **READY**, deployment `dpl_DKAJXz6f2NgWYEPjHdMnc7DvpcFS`; acceso visual y 28 controles HTTPS puntuales aprobados |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | **Pasos manuales de `docs/vercel-demo.md` ("V1")**: aplicar migraciones 011 y 012 a `onza-dev` (tras confirmar el proyecto), definir `SUPABASE_SERVICE_ROLE_KEY` en el Preview, `npm run demo:seed-real-venues`, y recorrer el Preview con teléfono + computadora. Aportar fotos/logos y coordenadas verificadas de los locales. Decidir P-1–P-7. |
+| Siguiente tarea exacta | Publicar y comprobar por HTTPS el ajuste mínimo del login; migraciones 011/012 y seed real ya aplicados a onza-dev. Luego prueba física teléfono + computadora. Alta laboral y cambio temporal de clave quedan fuera de esta comprobación puntual. |
 
 ### Pendientes abiertos
 
@@ -89,6 +89,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-17-07 · Preparar accesos del demo en onza-dev
+
+- **Fecha y hora:** 2026-11-17 (America/Costa_Rica)
+- **Persona:** Manu
+- **IA:** Codex · GPT-6
+- **Rama y commits:** `fix/hosted-integration` · base `af932d3`; ajuste en el commit de esta entrada.
+- **Qué cambió:** actualización por fast-forward desde árbol limpio. Identidad onza-dev confirmada por CLI, ref `ukdjuubekpanizcmppod`. Contraseñas de las cuatro cuentas demo existentes solicitadas actualizadas en Auth y sincronizadas solo en el entorno local; cuenta Onza intacta. Migraciones aditivas 011/012 revisadas con dry-run y aplicadas sin reset. Seed real ejecutado: cinco locales, 24 productos, tres locales ficticios ocultos y 15 asignaciones laborales. Cliente sin membresías; los dos bartenders y admin comparten Mil948 abierto.
+- **Corrección necesaria:** el login cliente rechazaba una contraseña aceptada por Auth con “Usá al menos 8 caracteres.”. Se reprodujo en Preview; el mínimo se aplica ahora solo al registro. No se versionan credenciales ni scripts temporales.
+- **Verificado:** typecheck, ESLint del formulario y diff-check; login por Auth y formulario, acceso al mismo local y roles en cuatro sesiones independientes contra servidor local con Supabase real. Preview existente READY y alias confirmados para `af932d3` antes del ajuste.
+- **No verificado:** todavía el ajuste por HTTPS; no se repitió suite completa ni pedidos, alta laboral, cambios temporales, cámara, audio ni teléfonos físicos.
+- **Pendientes / siguiente paso:** publicar la corrección y comprobar únicamente login/acceso por HTTPS; registrar cierre.
+
 
 ### D-2026-11-17-06 · Implementar F2–F6 del rediseño V1 y verificar el recorrido real en local
 

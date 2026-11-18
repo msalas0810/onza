@@ -26,7 +26,7 @@ export function AuthForm({ next, notice }: { next: string; notice?: string }) {
     event.preventDefault();
     setErrorLocation("email");
     setError("");
-    if (password.length < 8) return setError("Usá al menos 8 caracteres.");
+    if (up && password.length < 8) return setError("Usá al menos 8 caracteres.");
     if (up && password !== confirm)
       return setError("Las contraseñas no coinciden.");
     setBusy(true);

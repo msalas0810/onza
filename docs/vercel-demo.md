@@ -59,3 +59,9 @@ npm run demo:seed-real-venues
 6. Verificación contra el Preview: `scripts/verify-hosted-ux-preview.mjs` y `scripts/verify-accounts-demo.mjs` se ajustaron a la interfaz nueva pero **no se re-ejecutaron**.
 
 Reversible: para volver a listar los locales ficticios, `update public.venues set demo_listed = true where slug in ('sala-norte','patio-central','club-cero');`.
+
+## Preparación puntual · 2026-11-17
+
+Rama actualizada a `af932d3`. Proyecto onza-dev confirmado; migraciones 011 y 012 aplicadas tras dry-run y dry-run posterior sin pendientes. `demo:seed-real-venues` ejecutado: cinco locales, menús simulados, membresías del equipo existente. Usar **Mil948** (`/v/mil948`) en el teléfono y el mismo local en barra/admin; sus dos bartenders y administrador tienen acceso. Cliente sin membresía laboral. Credenciales sincronizadas únicamente en `.env.local`.
+
+El formulario cliente aplicaba el mínimo de registro también al login; corregido para permitir credenciales existentes aceptadas por Auth. Comprobación local: cuatro logins independientes y acceso común; publicación de este ajuste y comprobación HTTPS registradas en el cierre del diario. No se ejecutaron pedidos ni suites completas.
