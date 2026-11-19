@@ -1,8 +1,8 @@
 import { StaffShell } from "@/components/ui/staff-shell";
 import { staffGate } from "@/components/ui/staff-gate";
 import { getAdminMenu } from "@/features/catalog/server/queries";
-import { getVenueSummary } from "@/features/analytics/server/queries";
-import { businessDate } from "@/features/analytics/business-date";
+import { getVenueSummaryRange } from "@/features/analytics/server/queries";
+import { tonight } from "@/features/analytics/period";
 import { AdminPanel } from "@/features/admin/components/admin-panel";
 import { isAdminTab, type AdminTab } from "@/features/admin/admin-tabs";
 import { loadStaffContext } from "@/features/team/server/staff-context";
@@ -24,11 +24,12 @@ export default async function Page({
   if (gate || !context.ok) return gate;
   let data;
   try {
+    const period = tonight();
     const [menu, summary] = await Promise.all([
       getAdminMenu(venueId),
-      getVenueSummary(venueId, businessDate()),
+      getVenueSummaryRange(venueId, period.from, period.to),
     ]);
-    data = { menu, summary };
+    data = { menu, summary, period };
   } catch (error) {
     return (
       <StaffShell venue={context.venue} person={context.person}>
@@ -47,6 +48,7 @@ export default async function Page({
         venue={context.venue}
         {...data.menu}
         summary={data.summary}
+        period={data.period}
         tab={current}
         editId={editar}
       />

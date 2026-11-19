@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { z } from "zod";
 import Link from "next/link";
@@ -12,7 +12,9 @@ import {
   Wine,
 } from "lucide-react";
 import type { Product, Venue } from "@/features/catalog/server/queries";
-import { summarySchema, type VenueSummary } from "@/features/analytics/types";
+import type { RangeSummary } from "@/features/analytics/types";
+import type { Period } from "@/features/analytics/period";
+import { AdminSummary } from "@/features/analytics/components/admin-summary";
 import {
   Button,
   EmptyState,
@@ -80,18 +82,18 @@ export function AdminPanel({
   products,
   categories,
   summary,
+  period,
   tab,
   editId,
 }: {
   venue: Venue;
   products: Product[];
   categories: { id: string; label: string }[];
-  summary: VenueSummary;
+  summary: RangeSummary | null;
+  period: Period;
   tab: AdminTab;
   editId?: string;
 }) {
-  const [date, setDate] = useState(summary.business_date);
-  const [metrics, setMetrics] = useState(summary);
   const [filter, setFilter] = useState("");
   // Estado confirmado por el servidor para cada producto tocado en esta pantalla (antes de que llegue el refresh).
   const [confirmed, setConfirmed] = useState<Record<string, Product>>({});
@@ -126,27 +128,13 @@ export function AdminPanel({
   const state: Availability =
     venue.open_state !== "open" ? "closed" : venue.paused ? "paused" : "open";
 
+  // La pestaña activa siempre queda a la vista en la fila deslizable de móvil.
+  const tabsRow = useRef<HTMLElement>(null);
   useEffect(() => {
-    const controller = new AbortController();
-    async function update() {
-      try {
-        const response = await fetch(
-          `/api/summary?venue=${venue.id}&day=${date}`,
-          { signal: controller.signal, cache: "no-store" },
-        );
-        if (!response.ok) throw new Error();
-        setMetrics(summarySchema.parse(await response.json()));
-      } catch {
-        if (!controller.signal.aborted)
-          setError(
-            "No pudimos actualizar las ventas. Se conservan los valores anteriores hasta volver a consultar.",
-          );
-      }
-    }
-    void update();
-    return () => controller.abort();
-  }, [venue.id, date, revision]);
-
+    tabsRow.current
+      ?.querySelector<HTMLElement>('[aria-current="page"]')
+      ?.scrollIntoView({ block: "nearest", inline: "center" });
+  }, [tab]);
   const run = async (input: Record<string, unknown>, message = "") => {
     setBusy(true);
     setError("");
@@ -226,7 +214,13 @@ export function AdminPanel({
       </Link>
     );
   });
-  const hours = metrics.median_preparation_seconds;
+  const activeCount = orders.filter((o) =>
+    ["pending_authorization", "queued", "preparing", "ready"].includes(o.status),
+  ).length;
+  /** Incidencia financiera: cobro sin entrega o resultado sin confirmar. Distinta del estado operativo. */
+  const financialIssue = (o: (typeof orders)[number]) =>
+    (o.payment_state === "captured" && o.status !== "delivered" && o.status !== "canceled") ||
+    o.payment_state === "unknown";
   const shownOrders = orders.filter((o) =>
     orderFilter === "all"
       ? true
@@ -263,7 +257,7 @@ export function AdminPanel({
           {nav}
         </nav>
         <div>
-          <nav className="tabs" aria-label="Administración">
+          <nav className="tabs admin-tabs" aria-label="Administración" ref={tabsRow}>
             {nav}
           </nav>
           {error && (
@@ -277,84 +271,12 @@ export function AdminPanel({
             </p>
           )}
           {tab === "resumen" && (
-            <section className="stack">
-              <div className="row between wrap">
-                <h2>Resumen</h2>
-                <TextField
-                  label="Fecha operativa"
-                  type="date"
-                  required
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
-              </div>
-              <p className="muted t-label">
-                Solo operaciones de esta demo. Día operativo de 06:00 a 06:00
-                (Costa Rica). Las reservas no son ventas.
-              </p>
-              <div className="metrics">
-                <div className="metric">
-                  <span className="muted t-label">Cobro neto simulado</span>
-                  <span className="v">
-                    <Price
-                      amount={metrics.captured_minor - metrics.refunded_minor}
-                    />
-                  </span>
-                </div>
-                <div className="metric">
-                  <span className="muted t-label">Reservado</span>
-                  <span className="v">
-                    <Price amount={metrics.reserved_minor} />
-                  </span>
-                </div>
-                <div className="metric">
-                  <span className="muted t-label">Entregados</span>
-                  <span className="v">{metrics.delivered_orders}</span>
-                </div>
-                <div className="metric">
-                  <span className="muted t-label">Mediana de preparación</span>
-                  <span className="v">
-                    {hours === null
-                      ? "—"
-                      : hours < 60
-                        ? "<1 min"
-                        : `${Math.round(hours / 60)} min`}
-                  </span>
-                  <span className="hint">N = {metrics.preparation_n}</span>
-                </div>
-              </div>
-              <p className="muted t-label">
-                Capturado <Price amount={metrics.captured_minor} /> · Devuelto{" "}
-                <Price amount={metrics.refunded_minor} />
-              </p>
-              <div className="table-scroll">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Producto</th>
-                      <th>Unidades</th>
-                      <th>Venta entregada</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {metrics.products.map((p) => (
-                      <tr key={p.product_id + p.name_snapshot}>
-                        <td>{p.name_snapshot}</td>
-                        <td className="num">{p.units}</td>
-                        <td>
-                          <Price amount={p.total_minor} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-                {!metrics.products.length && (
-                  <p className="muted t-label" style={{ paddingTop: 12 }}>
-                    Sin entregas en esta fecha.
-                  </p>
-                )}
-              </div>
-            </section>
+            <AdminSummary
+              venueId={venue.id}
+              initial={summary}
+              initialPeriod={period}
+              revision={revision}
+            />
           )}
           {tab === "pedidos" && (
             <section className="stack">
@@ -364,14 +286,17 @@ export function AdminPanel({
                   label="Filtro de pedidos"
                   value={orderFilter}
                   options={[
-                    { value: "active", label: "Activos" },
+                    { value: "active", label: `Activos (${activeCount})` },
                     { value: "all", label: "Todos" },
                   ]}
                   onChange={setOrderFilter}
                 />
               </div>
               {!shownOrders.length && (
-                <EmptyState icon={Receipt} title="Sin pedidos activos" />
+                <EmptyState
+                  icon={Receipt}
+                  title={orderFilter === "active" ? "Sin pedidos activos" : "Sin pedidos"}
+                />
               )}
               {shownOrders.map((o) => (
                 <article className="panel stack tight" key={o.id}>
@@ -394,9 +319,12 @@ export function AdminPanel({
                     </StatusBadge>
                   </div>
                   <p className="muted t-label">
-                    {paymentLabels[o.payment_state]} ·{" "}
+                    {paymentLabels[o.payment_state]} (simulado) ·{" "}
                     <Price amount={o.total_minor} />
                   </p>
+                  {financialIssue(o) && (
+                    <StatusBadge tone="warning">Incidencia de cobro</StatusBadge>
+                  )}
                   {o.status === "pending_authorization" &&
                     o.payment_state === "unknown" && (
                       <>

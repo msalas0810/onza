@@ -45,12 +45,14 @@ export function VenueCover({
   eager = false,
   sizes = "(min-width: 1024px) 336px, (min-width: 720px) 50vw, 100vw",
   state,
+  position = "50% 50%",
 }: {
   src: string;
   ratio?: "ratio-16x9" | "ratio-3x2";
   eager?: boolean;
   sizes?: string;
   state: ReturnType<typeof useImageFailure>;
+  position?: string;
 }) {
   return (
     <div className={`media ${ratio}`}>
@@ -61,6 +63,7 @@ export function VenueCover({
         src={src}
         alt=""
         loading={eager ? "eager" : undefined}
+        style={{ objectPosition: position }}
         {...state.props}
       />
     </div>

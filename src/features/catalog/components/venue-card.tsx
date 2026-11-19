@@ -9,7 +9,20 @@ export type VenueCardData = Pick<
   Venue,
   "slug" | "name" | "zone" | "cover_url" | "logo_url"
 > &
-  Partial<Pick<Venue, "open_state" | "paused" | "hours" | "pickup_label">>;
+  Partial<
+    Pick<
+      Venue,
+      | "open_state"
+      | "paused"
+      | "hours"
+      | "pickup_label"
+      | "cover_focus_x"
+      | "cover_focus_y"
+    >
+  >;
+/** Punto focal de la portada (0–100), el mismo para la tarjeta 16:10 y la cabecera 3:2. */
+export const coverPosition = (venue: Partial<Pick<Venue, "cover_focus_x" | "cover_focus_y">>) =>
+  `${venue.cover_focus_x ?? 50}% ${venue.cover_focus_y ?? 50}%`;
 
 /**
  * Tarjeta de Explorar: portada fotográfica 16:10 con el logo del local abajo a la izquierda y el barrio abajo a la
@@ -53,6 +66,7 @@ export function VenueCard({
             src={cover.usable}
             alt=""
             loading={eager ? "eager" : undefined}
+            style={{ objectPosition: coverPosition(venue) }}
             {...cover.props}
           />
         ) : (

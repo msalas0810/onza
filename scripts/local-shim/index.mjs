@@ -23,6 +23,8 @@ const MIGRATIONS = [
   "202611170012_demo_listing.sql",
   "202611190013_order_window_availability.sql",
   "202611190014_profile_avatar.sql",
+  "202611190016_summary_range.sql",
+  "202611190017_venue_cover_focus.sql",
 ];
 const TABLES = new Set([
   "venues",

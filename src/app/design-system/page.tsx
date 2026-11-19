@@ -39,6 +39,8 @@ const sampleVenue: Venue = {
   cover_url: "/demo-venues/sala-norte-cover.jpg",
   logo_url: "/demo-venues/sala-norte-logo.png",
   demo_listed: true,
+  cover_focus_x: 50,
+  cover_focus_y: 50,
 };
 
 // Sample drinks for reviewing the menu rows and the drink editor. Nothing here is saved.

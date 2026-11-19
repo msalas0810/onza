@@ -304,6 +304,8 @@ export type Database = {
           latitude: number | null;
           longitude: number | null;
           demo_listed: boolean;
+          cover_focus_x: number;
+          cover_focus_y: number;
         };
         Insert: {
           id?: string;
@@ -325,6 +327,8 @@ export type Database = {
           latitude?: number | null;
           longitude?: number | null;
           demo_listed?: boolean;
+          cover_focus_x?: number;
+          cover_focus_y?: number;
         };
         Update: {
           id?: string;
@@ -346,6 +350,8 @@ export type Database = {
           latitude?: number | null;
           longitude?: number | null;
           demo_listed?: boolean;
+          cover_focus_x?: number;
+          cover_focus_y?: number;
         };
         Relationships: [];
       };
@@ -401,6 +407,14 @@ export type Database = {
         Returns: undefined;
       };
       update_profile_avatar: { Args: { path: string | null }; Returns: Json };
+      venue_summary_range: {
+        Args: { venue: string; from_day: string; to_day: string };
+        Returns: Json;
+      };
+      update_venue_cover_focus: {
+        Args: { venue: string; x: number; y: number };
+        Returns: Json;
+      };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

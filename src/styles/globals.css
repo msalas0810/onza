@@ -106,6 +106,10 @@ svg {
   position: absolute;
   width: 1px;
   height: 1px;
+  min-height: 0;
+  margin: -1px;
+  padding: 0;
+  border: 0;
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
@@ -2958,4 +2962,233 @@ button.link-button {
   inset: 0;
   width: 100%;
   height: 100%;
+}
+
+/* Plan de pulido · E4: gráfico del Resumen (una serie, barras finas, base única). */
+.summary-chart {
+  margin: 0;
+}
+.chart-frame {
+  position: relative;
+}
+.summary-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+.summary-chart .grid,
+.summary-chart .axis {
+  stroke: var(--onza-border);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+.summary-chart .axis {
+  stroke: var(--onza-control-border);
+}
+.summary-chart .bar {
+  fill: var(--onza-chart);
+  transition: opacity var(--onza-motion-state);
+}
+.summary-chart g:hover .bar:not(.on),
+.summary-chart:has(.bar.on) .bar:not(.on) {
+  opacity: 0.55;
+}
+.summary-chart .hit {
+  fill: transparent;
+}
+.summary-chart g:focus-visible {
+  outline: none;
+}
+.summary-chart g:focus-visible .hit {
+  stroke: var(--onza-focus);
+  stroke-width: 2;
+}
+.summary-chart .tick,
+.summary-chart .peak {
+  font-size: 11px;
+  fill: var(--onza-text-muted);
+}
+.summary-chart .peak {
+  fill: var(--onza-text);
+  font-weight: 600;
+}
+.chart-tip {
+  position: absolute;
+  top: 0;
+  translate: -50% 0;
+  display: grid;
+  gap: 2px;
+  padding: var(--onza-space-4) var(--onza-space-8);
+  border-radius: 8px;
+  background: var(--onza-text);
+  color: var(--onza-bg);
+  font-size: var(--onza-type-caption-size);
+  white-space: nowrap;
+  pointer-events: none;
+}
+.chart-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+}
+.chart-table summary {
+  cursor: pointer;
+  min-height: var(--onza-size-touch-min);
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--onza-type-label-size);
+  font-weight: 600;
+}
+
+/* Plan de pulido · E4: Administración en teléfono. La fila de tabs queda fija arriba y desliza sola; la página nunca
+   se desplaza en horizontal. */
+.admin-tabs {
+  position: sticky;
+  top: 0;
+  z-index: 12;
+  margin-inline: calc(-1 * var(--onza-layout-gutter));
+  padding-inline: var(--onza-layout-gutter);
+  background: var(--onza-bg);
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scroll-padding-inline: var(--onza-layout-gutter);
+}
+.admin-tabs a {
+  scroll-snap-align: center;
+  min-height: var(--onza-layout-touch-staff);
+  transition:
+    color var(--onza-motion-state),
+    border-color var(--onza-motion-state);
+}
+.admin-tabs a:focus-visible {
+  outline: 3px solid var(--onza-focus);
+  outline-offset: -3px;
+}
+.page.operations {
+  overflow-x: clip;
+}
+.period-button {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--onza-space-8);
+  min-height: var(--onza-size-touch-min);
+  padding: 0 var(--onza-space-16);
+  border: 1px solid var(--onza-control-border);
+  border-radius: var(--onza-radius-pill);
+  background: var(--onza-surface-raised);
+  color: var(--onza-text);
+  font-size: var(--onza-type-label-size);
+  font-weight: 600;
+  cursor: pointer;
+}
+.metric .hint {
+  font-size: var(--onza-type-caption-size);
+  color: var(--onza-text-muted);
+}
+.reserve-card {
+  display: grid;
+  gap: var(--onza-space-8);
+}
+.reserve-card .grow {
+  display: grid;
+}
+.reserve-card strong {
+  font-size: var(--onza-type-heading-size);
+}
+.reserve-card .hint {
+  margin: 0;
+}
+.row-link {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-12);
+  width: 100%;
+  min-height: var(--onza-layout-touch-staff);
+  padding: var(--onza-space-12) var(--onza-space-16);
+  border: 1px solid var(--onza-border);
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-surface-raised);
+  color: var(--onza-text);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+}
+.row-link:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+
+/* Plan de pulido · E4: imágenes del local en Negocio. */
+.profile-previews {
+  display: grid;
+  gap: var(--onza-space-24);
+}
+@media (min-width: 48rem) {
+  .profile-previews {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.header-preview {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--onza-radius-media);
+  background: color-mix(in srgb, var(--onza-access-bg) 90%, var(--onza-text));
+}
+.header-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.image-control {
+  display: grid;
+  gap: var(--onza-space-12);
+  padding: var(--onza-space-16);
+  border: 1px solid var(--onza-border);
+  border-radius: var(--onza-radius-media);
+}
+.image-control-head .hint {
+  margin: var(--onza-space-4) 0 0;
+}
+.image-control-preview {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-surface);
+}
+.image-control-preview.cover {
+  aspect-ratio: 16 / 10;
+  cursor: crosshair;
+}
+.image-control-preview.cover[data-empty] {
+  cursor: default;
+}
+.image-control-preview.logo {
+  width: 8rem;
+  aspect-ratio: 1;
+  /* Fondo de contraste para logos claros u oscuros. */
+  background: repeating-conic-gradient(var(--onza-surface) 0 25%, var(--onza-surface-raised) 0 50%) 0 0 / 16px 16px;
+}
+.image-control-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.image-control-preview.logo img {
+  object-fit: contain;
+}
+.focus-dot {
+  position: absolute;
+  width: 1.5rem;
+  height: 1.5rem;
+  translate: -50% -50%;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px #0d0d0e99;
+  pointer-events: none;
 }

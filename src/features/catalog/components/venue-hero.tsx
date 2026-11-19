@@ -2,6 +2,7 @@
 import type { Venue } from "../server/queries";
 import { venueStatus } from "./venue-status";
 import { VenueCover, VenueMark, useCover } from "./venue-parts";
+import { coverPosition } from "./venue-card";
 
 /** Cabecera del local: foto (si hay), identidad, datos de retiro y nota de demo. */
 export function VenueHero({ venue }: { venue: Venue }) {
@@ -16,6 +17,7 @@ export function VenueHero({ venue }: { venue: Venue }) {
           ratio="ratio-3x2"
           eager
           sizes="(min-width: 640px) 640px, 100vw"
+          position={coverPosition(venue)}
         />
       )}
       <div className="id">

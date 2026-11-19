@@ -20,6 +20,7 @@
   --onza-focus: #741F2C;
   --onza-scrim: #0D0D0E7A;
   --onza-mark: #741F2C;
+  --onza-chart: #A43849;
   --onza-access-bg: #0D0D0E;
   --onza-access-text: #F4F1ED;
   --onza-access-accent: #741F2C;
@@ -110,6 +111,7 @@
   --onza-focus: #E2A2AB;
   --onza-scrim: #000000A3;
   --onza-mark: #B33A4C;
+  --onza-chart: #B33A4C;
   color-scheme: dark;
   }
 }
@@ -134,6 +136,7 @@
   --onza-focus: #E2A2AB;
   --onza-scrim: #000000A3;
   --onza-mark: #B33A4C;
+  --onza-chart: #B33A4C;
   color-scheme: dark;
 }
 :root[data-theme="light"] { color-scheme: light; }

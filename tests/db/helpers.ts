@@ -14,6 +14,8 @@ export const ids = {
 export const LATER_MIGRATIONS = [
   "202611190013_order_window_availability.sql",
   "202611190014_profile_avatar.sql",
+  "202611190016_summary_range.sql",
+  "202611190017_venue_cover_focus.sql",
 ];
 export async function database() {
   const db = new PGlite();
