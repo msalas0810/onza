@@ -379,6 +379,12 @@ export async function startShim({ port = 54321, quiet = true } = {}) {
         }
         return send(res, 200, result.rows);
       }
+      // Solo verificación: SQL de fixtures (p. ej. membresías extra) con la clave de servicio. No existe en Supabase.
+      if (url.pathname === "/__fixture/sql" && req.method === "POST") {
+        if (!auth.endsWith(SERVICE_KEY)) return send(res, 401, { message: "requiere la clave de servicio del shim" });
+        await serial(() => db.exec(json.sql));
+        return send(res, 200, { ok: true });
+      }
       return send(res, 404, {
         message: `shim: ${req.method} ${url.pathname} no implementado`,
       });

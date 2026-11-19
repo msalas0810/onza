@@ -2804,6 +2804,7 @@ button.link-button {
   text-align: center;
 }
 .venue-pick {
+  container: venue-pick / inline-size;
   overflow: hidden;
   border: 1px solid var(--onza-border);
   border-radius: var(--onza-layout-card-radius);
@@ -2811,7 +2812,8 @@ button.link-button {
 }
 .venue-pick-cover {
   position: relative;
-  aspect-ratio: 16 / 6;
+  width: 100%;
+  height: clamp(5.5rem, 24cqi, 8rem);
   background: color-mix(in srgb, var(--onza-access-bg) 90%, var(--onza-text));
 }
 .venue-pick-cover img {
@@ -2819,12 +2821,46 @@ button.link-button {
   height: 100%;
   object-fit: cover;
 }
+/* Nombre, rol y estado arriba; acciones debajo. Dos columnas solo si caben con la etiqueta completa; si no, apiladas.
+   En escritorio las acciones pasan al lado del bloque superior. */
 .venue-pick-body {
+  display: grid;
+  gap: var(--onza-space-16);
+  padding: var(--onza-space-16);
+}
+.venue-pick-info {
+  min-width: 0;
+}
+.venue-pick-info strong {
+  display: block;
+  overflow-wrap: break-word;
+  font-size: var(--onza-text-lg, 1.0625rem);
+}
+.venue-pick-meta {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
-  gap: var(--onza-space-12);
-  padding: var(--onza-space-16);
+  gap: var(--onza-space-8);
+  margin-top: var(--onza-space-8);
+}
+.venue-pick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9rem), 1fr));
+  gap: var(--onza-space-8);
+}
+@container venue-pick (min-width: 32rem) {
+  .venue-pick-body {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+  }
+  .venue-pick-actions {
+    grid-template-columns: none;
+    grid-auto-flow: column;
+    grid-auto-columns: 9.5rem;
+  }
+}
+.venue-pick-page {
+  max-width: 40rem;
+  margin-inline: auto;
 }
 
 /* Plan de pulido · E3: «¡Disfrutá!». */
