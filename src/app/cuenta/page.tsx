@@ -6,6 +6,7 @@ import {
 } from "@/features/account/components/account-actions";
 import { currentAccount } from "@/lib/account";
 import { AvatarEditor } from "@/features/account/components/avatar-editor";
+import { ProfileEditor } from "@/features/account/components/profile-editor";
 
 export const dynamic = "force-dynamic";
 export default async function Page() {
@@ -25,6 +26,11 @@ export default async function Page() {
             <strong className="identity-name">{profile.full_name}</strong>
             <div className="muted t-label">@{profile.username}</div>
           </div>
+          <ProfileEditor
+            fullName={profile.full_name}
+            username={profile.username}
+            email={email ?? null}
+          />
         </section>
       )}
       <div className="stack loose">

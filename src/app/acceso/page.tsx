@@ -22,9 +22,7 @@ export default async function Page({
             <br />
             Sin perderte la noche.
           </h1>
-          <p className={styles.subtitle}>
-            Pedí tus tragos. Recogé en la barra.
-          </p>
+          <p className={styles.subtitle}>Pedí tu ronda. Retirá en la barra.</p>
         </section>
         <div className={styles.actions}>
           <AuthForm

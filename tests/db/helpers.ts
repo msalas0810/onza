@@ -18,6 +18,7 @@ export const LATER_MIGRATIONS = [
   "202611190017_venue_cover_focus.sql",
   "202611190018_abuse_waitlist.sql",
   "202611190019_auto_accept.sql",
+  "202611190020_profile_details.sql",
 ];
 export async function database() {
   const db = new PGlite();

@@ -413,6 +413,10 @@ export type Database = {
         Returns: undefined;
       };
       update_profile_avatar: { Args: { path: string | null }; Returns: Json };
+      update_profile_details: {
+        Args: { full_name: string; username: string };
+        Returns: Json;
+      };
       venue_summary_range: {
         Args: { venue: string; from_day: string; to_day: string };
         Returns: Json;
