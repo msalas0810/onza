@@ -20,6 +20,7 @@ export default async function Page({
   if (account.kind === "customer") redirect("/sesion-activa?want=equipo");
   return (
     <AccessFrame
+      video
       eyebrow="Equipo"
       title="Acceso del equipo"
       subtitle="Las cuentas del equipo las crea el administrador de tu local."

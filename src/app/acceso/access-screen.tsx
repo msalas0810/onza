@@ -14,7 +14,13 @@ function accessDevice() {
   return /iPhone|iPod|Android.*Mobile/i.test(userAgent) ? "phone" : "desktop";
 }
 
-export function AccessScreen({ children }: { children: ReactNode }) {
+export function AccessScreen({
+  children,
+  compact = false,
+}: {
+  children: ReactNode;
+  compact?: boolean;
+}) {
   const screen = useRef<HTMLDivElement>(null);
   const video = useRef<HTMLVideoElement>(null);
 
@@ -70,7 +76,7 @@ export function AccessScreen({ children }: { children: ReactNode }) {
   return (
     <div
       ref={screen}
-      className={`access-screen ${styles.screen} ${styles.videoAccess}`}
+      className={`access-screen ${styles.screen} ${compact ? styles.compact : styles.videoAccess}`}
     >
       <div className={styles.backdrop} aria-hidden="true">
         <div className={styles.film}>
