@@ -18,11 +18,10 @@ export default async function Page({
         <section className={styles.hero} aria-labelledby="access-title">
           <OnzaLogo size="hero" className={styles.brand} />
           <h1 id="access-title" className={styles.title}>
-            Tu próxima ronda.
+            Pedí tu ronda.
             <br />
-            Sin perderte la noche.
+            Retirá en la barra.
           </h1>
-          <p className={styles.subtitle}>Pedí tu ronda. Retirá en la barra.</p>
         </section>
         <div className={styles.actions}>
           <AuthForm
