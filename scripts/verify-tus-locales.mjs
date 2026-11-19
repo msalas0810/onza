@@ -3,6 +3,8 @@
 // Uso: ONZA_APP=http://127.0.0.1:3100 node scripts/verify-tus-locales.mjs <carpeta-de-capturas> [prefijo]
 import { createRequire } from "node:module";
 import { mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { people } from "./local-shim/index.mjs";
 import { sessionCookies } from "./local-shim/session.mjs";
 const require = createRequire(import.meta.url);
@@ -10,7 +12,7 @@ const { chromium } = require("playwright");
 const APP = process.env.ONZA_APP ?? "http://127.0.0.1:3100";
 const SHIM = process.env.SHIM_URL ?? "http://127.0.0.1:54321";
 const KEY = "local-shim-service-role";
-const [out = "capturas", prefix = "tus-locales"] = process.argv.slice(2);
+const [out = join(tmpdir(), "onza-capturas"), prefix = "tus-locales"] = process.argv.slice(2);
 mkdirSync(out, { recursive: true });
 const sql = (text) =>
   fetch(`${SHIM}/__fixture/sql`, { method: "POST", headers: { authorization: `Bearer ${KEY}`, "content-type": "application/json" }, body: JSON.stringify({ sql: text }) }).then(async (r) => {
@@ -29,7 +31,9 @@ await sql(`
 
 const browser = await chromium.launch();
 let failed = 0;
+let total = 0;
 const check = (name, ok, detail = "") => {
+  total++;
   console.log(`${ok ? "✓" : "✗"} ${name}${ok ? "" : ` — ${detail}`}`);
   if (!ok) failed++;
 };
@@ -76,5 +80,5 @@ for (const [who, label] of [["ana", "admin"], ["jorge", "bartender"]]) {
   }
 }
 await browser.close();
-console.log(failed ? `\n${failed} fallos` : "\nTodo en orden");
+console.log(`\n${total - failed}/${total} comprobaciones`);
 process.exit(failed ? 1 : 0);

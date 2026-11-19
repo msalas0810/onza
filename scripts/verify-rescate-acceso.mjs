@@ -2,13 +2,17 @@
 // al alcance en pantalla baja. Uso: ONZA_APP=http://127.0.0.1:3100 node scripts/verify-rescate-acceso.mjs [carpeta-capturas]
 import { createRequire } from "node:module";
 import { mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 const require = createRequire(import.meta.url);
 const { chromium, devices } = require("playwright");
 const APP = process.env.ONZA_APP ?? "http://127.0.0.1:3100";
-const out = process.argv[2] ?? "capturas";
+const out = process.argv[2] ?? join(tmpdir(), "onza-capturas");
 mkdirSync(out, { recursive: true });
 let failed = 0;
+let total = 0;
 const check = (name, ok, detail = "") => {
+  total++;
   console.log(`${ok ? "✓" : "✗"} ${name}${ok ? "" : ` — ${detail}`}`);
   if (!ok) failed++;
 };
@@ -36,4 +40,5 @@ for (const [width, height] of [[320, 568], [340, 640], [360, 740], [390, 844]]) 
   await ctx.close();
 }
 await browser.close();
+console.log(`\n${total - failed}/${total} comprobaciones`);
 process.exit(failed ? 1 : 0);

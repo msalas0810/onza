@@ -39,7 +39,7 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `feat/plan-pulido` (local, sin push) sobre `fix/hosted-integration` `fed5794`: seis entregas del plan de pulido con commits revisables. `fix/hosted-integration` sigue siendo la rama desplegada. Sin merge a `main` |
+| Rama vigente de trabajo | `review/rescate-entrega` (local, sin push) sobre `feat/plan-pulido` `83ba141`: auditoría, brechas cerradas y limpieza (ver `docs/Onza-Matriz-de-entrega.md`). Antes: `feat/plan-pulido` sobre `fix/hosted-integration` `fed5794`: seis entregas del plan de pulido con commits revisables. `fix/hosted-integration` sigue siendo la rama desplegada. Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
 | Commit desplegado en Vercel | `fed579403d75da1d49cc54f0af9239b55c125706`, Preview READY `dpl_8emjFDVbshCsg5xBBsiaKNFSpEqT`. Video e ingreso laboral comprobados por HTTPS. |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
@@ -89,6 +89,20 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-19-05 · Rescate: auditoría con la app abierta, brechas cerradas y limpieza
+
+- **Fecha y hora:** 2026-11-19 12:45–13:30 (America/Costa_Rica)
+- **Persona:** Manu (encargo «Auditá y completá Onza»).
+- **IA:** Claude Code · claude-sonnet-5-5
+- **Rama y commits:** `review/rescate-entrega` desde `feat/plan-pulido` `83ba141` · `41505e1`, `22c698b`, `d10c97a`, `be18740`, `bde956f`, `13d369b`, `4c2a848` y el cierre documental. Sin push, sin tocar producción ni el Preview.
+- **Qué cambió:** «Tus locales» ya no tapa badges ni parte nombres (acciones debajo, al lado en escritorio). Cuenta: nombre, @usuario y trago favorito (opcional) editables (migración aditiva 020). Acceso: título corto y «Próximamente» dentro del botón a 320 px. Se retiró `three`/ParticleWave sin uso. Higiene: fuentes y referencias archivadas fuera del repo, `design/bocetos` retirado.
+- **Archivos clave:** `docs/Onza-Matriz-de-entrega.md`, `docs/Onza-Estructura-del-repo.md`, `docs/evidence/rescate-mediciones.md`, `src/app/equipo/locales/page.tsx`, `src/features/account/components/profile-editor.tsx`, `supabase/migrations/202611190020_profile_details.sql`, `scripts/verify-tus-locales.mjs`, `scripts/verify-rescate-*.mjs`.
+- **Verificado:** `npm test` 41 archivos/157 pruebas, typecheck, lint y build; `node scripts/verify-pulido-all.mjs` (E1–E6, video, acceso estrecho, cuenta, Tus locales 143/143) y e2e `venue-card` 14/14, todo en Chromium contra el servidor local aislado. Capturas antes/después abiertas e inspeccionadas.
+- **No verificado:** dispositivos físicos y Safari, cámara real, Realtime, Storage, correo, migraciones 013–020 en Supabase real. La transcripción y el ZIP de capturas no estaban en el Mac. Matriz: 23 verificados, 7 parciales.
+- **Decisiones:** se mantiene la línea «sin relación comercial con el local» (decisión de Manu pendiente, C05). No se recodificó el video móvil (ffmpeg local roto). No se agregó índice: la medición no mostró cuello de botella.
+- **Pendientes / siguiente paso:** instalar `jsqr@1.4.0` (denegado dos veces por el entorno), probar Storage/Realtime/correo en un proyecto Supabase aislado, programar `auto_accept_tick`, pruebas físicas.
+
 
 ### D-2026-11-19-04 · Implementar las seis entregas del plan de pulido en rama local
 

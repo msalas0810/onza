@@ -4,7 +4,10 @@
 import { spawn } from "node:child_process";
 import { startShim } from "./local-shim/index.mjs";
 const groups = [
-  ["verify-pulido-e1.mjs", "verify-pulido-e2.mjs", "verify-pulido-e3.mjs", "verify-pulido-e4.mjs", "verify-access-video.mjs"],
+  ["verify-pulido-e1.mjs", "verify-pulido-e2.mjs", "verify-pulido-e3.mjs", "verify-pulido-e4.mjs", "verify-access-video.mjs", "verify-rescate-acceso.mjs"],
+  // Estos dos cambian datos compartidos (nombre de María, membresías y estados de locales): grupo propio con datos limpios.
+  ["verify-rescate-cuenta.mjs"],
+  ["verify-tus-locales.mjs"],
   ["verify-pulido-e5.mjs"],
   ["verify-pulido-e6.mjs"],
 ];

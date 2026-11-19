@@ -1,13 +1,15 @@
 // C09: editar nombre y @usuario desde Cuenta (sesión de María contra el servidor de verificación local).
 import { createRequire } from "node:module";
 import { mkdirSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import { people } from "./local-shim/index.mjs";
 import { sessionCookies } from "./local-shim/session.mjs";
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
 const APP = process.env.ONZA_APP ?? "http://127.0.0.1:3100";
 const SHIM = process.env.SHIM_URL ?? "http://127.0.0.1:54321";
-const out = process.argv[2] ?? "capturas";
+const out = process.argv[2] ?? join(tmpdir(), "onza-capturas");
 mkdirSync(out, { recursive: true });
 const results = [];
 const check = (name, ok, detail = "") => {
