@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AuthForm } from "@/features/account/components/auth-form";
 import { safeNext } from "@/lib/access-policy";
-import { AccessBackground } from "./mobile-background";
+import { AccessScreen } from "./access-screen";
 import styles from "./access.module.css";
 export const dynamic = "force-dynamic";
 export default async function Page({
@@ -11,19 +11,14 @@ export default async function Page({
 }) {
   const { next, error } = await searchParams;
   const destination = safeNext(next);
-  const venue = destination.match(/^\/v\/([\w-]+)/)?.[1];
   return (
-    <div className={`access-screen ${styles.screen} ${styles.mobileAccess}`}>
+    <AccessScreen>
       <div className={styles.content}>
         <section className={styles.hero} aria-labelledby="access-title">
-          <div className={styles.wave} aria-hidden="true">
-            <AccessBackground />
-          </div>
           <div className={styles.brand} role="img" aria-label="Onza">
             <span className={styles.shot} />
             <span className={styles.signature}>
               <span className={styles.wordmark} />
-              <span className={styles.dot} />
             </span>
           </div>
           <h1 id="access-title" className={styles.title}>
@@ -36,11 +31,6 @@ export default async function Page({
           </p>
         </section>
         <div className={styles.actions}>
-          {venue && (
-            <p className={styles.destination}>
-              Vas a abrir el menú de un local
-            </p>
-          )}
           <AuthForm
             next={destination}
             notice={
@@ -56,15 +46,9 @@ export default async function Page({
             Solo mayores de 18 años.
           </p>
           <p className={styles.staff}>
-            <span className={styles.desktopStaff}>¿Sos personal?</span>{" "}
             <Link href="/equipo/acceso">
-              <span className={styles.desktopStaff}>Entrá por acá</span>
-              <span className={styles.mobileStaff}>¿Sos personal?</span>
-              <span className={styles.desktopStaff} aria-hidden="true">
-                ↗
-              </span>
+              ¿Sos personal?
               <svg
-                className={styles.mobileStaff}
                 width="14"
                 height="14"
                 viewBox="0 0 24 24"
@@ -77,9 +61,8 @@ export default async function Page({
               </svg>
             </Link>
           </p>
-          <span className={styles.demo}>DEMO · sin dinero real</span>
         </div>
       </div>
-    </div>
+    </AccessScreen>
   );
 }

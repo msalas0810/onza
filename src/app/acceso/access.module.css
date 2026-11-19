@@ -308,282 +308,414 @@
   color: var(--onza-text-muted);
 }
 
-.content {
-  display: contents;
+/* Main access screen, using the approved full-viewport composition. */
+.videoAccess {
+  --onza-bg: #090708;
+  --onza-text: #f4f1ed;
+  --onza-focus: #df9ba6;
+  --access-button-height: 50px;
+  --access-button-padding: 20px;
+  --access-button-gap: 13px;
+  --access-button-weight: 580;
+  --access-button-tracking: -0.22px;
+  --access-disabled: #161215c2;
+  --access-disabled-border: #ffffff0e;
+  --access-disabled-text: #aa9f9c;
+  --access-email: #090708a8;
+  --access-divider: #928583;
+  --access-divider-line: #ffffff1e;
+  --access-divider-space: 15px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  place-items: center;
+  padding: max(38px, env(safe-area-inset-top))
+    max(24px, env(safe-area-inset-right)) max(68px, env(safe-area-inset-bottom))
+    max(24px, env(safe-area-inset-left));
 }
-.legal,
-.mobileStaff,
+
+.videoAccess .content {
+  width: min(100%, 350px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.backdrop,
 .film,
-.vignette,
-.shade {
-  display: none;
+.shade,
+.film video {
+  position: absolute;
+  inset: 0;
 }
-.desktopWave {
-  width: 100%;
-  height: 100%;
+
+.backdrop {
+  z-index: -1;
+  pointer-events: none;
 }
 .filter {
   position: absolute;
 }
-
-/* Approved video composition. These overrides belong only to /acceso. */
-@media (max-width: 600px) {
-  .mobileAccess {
-    --onza-bg: #090909;
-    --onza-text: #f4f1ed;
-    display: block;
-    padding: 0;
-    background: #090909;
-  }
-  .mobileAccess .content {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    min-height: 100svh;
-    max-width: 440px;
-    margin: auto;
-    padding: clamp(65px, 11.1svh, 110px) max(28px, env(safe-area-inset-right))
-      max(26px, env(safe-area-inset-bottom))
-      max(28px, env(safe-area-inset-left));
-  }
-  .mobileAccess .hero {
-    width: 100%;
-    padding: 0;
-  }
-  .mobileAccess .wave {
-    position: fixed;
-    inset: 0;
-    mask-image: none;
-  }
-  .film,
-  .vignette,
-  .shade {
-    display: block;
-    position: absolute;
-    inset: 0;
-  }
-  .film {
-    z-index: -4;
-    overflow: hidden;
-    background: #090909 url("/access/access-poster.jpg") center top / cover
-      no-repeat;
-  }
-  .film video {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: 50% 30%;
-    filter: url("#access-duotone");
-    opacity: 0;
-  }
-  .vignette {
-    z-index: -3;
-    background: linear-gradient(
-      90deg,
-      #0006,
-      transparent 25%,
-      transparent 75%,
-      #0006
-    );
-  }
-  .shade {
-    z-index: -2;
-    background: linear-gradient(
-      180deg,
-      rgba(9, 9, 9, 0.23) 0%,
-      rgba(9, 9, 9, 0.18) 24%,
-      rgba(9, 9, 9, 0.38) 34%,
-      rgba(9, 9, 9, 0.83) 49%,
-      #090909 64%,
-      #090909 100%
-    );
-  }
-  .mobileAccess .brand {
-    gap: 14px;
-    margin: 0;
-    filter: drop-shadow(0 2px 20px #0004);
-  }
-  .mobileAccess .shot {
-    width: 52px;
-    height: 58px;
-    background: #a43849;
-  }
-  .mobileAccess .wordmark {
-    width: 218px;
-    height: calc(218px * 358 / 1337);
-    background: white;
-  }
-  .mobileAccess .dot {
-    display: none;
-  }
-  .mobileAccess .title {
-    margin: 34px 0 0;
-    font-size: 27px;
-    line-height: 1.16;
-    letter-spacing: -1.05px;
-    font-weight: 650;
-    text-shadow: 0 2px 20px #0006;
-  }
-  .mobileAccess .subtitle {
-    font-size: 13px;
-    line-height: 1.6;
-    color: #d1c9c7;
-    margin: 14px 0 0;
-    letter-spacing: -0.1px;
-  }
-  .mobileAccess .actions {
-    margin-top: 45px;
-    max-width: none;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-  }
-  .mobileAccess .actions :global(.stack.tight) {
-    gap: 10px;
-  }
-  .mobileAccess .actions :global(.auth-provider) {
-    height: 52px;
-    min-height: 52px;
-    padding: 0 22px;
-    border-radius: 999px;
-    gap: 12px;
-    font-size: 14px;
-    font-weight: 560;
-    letter-spacing: -0.25px;
-  }
-  .mobileAccess .actions :global(.auth-provider svg) {
-    width: 20px;
-    height: 20px;
-  }
-  .mobileAccess .actions :global(.auth-provider.primary) {
-    background: #f4f1ed;
-    color: #121212;
-    border: 1px solid transparent;
-    box-shadow: 0 1px 0 #fff inset;
-  }
-  .mobileAccess .actions :global(.auth-provider.primary svg) {
-    background: url("/access/google.svg") center / contain no-repeat;
-  }
-  .mobileAccess .actions :global(.auth-provider.primary svg path) {
-    visibility: hidden;
-  }
-  .mobileAccess .actions :global(.auth-provider:disabled) {
-    background: #ffffff09;
-    border-color: #ffffff05;
-    color: #8a8785;
-    cursor: not-allowed;
-  }
-  .mobileAccess .actions :global(.auth-provider:disabled svg) {
-    background: url("/access/apple.svg") center / contain no-repeat;
-  }
-  .mobileAccess .actions :global(.auth-provider:disabled svg path) {
-    visibility: hidden;
-  }
-  .mobileAccess .actions :global(.soon) {
-    margin-left: auto;
-    padding: 5px 7px;
-    background: #ffffff09;
-    border-radius: 5px;
-    font-size: 9px;
-    font-weight: 450;
-    color: #a9a5a3;
-    letter-spacing: 0;
-  }
-  .mobileAccess .actions :global(.email-access) {
-    margin-top: 0;
-  }
-  .mobileAccess .actions :global(.email-access)::before {
-    content: "o";
-    display: block;
-    margin: 17px 0;
-    height: 13px;
-    line-height: 13px;
-    font-size: 11px;
-    color: #787573;
-    background:
-      linear-gradient(#ffffff18, #ffffff18) left center / calc(50% - 18px) 1px
-        no-repeat,
-      linear-gradient(#ffffff18, #ffffff18) right center / calc(50% - 18px) 1px
-        no-repeat;
-  }
-  .mobileAccess .actions :global(summary.auth-provider) {
-    background: transparent;
-    border-color: #ffffff40;
-    color: #f4f1ed;
-  }
-  .mobileAccess .actions :global(summary.auth-provider:hover) {
-    background: #ffffff08;
-  }
-  .mobileAccess .legal {
-    display: block;
-    font-size: 10px;
-    line-height: 1.8;
-    color: #918b87;
-    margin: 19px -7px 0;
-  }
-  .legal a {
-    text-underline-offset: 3px;
-    text-decoration-color: #8885;
-  }
-  .mobileAccess .staff {
-    margin-top: auto;
-    padding-top: 45px;
-    min-height: 0;
-    font-size: 12px;
-    color: #c3bdba;
-  }
-  .mobileAccess .staff a {
-    min-height: 0;
-    padding: 15px 0;
-    margin: -15px 0;
-    gap: 8px;
-    color: #c3bdba;
-  }
-  .mobileAccess .mobileStaff {
-    display: inline;
-  }
-  .mobileAccess .desktopStaff,
-  .mobileAccess .demo,
-  .mobileAccess .destination {
-    display: none;
-  }
+.film {
+  background: #100a0d var(--access-poster) 50% 46% / cover no-repeat;
 }
-@media (max-height: 740px) and (max-width: 600px) {
-  .mobileAccess .content {
-    padding-top: 38px;
+
+.videoAccess[data-access-device] {
+  --access-poster: url("/access/access-horizontal-poster.jpg");
+}
+.videoAccess:not([data-access-device]) .film {
+  background: #100a0d;
+}
+
+.film video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 46%;
+  opacity: 0;
+}
+
+.film video[data-playing] {
+  opacity: 1;
+}
+
+.shade {
+  background:
+    radial-gradient(
+      ellipse 44% 67% at 50% 45%,
+      #090708dc 0%,
+      #090708b8 28%,
+      #09070857 65%,
+      #09070800 100%
+    ),
+    linear-gradient(
+      180deg,
+      #09070828 0%,
+      #09070800 22%,
+      #09070824 46%,
+      #090708a8 77%,
+      #090708f0 100%
+    ),
+    linear-gradient(
+      90deg,
+      #09070865 0%,
+      transparent 22%,
+      transparent 78%,
+      #09070865 100%
+    );
+}
+
+[data-access-device="tablet"] .shade {
+  background:
+    radial-gradient(
+      ellipse 62% 57% at 50% 48%,
+      #090708e5 0%,
+      #090708ba 33%,
+      #09070840 73%,
+      #09070800 100%
+    ),
+    linear-gradient(
+      180deg,
+      #09070835,
+      transparent 26%,
+      #09070818 44%,
+      #090708ed 100%
+    );
+}
+
+.videoAccess .hero {
+  width: 100%;
+  padding: 0;
+}
+.videoAccess .brand {
+  gap: 15px;
+  margin: 0;
+}
+.videoAccess .shot {
+  width: 54px;
+  height: 60px;
+  background: #a43849;
+}
+.videoAccess .wordmark {
+  width: 224px;
+  height: calc(224px * 358 / 1337);
+  background: white;
+}
+.videoAccess .title {
+  margin: 29px 0 0;
+  font-size: 30px;
+  line-height: 1.12;
+  letter-spacing: -1.35px;
+  font-weight: 650;
+}
+.videoAccess .subtitle {
+  margin: 14px 0 0;
+  font-size: 13px;
+  line-height: 1.55;
+  color: #ccc2c0;
+}
+.videoAccess :is(.title, .subtitle, .legal, .staff) {
+  text-shadow: 0 2px 15px #0008;
+}
+.videoAccess .actions {
+  width: 100%;
+  max-width: none;
+  margin-top: 37px;
+}
+.videoAccess .actions :global(.stack.tight) {
+  gap: 10px;
+}
+
+.videoAccess .actions :global(.auth-provider) {
+  height: var(--access-button-height);
+  min-height: var(--access-button-height);
+  padding: 0 var(--access-button-padding);
+  border-radius: 999px;
+  gap: var(--access-button-gap);
+  font-size: 14px;
+  font-weight: var(--access-button-weight);
+  letter-spacing: var(--access-button-tracking);
+}
+.videoAccess .actions :global(.auth-provider:disabled) {
+  background: var(--access-disabled);
+  border-color: var(--access-disabled-border);
+  color: var(--access-disabled-text);
+  cursor: default;
+}
+.videoAccess .actions :global(.auth-icon) {
+  flex: 0 0 20px;
+  height: 20px;
+  background: center / contain no-repeat;
+}
+.videoAccess .actions :global(.auth-icon-google) {
+  background-image: url("/access/google.svg");
+  filter: grayscale(1) brightness(1.25);
+}
+.videoAccess .actions :global(.auth-icon-apple) {
+  background-image: url("/access/apple.svg");
+}
+.videoAccess .actions :global(.soon) {
+  margin-left: auto;
+  padding: 4px 7px;
+  background: #ffffff0a;
+  border-radius: 6px;
+  font-size: 10px;
+  color: inherit;
+  letter-spacing: 0;
+}
+.videoAccess .actions :global(.email-access) {
+  margin: 0;
+}
+.videoAccess .actions :global(.email-access)::before {
+  content: "o";
+  display: block;
+  margin: var(--access-divider-space) 0;
+  height: 13px;
+  line-height: 13px;
+  font-size: 11px;
+  color: var(--access-divider);
+  background:
+    linear-gradient(var(--access-divider-line), var(--access-divider-line)) left
+      center / calc(50% - 18px) 1px no-repeat,
+    linear-gradient(var(--access-divider-line), var(--access-divider-line))
+      right center / calc(50% - 18px) 1px no-repeat;
+}
+.videoAccess .actions :global(summary.auth-provider) {
+  background: var(--access-email);
+  border-color: #ffffff3b;
+  color: #f4f1ed;
+}
+.videoAccess .actions :global(summary.auth-provider:hover) {
+  background: #ffffff0b;
+}
+
+.legal {
+  font-size: 10px;
+  color: #a99b98;
+  line-height: 1.75;
+  margin: 17px -8px 0;
+}
+.legal a {
+  color: inherit;
+  text-underline-offset: 3px;
+  text-decoration-color: #ffffff46;
+}
+.videoAccess .staff {
+  margin: 36px 0 0;
+  min-height: 0;
+  font-size: 12px;
+}
+.videoAccess .staff a {
+  min-height: 0;
+  padding: 15px 0;
+  margin: -15px 0;
+  gap: 8px;
+  color: #c8bdba;
+}
+.videoAccess .staff a:hover {
+  color: white;
+}
+
+.videoAccess[data-access-device="phone"] {
+  --onza-bg: #090909;
+  --access-poster: url("/access/access-poster.jpg");
+  --access-button-height: 52px;
+  --access-button-padding: 22px;
+  --access-button-gap: 12px;
+  --access-button-weight: 560;
+  --access-button-tracking: -0.25px;
+  --access-disabled: #ffffff09;
+  --access-disabled-border: #ffffff05;
+  --access-disabled-text: #8a8785;
+  --access-email: transparent;
+  --access-divider: #787573;
+  --access-divider-line: #ffffff18;
+  --access-divider-space: 17px;
+  display: block;
+  padding: 0;
+}
+[data-access-device="phone"] .content {
+  min-height: 100svh;
+  width: min(100%, 440px);
+  margin: auto;
+  padding: clamp(65px, 11.1svh, 110px) max(28px, env(safe-area-inset-right))
+    max(26px, env(safe-area-inset-bottom)) max(28px, env(safe-area-inset-left));
+}
+[data-access-device="phone"] .backdrop {
+  position: fixed;
+}
+[data-access-device="phone"] .film {
+  background-position: center top;
+}
+[data-access-device="phone"] .film video {
+  object-position: 50% 30%;
+  filter: url("#access-duotone");
+}
+[data-access-device="phone"] .film video[data-playing] {
+  opacity: 0.88;
+}
+[data-access-device="phone"] .shade {
+  background:
+    linear-gradient(
+      180deg,
+      #0909093b 0%,
+      #0909092e 24%,
+      #09090961 34%,
+      #090909d4 49%,
+      #090909 64%
+    ),
+    linear-gradient(90deg, #0006, transparent 25%, transparent 75%, #0006);
+}
+[data-access-device="phone"] .brand {
+  gap: 14px;
+  filter: drop-shadow(0 2px 20px #0004);
+}
+[data-access-device="phone"] .shot {
+  width: 52px;
+  height: 58px;
+}
+[data-access-device="phone"] .wordmark {
+  width: 218px;
+  height: calc(218px * 358 / 1337);
+}
+[data-access-device="phone"] .title {
+  margin-top: 34px;
+  font-size: 27px;
+  line-height: 1.16;
+  letter-spacing: -1.05px;
+  text-shadow: 0 2px 20px #0006;
+}
+[data-access-device="phone"] .subtitle {
+  line-height: 1.6;
+  color: #d1c9c7;
+  letter-spacing: -0.1px;
+}
+[data-access-device="phone"] .actions {
+  margin-top: 45px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+[data-access-device="phone"] .actions :global(.soon) {
+  padding: 5px 7px;
+  border-radius: 5px;
+  font-size: 9px;
+  font-weight: 450;
+  color: #a9a5a3;
+}
+[data-access-device="phone"] .legal {
+  margin: 19px -7px 0;
+  line-height: 1.8;
+  color: #918b87;
+}
+[data-access-device="phone"] .staff {
+  margin-top: auto;
+  padding-top: 45px;
+}
+
+@media (max-height: 730px) {
+  .videoAccess {
+    --access-button-height: 46px;
+    padding-top: 24px;
+    padding-bottom: 54px;
   }
-  .mobileAccess .shot {
-    width: 41px;
-    height: 46px;
+  .videoAccess .brand {
+    gap: 11px;
   }
-  .mobileAccess .wordmark {
+  .videoAccess .shot {
+    width: 43px;
+    height: 48px;
+  }
+  .videoAccess .wordmark {
     width: 190px;
     height: calc(190px * 358 / 1337);
   }
-  .mobileAccess .brand {
+  .videoAccess .title {
+    margin-top: 23px;
+    font-size: 26px;
+  }
+  .videoAccess .actions {
+    margin-top: 26px;
+  }
+  .videoAccess .staff {
+    margin-top: 23px;
+  }
+}
+
+@media (max-height: 740px) {
+  .videoAccess[data-access-device="phone"] {
+    --access-button-height: 48px;
+  }
+  [data-access-device="phone"] .content {
+    padding-top: 38px;
+  }
+  [data-access-device="phone"] .shot {
+    width: 41px;
+    height: 46px;
+  }
+  [data-access-device="phone"] .wordmark {
+    width: 190px;
+    height: calc(190px * 358 / 1337);
+  }
+  [data-access-device="phone"] .brand {
     gap: 10px;
   }
-  .mobileAccess .title {
+  [data-access-device="phone"] .title {
     margin-top: 25px;
     font-size: 25px;
   }
-  .mobileAccess .actions {
+  [data-access-device="phone"] .actions {
     margin-top: 28px;
   }
-  .mobileAccess .actions :global(.auth-provider) {
-    height: 48px;
-    min-height: 48px;
-  }
-  .mobileAccess .staff {
+  [data-access-device="phone"] .staff {
+    margin-top: auto;
     padding-top: 28px;
   }
-  .mobileAccess .legal {
+  [data-access-device="phone"] .legal {
     margin-top: 14px;
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
   .film video {
     display: none;
