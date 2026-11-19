@@ -25,6 +25,7 @@ const MIGRATIONS = [
   "202611190014_profile_avatar.sql",
   "202611190016_summary_range.sql",
   "202611190017_venue_cover_focus.sql",
+  "202611190018_abuse_waitlist.sql",
 ];
 const TABLES = new Set([
   "venues",

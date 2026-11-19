@@ -1,5 +1,5 @@
 "use client";
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Lock } from "lucide-react";
@@ -23,6 +23,12 @@ import {
 import { sendCommand, CommandError, isSessionError } from "../client-api";
 import { orderSchema, statusLabels, type Order } from "../types";
 import { SessionExpiredSheet } from "./session-expired-sheet";
+import {
+  WaitlistPanel,
+  waitlistRequest,
+  type WaitlistEntry,
+} from "./waitlist-panel";
+import { formatClock } from "@/lib/clock";
 import { useOnline } from "@/lib/use-online";
 
 /** Rechazos en los que el servidor no creó nada: el intento se puede descartar sin riesgo de duplicar. */
@@ -39,6 +45,7 @@ const DEFINITIVE = [
   "RATE_LIMITED",
   "STAFF_CANNOT_ORDER",
   "ONBOARDING_REQUIRED",
+  "CANCEL_COOLDOWN",
 ];
 const ACTIVE = ["pending_authorization", "queued", "preparing", "ready"];
 const legacyAttemptKey = "onza-checkout-attempt";
@@ -74,6 +81,43 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
     detail?: FailureDetail;
   } | null>(null);
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
+  const [waiting, setWaiting] = useState<WaitlistEntry | null>(null);
+  const [joining, setJoining] = useState(false);
+  const venueId = cart?.venueId;
+  // Recuperar el lugar en la lista de espera al volver a esta pantalla (vive en el servidor).
+  useEffect(() => {
+    if (!accounts || !venueId) return;
+    let closed = false;
+    void waitlistRequest("status", venueId)
+      .then((entry) => {
+        if (
+          !closed &&
+          (entry.status === "waiting" || entry.status === "offered")
+        )
+          setWaiting(entry);
+      })
+      .catch(() => undefined);
+    return () => {
+      closed = true;
+    };
+  }, [accounts, venueId]);
+  const joinWaitlist = async () => {
+    if (!venueId) return;
+    setJoining(true);
+    try {
+      setWaiting(await waitlistRequest("join", venueId));
+      setError(null);
+    } catch (e) {
+      const failure = e as Error & { code?: string; retryAt?: string };
+      setError({
+        code: failure.code ?? "UNKNOWN",
+        message: failure.message,
+        detail: failure.retryAt ? { retryAt: failure.retryAt } : undefined,
+      });
+    } finally {
+      setJoining(false);
+    }
+  };
   const allowAnother = useRef(false);
   const [busy, setBusy] = useState(false);
   const [expired, setExpired] = useState(false);
@@ -191,6 +235,7 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       const order = orderSchema.parse(
         await sendCommand({ ...input, idempotencyKey: attempt.key }),
       );
+      setWaiting(null);
       if (JSON.stringify(readCart()) === JSON.stringify(cart)) writeCart(null);
       localStorage.removeItem(attemptKey);
       setPlaced(order);
@@ -354,7 +399,11 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           <Notice
             tone="danger"
             title={
-              error.code === "OFFLINE" ? "Sin conexión" : "No se hizo el pedido"
+              error.code === "OFFLINE"
+                ? "Sin conexión"
+                : error.code === "VENUE_CAPACITY"
+                  ? "La barra está llena"
+                  : "No se hizo el pedido"
             }
             action={
               lineIssue && affected ? (
@@ -374,6 +423,14 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
                 >
                   Revisar carrito
                 </Link>
+              ) : error.code === "VENUE_CAPACITY" && accounts && !waiting ? (
+                <Button
+                  size="sm"
+                  loading={joining}
+                  onClick={() => void joinWaitlist()}
+                >
+                  Entrar en lista de espera
+                </Button>
               ) : retryable || error.code === "OFFLINE" ? (
                 <div className="row wrap">
                   <Button
@@ -395,31 +452,45 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
               ) : undefined
             }
           >
-            {affected && error.code === "OUT_OF_STOCK"
-              ? `${affected.name} se agotó. Quitalo para pedir el resto.`
-              : affected && error.code === "PRICE_CHANGED"
-                ? `${affected.name} cambió de precio. Revisá el total antes de pedir.`
-                : error.message}
+            {error.code === "CANCEL_COOLDOWN" && error.detail?.retryAt
+              ? `Cancelaste varios pedidos seguidos. Podés volver a pedir a las ${formatClock(error.detail.retryAt)}. Tu carrito se conserva.`
+              : affected && error.code === "OUT_OF_STOCK"
+                ? `${affected.name} se agotó. Quitalo para pedir el resto.`
+                : affected && error.code === "PRICE_CHANGED"
+                  ? `${affected.name} cambió de precio. Revisá el total antes de pedir.`
+                  : error.message}
             {retryable &&
               " Reintentar usa el mismo intento: no se duplica el pedido."}
           </Notice>
         )}
-        <div className="sticky-cta">
-          <Button
-            size="lg"
-            block
-            onClick={submit}
-            disabled={!adult || !policy || !online}
-            loading={busy}
-          >
-            Pedir · <Price amount={total} />
-          </Button>
-          {!online && (
-            <p className="btn-note">
-              Sin conexión: el pedido no se va a enviar.
-            </p>
-          )}
-        </div>
+        {waiting && venueId && (
+          <WaitlistPanel
+            key={waiting.id ?? "waitlist"}
+            venueId={venueId}
+            entry={waiting}
+            confirming={busy}
+            onConfirm={() => void submit()}
+            onLeave={() => setWaiting(null)}
+          />
+        )}
+        {!waiting && (
+          <div className="sticky-cta">
+            <Button
+              size="lg"
+              block
+              onClick={submit}
+              disabled={!adult || !policy || !online}
+              loading={busy}
+            >
+              Pedir · <Price amount={total} />
+            </Button>
+            {!online && (
+              <p className="btn-note">
+                Sin conexión: el pedido no se va a enviar.
+              </p>
+            )}
+          </div>
+        )}
       </div>
       <SessionExpiredSheet open={expired} next="/checkout" />
     </>

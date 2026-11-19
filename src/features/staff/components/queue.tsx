@@ -29,6 +29,7 @@ import { productImageSrc } from "@/features/catalog/product-image-src";
 import { LogoutButton } from "@/features/account/components/account-actions";
 import { useOnline } from "@/lib/use-online";
 import { formatClock } from "@/lib/clock";
+import { countdownText } from "@/features/orders/countdown";
 import type React from "react";
 import type { Venue } from "@/features/catalog/server/queries";
 
@@ -47,11 +48,7 @@ const rejectReasons = [
 
 const minutesSince = (iso: string, now: number) =>
   Math.max(0, Math.floor((now - new Date(iso).getTime()) / 60000));
-/** Tiempo restante en mm:ss. */
-export const countdown = (ms: number) => {
-  const total = Math.max(0, Math.ceil(ms / 1000));
-  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
-};
+const countdown = countdownText;
 const clockTime = formatClock;
 
 /** Reloj para los minutos de espera: se actualiza solo, sin pedir datos nuevos. */

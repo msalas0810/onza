@@ -415,6 +415,7 @@ export type Database = {
         Args: { venue: string; x: number; y: number };
         Returns: Json;
       };
+      waitlist_command: { Args: { input: Json }; Returns: Json };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

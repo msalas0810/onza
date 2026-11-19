@@ -26,7 +26,10 @@ export const messages: Record<string, string> = {
   VENUE_PAUSED:
     "El local no está recibiendo pedidos. Tu carrito sigue disponible.",
   VENUE_CAPACITY:
-    "La barra está al máximo de pedidos activos. Intentá más tarde.",
+    "La barra está llena. Podés entrar en la lista de espera y conservar tu carrito.",
+  CANCEL_COOLDOWN:
+    "Cancelaste varios pedidos seguidos. Podés volver a pedir en unos minutos; tu carrito se conserva.",
+  WAITLIST_DISABLED: "La lista de espera no está disponible en este local.",
   PRICE_CHANGED:
     "El menú cambió. Volvé al carrito, revisá los precios y confirmá otra vez.",
   OUT_OF_STOCK: "Un producto ya no está disponible. Revisá el carrito.",
