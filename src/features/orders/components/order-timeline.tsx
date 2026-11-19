@@ -1,12 +1,13 @@
 import { Check } from "lucide-react";
 import type { Order } from "../types";
+import { formatClock } from "@/lib/clock";
 
 const steps = [
   {
     status: "queued",
-    title: "Recibido",
-    hint: "Esperando que el local lo acepte",
-    at: "created_at",
+    title: "Recibido · esperando al local",
+    hint: "El local tiene unos minutos para aceptarlo",
+    at: "queued_at",
   },
   {
     status: "preparing",
@@ -23,14 +24,8 @@ const steps = [
   { status: "delivered", title: "Entregado", hint: "", at: "delivered_at" },
 ] as const;
 
-const time = (value: string | null) =>
-  value
-    ? new Date(value).toLocaleTimeString("es-CR", {
-        timeZone: "America/Costa_Rica",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
-    : "";
+const time = (value: string | null | undefined) =>
+  value ? formatClock(value) : "";
 
 /** Recibido → Preparando → Listo → Entregado. Los estados finales no felices (cancelado, vencido) se muestran aparte. */
 export function OrderTimeline({ order }: { order: Order }) {
@@ -59,9 +54,12 @@ export function OrderTimeline({ order }: { order: Order }) {
               {state === "now" && step.hint && (
                 <div className="s">{step.hint}</div>
               )}
-              {state && order[step.at] && (
-                <time className="s num" dateTime={order[step.at] ?? undefined}>
-                  {time(order[step.at])}
+              {state && (order[step.at] ?? (step.at === "queued_at" ? order.created_at : null)) && (
+                <time
+                  className="s num"
+                  dateTime={order[step.at] ?? order.created_at}
+                >
+                  {time(order[step.at] ?? order.created_at)}
                 </time>
               )}
             </div>

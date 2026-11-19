@@ -66,13 +66,13 @@ try {
   await a.getByRole("checkbox").nth(1).check();
   await a.getByRole("button", { name: /^Pedir/ }).click();
   await a
-    .getByRole("heading", { name: "Pedido recibido", exact: true })
+    .getByRole("heading", { name: "Recibido · esperando al local", exact: true })
     .waitFor({ timeout: 30000 });
   check("guest order and mock reserve", true);
   const id = new URL(a.url()).pathname.split("/").at(-1);
   await a.reload();
   await a
-    .getByRole("heading", { name: "Pedido recibido", exact: true })
+    .getByRole("heading", { name: "Recibido · esperando al local", exact: true })
     .waitFor();
   check("order persists after refresh", true);
   const cookies = [];
@@ -122,7 +122,7 @@ try {
   check("remote bartender accepts and client updates", true);
   await card.getByRole("button", { name: "Marcar listo" }).click();
   await a
-    .getByRole("heading", { name: "Listo para recoger", exact: true })
+    .getByRole("heading", { name: "Listo para retirar", exact: true })
     .waitFor({ timeout: 25000 });
   check("remote ready update", true);
   check("runtime errors absent", errors === 0);

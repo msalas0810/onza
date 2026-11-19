@@ -51,7 +51,7 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     const original = (await submitted).postDataJSON();
     // La confirmación con el vasito dura ~2 s antes de pasar al seguimiento; el servidor de desarrollo compila la ruta al entrar.
     await expect(
-      a.locator(".badge", { hasText: "Pedido recibido" }),
+      a.locator(".badge", { hasText: "Recibido · esperando al local" }),
     ).toBeVisible({ timeout: 45000 });
     const orderId = new URL(a.url()).pathname.split("/").at(-1)!;
     const duplicates = await Promise.all([
@@ -109,7 +109,7 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     await readySignal;
     release();
     await expect(
-      a.locator(".badge", { hasText: "Listo para recoger" }),
+      a.locator(".badge", { hasText: "Listo para retirar" }),
     ).toBeVisible({ timeout: 25000 });
     await expect(a.getByAltText("QR de autorización de retiro")).toBeVisible();
     await a.unroute(`**/api/orders?order=${orderId}`);

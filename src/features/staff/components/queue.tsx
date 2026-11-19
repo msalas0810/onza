@@ -1,8 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import dynamic from "next/dynamic";
 import Link from "next/link";
-import { Clock, History, ScanLine, Volume2, VolumeX } from "lucide-react";
+import { Clock, History, ScanLine, Settings2 } from "lucide-react";
 import { useLiveOrders } from "@/features/orders/use-live-orders";
 import {
   sendCommand,
@@ -21,15 +20,18 @@ import {
 import { Sheet } from "@/components/ui/sheet";
 import { ReconnectingBanner } from "@/components/ui/connection-banner";
 import { SessionExpiredSheet } from "@/features/orders/components/session-expired-sheet";
-import { PickupPanel } from "@/features/pickup/components/pickup-panel";
+import {
+  PickupPanel,
+  startCamera,
+} from "@/features/pickup/components/pickup-panel";
+import { ProductImage } from "@/features/catalog/components/product-image";
+import { productImageSrc } from "@/features/catalog/product-image-src";
+import { LogoutButton } from "@/features/account/components/account-actions";
 import { useOnline } from "@/lib/use-online";
 import { formatClock } from "@/lib/clock";
+import type React from "react";
 import type { Venue } from "@/features/catalog/server/queries";
 
-const ScanSheet = dynamic(
-  () => import("@/features/pickup/components/scan-sheet"),
-  { ssr: false },
-);
 const lanes = [
   ["queued", "Nuevos"],
   ["preparing", "Preparando"],
@@ -62,7 +64,15 @@ function useNow(interval = 30000) {
   return now;
 }
 
-export function StaffQueue({ venue }: { venue: Venue }) {
+export function StaffQueue({
+  venue,
+  role = "bartender",
+  canSwitch = false,
+}: {
+  venue: Venue;
+  role?: "admin" | "bartender" | "onza";
+  canSwitch?: boolean;
+}) {
   const {
     orders,
     loading,
@@ -85,9 +95,9 @@ export function StaffQueue({ venue }: { venue: Venue }) {
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [paused, setPaused] = useState(venue.paused);
-  const [scan, setScan] = useState(false);
   const [pickup, setPickup] = useState(false);
-  const [credential, setCredential] = useState<string | null>(null);
+  const [settings, setSettings] = useState(false);
+  const camera = useRef<Promise<MediaStream> | null>(null);
   const [resumeOrderId, setResumeOrderId] = useState<string | null>(null);
   const [pickupRevision, setPickupRevision] = useState(0);
   const [rejecting, setRejecting] = useState<Order | null>(null);
@@ -156,12 +166,37 @@ export function StaffQueue({ venue }: { venue: Venue }) {
   useEffect(() => {
     if (lapsedIds) refresh();
   }, [lapsedIds, refresh]);
+  /** «Validar retiro» abre el escáner y pide la cámara dentro del mismo toque (Safari lo exige). */
   const openPickup = (options: { resume?: string } = {}) => {
-    setCredential(null);
+    camera.current = options.resume ? null : startCamera();
+    camera.current?.catch(() => undefined);
     setResumeOrderId(options.resume ?? null);
     setPickupRevision((n) => n + 1);
     setPickup(true);
   };
+  const closePickup = () => {
+    camera.current?.then((media) => media.getTracks().forEach((t) => t.stop())).catch(() => undefined);
+    camera.current = null;
+    setPickup(false);
+    refresh();
+  };
+  const setReceiving = async (receiving: boolean) => {
+    try {
+      await sendCommand({
+        action: "venue_update",
+        venueId: venue.id,
+        paused: !receiving,
+      });
+      setPaused(!receiving);
+    } catch (e) {
+      if (isSessionError(e)) setExpired(true);
+      else
+        setNotice(
+          e instanceof Error ? e.message : "No pudimos cambiar la recepción.",
+        );
+    }
+  };
+  const isAdmin = role === "admin" || role === "onza";
   const act = async (
     order: Order,
     action: "accept" | "ready" | "cancel",
@@ -304,48 +339,31 @@ export function StaffQueue({ venue }: { venue: Venue }) {
             {!active.length && !loading && " · Sin pedidos activos"}
           </p>
         </div>
+        <span
+          className={`reception ${closedVenue ? "closed" : paused ? "paused" : "open"}`}
+          role="status"
+        >
+          <span className="dot" aria-hidden="true" />
+          {closedVenue
+            ? "Local cerrado"
+            : paused
+              ? "Pausado"
+              : "Recibiendo pedidos"}
+        </span>
         <button
           type="button"
           className="btn secondary sm"
-          aria-pressed={sound}
-          aria-label={`Sonido de pedidos nuevos: ${sound ? "activado" : "desactivado"}`}
-          onClick={() => void toggleSound(!sound)}
+          onClick={() => setSettings(true)}
         >
-          {sound ? (
-            <Volume2 size={16} aria-hidden="true" />
-          ) : (
-            <VolumeX size={16} aria-hidden="true" />
-          )}
-          <span>Sonido</span>
+          <Settings2 size={18} aria-hidden="true" />
+          <span>Ajustes</span>
         </button>
-        {closedVenue ? (
-          <StatusBadge>Cerrado por el administrador</StatusBadge>
-        ) : (
-          <Toggle
-            label="Recibiendo pedidos"
-            checked={!paused}
-            disabled={!online}
-            onChange={async (receiving) => {
-              try {
-                await sendCommand({
-                  action: "venue_update",
-                  venueId: venue.id,
-                  paused: !receiving,
-                });
-                setPaused(!receiving);
-              } catch (e) {
-                if (isSessionError(e)) setExpired(true);
-                else
-                  setNotice(
-                    e instanceof Error
-                      ? e.message
-                      : "No pudimos cambiar la pausa.",
-                  );
-              }
-            }}
-          />
-        )}
-        <Button size="lg" disabled={!online} onClick={() => openPickup()}>
+        <Button
+          size="lg"
+          className="pickup-cta wide-only"
+          disabled={!online}
+          onClick={() => openPickup()}
+        >
           <ScanLine size={20} aria-hidden="true" />
           Validar retiro
         </Button>
@@ -362,10 +380,20 @@ export function StaffQueue({ venue }: { venue: Venue }) {
         )}
       </div>
       <div
-        className="tabs board-tabs"
+        className="board-tabs"
         role="tablist"
         aria-label="Cola de pedidos"
+        style={
+          {
+            "--seg-count": lanes.length,
+            "--seg-index": Math.max(
+              0,
+              lanes.findIndex(([state]) => state === tab),
+            ),
+          } as React.CSSProperties
+        }
       >
+        <span className="seg-thumb" aria-hidden="true" />
         {lanes.map(([state, label]) => (
           <button
             key={state}
@@ -460,13 +488,25 @@ export function StaffQueue({ venue }: { venue: Venue }) {
                       <ul className="items">
                         {o.items.map((i) => (
                           <li key={i.id}>
+                            <span className="mini">
+                              <ProductImage
+                                name={i.name_snapshot}
+                                src={productImageSrc({
+                                  image_url: i.image_url ?? null,
+                                  photo_path: i.photo_path ?? null,
+                                })}
+                              />
+                            </span>
                             <span className="q">{i.quantity}×</span>{" "}
                             {i.name_snapshot}
                           </li>
                         ))}
                       </ul>
                       <div className="by">
-                        {o.items.reduce((n, i) => n + i.quantity, 0)} productos
+                        {(() => {
+                          const units = o.items.reduce((n, i) => n + i.quantity, 0);
+                          return `${units} ${units === 1 ? "producto" : "productos"}`;
+                        })()}
                       </div>
                       {failure && failure.version === o.version && (
                         <p className="inline-error" role="alert">
@@ -476,7 +516,7 @@ export function StaffQueue({ venue }: { venue: Venue }) {
                       {state === "queued" && (
                         <div className="acts">
                           <Button
-                            variant="danger"
+                            variant="secondary"
                             size="lg"
                             disabled={disabled}
                             onClick={() => {
@@ -554,7 +594,7 @@ export function StaffQueue({ venue }: { venue: Venue }) {
                     size="sm"
                     onClick={() => openPickup({ resume: o.id })}
                   >
-                    Retomar retiro validado
+                    Retomar entrega
                   </Button>
                 ) : undefined
               }
@@ -602,35 +642,77 @@ export function StaffQueue({ venue }: { venue: Venue }) {
           </div>
         </details>
       )}
+      <div className="pickup-dock">
+        <Button size="lg" block disabled={!online} onClick={() => openPickup()}>
+          <ScanLine size={20} aria-hidden="true" />
+          Validar retiro
+        </Button>
+      </div>
       <Sheet
         open={pickup}
-        onOpenChange={(open) => {
-          setPickup(open);
-          if (!open) refresh();
-        }}
-        title="Validar retiro"
-        description="Pedí el código privado al cliente o escaneá su QR. El número del pedido no autoriza la entrega."
+        onOpenChange={(open) => (open ? setPickup(true) : closePickup())}
+        title={resumeOrderId ? "Retomar entrega" : "Validar retiro"}
+        description="Escaneá el QR del cliente o ingresá su código privado. El número del pedido no autoriza la entrega."
       >
-        <PickupPanel
-          key={pickupRevision}
-          venueId={venue.id}
-          credential={credential}
-          resumeOrderId={resumeOrderId}
-          onChanged={refresh}
-          onScan={() => setScan(true)}
-        />
+        {pickup && (
+          <PickupPanel
+            key={pickupRevision}
+            venueId={venue.id}
+            camera={camera.current}
+            resumeOrderId={resumeOrderId}
+            onChanged={refresh}
+            onDone={closePickup}
+          />
+        )}
       </Sheet>
-      {scan && (
-        <ScanSheet
-          onClose={() => setScan(false)}
-          onResult={(value) => {
-            setResumeOrderId(null);
-            setPickupRevision((n) => n + 1);
-            setCredential(value);
-            setScan(false);
-          }}
-        />
-      )}
+      <Sheet
+        open={settings}
+        onOpenChange={setSettings}
+        title="Ajustes de la barra"
+      >
+        <div className="stack">
+          {closedVenue ? (
+            <Notice tone="warning">
+              El administrador cerró el local. La cola existente se puede seguir
+              operando.
+            </Notice>
+          ) : (
+            <Toggle
+              label="Recibir pedidos nuevos"
+              checked={!paused}
+              disabled={!online}
+              onChange={(receiving) => void setReceiving(receiving)}
+            />
+          )}
+          <p className="hint">
+            La pausa detiene pedidos nuevos y conserva los que ya están en la
+            cola.
+          </p>
+          <Toggle
+            label="Sonido de pedidos nuevos"
+            checked={sound}
+            onChange={(next) => void toggleSound(next)}
+          />
+          {isAdmin && (
+            <Link
+              className={buttonClass({ variant: "secondary", block: true })}
+              href={`/admin/${venue.id}?tab=disponibilidad`}
+            >
+              {closedVenue ? "Abrir el local" : "Cerrar el local"} en
+              Administración
+            </Link>
+          )}
+          {canSwitch && (
+            <Link
+              className={buttonClass({ variant: "secondary", block: true })}
+              href="/equipo/locales"
+            >
+              Cambiar de local
+            </Link>
+          )}
+          <LogoutButton to="/equipo/acceso" label="Salir" />
+        </div>
+      </Sheet>
       <Sheet
         open={!!rejecting}
         onOpenChange={(open) => !open && setRejecting(null)}

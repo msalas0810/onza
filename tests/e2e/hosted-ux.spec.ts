@@ -238,7 +238,7 @@ test("onza-dev: aceptar/cancelar concurrentes, cancelación posterior denegada y
     await a.getByRole("checkbox").nth(1).check();
     await a.getByRole("button", { name: /^Pedir/ }).click();
     await expect(
-      a.getByRole("heading", { name: "Pedido recibido", exact: true }),
+      a.getByRole("heading", { name: "Recibido · esperando al local", exact: true }),
     ).toBeVisible();
     const orderId = new URL(a.url()).pathname.split("/").at(-1)!;
     const original = (
@@ -381,7 +381,7 @@ test("vencimiento real con Realtime conectado: refresco puntual, sin polling con
   await page.getByRole("checkbox").nth(1).check();
   await page.getByRole("button", { name: /^Pedir/ }).click();
   await expect(
-    page.getByRole("heading", { name: "Pedido recibido", exact: true }),
+    page.getByRole("heading", { name: "Recibido · esperando al local", exact: true }),
   ).toBeVisible();
   await page.waitForTimeout(31000);
   expect(reads).toBeLessThanOrEqual(3);

@@ -45,6 +45,9 @@ export const orderSchema = z.object({
     pickup_label: z.string(),
     support_contact: z.string(),
     eta_minutes: z.number(),
+    slug: z.string().optional(),
+    open_state: z.string().optional(),
+    paused: z.boolean().optional(),
   }),
   items: z.array(
     z.object({
@@ -70,9 +73,9 @@ export const orderSchema = z.object({
 export type Order = z.infer<typeof orderSchema>;
 export const statusLabels: Record<Order["status"], string> = {
   pending_authorization: "Confirmando pedido",
-  queued: "Pedido recibido",
+  queued: "Recibido · esperando al local",
   preparing: "Preparando",
-  ready: "Listo para recoger",
+  ready: "Listo para retirar",
   delivered: "Entregado",
   canceled: "Cancelado",
   expired: "Pedido vencido",

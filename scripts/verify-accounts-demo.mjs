@@ -83,13 +83,13 @@ try {
   );
   await a.getByRole("button", { name: /^Pedir/ }).click();
   await a
-    .getByRole("heading", { name: "Pedido recibido", exact: true })
+    .getByRole("heading", { name: "Recibido · esperando al local", exact: true })
     .waitFor({ timeout: 25000 });
   check("Preview accepts its own Origin and creates mock order", true);
   const orderId = new URL(a.url()).pathname.split("/").at(-1);
   await a.reload();
   await a
-    .getByRole("heading", { name: "Pedido recibido", exact: true })
+    .getByRole("heading", { name: "Recibido · esperando al local", exact: true })
     .waitFor();
   check("customer order survives reload", true);
   const get = async () => {
@@ -111,7 +111,7 @@ try {
   check("acceptance reaches customer", true);
   await card.getByRole("button", { name: "Marcar listo", exact: true }).click();
   await a
-    .getByRole("heading", { name: "Listo para recoger", exact: true })
+    .getByRole("heading", { name: "Listo para retirar", exact: true })
     .waitFor({ timeout: 25000 });
   order = await get();
   check(

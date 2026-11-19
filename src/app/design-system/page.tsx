@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/primitives";
 import { Plus } from "lucide-react";
 import { VenueCard } from "@/features/catalog/components/venue-card";
+import { EnjoyMoment } from "@/features/orders/components/enjoy";
 import { VenueProfile } from "@/features/admin/components/venue-profile";
 import { ProductMenu } from "@/features/catalog/components/product-menu";
 import { ProductEditorSample } from "./product-editor-sample";
@@ -217,6 +218,10 @@ export default function DesignSystem() {
             ))}
           </div>
         </section>
+        <section className="stack" aria-label="Momento final">
+          <h2>Momento final del retiro</h2>
+          <EnjoyMoment venueName="Sala Norte" menuHref="/v/sala-norte" />
+        </section>
         <section className="stack" aria-label="Menú de tragos">
           <h2>Menú de tragos</h2>
           <ProductMenu
@@ -238,8 +243,8 @@ export default function DesignSystem() {
         </section>
         <section className="stack">
           <h2>Estados y formularios</h2>
-          <StatusBadge>Pedido recibido</StatusBadge>
-          <StatusBadge tone="success">Listo para recoger</StatusBadge>
+          <StatusBadge>Recibido · esperando al local</StatusBadge>
+          <StatusBadge tone="success">Listo para retirar</StatusBadge>
           <StatusBadge tone="warning">
             Reserva pendiente de confirmación
           </StatusBadge>

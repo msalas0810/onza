@@ -18,8 +18,13 @@ export default async function Page({
       venue={context.venue}
       person={context.person}
       canSwitch={context.venueCount > 1}
+      logout={false}
     >
-      <StaffQueue venue={context.venue} />
+      <StaffQueue
+        venue={context.venue}
+        role={context.person.role}
+        canSwitch={context.venueCount > 1}
+      />
     </StaffShell>
   );
 }

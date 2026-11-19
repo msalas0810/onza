@@ -17,12 +17,15 @@ export function StaffShell({
   person,
   canSwitch = false,
   wide = true,
+  logout = true,
   children,
 }: {
   venue?: { id: string; name: string };
   person: StaffPerson;
   canSwitch?: boolean;
   wide?: boolean;
+  /** La barra mueve «Salir» a sus Ajustes para que la cabecera quede compacta. */
+  logout?: boolean;
   children: ReactNode;
 }) {
   return (
@@ -58,7 +61,7 @@ export function StaffShell({
             Cambiar de local
           </Link>
         )}
-        <LogoutButton to="/equipo/acceso" label="Salir" compact />
+        {logout && <LogoutButton to="/equipo/acceso" label="Salir" compact />}
       </header>
       <ConnectionBanner message="Sin conexión. Las acciones quedan en pausa hasta reconectar; nada se envía a ciegas." />
       <div className={`page ${wide ? "operations" : "narrow"}`}>{children}</div>

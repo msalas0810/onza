@@ -2570,3 +2570,392 @@ button.link-button {
     max-width: var(--onza-size-content-menu);
   }
 }
+
+/* Plan de pulido · E3: barra con una mano. */
+.reception {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--onza-space-8);
+  min-height: 2rem;
+  padding: 0 var(--onza-space-12);
+  border-radius: var(--onza-radius-pill);
+  font-size: var(--onza-type-label-size);
+  font-weight: 600;
+}
+.reception .dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+.reception.open {
+  background: var(--onza-success-soft);
+  color: var(--onza-success-text);
+}
+.reception.open .dot {
+  animation: onza-pulse 2s ease-in-out infinite;
+}
+.reception.paused {
+  background: var(--onza-warning-soft);
+  color: var(--onza-warning-text);
+}
+.reception.closed {
+  background: var(--onza-surface);
+  color: var(--onza-text-muted);
+}
+.board-tabs {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: repeat(var(--seg-count), minmax(0, 1fr));
+  gap: var(--onza-space-4);
+  margin-bottom: var(--onza-space-16);
+  padding: var(--onza-space-4);
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-surface);
+}
+.board-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--onza-space-8);
+  min-height: var(--onza-layout-touch-staff);
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--onza-text-muted);
+  font-size: var(--onza-type-label-size);
+  font-weight: 600;
+  cursor: pointer;
+}
+.board-tabs button[aria-selected="true"] {
+  color: var(--onza-text);
+}
+.board-tabs .n {
+  display: inline-block;
+  min-width: 1.4rem;
+  height: 1.4rem;
+  padding: 0 0.35rem;
+  border-radius: var(--onza-radius-pill);
+  background: var(--onza-bg);
+  font: 600 12px/1.4rem var(--onza-font);
+  font-variant-numeric: tabular-nums;
+}
+.ocard .items li {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-8);
+}
+.ocard .items .mini {
+  position: relative;
+  flex: none;
+  width: 2rem;
+  height: 2rem;
+  overflow: hidden;
+  border-radius: 8px;
+  background: var(--onza-surface);
+}
+.ocard .items .mini img {
+  object-fit: cover;
+}
+.ocard .items .mini .photo-fallback,
+.pickup-items .thumb .photo-fallback {
+  width: 100%;
+  height: 100%;
+}
+/* «Validar retiro» al alcance del pulgar en teléfono; en pantallas anchas vive en la cabecera. */
+.pickup-dock {
+  position: fixed;
+  z-index: 15;
+  inset-inline: 0;
+  inset-block-end: 0;
+  padding: var(--onza-space-12) max(var(--onza-layout-gutter), env(safe-area-inset-left))
+    calc(var(--onza-space-12) + env(safe-area-inset-bottom))
+    max(var(--onza-layout-gutter), env(safe-area-inset-right));
+  background: color-mix(in srgb, var(--onza-bg) 88%, transparent);
+  border-top: 1px solid var(--onza-border);
+}
+@supports (backdrop-filter: blur(1px)) {
+  .pickup-dock {
+    backdrop-filter: blur(var(--onza-layout-glass-blur));
+  }
+}
+.pickup-dock .btn {
+  min-height: var(--onza-size-staff-control);
+}
+.page.operations:has(.pickup-dock) {
+  padding-bottom: calc(var(--onza-size-staff-control) + 3rem + env(safe-area-inset-bottom));
+}
+.board-head .pickup-cta {
+  display: none;
+}
+@media (min-width: 48rem) {
+  .pickup-dock {
+    display: none;
+  }
+  .board-head .pickup-cta {
+    display: inline-flex;
+  }
+  .page.operations:has(.pickup-dock) {
+    padding-bottom: var(--onza-space-48);
+  }
+}
+.board-head > .btn.secondary {
+  width: auto;
+}
+.scanner {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 1;
+  max-height: 60svh;
+  margin-inline: auto;
+  width: 100%;
+  border-radius: var(--onza-radius-media);
+  background: #0d0d0e;
+}
+.scanner video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.scanner-frame {
+  position: absolute;
+  inset: 18%;
+  border: 3px solid #f4f1ed;
+  border-radius: var(--onza-radius-media);
+  box-shadow: 0 0 0 100vmax #0d0d0e66;
+}
+.pickup-code-field {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 1.375rem;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.pickup-summary {
+  display: grid;
+  gap: var(--onza-space-8);
+  padding: var(--onza-space-16);
+  border: 1px solid var(--onza-border);
+  border-radius: var(--onza-radius-media);
+  background: var(--onza-surface-raised);
+}
+.pickup-items {
+  display: grid;
+  gap: var(--onza-space-8);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pickup-items li {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-8);
+  font-size: var(--onza-type-staff-order-size);
+  font-weight: 600;
+}
+.pickup-items .thumb {
+  position: relative;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  overflow: hidden;
+  border-radius: 10px;
+  background: var(--onza-surface);
+}
+.pickup-items .thumb img {
+  object-fit: cover;
+}
+.pickup-steps {
+  display: grid;
+  gap: var(--onza-space-16);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pickup-steps > li {
+  display: flex;
+  gap: var(--onza-space-12);
+  align-items: flex-start;
+}
+.pickup-steps > li[data-disabled] {
+  opacity: 0.55;
+}
+.step-n {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  background: var(--onza-surface);
+  font-size: var(--onza-type-label-size);
+  font-weight: 700;
+}
+.pickup-steps > li[data-done] .step-n {
+  background: var(--onza-success-text);
+  color: var(--onza-bg);
+}
+.center {
+  text-align: center;
+}
+.venue-pick {
+  overflow: hidden;
+  border: 1px solid var(--onza-border);
+  border-radius: var(--onza-layout-card-radius);
+  background: var(--onza-surface-raised);
+}
+.venue-pick-cover {
+  position: relative;
+  aspect-ratio: 16 / 6;
+  background: color-mix(in srgb, var(--onza-access-bg) 90%, var(--onza-text));
+}
+.venue-pick-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.venue-pick-body {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--onza-space-12);
+  padding: var(--onza-space-16);
+}
+
+/* Plan de pulido · E3: «¡Disfrutá!». */
+.enjoy {
+  display: grid;
+  justify-items: center;
+  gap: var(--onza-space-12);
+  padding: var(--onza-space-24) var(--onza-space-16);
+  border-radius: var(--onza-layout-card-radius);
+  background: var(--onza-success-soft);
+  text-align: center;
+}
+.enjoy-art {
+  width: 9rem;
+  color: var(--onza-text);
+}
+.enjoy-hand {
+  display: block;
+  width: 100%;
+  overflow: visible;
+}
+.enjoy-fist {
+  fill: var(--onza-success-soft);
+}
+.enjoy-shot {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--onza-mark);
+  -webkit-mask: url("/brand/onza-shot-white.svg") center / contain no-repeat;
+  mask: url("/brand/onza-shot-white.svg") center / contain no-repeat;
+}
+.enjoy-title {
+  font-size: var(--onza-type-display-size);
+  line-height: var(--onza-type-display-line);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+.enjoy-raise {
+  transform-box: fill-box;
+  transform-origin: 50% 100%;
+  animation: enjoy-raise 900ms var(--onza-motion-ease) both;
+}
+.enjoy-spark {
+  animation: enjoy-spark 900ms 450ms var(--onza-motion-ease) both;
+}
+@keyframes enjoy-raise {
+  0% {
+    transform: translateY(26px) rotate(-10deg);
+    opacity: 0;
+  }
+  55% {
+    transform: translateY(-6px) rotate(4deg);
+    opacity: 1;
+  }
+  75% {
+    transform: translateY(0) rotate(-3deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0);
+  }
+}
+@keyframes enjoy-spark {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .enjoy-raise,
+  .enjoy-spark {
+    animation: none;
+  }
+}
+.private-label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--onza-space-4);
+}
+.ticket-help summary {
+  cursor: pointer;
+  min-height: var(--onza-size-touch-min);
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--onza-type-label-size);
+  font-weight: 600;
+}
+.tl li.now .dot {
+  animation: tl-pulse 1.8s ease-in-out infinite;
+}
+@keyframes tl-pulse {
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in srgb, var(--onza-brand) 22%, transparent);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tl li.now .dot {
+    animation: none;
+  }
+}
+.board-head > .grow {
+  flex: 1 1 14rem;
+  min-width: 0;
+  overflow-wrap: normal;
+}
+.board-tabs button {
+  white-space: nowrap;
+  padding-inline: var(--onza-space-4);
+  gap: 0.375rem;
+}
+@media (max-width: 26rem) {
+  .board-tabs button {
+    font-size: 0.8125rem;
+  }
+}
+@media (min-width: 1024px) {
+  .board-tabs {
+    display: none;
+  }
+}
+.ocard .items .mini .product-image,
+.pickup-items .thumb .product-image,
+.ocard-c .thumb .product-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+/* La imagen del trago llena el contenedor que la aloja (menú, admin, historial, barra, retiro). */
+.thumb > .product-image,
+.mini > .product-image,
+.thumb > .photo-fallback,
+.mini > .photo-fallback {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}

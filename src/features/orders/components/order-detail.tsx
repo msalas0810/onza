@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Bell, ChevronLeft } from "lucide-react";
+import { Bell, ChevronLeft, Lock, RefreshCw } from "lucide-react";
 import { useLiveOrders } from "../use-live-orders";
 import { statusLabels, paymentLabels, type Order } from "../types";
 import {
@@ -16,8 +16,31 @@ import { Sheet } from "@/components/ui/sheet";
 import { sendCommand, CommandError, isSessionError } from "../client-api";
 import { ReadySound } from "@/features/notifications/ready-sound";
 import { OrderTimeline } from "./order-timeline";
+import { formatClock } from "@/lib/clock";
 import { SessionExpiredSheet } from "./session-expired-sheet";
 import { ReconnectingBanner } from "@/components/ui/connection-banner";
+import { EnjoyMoment } from "./enjoy";
+
+/** «¡Disfrutá!» una sola vez por pedido, y solo cerca de la entrega: en el historial queda el comprobante. */
+function useEnjoyOnce(order: Order | undefined) {
+  const [show, setShow] = useState(false);
+  const id = order?.id;
+  const deliveredAt = order?.status === "delivered" ? order.delivered_at : null;
+  useEffect(() => {
+    if (!id || !deliveredAt) return;
+    const key = `onza-enjoy:${id}`;
+    try {
+      if (localStorage.getItem(key)) return;
+      if (Date.now() - Date.parse(deliveredAt) > 30 * 60 * 1000) return;
+      localStorage.setItem(key, "1");
+    } catch {
+      return;
+    }
+    const timer = setTimeout(() => setShow(true), 0);
+    return () => clearTimeout(timer);
+  }, [id, deliveredAt]);
+  return show;
+}
 
 const tone = (status: Order["status"]) =>
   status === "ready"
@@ -59,6 +82,7 @@ export function OrderDetail({ id }: { id: string }) {
   const [busy, setBusy] = useState(false);
   const actionKey = useRef<string | null>(null);
   useWakeLock(order?.status === "ready" && !!order.pickup_code);
+  const enjoy = useEnjoyOnce(order);
   const act = async (action: string) => {
     if (!order || busy) return;
     setBusy(true);
@@ -160,7 +184,10 @@ export function OrderDetail({ id }: { id: string }) {
             {order.pickup_code ? (
               <>
                 <div>
-                  <div className="small">Código privado</div>
+                  <div className="small private-label">
+                    <Lock size={14} aria-hidden="true" />
+                    Código privado
+                  </div>
                   <div
                     className="code num"
                     data-private="pickup"
@@ -177,10 +204,14 @@ export function OrderDetail({ id }: { id: string }) {
                     código.
                   </p>
                 )}
-                <p className="small">
-                  Pedido #{order.public_code} · El número no sirve para retirar.
-                  No compartas este código.
-                </p>
+                <details className="ticket-help">
+                  <summary>¿Cómo se usa?</summary>
+                  <p className="small">
+                    Mostrá el QR o decí el código en la barra. El número
+                    #{order.public_code} identifica el pedido pero no sirve para
+                    retirar. No compartas este código.
+                  </p>
+                </details>
               </>
             ) : (
               <div role="alert">
@@ -211,11 +242,23 @@ export function OrderDetail({ id }: { id: string }) {
               : "No se retiró a tiempo y la reserva se anuló."}
           </Notice>
         )}
-        {order.status === "delivered" && (
-          <Notice tone="success" title="Entregado">
-            Gracias por pedir con Onza.
-          </Notice>
-        )}
+        {order.status === "delivered" &&
+          (enjoy ? (
+            <EnjoyMoment
+              venueName={order.venue.name}
+              menuHref={
+                order.venue.slug && order.venue.open_state !== "closed"
+                  ? `/v/${order.venue.slug}`
+                  : null
+              }
+            />
+          ) : (
+            <Notice tone="success" title="Entregado · comprobante">
+              {order.delivered_at
+                ? `Retirado a las ${formatClock(order.delivered_at)}.`
+                : "Pedido retirado."}
+            </Notice>
+          ))}
         {order.status === "pending_authorization" && (
           <Notice title="Confirmando pedido">
             Todavía no entró a la cola del local.
@@ -263,7 +306,8 @@ export function OrderDetail({ id }: { id: string }) {
             Cancelar pedido
           </Button>
         )}
-        <Button variant="quiet" onClick={refresh}>
+        <Button variant="quiet" onClick={refresh} aria-label="Actualizar estado del pedido">
+          <RefreshCw size={18} aria-hidden="true" />
           Actualizar estado
         </Button>
         <p className="hint">

@@ -16,6 +16,7 @@ import {
 } from "@/features/team/server/staff-context";
 import { serverDb } from "@/lib/supabase/server";
 import { ConfigurationState } from "@/components/ui/configuration-state";
+import { LogoutButton } from "@/features/account/components/account-actions";
 
 export const dynamic = "force-dynamic";
 export default async function Page() {
@@ -60,42 +61,55 @@ export default async function Page() {
               (m) => m.venue_id === venue.id,
             )?.role as StaffRole;
             const status = venueStatus(venue);
+            const admin = role === "admin" || role === "onza";
             return (
-              <div className="panel row wrap" key={venue.id}>
-                <VenueMark venue={venue} />
-                <div className="grow">
-                  <strong>{venue.name}</strong>
-                  <div className="row" style={{ gap: 8, marginTop: 4 }}>
-                    <StatusBadge plain>{roleLabel(role)}</StatusBadge>
-                    {status.badge}
+              <article className="venue-pick" key={venue.id}>
+                <div className="venue-pick-cover" data-photo={venue.cover_url ? "true" : "false"}>
+                  {venue.cover_url && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={venue.cover_url} alt="" loading="lazy" />
+                  )}
+                  <span className="vcard-logo">
+                    <VenueMark venue={venue} large />
+                  </span>
+                </div>
+                <div className="venue-pick-body">
+                  <div className="grow">
+                    <strong>{venue.name}</strong>
+                    <div className="row" style={{ gap: 8, marginTop: 4 }}>
+                      <StatusBadge plain>{roleLabel(role)}</StatusBadge>
+                      {status.badge}
+                    </div>
+                  </div>
+                  <div className="row wrap">
+                    <Link
+                      className={buttonClass({ size: "sm" })}
+                      href={admin ? `/admin/${venue.id}` : `/staff/${venue.id}`}
+                    >
+                      {admin ? "Administrar" : "Abrir barra"}
+                    </Link>
+                    {admin && (
+                      <Link
+                        className={buttonClass({ variant: "secondary", size: "sm" })}
+                        href={`/staff/${venue.id}`}
+                      >
+                        Abrir barra
+                      </Link>
+                    )}
                   </div>
                 </div>
-                <div className="row">
-                  <Link
-                    className={buttonClass({ size: "sm" })}
-                    href={`/staff/${venue.id}`}
-                  >
-                    Abrir barra
-                  </Link>
-                  {(role === "admin" || role === "onza") && (
-                    <Link
-                      className={buttonClass({
-                        variant: "secondary",
-                        size: "sm",
-                      })}
-                      href={`/admin/${venue.id}`}
-                    >
-                      Administrar
-                    </Link>
-                  )}
-                </div>
-              </div>
+              </article>
             );
           })}
         </div>
       ) : (
-        <EmptyState icon={Store} title="No tenés locales asignados">
-          Pedile al administrador de tu local que te dé acceso.
+        <EmptyState
+          icon={Store}
+          title="Tu acceso está pendiente"
+          action={<LogoutButton to="/equipo/acceso" label="Salir" />}
+        >
+          Todavía no tenés locales asignados. Pedile al administrador de tu
+          local que te dé acceso.
         </EmptyState>
       )}
       {platform && (
