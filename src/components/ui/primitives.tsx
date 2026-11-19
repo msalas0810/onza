@@ -1,4 +1,6 @@
 import Image from "next/image";
+import { OnzaLogo } from "./brand";
+import type React from "react";
 import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
@@ -321,12 +323,23 @@ export function SegmentedControl<T extends string>({
   label: string;
   block?: boolean;
 }) {
+  const index = Math.max(
+    0,
+    options.findIndex((option) => option.value === value),
+  );
   return (
     <div
       className={`seg ${block ? "block" : ""}`}
       role="group"
       aria-label={label}
+      style={
+        {
+          "--seg-count": options.length,
+          "--seg-index": index,
+        } as React.CSSProperties
+      }
     >
+      <span className="seg-thumb" aria-hidden="true" />
       {options.map((option) => (
         <button
           key={option.value}
@@ -340,26 +353,7 @@ export function SegmentedControl<T extends string>({
     </div>
   );
 }
-/** Wordmark original en versión clara y oscura; el contenedor aporta la clase `brand`. */
+/** Marca compacta de cabecera (cliente, equipo y administración): el mismo lockup del acceso. */
 export function BrandMark() {
-  return (
-    <>
-      <Image
-        unoptimized
-        src="/brand/onza-wordmark.svg"
-        className="brand-light"
-        width="82"
-        height="22"
-        alt="Onza"
-      />
-      <Image
-        unoptimized
-        src="/brand/onza-wordmark-white.svg"
-        className="brand-dark"
-        width="82"
-        height="22"
-        alt="Onza"
-      />
-    </>
-  );
+  return <OnzaLogo size="header" />;
 }

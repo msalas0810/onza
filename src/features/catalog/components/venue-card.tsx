@@ -1,7 +1,8 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import type { Venue } from "../server/queries";
-import { VenueCover, VenueMark, useCover } from "./venue-parts";
+import { VenueMark, useCover } from "./venue-parts";
 import { formatDistance, venueStatus } from "./venue-status";
 
 export type VenueCardData = Pick<
@@ -10,6 +11,11 @@ export type VenueCardData = Pick<
 > &
   Partial<Pick<Venue, "open_state" | "paused" | "hours" | "pickup_label">>;
 
+/**
+ * Tarjeta de Explorar: portada fotográfica 16:10 con el logo del local abajo a la izquierda y el barrio abajo a la
+ * derecha; nombre, estado («Abierto» verde o «Pausado») y horario debajo del estado. Sin foto utilizable, la portada usa
+ * un respaldo sólido con el vasito de Onza: nunca una foto genérica que parezca del local.
+ */
 export function VenueCard({
   venue,
   preview = false,
@@ -23,47 +29,52 @@ export function VenueCard({
   preview?: boolean;
   /** Cargar la portada de inmediato (tarjetas sobre el pliegue) en vez de diferida. */
   eager?: boolean;
-  /** El local abierto más cercano: portada algo más alta. */
+  /** El local abierto más cercano. */
   featured?: boolean;
 }) {
   const status = venueStatus(venue);
   const cover = useCover(venue.cover_url);
-  const meta = [
-    venue.zone.trim(),
-    distance !== null ? formatDistance(distance) : "",
-  ]
-    .filter(Boolean)
-    .join(" · ");
+  const zone = venue.zone.trim();
   const className = [
     "vcard",
-    cover.usable ? "" : "compact",
-    featured && cover.usable ? "featured" : "",
+    featured ? "featured" : "",
     status.closed ? "closed" : "",
   ]
     .filter(Boolean)
     .join(" ");
-  const text = (
-    <div className="grow">
-      <div className="row between">
-        <h3 className="name">{venue.name}</h3>
-        {status.badge}
-      </div>
-      {meta && <div className="meta">{meta}</div>}
-      {status.detail && <div className="meta">{status.detail}</div>}
-    </div>
-  );
-  const content = cover.usable ? (
+  const content = (
     <>
-      <VenueCover src={cover.usable} state={cover} eager={eager} />
-      <div className="body">
-        <VenueMark venue={venue} />
-        {text}
+      <div className="vcard-cover" data-photo={cover.usable ? "true" : "false"}>
+        {cover.usable ? (
+          <Image
+            unoptimized
+            fill
+            sizes="(min-width: 1024px) 336px, (min-width: 720px) 50vw, 100vw"
+            src={cover.usable}
+            alt=""
+            loading={eager ? "eager" : undefined}
+            {...cover.props}
+          />
+        ) : (
+          <span className="vcard-fallback" aria-hidden="true" />
+        )}
+        <span className="vcard-logo">
+          <VenueMark venue={venue} large />
+        </span>
+        {zone && <span className="vcard-zone">{zone}</span>}
       </div>
-    </>
-  ) : (
-    <>
-      <VenueMark venue={venue} large />
-      {text}
+      <div className="vcard-body">
+        <div className="grow">
+          <h3 className="name">{venue.name}</h3>
+          {distance !== null && (
+            <div className="meta">{formatDistance(distance)}</div>
+          )}
+        </div>
+        <div className="vcard-state">
+          {!status.closed && status.badge}
+          {status.detail && <span className="meta">{status.detail}</span>}
+        </div>
+      </div>
     </>
   );
   return preview || status.closed ? (
@@ -75,7 +86,7 @@ export function VenueCard({
   );
 }
 
-/** Fila compacta para locales cerrados: estado evidente y sin acción. */
+/** Fila compacta para locales cerrados: atenuada, sin acción y sin badge (el grupo «Cerrados» ya lo dice). */
 export function VenueRow({
   venue,
   distance = null,
@@ -98,7 +109,7 @@ export function VenueRow({
         <h3>{venue.name}</h3>
         <div className="muted t-label">{meta}</div>
       </div>
-      {status.badge}
+      {!status.closed && status.badge}
     </div>
   );
 }

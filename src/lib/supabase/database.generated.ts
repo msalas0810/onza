@@ -219,6 +219,7 @@ export type Database = {
           offers_opt_in: boolean;
           onboarded_at: string;
           updated_at: string;
+          avatar_path: string | null;
         };
         Insert: {
           user_id: string;
@@ -236,6 +237,7 @@ export type Database = {
           offers_opt_in?: boolean;
           onboarded_at?: string;
           updated_at?: string;
+          avatar_path?: string | null;
         };
         Update: {
           user_id?: string;
@@ -253,6 +255,7 @@ export type Database = {
           offers_opt_in?: boolean;
           onboarded_at?: string;
           updated_at?: string;
+          avatar_path?: string | null;
         };
         Relationships: [];
       };
@@ -397,6 +400,7 @@ export type Database = {
         Args: { member: string };
         Returns: undefined;
       };
+      update_profile_avatar: { Args: { path: string | null }; Returns: Json };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

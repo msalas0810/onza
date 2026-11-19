@@ -63,6 +63,7 @@ export const messages: Record<string, string> = {
   ACCOUNT_REQUIRED: "Ingresá con tu cuenta para pedir.",
   ONBOARDING_REQUIRED: "Completá tu perfil para poder pedir.",
   PROFILE_REQUIRED: "Completá tu perfil primero.",
+  INVALID_AVATAR: "La foto no es válida. Elegí una imagen JPG, PNG o WebP.",
   INVALID_NAME: "Ingresá tu nombre (entre 2 y 100 caracteres).",
   INVALID_USERNAME:
     "Usá de 3 a 20 letras minúsculas, números, punto o guion bajo.",

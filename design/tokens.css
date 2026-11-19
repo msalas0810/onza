@@ -19,9 +19,14 @@
   --onza-danger-soft: #F3E0E0;
   --onza-focus: #741F2C;
   --onza-scrim: #0D0D0E7A;
+  --onza-mark: #741F2C;
   --onza-access-bg: #0D0D0E;
   --onza-access-text: #F4F1ED;
   --onza-access-accent: #741F2C;
+  --onza-access-mark: #A43849;
+  --onza-access-glass: #120E10A6;
+  --onza-access-glass-border: #FFFFFF2E;
+  --onza-access-glass-focus: #F4F1ED;
   --onza-space-4: 4px;
   --onza-space-8: 8px;
   --onza-space-12: 12px;
@@ -46,6 +51,13 @@
   --onza-size-header: 56px;
   --onza-size-header-staff: 64px;
   --onza-size-bottom-nav: 64px;
+  --onza-layout-gutter: clamp(1rem, 3vw, 2rem);
+  --onza-layout-touch-customer: 2.75rem;
+  --onza-layout-touch-staff: 3rem;
+  --onza-layout-card-radius: clamp(1rem, 2.5vw, 1.25rem);
+  --onza-layout-glass-blur: 14px;
+  --onza-layout-elevation-1: 0 1px 2px #0D0D0E14, 0 4px 16px #0D0D0E0F;
+  --onza-layout-elevation-2: 0 2px 6px #0D0D0E1F, 0 12px 32px #0D0D0E1A;
   --onza-type-display-size: 32px;
   --onza-type-display-line: 38px;
   --onza-type-display-weight: 600;
@@ -97,6 +109,7 @@
   --onza-danger-soft: #2C1418;
   --onza-focus: #E2A2AB;
   --onza-scrim: #000000A3;
+  --onza-mark: #B33A4C;
   color-scheme: dark;
   }
 }
@@ -120,6 +133,7 @@
   --onza-danger-soft: #2C1418;
   --onza-focus: #E2A2AB;
   --onza-scrim: #000000A3;
+  --onza-mark: #B33A4C;
   color-scheme: dark;
 }
 :root[data-theme="light"] { color-scheme: light; }

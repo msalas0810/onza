@@ -11,6 +11,8 @@
 -- * Disponibilidad y archivo no cambian la versión del producto: agotar y reactivar no invalida carritos. El servidor
 --   compara el precio esperado (expectedPriceMinor) cuando el cliente lo envía; si no, la versión, como antes.
 -- * Restaurar un archivado lo deja visible para administración y AGOTADO: venderlo requiere habilitarlo expresamente.
+-- * order_view agrega server_now (cuentas regresivas con hora del servidor) y la imagen vigente del producto en cada línea
+--   (historial con foto). Nombre y precio siguen siendo los históricos de order_items.
 
 alter table public.orders add column if not exists queued_at timestamptz;
 comment on column public.orders.queued_at is 'Momento en que el servidor dejó el pedido en la cola de barra; inicia el plazo de aceptación.';
@@ -116,7 +118,7 @@ begin
 end $$;
 
 create or replace function private.order_view(target_order_id uuid) returns jsonb language sql stable security definer set search_path='' as $$
- select to_jsonb(o)||jsonb_build_object('server_now',now(),'payment_state',p.status,'capture_state',(select provider_state from private.payment_operations where payment_id=p.id and type='capture'),'authorized_minor',p.authorized_minor,'captured_minor',p.captured_minor,'refunded_minor',p.refunded_minor,'venue',to_jsonb(v),'items',coalesce((select jsonb_agg(i order by i.id) from public.order_items i where i.order_id=o.id),'[]'::jsonb),'events',coalesce((select jsonb_agg(e order by e.created_at) from public.order_events e where e.order_id=o.id),'[]'::jsonb),'claim_id',case when c.owner_user_id=auth.uid() and c.owner_staff_session_id=auth.jwt()->>'session_id' then c.id else null end,'claimed_elsewhere',c.id is not null and not(c.owner_user_id=auth.uid() and c.owner_staff_session_id=auth.jwt()->>'session_id'),'encrypted_token',case when o.customer_id=auth.uid() and o.status='ready' and p.status in ('authorized','unknown','captured') and t.consumed_at is null and t.expires_at>now() then t.encrypted_token else null end)
+ select to_jsonb(o)||jsonb_build_object('server_now',now(),'payment_state',p.status,'capture_state',(select provider_state from private.payment_operations where payment_id=p.id and type='capture'),'authorized_minor',p.authorized_minor,'captured_minor',p.captured_minor,'refunded_minor',p.refunded_minor,'venue',to_jsonb(v),'items',coalesce((select jsonb_agg(to_jsonb(i)||jsonb_build_object('image_url',pr.image_url,'photo_path',pr.photo_path) order by i.id) from public.order_items i left join public.products pr on pr.id=i.product_id where i.order_id=o.id),'[]'::jsonb),'events',coalesce((select jsonb_agg(e order by e.created_at) from public.order_events e where e.order_id=o.id),'[]'::jsonb),'claim_id',case when c.owner_user_id=auth.uid() and c.owner_staff_session_id=auth.jwt()->>'session_id' then c.id else null end,'claimed_elsewhere',c.id is not null and not(c.owner_user_id=auth.uid() and c.owner_staff_session_id=auth.jwt()->>'session_id'),'encrypted_token',case when o.customer_id=auth.uid() and o.status='ready' and p.status in ('authorized','unknown','captured') and t.consumed_at is null and t.expires_at>now() then t.encrypted_token else null end)
  from public.orders o join public.venues v on v.id=o.venue_id join private.payments p on p.order_id=o.id left join private.pickup_claims c on c.order_id=o.id left join private.pickup_tokens t on t.order_id=o.id where o.id=target_order_id
 $$;
 

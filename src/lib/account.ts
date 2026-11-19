@@ -13,6 +13,7 @@ export type CurrentAccount = {
     offers_opt_in: boolean;
     terms_version: string;
     terms_accepted_at: string;
+    avatar_path?: string | null;
   } | null;
 };
 /** Account kind comes from the database (membership), never from the browser. */
@@ -45,9 +46,19 @@ export async function currentAccount(): Promise<CurrentAccount> {
       ? await db
           .from("profiles")
           .select(
-            "full_name,username,phone_e164,news_opt_in,offers_opt_in,terms_version,terms_accepted_at",
+            "full_name,username,phone_e164,news_opt_in,offers_opt_in,terms_version,terms_accepted_at,avatar_path",
           )
           .maybeSingle()
       : { data: null };
+  // Una base sin la migración 014 no tiene avatar_path: se reintenta sin esa columna para no perder el perfil.
+  if (account.kind === "customer" && !profile) {
+    const fallback = await db
+      .from("profiles")
+      .select(
+        "full_name,username,phone_e164,news_opt_in,offers_opt_in,terms_version,terms_accepted_at",
+      )
+      .maybeSingle();
+    return { account, email: user.email ?? null, profile: fallback.data };
+  }
   return { account, email: user.email ?? null, profile };
 }

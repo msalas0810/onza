@@ -29,7 +29,7 @@ export function LogoutButton({
   const [busy, setBusy] = useState(false);
   return (
     <Button
-      variant="secondary"
+      variant={compact ? "secondary" : "danger"}
       size={compact ? "sm" : "md"}
       block={!compact}
       aria-label={label}

@@ -58,6 +58,7 @@ export function ProductMenu({
       {shown.map((c) => (
         <section className="category" id={`category-${c.id}`} key={c.id}>
           <h2 className="eyebrow section-label">{c.label}</h2>
+          <div className="pgrid">
           {visible
             .filter((p) => p.category_id === c.id)
             .map((p) => (
@@ -94,6 +95,7 @@ export function ProductMenu({
                 </div>
               </article>
             ))}
+          </div>
         </section>
       ))}
       {!visible.length && (

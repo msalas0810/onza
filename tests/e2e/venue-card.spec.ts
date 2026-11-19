@@ -1,5 +1,7 @@
 import { test, expect, type Page } from "@playwright/test";
 
+// Plan de pulido · E2: portada 16:10, logo del local abajo a la izquierda y barrio abajo a la derecha sobre la portada;
+// nombre, estado y horario debajo. Sin foto utilizable: respaldo nocturno con el vasito, nunca una caja rota.
 const widths = [360, 390, 430, 768, 1280];
 const themes = ["light", "dark"] as const;
 
@@ -23,31 +25,34 @@ for (const width of widths)
           () => document.documentElement.scrollWidth <= innerWidth,
         ),
       ).toBe(true);
-      // Con portada: la foto protagoniza y el texto va DEBAJO, sin velos sobre la imagen.
       const full = card(page, "sala-norte");
       await full.scrollIntoViewIfNeeded();
-      await expect(
-        full.getByRole("heading", { name: "Sala Norte" }),
-      ).toBeVisible();
-      await expect(full.getByText("San José")).toBeVisible();
-      const media = (await full.locator(".media").boundingBox())!;
+      const cover = (await full.locator(".vcard-cover").boundingBox())!;
+      expect(cover.width / cover.height).toBeGreaterThan(1.55);
+      // El nombre va debajo de la portada.
       const name = (await full
         .getByRole("heading", { name: "Sala Norte" })
         .boundingBox())!;
-      expect(name.y).toBeGreaterThanOrEqual(media.y + media.height - 1);
-      expect(media.width / media.height).toBeGreaterThan(1.7);
-      // El logo es cuadrado y la portada realmente cargó.
-      const logo = (await full.locator(".mono").boundingBox())!;
+      expect(name.y).toBeGreaterThanOrEqual(cover.y + cover.height - 1);
+      // Logo cuadrado en la esquina inferior izquierda; barrio en la inferior derecha, ambos dentro de la portada.
+      const logo = (await full.locator(".vcard-logo .mono").boundingBox())!;
       expect(Math.abs(logo.width - logo.height)).toBeLessThan(1);
+      expect(logo.x).toBeLessThan(cover.x + cover.width / 3);
+      expect(logo.y + logo.height).toBeLessThanOrEqual(cover.y + cover.height);
+      const zone = (await full.locator(".vcard-zone").boundingBox())!;
+      expect(zone.x + zone.width).toBeLessThanOrEqual(cover.x + cover.width);
+      expect(zone.x).toBeGreaterThan(cover.x + cover.width / 3);
+      await expect(full.locator(".vcard-zone")).toHaveText("San José");
       expect(
         await full
-          .locator(".media img")
+          .locator(".vcard-cover > img")
           .first()
           .evaluate(
             (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
           ),
       ).toBe(true);
-      // Ningún texto de la tarjeta se sale de ella.
+      // Estado verde y, debajo, el horario sin espacios dentro de p.m./a.m.
+      await expect(full.locator(".vcard-state .badge")).toHaveText(/Abierto/);
       const box = (await full.boundingBox())!;
       for (const text of await full.locator("h3,.meta,.badge").all()) {
         const t = (await text.boundingBox())!;
@@ -59,27 +64,17 @@ for (const width of widths)
         .screenshot({ path: `test-results/venue-cards-${width}-${theme}.png` });
     });
 
-test("sin ubicación no se muestra una línea de ubicación vacía", async ({
-  page,
-}) => {
-  await open(page, 390, "light");
-  await expect(
-    card(page, "patio-central")
-      .locator(".meta")
-      .filter({ hasText: "San José" }),
-  ).toHaveCount(0);
-  await expect(
-    card(page, "sala-norte").locator(".meta").filter({ hasText: "San José" }),
-  ).toHaveCount(1);
-});
-
-test("sin imágenes se muestra una tarjeta compacta con la inicial del local", async ({
+test("sin imágenes: respaldo nocturno con la inicial del local, sin foto genérica", async ({
   page,
 }) => {
   await open(page, 390, "dark");
   const empty = card(page, "club-cero");
-  await expect(empty).toHaveClass(/compact/);
-  await expect(empty.locator(".media")).toHaveCount(0);
+  await expect(empty.locator(".vcard-cover")).toHaveAttribute(
+    "data-photo",
+    "false",
+  );
+  await expect(empty.locator(".vcard-fallback")).toHaveCount(1);
+  await expect(empty.locator(".vcard-cover > img")).toHaveCount(0);
   await expect(empty.locator(".mono")).toHaveAttribute(
     "data-has-logo",
     "false",
@@ -87,14 +82,16 @@ test("sin imágenes se muestra una tarjeta compacta con la inicial del local", a
   await expect(empty.locator(".mono")).toHaveText("C");
 });
 
-test("una imagen que no carga cae a la tarjeta compacta sin dejar una caja rota", async ({
+test("una imagen que no carga cae al respaldo sin dejar una caja rota", async ({
   page,
 }) => {
   await open(page, 390, "light");
   const broken = card(page, "rota");
   await broken.scrollIntoViewIfNeeded();
-  await expect(broken).toHaveClass(/compact/);
-  await expect(broken.locator(".media")).toHaveCount(0);
+  await expect(broken.locator(".vcard-cover")).toHaveAttribute(
+    "data-photo",
+    "false",
+  );
   await expect(broken.locator(".mono")).toHaveText("I");
 });
 

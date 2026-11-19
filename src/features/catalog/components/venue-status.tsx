@@ -11,11 +11,17 @@ export function formatDistance(km: number) {
     return `Aprox. ${Math.max(50, Math.round((km * 1000) / 50) * 50)} m`;
   return `Aprox. ${km.toFixed(1).replace(".", ",")} km`;
 }
+/** «11:00 p. m.» → «11:00 p.m.»: sin espacios dentro de a.m./p.m. (los horarios llegan como texto libre del local). */
+export function tidyHours(text: string) {
+  return text.replace(/([ap])\.\s*m\./gi, (_, half: string) => `${half.toLowerCase()}.m.`);
+}
 export function venueStatus(venue: VenueStatusInput) {
   const closed = venue.open_state === "closed";
   const paused = !closed && !!venue.paused;
   const hours =
-    venue.hours && venue.hours !== "Consultar al local" ? venue.hours : "";
+    venue.hours && venue.hours !== "Consultar al local"
+      ? tidyHours(venue.hours)
+      : "";
   return {
     closed,
     paused,

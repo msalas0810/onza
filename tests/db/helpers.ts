@@ -11,7 +11,10 @@ export const ids = {
   product: "30000000-0000-4000-8000-000000000001",
 };
 /** Migraciones del plan de pulido, en orden. Se aplican después de las anteriores, igual que en el proyecto. */
-export const LATER_MIGRATIONS = ["202611190013_order_window_availability.sql"];
+export const LATER_MIGRATIONS = [
+  "202611190013_order_window_availability.sql",
+  "202611190014_profile_avatar.sql",
+];
 export async function database() {
   const db = new PGlite();
   await db.exec(

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { AuthForm } from "@/features/account/components/auth-form";
 import { safeNext } from "@/lib/access-policy";
 import { AccessScreen } from "./access-screen";
+import { OnzaLogo } from "@/components/ui/brand";
 import styles from "./access.module.css";
 export const dynamic = "force-dynamic";
 export default async function Page({
@@ -15,12 +16,7 @@ export default async function Page({
     <AccessScreen>
       <div className={styles.content}>
         <section className={styles.hero} aria-labelledby="access-title">
-          <div className={styles.brand} role="img" aria-label="Onza">
-            <span className={styles.shot} />
-            <span className={styles.signature}>
-              <span className={styles.wordmark} />
-            </span>
-          </div>
+          <OnzaLogo size="hero" className={styles.brand} />
           <h1 id="access-title" className={styles.title}>
             Tu próxima ronda.
             <br />

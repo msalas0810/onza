@@ -5,6 +5,7 @@ import {
   PreferenceToggles,
 } from "@/features/account/components/account-actions";
 import { currentAccount } from "@/lib/account";
+import { AvatarEditor } from "@/features/account/components/avatar-editor";
 
 export const dynamic = "force-dynamic";
 export default async function Page() {
@@ -15,20 +16,37 @@ export default async function Page() {
         <h1>Cuenta</h1>
       </div>
       {profile && (
-        <div className="panel row" style={{ marginBottom: 32 }}>
-          <span className="mono" aria-hidden="true">
-            {profile.full_name.trim().charAt(0).toLocaleUpperCase("es-CR")}
-          </span>
+        <section className="identity" aria-label="Tu perfil">
+          <AvatarEditor
+            name={profile.full_name}
+            path={profile.avatar_path ?? null}
+          />
           <div className="grow">
-            <strong>{profile.full_name}</strong>
-            <div className="muted t-label">
-              @{profile.username}
-              {email ? ` · ${email}` : ""}
-            </div>
+            <strong className="identity-name">{profile.full_name}</strong>
+            <div className="muted t-label">@{profile.username}</div>
           </div>
-        </div>
+        </section>
       )}
       <div className="stack loose">
+        {profile && (
+          <section className="stack tight">
+            <h2>Datos de la cuenta</h2>
+            <dl className="facts-list">
+              <div>
+                <dt>Correo</dt>
+                <dd>{email ?? "—"}</dd>
+              </div>
+              <div>
+                <dt>Teléfono</dt>
+                <dd>{profile.phone_e164} · privado</dd>
+              </div>
+            </dl>
+            <p className="hint">
+              El correo es tu acceso. Teléfono y fecha de nacimiento quedan en
+              tu perfil privado; el local no los ve.
+            </p>
+          </section>
+        )}
         <section className="stack tight">
           <h2>Apariencia</h2>
           <ThemeControl />

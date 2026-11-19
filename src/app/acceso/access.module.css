@@ -75,41 +75,13 @@
   height: 100%;
 }
 
+/* Tamaños del lockup compartido (OnzaLogo size="hero"): el componente lee estas variables. */
 .brand {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--onza-space-24);
+  --logo-gap: var(--onza-space-24);
+  --logo-shot: 72px;
+  --logo-word: 200px;
   margin-bottom: var(--onza-space-40);
-}
-
-.shot {
-  width: 64px;
-  height: 72px;
-  background: var(--onza-text);
-  mask: url("/brand/onza-shot-white.svg") center / contain no-repeat;
-}
-
-.signature {
-  display: flex;
-  align-items: flex-end;
-  gap: var(--onza-space-8);
-}
-
-.wordmark {
-  display: block;
-  width: 200px;
-  height: 54px;
-  background: var(--onza-text);
-  mask: url("/brand/onza-wordmark-white.svg") center / contain no-repeat;
-}
-
-.dot {
-  width: 12px;
-  height: 12px;
-  margin-bottom: var(--onza-space-4);
-  border-radius: 50%;
-  background: var(--onza-brand);
+  --onza-logo-red: var(--onza-access-mark);
 }
 
 .title {
@@ -263,13 +235,10 @@
 
 @media (max-width: 479px) {
   .brand {
-    gap: var(--onza-space-20);
+    --logo-gap: var(--onza-space-20);
+    --logo-word: 176px;
+    --logo-shot: 64px;
     margin-bottom: var(--onza-space-32);
-  }
-
-  .wordmark {
-    width: 176px;
-    height: 48px;
   }
 
   .title {
@@ -283,16 +252,10 @@
 
 /* Variante compacta para las pantallas de acceso secundarias (confirmar, recuperar, equipo). */
 .compact .brand {
-  gap: var(--onza-space-16);
+  --logo-gap: var(--onza-space-16);
+  --logo-shot: 54px;
+  --logo-word: 150px;
   margin-bottom: var(--onza-space-32);
-}
-.compact .shot {
-  width: 48px;
-  height: 54px;
-}
-.compact .wordmark {
-  width: 150px;
-  height: 40px;
 }
 .compact .title {
   font-size: clamp(24px, 4vw, 32px);
@@ -424,19 +387,13 @@
   width: 100%;
   padding: 0;
 }
+/* Vasito un escalón mayor que la referencia aprobada (54 → 60 px); wordmark igual. */
 .videoAccess .brand {
-  gap: 15px;
+  --logo-gap: 15px;
+  --logo-shot: 60px;
+  --logo-word: 224px;
   margin: 0;
-}
-.videoAccess .shot {
-  width: 54px;
-  height: 60px;
-  background: #a43849;
-}
-.videoAccess .wordmark {
-  width: 224px;
-  height: calc(224px * 358 / 1337);
-  background: white;
+  color: white;
 }
 .videoAccess .title {
   margin: 29px 0 0;
@@ -606,16 +563,10 @@
     linear-gradient(90deg, #0006, transparent 25%, transparent 75%, #0006);
 }
 .videoAccess[data-access-device="phone"] .brand {
-  gap: 14px;
+  --logo-gap: 14px;
+  --logo-shot: 58px;
+  --logo-word: 218px;
   filter: drop-shadow(0 2px 20px #0004);
-}
-.videoAccess[data-access-device="phone"] .shot {
-  width: 52px;
-  height: 58px;
-}
-.videoAccess[data-access-device="phone"] .wordmark {
-  width: 218px;
-  height: calc(218px * 358 / 1337);
 }
 .videoAccess[data-access-device="phone"] .title {
   margin-top: 34px;
@@ -659,15 +610,9 @@
     padding-bottom: 54px;
   }
   .videoAccess .brand {
-    gap: 11px;
-  }
-  .videoAccess .shot {
-    width: 43px;
-    height: 48px;
-  }
-  .videoAccess .wordmark {
-    width: 190px;
-    height: calc(190px * 358 / 1337);
+    --logo-gap: 11px;
+    --logo-shot: 48px;
+    --logo-word: 190px;
   }
   .videoAccess .title {
     margin-top: 23px;
@@ -688,16 +633,10 @@
   .videoAccess[data-access-device="phone"] .content {
     padding-top: 38px;
   }
-  .videoAccess[data-access-device="phone"] .shot {
-    width: 41px;
-    height: 46px;
-  }
-  .videoAccess[data-access-device="phone"] .wordmark {
-    width: 190px;
-    height: calc(190px * 358 / 1337);
-  }
   .videoAccess[data-access-device="phone"] .brand {
-    gap: 10px;
+    --logo-gap: 10px;
+    --logo-shot: 46px;
+    --logo-word: 190px;
   }
   .videoAccess[data-access-device="phone"] .title {
     margin-top: 25px;
@@ -718,5 +657,84 @@
 @media (prefers-reduced-motion: reduce) {
   .film video {
     display: none;
+  }
+}
+
+/* Plan de pulido · E2: campos de vidrio oscuro en los accesos de clientes y equipo. Fondo sólido de respaldo cuando el
+   navegador no ofrece backdrop-filter; foco claro visible; autofill y gestores de contraseñas intactos. */
+.actions :global(.field) {
+  text-align: start;
+  color: var(--onza-text);
+}
+.actions :global(.field > span:first-child) {
+  font-size: 13px;
+  font-weight: 560;
+  color: #e7dfdc;
+}
+.actions :global(.field input) {
+  min-height: var(--access-button-height, 50px);
+  border-radius: 14px;
+  border: 1px solid var(--onza-access-glass-border);
+  background: #17121499;
+  color: var(--onza-access-text);
+  transition:
+    border-color var(--onza-motion-state) var(--onza-motion-ease),
+    box-shadow var(--onza-motion-state) var(--onza-motion-ease);
+}
+@supports (backdrop-filter: blur(1px)) {
+  .actions :global(.field input) {
+    background: var(--onza-access-glass);
+    /* Sin -webkit- manual: el compilador de CSS agrega el prefijo y, si va después, descarta la versión estándar. */
+    backdrop-filter: blur(var(--onza-layout-glass-blur)) saturate(1.2);
+  }
+}
+.actions :global(.field input:hover) {
+  border-color: #ffffff4d;
+}
+.actions :global(.field input:focus-visible) {
+  outline: none;
+  border-color: var(--onza-access-glass-focus);
+  box-shadow: 0 0 0 3px #f4f1ed40;
+}
+.actions :global(.field input:-webkit-autofill) {
+  -webkit-text-fill-color: var(--onza-access-text);
+  box-shadow: 0 0 0 100px #1d1719 inset;
+  caret-color: var(--onza-access-text);
+}
+.actions :global(.field .hint) {
+  font-size: 12px;
+  color: #b9aeab;
+}
+.actions :global(.email-title) {
+  margin: 0 0 var(--onza-space-4);
+  font-size: 15px;
+  font-weight: 600;
+  text-align: start;
+}
+.actions :global(.switch-mode) {
+  margin: var(--onza-space-4) 0 0;
+  font-size: 13px;
+  color: #b9aeab;
+}
+.actions :global(.switch-mode .link-button) {
+  min-height: var(--onza-size-touch-min);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--onza-access-text);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.actions :global(.email-fields) {
+  animation: access-reveal var(--onza-motion-sheet) var(--onza-motion-ease);
+}
+@keyframes access-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .actions :global(.email-fields) {
+    animation: none;
   }
 }

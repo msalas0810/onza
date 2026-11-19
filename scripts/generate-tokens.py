@@ -18,6 +18,8 @@ def outputs():
     for group in ['space', 'radius', 'size']:
         for key, value in tokens[group].items():
             css += f'  --onza-{group}-{key}: {value}px;\n'
+    for key, value in tokens.get('layout', {}).items():
+        css += f'  --onza-layout-{key}: {value};\n'
     for key, values in tokens['type'].items():
         for field, value in values.items():
             unit = 'px' if field in ['size', 'line'] else ''

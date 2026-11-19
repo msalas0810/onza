@@ -9,6 +9,8 @@ import { ConnectionBanner } from "./connection-banner";
 /** Rutas con su propio marco completo: acceso (pantalla oscura) y portal del equipo. */
 const OWN_FRAME =
   /^\/(acceso|confirmar|recuperar|restablecer)(\/|$)|^\/equipo(\/|$)|^\/(staff|admin|onza)(\/|$)/;
+/** Rutas con el dock del local o dentro del carrito: el acceso al carrito ya está en pantalla, sin icono duplicado. */
+const DOCKED = /^\/v\/|^\/cart|^\/checkout/;
 /** Rutas de una sola tarea: marca y nada más (sin navegación). */
 const FOCUSED = /^\/(onboarding|sesion-activa)(\/|$)/;
 
@@ -54,8 +56,7 @@ export function AppHeader() {
           </nav>
         )}
         <span className="spacer" />
-        <span className="demo-chip">Demo · sin dinero real</span>
-        {!focused && count > 0 && cart && (
+        {!focused && !DOCKED.test(path) && count > 0 && cart && (
           <Link
             className="icon-btn"
             href="/cart"

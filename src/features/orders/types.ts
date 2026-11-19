@@ -54,6 +54,8 @@ export const orderSchema = z.object({
       unit_price_minor_snapshot: z.number(),
       quantity: z.number(),
       line_total_minor: z.number(),
+      image_url: z.string().nullable().optional(),
+      photo_path: z.string().nullable().optional(),
     }),
   ),
   events: z.array(

@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { AccessScreen } from "@/app/acceso/access-screen";
 import styles from "@/app/acceso/access.module.css";
+import { OnzaLogo } from "./brand";
 
 /** Compact layout for account and staff screens, with an optional access video. */
 export function AccessFrame({
@@ -19,13 +20,7 @@ export function AccessFrame({
   const content = (
     <>
       <section className={styles.hero} aria-labelledby="access-title">
-        <div className={styles.brand} role="img" aria-label="Onza">
-          <span className={styles.shot} />
-          <span className={styles.signature}>
-            <span className={styles.wordmark} />
-            <span className={styles.dot} />
-          </span>
-        </div>
+        <OnzaLogo size="hero" className={styles.brand} />
         {eyebrow && <p className={styles.eyebrow}>{eyebrow}</p>}
         <h1 id="access-title" className={styles.title}>
           {title}

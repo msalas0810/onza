@@ -25,16 +25,13 @@ export function VenueHero({ venue }: { venue: Venue }) {
           <div className="facts">
             <span>{venue.zone}</span>
             <span>Retiro: {venue.pickup_label}</span>
-            {venue.hours && venue.hours !== "Consultar al local" && (
-              <span>{venue.hours}</span>
-            )}
+            {status.detail && <span>{status.detail}</span>}
           </div>
         </div>
         {status.badge}
       </div>
-      <p className="demo-note">
-        Demo · menú y precios simulados · sin relación comercial con el local
-      </p>
+      {/* Locales reales sin acuerdo: una sola línea, compacta, mientras dure el entorno controlado. */}
+      <p className="demo-note">Menú de demostración · sin relación comercial con el local</p>
     </header>
   );
 }

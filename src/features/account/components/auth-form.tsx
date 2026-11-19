@@ -96,27 +96,14 @@ export function AuthForm({ next, notice }: { next: string; notice?: string }) {
           Continuar con correo
         </summary>
         <div className="email-fields">
-          <div className="segmented" role="group" aria-label="Modo de acceso">
-            <button
-              type="button"
-              aria-pressed={!up}
-              onClick={() => setMode("in")}
-            >
-              Ingresar
-            </button>
-            <button
-              type="button"
-              aria-pressed={up}
-              onClick={() => setMode("up")}
-            >
-              Crear cuenta
-            </button>
-          </div>
           <form className="stack tight" onSubmit={submit} noValidate>
+            <h2 className="email-title">
+              {up ? "Creá tu cuenta" : "Ingresá con tu correo"}
+            </h2>
             <TextField
               label="Correo"
               type="email"
-              autoComplete="email"
+              autoComplete={up ? "email" : "username"}
               inputMode="email"
               required
               value={email}
@@ -127,6 +114,7 @@ export function AuthForm({ next, notice }: { next: string; notice?: string }) {
               type="password"
               autoComplete={up ? "new-password" : "current-password"}
               required
+              hint={up ? "Al menos 8 caracteres." : undefined}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -149,10 +137,26 @@ export function AuthForm({ next, notice }: { next: string; notice?: string }) {
               {up ? "Crear cuenta" : "Ingresar"}
             </Button>
             {!up && (
-              <Link className="link-button" href="/recuperar">
+              <Link
+                className="link-button"
+                href="/recuperar"
+              >
                 ¿Olvidaste tu contraseña?
               </Link>
             )}
+            <p className="switch-mode">
+              {up ? "¿Ya tenés cuenta?" : "¿No tenés cuenta?"}{" "}
+              <button
+                type="button"
+                className="link-button"
+                onClick={() => {
+                  setMode(up ? "in" : "up");
+                  setError("");
+                }}
+              >
+                {up ? "Ingresá" : "Creá una"}
+              </button>
+            </p>
           </form>
         </div>
       </details>

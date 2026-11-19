@@ -283,17 +283,11 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           <span>Total</span>
           <Price amount={total} />
         </div>
-        <div className="panel row">
-          <Lock size={20} aria-hidden="true" />
-          <div className="grow">
-            <strong className="t-label" style={{ fontWeight: 600 }}>
-              Pago simulado
-            </strong>
-            <div className="muted t-label">
-              Demo sin dinero real. No pedimos tarjeta.
-            </div>
-          </div>
-        </div>
+        {/* Mientras el proveedor sea simulado: una sola indicación compacta, acá en la confirmación. */}
+        <p className="no-charge">
+          <Lock size={16} aria-hidden="true" />
+          Sin cobro real · no pedimos tarjeta
+        </p>
         {!accounts && (
           <>
             <label className="checkbox">

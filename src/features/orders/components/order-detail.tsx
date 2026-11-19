@@ -244,7 +244,7 @@ export function OrderDetail({ id }: { id: string }) {
           <Price amount={order.total_minor} />
         </div>
         <p className="hint">
-          Demo · {financial.toLocaleLowerCase("es-CR")} · sin dinero real
+          {financial} · simulado
         </p>
         {order.payment_state === "unknown" && (
           <Notice tone="danger" title="Resultado pendiente de conciliación">

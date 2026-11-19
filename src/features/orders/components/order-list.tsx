@@ -12,6 +12,9 @@ import {
 } from "@/components/ui/primitives";
 import { ReconnectingBanner } from "@/components/ui/connection-banner";
 import { SessionExpiredSheet } from "./session-expired-sheet";
+import { ProductImage } from "@/features/catalog/components/product-image";
+import { productImageSrc } from "@/features/catalog/product-image-src";
+import { groupByNight, nightLabel } from "../night";
 
 const FINAL = ["delivered", "canceled", "expired", "uncollected"];
 const tone = (status: string) =>
@@ -52,25 +55,38 @@ export function OrderList() {
   );
   const active = sorted.filter((o) => !FINAL.includes(o.status));
   const past = sorted.filter((o) => FINAL.includes(o.status));
-  const row = (o: (typeof orders)[number]) => (
-    <Link href={`/orders/${o.id}`} key={o.id} className="vrow">
-      <div className="grow">
-        <div className="row between">
-          <h3>{o.venue.name}</h3>
-          <Price amount={o.total_minor} />
+  const card = (o: (typeof orders)[number]) => {
+    const first = o.items[0];
+    const units = o.items.reduce((n, i) => n + i.quantity, 0);
+    const more = o.items.length - 1;
+    return (
+      <Link href={`/orders/${o.id}`} key={o.id} className="ocard-c">
+        <span className="thumb">
+          <ProductImage
+            name={first?.name_snapshot ?? o.venue.name}
+            src={first ? productImageSrc({ image_url: first.image_url ?? null, photo_path: first.photo_path ?? null }) : null}
+          />
+        </span>
+        <div className="grow">
+          <div className="row between">
+            <h3>{o.venue.name}</h3>
+            <Price amount={o.total_minor} />
+          </div>
+          <p className="muted t-label">
+            {first ? `${first.quantity}× ${first.name_snapshot}` : ""}
+            {more > 0 && ` · +${more} más`}
+            {` · ${units} ${units === 1 ? "producto" : "productos"}`}
+          </p>
+          <div className="row between">
+            <span className="num muted t-label">#{o.public_code}</span>
+            <StatusBadge tone={tone(o.status)}>
+              {statusLabels[o.status]}
+            </StatusBadge>
+          </div>
         </div>
-        <div className="row between">
-          <span className="muted t-label">
-            #{o.public_code} ·{" "}
-            {o.items.map((i) => `${i.quantity}× ${i.name_snapshot}`).join(", ")}
-          </span>
-          <StatusBadge tone={tone(o.status)}>
-            {statusLabels[o.status]}
-          </StatusBadge>
-        </div>
-      </div>
-    </Link>
-  );
+      </Link>
+    );
+  };
   return (
     <>
       <ReconnectingBanner show={/Reconect/.test(connection)} />
@@ -89,19 +105,25 @@ export function OrderList() {
       ) : (
         <>
           {active.length > 0 && (
-            <>
-              <h2 className="eyebrow section-label" style={{ marginTop: 0 }}>
+            <section aria-labelledby="orders-active">
+              <h2
+                id="orders-active"
+                className="eyebrow section-label"
+                style={{ marginTop: 0 }}
+              >
                 En curso
               </h2>
-              <div>{active.map(row)}</div>
-            </>
+              <div className="order-cards">{active.map(card)}</div>
+            </section>
           )}
-          {past.length > 0 && (
-            <>
-              <h2 className="eyebrow section-label">Anteriores</h2>
-              <div>{past.map(row)}</div>
-            </>
-          )}
+          {groupByNight(past).map(({ day, items }) => (
+            <section key={day} aria-labelledby={`night-${day}`}>
+              <h2 id={`night-${day}`} className="eyebrow section-label">
+                {nightLabel(day)}
+              </h2>
+              <div className="order-cards">{items.map(card)}</div>
+            </section>
+          ))}
         </>
       )}
     </>

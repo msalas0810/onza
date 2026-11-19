@@ -308,11 +308,14 @@ time {
   width: 100%;
   max-width: var(--onza-size-content-customer);
   margin: 0 auto;
-  padding: var(--onza-space-24) var(--onza-space-16)
+  /* Gutter fluido (E2): 1rem en teléfono hasta 2rem en escritorio, respetando el área segura lateral. */
+  padding-block: var(--onza-space-24)
     calc(
       var(--onza-size-bottom-nav) + var(--onza-space-48) +
         env(safe-area-inset-bottom)
     );
+  padding-inline: max(var(--onza-layout-gutter), env(safe-area-inset-left))
+    max(var(--onza-layout-gutter), env(safe-area-inset-right));
   overflow-wrap: anywhere;
 }
 .page.narrow {
@@ -636,6 +639,33 @@ textarea[aria-invalid="true"] {
   color: var(--onza-text);
   box-shadow: 0 0 0 1px var(--onza-border);
 }
+/* Indicador deslizante del control segmentado (E2): la opción elegida se mueve en lugar de saltar. */
+.seg {
+  position: relative;
+  isolation: isolate;
+}
+.seg-thumb {
+  position: absolute;
+  z-index: -1;
+  inset-block: var(--onza-space-4);
+  inset-inline-start: var(--onza-space-4);
+  width: calc(
+    (100% - 2 * var(--onza-space-4) - (var(--seg-count) - 1) * var(--onza-space-4)) /
+      var(--seg-count)
+  );
+  border-radius: 9px;
+  background: var(--onza-surface-raised);
+  box-shadow: 0 0 0 1px var(--onza-border), var(--onza-layout-elevation-1);
+  transform: translateX(calc(var(--seg-index) * (100% + var(--onza-space-4))));
+  transition: transform var(--onza-motion-sheet) var(--onza-motion-ease);
+}
+:dir(rtl) .seg-thumb {
+  transform: translateX(calc(var(--seg-index) * -1 * (100% + var(--onza-space-4))));
+}
+.seg button[aria-pressed="true"] {
+  background: transparent;
+  box-shadow: none;
+}
 .toggle,
 .checkbox {
   display: flex;
@@ -915,44 +945,119 @@ textarea[aria-invalid="true"] {
   gap: var(--onza-space-12);
   color: inherit;
   text-decoration: none;
-  border-radius: var(--onza-radius-media);
+  border-radius: var(--onza-layout-card-radius);
+  transition: transform var(--onza-motion-state) var(--onza-motion-ease);
 }
-.vcard .body {
+.vcard-cover {
+  position: relative;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: var(--onza-layout-card-radius);
+  background: var(--onza-surface);
+  border: 1px solid var(--onza-border);
+}
+.vcard-cover > img {
+  object-fit: cover;
+  transition: transform var(--onza-motion-confirm) var(--onza-motion-ease);
+}
+/* Respaldo sin foto: superficie nocturna sólida (la del acceso) con el vasito rojo de Onza. Sin degradados ni fotos
+   genéricas que parezcan del local. Algo más baja que una portada real para no dejar un bloque vacío. */
+.vcard-cover[data-photo="false"] {
+  aspect-ratio: 16 / 8;
+  /* Casi negro en claro; en oscuro se aclara hacia el texto para separarse del fondo. */
+  background: color-mix(in srgb, var(--onza-access-bg) 90%, var(--onza-text));
+  border-color: transparent;
+}
+.vcard-fallback {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: var(--onza-access-mark);
+  opacity: 0.55;
+  -webkit-mask: url("/brand/onza-shot-white.svg") 50% 45% / auto 34% no-repeat;
+  mask: url("/brand/onza-shot-white.svg") 50% 45% / auto 34% no-repeat;
+}
+.vcard-logo {
+  position: absolute;
+  inset-inline-start: var(--onza-space-12);
+  inset-block-end: var(--onza-space-12);
+  display: block;
+  border-radius: var(--onza-radius-media);
+  box-shadow: var(--onza-layout-elevation-1);
+}
+.vcard-logo .mono.lg {
+  width: clamp(3.5rem, 12vw, 4rem);
+  height: clamp(3.5rem, 12vw, 4rem);
+  border: 2px solid var(--onza-surface-raised);
+}
+.vcard-zone {
+  position: absolute;
+  inset-inline-end: var(--onza-space-12);
+  inset-block-end: var(--onza-space-12);
+  max-width: 55%;
+  padding: var(--onza-space-4) var(--onza-space-12);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-radius: var(--onza-radius-pill);
+  background: color-mix(in srgb, var(--onza-surface-raised) 92%, transparent);
+  color: var(--onza-text);
+  font-size: var(--onza-type-caption-size);
+  line-height: var(--onza-type-caption-line);
+  font-weight: 600;
+  box-shadow: var(--onza-layout-elevation-1);
+}
+@supports (backdrop-filter: blur(1px)) {
+  .vcard-zone {
+    background: color-mix(in srgb, var(--onza-surface-raised) 78%, transparent);
+    backdrop-filter: blur(var(--onza-layout-glass-blur));
+  }
+}
+.vcard-body {
   display: flex;
   gap: var(--onza-space-12);
   align-items: flex-start;
+  padding-inline: var(--onza-space-4);
 }
 .vcard .name {
-  font-size: 17px;
+  font-size: 1.0625rem;
   font-weight: 600;
+  overflow-wrap: anywhere;
 }
 .vcard .meta {
   font-size: var(--onza-type-label-size);
   color: var(--onza-text-muted);
 }
-.vcard:hover .media {
-  outline: 1px solid var(--onza-control-border);
+.vcard-state {
+  display: grid;
+  justify-items: end;
+  gap: var(--onza-space-4);
+  text-align: end;
 }
-.vcard.featured .media {
-  aspect-ratio: 16 / 10;
+a.vcard:hover .vcard-cover > img {
+  transform: scale(1.02);
+}
+a.vcard:active {
+  transform: scale(0.99);
+}
+a.vcard:focus-visible {
+  outline: 3px solid var(--onza-focus);
+  outline-offset: 4px;
+}
+.vcard.featured .vcard-cover {
+  aspect-ratio: 16 / 9;
 }
 .vcard.closed {
   opacity: 0.6;
 }
-.vcard.closed .media > img {
+.vcard.closed .vcard-cover > img {
   filter: grayscale(1);
 }
-.vcard.compact {
-  display: flex;
-  gap: var(--onza-space-16);
-  align-items: center;
-  min-height: 96px;
-  padding: var(--onza-space-16);
-  border: 1px solid var(--onza-border);
-  background: var(--onza-surface-raised);
-}
-.vcard.compact:hover {
-  border-color: var(--onza-control-border);
+@media (prefers-reduced-motion: reduce) {
+  .vcard,
+  .vcard-cover > img {
+    transition: none;
+  }
 }
 .vrow {
   display: flex;
@@ -1003,7 +1108,7 @@ textarea[aria-invalid="true"] {
 /* ---------- Producto y carrito ---------- */
 .prow {
   display: grid;
-  grid-template-columns: 72px 1fr auto;
+  grid-template-columns: 5rem minmax(0, 1fr) auto;
   gap: var(--onza-space-12) var(--onza-space-16);
   align-items: center;
   min-height: 96px;
@@ -1012,8 +1117,8 @@ textarea[aria-invalid="true"] {
 }
 .prow .thumb {
   position: relative;
-  width: 72px;
-  height: 72px;
+  width: 5rem;
+  height: 5rem;
   display: grid;
   place-items: center;
   overflow: hidden;
@@ -2128,3 +2233,340 @@ input.code-input {
   margin: 0;
 }
 .ocard .wait.countdown.late { color: var(--onza-danger-text); }
+
+/* Plan de pulido · E2: lockup único (OnzaLogo). Proporciones de los SVG oficiales: vasito 394×439, wordmark 1337×358. */
+.onza-logo {
+  --logo-word: 5.125rem;
+  --logo-shot: 1.3rem;
+  --logo-gap: 0.4rem;
+  display: inline-flex;
+  align-items: flex-end;
+  gap: var(--logo-gap);
+  line-height: 0;
+  color: inherit;
+}
+.onza-logo-shot,
+.onza-logo-wordmark {
+  display: block;
+  flex: none;
+  -webkit-mask: var(--logo-mask) center / contain no-repeat;
+  mask: var(--logo-mask) center / contain no-repeat;
+}
+.onza-logo-shot {
+  --logo-mask: url("/brand/onza-shot-white.svg");
+  width: var(--logo-shot);
+  aspect-ratio: 394 / 439;
+  background: var(--onza-logo-red, var(--onza-mark));
+}
+.onza-logo-word {
+  display: inline-flex;
+  align-items: flex-end;
+  gap: calc(var(--logo-word) * 0.035);
+}
+.onza-logo-wordmark {
+  --logo-mask: url("/brand/onza-wordmark-white.svg");
+  width: var(--logo-word);
+  aspect-ratio: 1337 / 358;
+  background: currentColor;
+}
+.onza-logo-dot {
+  flex: none;
+  width: max(5px, calc(var(--logo-word) * 0.06));
+  aspect-ratio: 1;
+  margin-bottom: calc(var(--logo-word) * 0.012);
+  border-radius: 50%;
+  background: var(--onza-logo-red, var(--onza-mark));
+}
+.onza-logo-hero {
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Plan de pulido · E2: buscador con sugerencias de Explorar y línea de ubicación. */
+.combo {
+  position: relative;
+}
+.search input[type="search"]::-webkit-search-cancel-button {
+  display: none;
+}
+.search:has(.search-clear) input {
+  padding-inline-end: 3rem;
+}
+.search-clear {
+  position: absolute;
+  inset-inline-end: 0.25rem;
+  top: 50%;
+  translate: 0 -50%;
+  display: grid;
+  place-items: center;
+  width: var(--onza-layout-touch-customer);
+  height: var(--onza-layout-touch-customer);
+  border: 0;
+  border-radius: var(--onza-radius-pill);
+  background: transparent;
+  color: var(--onza-text-muted);
+  cursor: pointer;
+}
+.search-clear:hover {
+  color: var(--onza-text);
+}
+.suggestions {
+  position: absolute;
+  z-index: 20;
+  inset-inline: 0;
+  top: calc(100% + var(--onza-space-4));
+  margin: 0;
+  padding: var(--onza-space-4);
+  list-style: none;
+  border: 1px solid var(--onza-border);
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-surface-raised);
+  box-shadow: var(--onza-layout-elevation-2);
+  animation: onza-pop var(--onza-motion-state) var(--onza-motion-ease);
+}
+.suggestions li {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-12);
+  min-height: var(--onza-layout-touch-customer);
+  padding-inline: var(--onza-space-12);
+  border-radius: calc(var(--onza-radius-control) - 4px);
+  cursor: pointer;
+}
+.suggestions li > svg {
+  flex: none;
+  color: var(--onza-text-muted);
+}
+.suggestions li[aria-selected="true"],
+.suggestions li:hover:not(.empty) {
+  background: var(--onza-surface);
+}
+.suggestions li.empty {
+  cursor: default;
+  color: var(--onza-text-muted);
+  font-size: var(--onza-type-label-size);
+}
+.location-line {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-8);
+  margin: 0;
+  min-height: var(--onza-layout-touch-customer);
+  font-size: var(--onza-type-label-size);
+  color: var(--onza-text-muted);
+}
+.location-line > svg {
+  flex: none;
+}
+.location-line .link-button {
+  min-height: var(--onza-layout-touch-customer);
+  font-weight: 600;
+  color: var(--onza-brand-text);
+}
+.explore-grid {
+  margin-top: var(--onza-space-24);
+}
+.pulse {
+  animation: onza-pulse 1.4s ease-in-out infinite;
+}
+@keyframes onza-pop {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes onza-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .suggestions,
+  .pulse {
+    animation: none;
+  }
+}
+
+/* Plan de pulido · E2: historial de pedidos en tarjetas. */
+.order-cards {
+  display: grid;
+  gap: var(--onza-space-12);
+}
+.ocard-c {
+  display: flex;
+  gap: var(--onza-space-12);
+  align-items: center;
+  padding: var(--onza-space-12);
+  border: 1px solid var(--onza-border);
+  border-radius: var(--onza-layout-card-radius);
+  background: var(--onza-surface-raised);
+  color: inherit;
+  text-decoration: none;
+  transition: border-color var(--onza-motion-state) var(--onza-motion-ease);
+}
+.ocard-c:hover {
+  border-color: var(--onza-control-border);
+}
+.ocard-c:focus-visible {
+  outline: 3px solid var(--onza-focus);
+  outline-offset: 3px;
+}
+.ocard-c .thumb {
+  position: relative;
+  flex: none;
+  width: 4rem;
+  height: 4rem;
+  overflow: hidden;
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-surface);
+}
+.ocard-c .thumb img {
+  object-fit: cover;
+}
+.ocard-c h3 {
+  font-size: 1rem;
+  font-weight: 600;
+}
+.ocard-c p {
+  margin: var(--onza-space-4) 0;
+}
+button.link-button {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Plan de pulido · E2: identidad y avatar en Cuenta. */
+.identity {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-16);
+  margin-bottom: var(--onza-space-32);
+}
+.identity-name {
+  display: block;
+  font-size: var(--onza-type-heading-size);
+  line-height: var(--onza-type-heading-line);
+}
+.avatar {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3rem;
+  overflow: hidden;
+  border-radius: 50%;
+  background: var(--onza-brand-soft);
+  color: var(--onza-brand-text);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.avatar.lg {
+  width: 4.5rem;
+  height: 4.5rem;
+  font-size: 1.5rem;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar-button {
+  position: relative;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+.avatar-button:focus-visible {
+  outline: 3px solid var(--onza-focus);
+  outline-offset: 3px;
+}
+.avatar-edit {
+  position: absolute;
+  inset-inline-end: -2px;
+  inset-block-end: -2px;
+  display: grid;
+  place-items: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border-radius: 50%;
+  border: 2px solid var(--onza-bg);
+  background: var(--onza-text);
+  color: var(--onza-bg);
+}
+.avatar-preview {
+  display: grid;
+  justify-items: center;
+  gap: var(--onza-space-16);
+  padding-block: var(--onza-space-8);
+}
+.avatar-preview .avatar.lg {
+  width: 7rem;
+  height: 7rem;
+  font-size: 2.25rem;
+}
+.facts-list {
+  display: grid;
+  margin: 0;
+  border-top: 1px solid var(--onza-border);
+}
+.facts-list > div {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--onza-space-16);
+  min-height: var(--onza-layout-touch-customer);
+  align-items: center;
+  border-bottom: 1px solid var(--onza-border);
+}
+.facts-list dt {
+  color: var(--onza-text-muted);
+  font-size: var(--onza-type-label-size);
+}
+.facts-list dd {
+  margin: 0;
+  text-align: end;
+  overflow-wrap: anywhere;
+}
+.no-charge {
+  display: inline-flex;
+  align-items: center;
+  align-self: flex-start;
+  gap: var(--onza-space-8);
+  margin: 0;
+  padding: var(--onza-space-4) var(--onza-space-12);
+  border-radius: var(--onza-radius-pill);
+  background: var(--onza-surface);
+  color: var(--onza-text-muted);
+  font-size: var(--onza-type-label-size);
+  font-weight: 500;
+}
+
+/* Plan de pulido · E2: el menú pasa a cuadrícula solo cuando cada tarjeta deja lugar cómodo para el stepper. */
+.pgrid {
+  container-type: inline-size;
+  display: grid;
+}
+@container (min-width: 46rem) {
+  .pgrid > .prow {
+    grid-column: span 1;
+  }
+}
+@media (min-width: 64rem) {
+  .page.menu {
+    max-width: var(--onza-size-content-explore);
+  }
+  .page.menu .pgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--onza-space-32);
+  }
+  .page.menu .vhero,
+  .page.menu > .stack {
+    max-width: var(--onza-size-content-menu);
+  }
+}
