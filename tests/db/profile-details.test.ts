@@ -11,10 +11,15 @@ async function withProfiles() {
   );
   return db;
 }
-const edit = (db: PGlite, name: string, username: string) =>
+const edit = (
+  db: PGlite,
+  name: string,
+  username: string,
+  drink: string | null = null,
+) =>
   db.query<{ r: Record<string, unknown> }>(
-    "select public.update_profile_details($1,$2) as r",
-    [name, username],
+    "select public.update_profile_details($1,$2,$3) as r",
+    [name, username, drink],
   );
 
 describe("edición de nombre y @usuario", () => {
@@ -25,7 +30,18 @@ describe("edición de nombre y @usuario", () => {
       expect((await edit(db, "  Ana María  ", "Ana.M_1")).rows[0].r).toEqual({
         fullName: "Ana María",
         username: "ana.m_1",
+        favoriteDrink: null,
       });
+      // Trago favorito opcional: se guarda recortado y vacío lo quita.
+      expect(
+        (await edit(db, "Ana María", "ana.m_1", "  Negroni ")).rows[0].r,
+      ).toMatchObject({ favoriteDrink: "Negroni" });
+      expect(
+        (await edit(db, "Ana María", "ana.m_1", "   ")).rows[0].r,
+      ).toMatchObject({ favoriteDrink: null });
+      await expect(
+        edit(db, "Ana María", "ana.m_1", "x".repeat(61)),
+      ).rejects.toThrow();
       const row = (
         await db.query<{
           full_name: string;

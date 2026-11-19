@@ -52,6 +52,7 @@ export function OnboardingForm({
     accepted: false,
     news: false,
     offers: false,
+    drink: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
@@ -88,6 +89,18 @@ export function OnboardingForm({
         },
       });
       if (error) throw new Error(error.message);
+      // Opcional y salteable: si falla no frena el alta; se puede completar después desde Cuenta.
+      if (f.drink.trim())
+        await browserDb()
+          .rpc("update_profile_details", {
+            full_name: f.fullName,
+            username: f.username,
+            favorite_drink: f.drink,
+          })
+          .then(
+            () => undefined,
+            () => undefined,
+          );
       router.replace(next);
       router.refresh();
     } catch (failure) {
@@ -196,6 +209,13 @@ export function OnboardingForm({
           </span>
         )}
       </div>
+      <TextField
+        label="Tu trago favorito (opcional)"
+        maxLength={60}
+        value={f.drink}
+        hint="Podés saltearlo y completarlo después en Cuenta."
+        onChange={(e) => set("drink", e.target.value)}
+      />
       <label className="checkbox">
         <input
           type="checkbox"

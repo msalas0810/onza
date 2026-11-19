@@ -11,16 +11,19 @@ import { Sheet } from "@/components/ui/sheet";
 export function ProfileEditor({
   fullName,
   username,
+  favoriteDrink,
   email,
 }: {
   fullName: string;
   username: string;
+  favoriteDrink: string | null;
   email: string | null;
 }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(fullName);
   const [user, setUser] = useState(username);
+  const [drink, setDrink] = useState(favoriteDrink ?? "");
   const [errors, setErrors] = useState<{
     name?: string;
     username?: string;
@@ -33,6 +36,7 @@ export function ProfileEditor({
     if (!next) {
       setName(fullName);
       setUser(username);
+      setDrink(favoriteDrink ?? "");
       setErrors({});
     }
   };
@@ -43,6 +47,7 @@ export function ProfileEditor({
     const { error } = await browserDb().rpc("update_profile_details", {
       full_name: name,
       username: user.replace(/^@/, ""),
+      favorite_drink: drink,
     });
     setBusy(false);
     if (error) {
@@ -84,6 +89,13 @@ export function ProfileEditor({
             error={errors.username}
             hint="De 3 a 20 letras, números, punto o guion bajo."
             onChange={(e) => setUser(e.target.value)}
+          />
+          <TextField
+            label="Tu trago favorito (opcional)"
+            maxLength={60}
+            value={drink}
+            hint="Podés dejarlo vacío. Solo vos lo ves."
+            onChange={(e) => setDrink(e.target.value)}
           />
           <TextField
             label="Correo"

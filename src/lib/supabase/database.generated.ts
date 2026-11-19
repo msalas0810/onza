@@ -220,6 +220,7 @@ export type Database = {
           onboarded_at: string;
           updated_at: string;
           avatar_path: string | null;
+          favorite_drink: string | null;
         };
         Insert: {
           user_id: string;
@@ -414,7 +415,7 @@ export type Database = {
       };
       update_profile_avatar: { Args: { path: string | null }; Returns: Json };
       update_profile_details: {
-        Args: { full_name: string; username: string };
+        Args: { full_name: string; username: string; favorite_drink?: string | null };
         Returns: Json;
       };
       venue_summary_range: {

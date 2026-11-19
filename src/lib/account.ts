@@ -14,6 +14,7 @@ export type CurrentAccount = {
     terms_version: string;
     terms_accepted_at: string;
     avatar_path?: string | null;
+    favorite_drink?: string | null;
   } | null;
 };
 /** Account kind comes from the database (membership), never from the browser. */
@@ -46,11 +47,11 @@ export async function currentAccount(): Promise<CurrentAccount> {
       ? await db
           .from("profiles")
           .select(
-            "full_name,username,phone_e164,news_opt_in,offers_opt_in,terms_version,terms_accepted_at,avatar_path",
+            "full_name,username,phone_e164,news_opt_in,offers_opt_in,terms_version,terms_accepted_at,avatar_path,favorite_drink",
           )
           .maybeSingle()
       : { data: null };
-  // Una base sin la migración 014 no tiene avatar_path: se reintenta sin esa columna para no perder el perfil.
+  // Una base sin las migraciones 014/020 no tiene avatar_path ni favorite_drink: se reintenta sin esa columna para no perder el perfil.
   if (account.kind === "customer" && !profile) {
     const fallback = await db
       .from("profiles")

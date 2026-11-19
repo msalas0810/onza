@@ -29,6 +29,7 @@ export default async function Page() {
           <ProfileEditor
             fullName={profile.full_name}
             username={profile.username}
+            favoriteDrink={profile.favorite_drink ?? null}
             email={email ?? null}
           />
         </section>

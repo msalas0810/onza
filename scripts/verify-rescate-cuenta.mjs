@@ -35,10 +35,20 @@ try {
   check("@usuario inválido: rechazo visible", true);
   await dialog.getByLabel("Nombre").fill("María José Solís");
   await dialog.getByLabel("Usuario").fill("@MariaJ");
+  await dialog.getByLabel("Tu trago favorito (opcional)").fill("Negroni");
   await dialog.getByRole("button", { name: "Guardar" }).click();
   await dialog.waitFor({ state: "hidden" });
   await page.reload();
   check("Nombre y @usuario guardados y visibles tras recargar", (await page.locator(".identity").innerText()).includes("María José Solís") && (await page.locator(".identity").innerText()).includes("@mariaj"));
+  await page.getByRole("button", { name: "Editar perfil" }).click();
+  check("Trago favorito (opcional) guardado y precargado al reabrir", (await page.getByRole("dialog").getByLabel("Tu trago favorito (opcional)").inputValue()) === "Negroni");
+  await page.getByRole("dialog").getByLabel("Tu trago favorito (opcional)").fill("");
+  await page.getByRole("dialog").getByRole("button", { name: "Guardar" }).click();
+  await page.getByRole("dialog").waitFor({ state: "hidden" });
+  await page.reload();
+  await page.getByRole("button", { name: "Editar perfil" }).click();
+  check("Vaciar el trago favorito lo quita (salteable)", (await page.getByRole("dialog").getByLabel("Tu trago favorito (opcional)").inputValue()) === "");
+  await page.keyboard.press("Escape");
   await page.screenshot({ path: `${out}/cuenta-editada-390.png` });
 } catch (e) {
   check("Recorrido sin excepciones", false, e.message.split("\n")[0]);

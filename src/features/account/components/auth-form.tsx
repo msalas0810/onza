@@ -137,10 +137,7 @@ export function AuthForm({ next, notice }: { next: string; notice?: string }) {
               {up ? "Crear cuenta" : "Ingresar"}
             </Button>
             {!up && (
-              <Link
-                className="link-button"
-                href="/recuperar"
-              >
+              <Link className="link-button" href="/recuperar">
                 ¿Olvidaste tu contraseña?
               </Link>
             )}
