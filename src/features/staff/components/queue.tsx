@@ -92,6 +92,7 @@ export function StaffQueue({
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
   const [paused, setPaused] = useState(venue.paused);
+  const [autoAccept, setAutoAccept] = useState(venue.auto_accept ?? false);
   const [pickup, setPickup] = useState(false);
   const [settings, setSettings] = useState(false);
   const camera = useRef<Promise<MediaStream> | null>(null);
@@ -347,6 +348,11 @@ export function StaffQueue({
               ? "Pausado"
               : "Recibiendo pedidos"}
         </span>
+        {autoAccept && !paused && !closedVenue && (
+          <span className="reception auto" role="status">
+            Aceptación automática
+          </span>
+        )}
         <button
           type="button"
           className="btn secondary sm"
@@ -684,6 +690,27 @@ export function StaffQueue({
           <p className="hint">
             La pausa detiene pedidos nuevos y conserva los que ya están en la
             cola.
+          </p>
+          <Toggle
+            label="Aceptación automática"
+            checked={autoAccept}
+            disabled={!online || (!autoAccept && !isAdmin)}
+            onChange={async (enabled) => {
+              try {
+                await sendCommand({ action: "venue_auto_accept", venueId: venue.id, enabled });
+                setAutoAccept(enabled);
+              } catch (e) {
+                if (isSessionError(e)) setExpired(true);
+                else setNotice(e instanceof Error ? e.message : "No pudimos cambiar la aceptación automática.");
+              }
+            }}
+          />
+          <p className="hint">
+            {autoAccept
+              ? "Acepta pedidos elegibles en el servidor, aunque la barra esté cerrada. Apagala para volver a manual."
+              : isAdmin
+                ? "Apagada. Configurá el máximo en preparación en Administración → Disponibilidad."
+                : "Apagada. Solo administración puede activarla."}
           </p>
           <Toggle
             label="Sonido de pedidos nuevos"

@@ -306,6 +306,8 @@ export type Database = {
           demo_listed: boolean;
           cover_focus_x: number;
           cover_focus_y: number;
+          auto_accept: boolean;
+          auto_accept_max_preparing: number;
         };
         Insert: {
           id?: string;
@@ -329,6 +331,8 @@ export type Database = {
           demo_listed?: boolean;
           cover_focus_x?: number;
           cover_focus_y?: number;
+          auto_accept?: boolean;
+          auto_accept_max_preparing?: number;
         };
         Update: {
           id?: string;
@@ -352,6 +356,8 @@ export type Database = {
           demo_listed?: boolean;
           cover_focus_x?: number;
           cover_focus_y?: number;
+          auto_accept?: boolean;
+          auto_accept_max_preparing?: number;
         };
         Relationships: [];
       };
@@ -416,6 +422,12 @@ export type Database = {
         Returns: Json;
       };
       waitlist_command: { Args: { input: Json }; Returns: Json };
+      venue_auto_accept: { Args: { input: Json }; Returns: Json };
+      venue_timing_stats: {
+        Args: { venue: string; from_day: string; to_day: string };
+        Returns: Json;
+      };
+      auto_accept_tick: { Args: Record<never, never>; Returns: number };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

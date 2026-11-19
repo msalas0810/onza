@@ -41,6 +41,8 @@ const sampleVenue: Venue = {
   demo_listed: true,
   cover_focus_x: 50,
   cover_focus_y: 50,
+  auto_accept: false,
+  auto_accept_max_preparing: 5,
 };
 
 // Sample drinks for reviewing the menu rows and the drink editor. Nothing here is saved.

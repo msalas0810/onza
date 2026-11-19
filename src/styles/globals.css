@@ -3240,3 +3240,7 @@ button.link-button {
     animation: none;
   }
 }
+.reception.auto {
+  background: var(--onza-brand-soft);
+  color: var(--onza-brand-text);
+}

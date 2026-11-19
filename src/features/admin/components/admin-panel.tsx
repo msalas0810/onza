@@ -120,6 +120,10 @@ export function AdminPanel({
   const [archive, setArchive] = useState<Product | null>(null);
   const [orderFilter, setOrderFilter] = useState<"active" | "all">("active");
   const [capacity, setCapacity] = useState(String(venue.capacity));
+  const [autoAccept, setAutoAccept] = useState(venue.auto_accept ?? false);
+  const [maxPreparing, setMaxPreparing] = useState(
+    String(venue.auto_accept_max_preparing ?? 5),
+  );
   const { orders, refresh } = useLiveOrders({ venueId: venue.id });
   const router = useRouter();
   const revision = orders
@@ -683,7 +687,7 @@ export function AdminPanel({
                     min={1}
                     max={100}
                     value={capacity}
-                    hint="Al llegar al máximo, el checkout avisa y no crea pedidos."
+                    hint="Al llegar al máximo, el checkout ofrece la lista de espera y no crea pedidos."
                     onChange={(e) => setCapacity(e.target.value)}
                     style={{ maxWidth: 160 }}
                   />
@@ -698,6 +702,51 @@ export function AdminPanel({
                     </Button>
                   </div>
                 </form>
+              </section>
+              <section className="block-card">
+                <h2>Aceptación automática</h2>
+                <Toggle
+                  label="Aceptar automáticamente los pedidos elegibles"
+                  checked={autoAccept}
+                  disabled={busy}
+                  onChange={(enabled) =>
+                    void run(
+                      {
+                        action: "venue_auto_accept",
+                        venueId: venue.id,
+                        enabled,
+                        maxPreparing: Number(maxPreparing),
+                      },
+                      enabled ? "Aceptación automática activada" : "Volvió a aceptación manual",
+                    ).then((ok) => ok && setAutoAccept(enabled))
+                  }
+                />
+                <TextField
+                  label="Máximo de pedidos en preparación"
+                  type="number"
+                  min={1}
+                  max={50}
+                  value={maxPreparing}
+                  hint="Límite de trabajo de la barra, distinto de la capacidad de admisión. Si está lleno, los pedidos quedan para aceptar a mano."
+                  onChange={(e) => setMaxPreparing(e.target.value)}
+                  onBlur={() =>
+                    autoAccept &&
+                    void run(
+                      {
+                        action: "venue_auto_accept",
+                        venueId: venue.id,
+                        enabled: true,
+                        maxPreparing: Number(maxPreparing),
+                      },
+                      "Guardado",
+                    )
+                  }
+                  style={{ maxWidth: 160 }}
+                />
+                <p className="muted t-label">
+                  Solo acepta si el local recibe pedidos, el pedido está vigente, la reserva está autorizada, hay stock y
+                  lugar en preparación. Una pausa la detiene. El equipo puede volver a manual desde los Ajustes de la barra.
+                </p>
               </section>
               <section className="block-card">
                 <h2>Agotados ahora</h2>

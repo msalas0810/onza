@@ -43,6 +43,12 @@ export const commandSchema = z.discriminatedUnion("action", [
     available: z.boolean(),
   }),
   z.object({
+    action: z.literal("venue_auto_accept"),
+    venueId: uuid,
+    enabled: z.boolean(),
+    maxPreparing: z.number().int().min(1).max(50).optional(),
+  }),
+  z.object({
     action: z.literal("product_archive"),
     venueId: uuid,
     productId: uuid,

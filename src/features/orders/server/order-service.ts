@@ -46,6 +46,11 @@ export async function executeCommand(raw: unknown) {
     if (error) throw new Error(error.message);
     return data;
   }
+  if (command.action === "venue_auto_accept") {
+    const { data, error } = await db.rpc("venue_auto_accept", { input });
+    if (error) throw new Error(await explainDenied(db, error.message));
+    return data;
+  }
   if (command.action === "product_image") {
     const { data, error } = await db.rpc("update_product_image", { input });
     if (error) throw new Error(error.message);
