@@ -21,6 +21,7 @@ const MIGRATIONS = [
   "202611170010_customer_accounts.sql",
   "202611170011_team_management.sql",
   "202611170012_demo_listing.sql",
+  "202611190013_order_window_availability.sql",
 ];
 const TABLES = new Set([
   "venues",

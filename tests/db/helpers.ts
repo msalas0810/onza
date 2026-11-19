@@ -10,6 +10,8 @@ export const ids = {
   patio: "20000000-0000-4000-8000-000000000002",
   product: "30000000-0000-4000-8000-000000000001",
 };
+/** Migraciones del plan de pulido, en orden. Se aplican después de las anteriores, igual que en el proyecto. */
+export const LATER_MIGRATIONS = ["202611190013_order_window_availability.sql"];
 export async function database() {
   const db = new PGlite();
   await db.exec(
@@ -60,6 +62,8 @@ export async function database() {
   await db.exec(
     readFileSync("supabase/migrations/202611170012_demo_listing.sql", "utf8"),
   );
+  for (const file of LATER_MIGRATIONS)
+    await db.exec(readFileSync(`supabase/migrations/${file}`, "utf8"));
   await db.exec(readFileSync("supabase/seed.sql", "utf8"));
   await db.exec(
     `insert into auth.users values('${ids.customer}'),('${ids.other}'),('${ids.staff}'),('${ids.admin}');insert into public.memberships(user_id,venue_id,role) values('${ids.staff}','${ids.venue}','bartender'),('${ids.admin}','${ids.venue}','admin');`,

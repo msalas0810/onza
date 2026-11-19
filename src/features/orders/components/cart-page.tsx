@@ -1,7 +1,6 @@
 "use client";
-import { useState } from "react";
 import Link from "next/link";
-import { RefreshCw, ShoppingBag } from "lucide-react";
+import { ArrowLeft, ShoppingBag } from "lucide-react";
 import {
   useCart,
   writeCart,
@@ -17,12 +16,11 @@ import {
   Notice,
   buttonClass,
 } from "@/components/ui/primitives";
-import { Sheet } from "@/components/ui/sheet";
 
 export function CartPage() {
   const cart = useCart();
-  const { issues, venue, reviewing, failed, review } = useCartReview(cart);
-  const [confirmEmpty, setConfirmEmpty] = useState(false);
+  // La revisión corre sola al abrir y al cambiar el carrito; el servidor vuelve a verificar todo al pedir.
+  const { issues, venue, failed } = useCartReview(cart);
   if (!cart?.items.length)
     return (
       <>
@@ -45,6 +43,14 @@ export function CartPage() {
   const blocked = Object.keys(issues).length > 0 || venue !== "open";
   return (
     <>
+      <Link
+        className="back"
+        href={`/v/${cart.venueSlug}`}
+        aria-label="Volver al menú"
+      >
+        <ArrowLeft size={20} aria-hidden="true" />
+        <span aria-hidden="true">Menú</span>
+      </Link>
       <div className="page-head">
         <h1 className="t-title">Carrito</h1>
         <Link
@@ -154,54 +160,11 @@ export function CartPage() {
                 : "El local no recibe pedidos ahora."}
             </p>
           )}
-          <div className="row between wrap">
-            <Link
-              className={buttonClass({ variant: "quiet", size: "sm" })}
-              href={`/v/${cart.venueSlug}`}
-            >
-              Seguir eligiendo
-            </Link>
-            <Button
-              variant="quiet"
-              size="sm"
-              loading={reviewing}
-              onClick={() => void review()}
-            >
-              <RefreshCw size={16} aria-hidden="true" />
-              Revisar precios
-            </Button>
-            <Button
-              variant="quiet"
-              size="sm"
-              onClick={() => setConfirmEmpty(true)}
-            >
-              Vaciar carrito
-            </Button>
-          </div>
+          <p className="btn-note">
+            Podés cancelar hasta que el local acepte tu pedido.
+          </p>
         </div>
       </div>
-      <Sheet
-        open={confirmEmpty}
-        onOpenChange={setConfirmEmpty}
-        title="¿Vaciar el carrito?"
-        description={`Se quitan todos los productos de ${cart.venueName}.`}
-        actions={
-          <>
-            <Button variant="secondary" onClick={() => setConfirmEmpty(false)}>
-              Volver
-            </Button>
-            <Button
-              variant="danger"
-              onClick={() => {
-                writeCart(null);
-                setConfirmEmpty(false);
-              }}
-            >
-              Vaciar
-            </Button>
-          </>
-        }
-      />
     </>
   );
 }

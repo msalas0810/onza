@@ -116,6 +116,7 @@ export type Database = {
           delivered_at: string | null;
           deadline: string;
           business_date: string;
+          queued_at: string | null;
         };
         Insert: {
           id?: string;
@@ -132,6 +133,7 @@ export type Database = {
           delivered_at?: string | null;
           deadline: string;
           business_date?: string;
+          queued_at?: string | null;
         };
         Update: {
           id?: string;
@@ -148,6 +150,7 @@ export type Database = {
           delivered_at?: string | null;
           deadline?: string;
           business_date?: string;
+          queued_at?: string | null;
         };
         Relationships: [];
       };

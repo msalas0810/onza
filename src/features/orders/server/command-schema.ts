@@ -11,6 +11,8 @@ export const createSchema = z.object({
         productId: uuid,
         quantity: z.number().int().min(1).max(10),
         expectedProductVersion: version,
+        // Precio que vio el cliente: el servidor rechaza solo si cambió el precio (no por cambios de descripción o stock).
+        expectedPriceMinor: z.number().int().min(0).max(100000000).optional(),
       }),
     )
     .min(1)
@@ -33,6 +35,19 @@ export const commandSchema = z.discriminatedUnion("action", [
     providerResultConfirmed: z.literal(true),
   }),
   z.object({ action: z.enum(["get", "authorize_action"]), orderId: uuid }),
+  z.object({ action: z.literal("attempt_status"), idempotencyKey: key }),
+  z.object({
+    action: z.literal("product_availability"),
+    venueId: uuid,
+    productId: uuid,
+    available: z.boolean(),
+  }),
+  z.object({
+    action: z.literal("product_archive"),
+    venueId: uuid,
+    productId: uuid,
+    archived: z.boolean(),
+  }),
   z.object({
     action: z.enum(["accept", "ready", "cancel"]),
     orderId: uuid,

@@ -2,7 +2,7 @@ import { isAllowedRequestOrigin } from "@/lib/request-origin";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { executeCommand } from "@/features/orders/server/order-service";
-import { errorCode, errorMessage } from "@/lib/errors";
+import { CommandFailure, errorCode, errorMessage } from "@/lib/errors";
 export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
   if (!isAllowedRequestOrigin(request))
@@ -39,8 +39,9 @@ export async function POST(request: Request) {
                   : code === "RATE_LIMITED"
                     ? 429
                     : 409;
+    const detail = error instanceof CommandFailure ? error.detail : undefined;
     return NextResponse.json(
-      { error: code, message: errorMessage(new Error(code)) },
+      { error: code, message: errorMessage(new Error(code)), detail },
       { status, headers: { "Cache-Control": "no-store" } },
     );
   }

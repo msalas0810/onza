@@ -4,8 +4,15 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft, Lock } from "lucide-react";
 import { browserDb } from "@/lib/supabase/browser";
-import { errorMessage } from "@/lib/errors";
-import { useCart, cartTotal, writeCart, readCart } from "../cart-store";
+import { z } from "zod";
+import { errorMessage, type FailureDetail } from "@/lib/errors";
+import {
+  useCart,
+  cartTotal,
+  writeCart,
+  readCart,
+  setProductQuantity,
+} from "../cart-store";
 import {
   Button,
   Price,
@@ -13,11 +20,46 @@ import {
   Notice,
   buttonClass,
 } from "@/components/ui/primitives";
-import { Sheet } from "@/components/ui/sheet";
 import { sendCommand, CommandError, isSessionError } from "../client-api";
-import { orderSchema, type Order } from "../types";
+import { orderSchema, statusLabels, type Order } from "../types";
 import { SessionExpiredSheet } from "./session-expired-sheet";
 import { useOnline } from "@/lib/use-online";
+
+/** Rechazos en los que el servidor no creó nada: el intento se puede descartar sin riesgo de duplicar. */
+const DEFINITIVE = [
+  "OUT_OF_STOCK",
+  "PRICE_CHANGED",
+  "VENUE_CLOSED",
+  "VENUE_PAUSED",
+  "VENUE_CAPACITY",
+  "INVALID_QUANTITY",
+  "INVALID_INPUT",
+  "POLICY_REQUIRED",
+  "RESOURCE_NOT_FOUND",
+  "RATE_LIMITED",
+  "STAFF_CANNOT_ORDER",
+  "ONBOARDING_REQUIRED",
+];
+const ACTIVE = ["pending_authorization", "queued", "preparing", "ready"];
+const legacyAttemptKey = "onza-checkout-attempt";
+/** El intento pendiente es de la cuenta, igual que el carrito: otra cuenta en el mismo equipo nunca lo hereda. */
+export const checkoutAttemptKey = (userId: string | null) =>
+  userId ? `${legacyAttemptKey}:${userId}` : legacyAttemptKey;
+const attemptSchema = z.object({ fingerprint: z.string(), key: z.string() });
+function readAttempt(key: string) {
+  try {
+    const parsed = attemptSchema.safeParse(
+      JSON.parse(localStorage.getItem(key) ?? "null"),
+    );
+    return parsed.success ? parsed.data : null;
+  } catch {
+    return null;
+  }
+}
+const attemptStatusSchema = z.discriminatedUnion("attempt", [
+  z.object({ attempt: z.literal("none") }),
+  z.object({ attempt: z.literal("found"), order: orderSchema }),
+]);
 
 export function Checkout({ accounts = false }: { accounts?: boolean }) {
   const cart = useCart();
@@ -26,12 +68,15 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
   // Con cuentas, la mayoría de edad y las condiciones se aceptaron (con fecha y versión) en el perfil.
   const [adult, setAdult] = useState(accounts);
   const [policy, setPolicy] = useState(accounts);
-  const [error, setError] = useState<{ code: string; message: string } | null>(
-    null,
-  );
+  const [error, setError] = useState<{
+    code: string;
+    message: string;
+    detail?: FailureDetail;
+  } | null>(null);
+  const [activeOrder, setActiveOrder] = useState<Order | null>(null);
+  const allowAnother = useRef(false);
   const [busy, setBusy] = useState(false);
   const [expired, setExpired] = useState(false);
-  const [confirmRetry, setConfirmRetry] = useState(false);
   const [placed, setPlaced] = useState<Order | null>(null);
   const lock = useRef(false);
   if (placed)
@@ -78,6 +123,8 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
     lock.current = true;
     setBusy(true);
     setError(null);
+    setActiveOrder(null);
+    let attemptKey = legacyAttemptKey;
     try {
       const db = browserDb();
       const {
@@ -99,6 +146,8 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           "Estás usando una sesión de personal. Abrí una ventana o perfil separado para pedir como invitado.",
         );
       }
+      const current = await db.auth.getUser();
+      attemptKey = checkoutAttemptKey(current.data.user?.id ?? null);
       const input = {
         action: "create",
         venueId: cart.venueId,
@@ -106,27 +155,44 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           productId: i.productId,
           quantity: i.quantity,
           expectedProductVersion: i.version,
+          expectedPriceMinor: i.priceMinor,
         })),
         termsVersion: "demo-v1",
         privacyVersion: "demo-v1",
         adult,
       };
       const fingerprint = JSON.stringify(input);
-      const saved = localStorage.getItem("onza-checkout-attempt");
-      const previous = saved ? JSON.parse(saved) : null;
-      // Se conserva la misma clave tras perder la red. Un carrito distinto exige un intento nuevo explícito.
-      if (previous && previous.fingerprint !== fingerprint)
-        throw new CommandError(
-          "Hay un intento anterior sin resolver. Consultá Pedidos antes de cambiar el carrito.",
-          "ATTEMPT_PENDING",
+      const previous = readAttempt(attemptKey) ?? readAttempt(legacyAttemptKey);
+      localStorage.removeItem(legacyAttemptKey);
+      let attempt = previous;
+      // Un intento anterior con otro carrito no bloquea a ciegas: el servidor dice si creó un pedido (y espera a que
+      // termine un envío en curso con esa clave). Sin pedido, se descarta; con un pedido activo, se muestra cuál es.
+      if (previous && previous.fingerprint !== fingerprint) {
+        const status = attemptStatusSchema.parse(
+          await sendCommand({
+            action: "attempt_status",
+            idempotencyKey: previous.key,
+          }),
         );
-      const attempt = previous ?? { fingerprint, key: crypto.randomUUID() };
-      localStorage.setItem("onza-checkout-attempt", JSON.stringify(attempt));
+        attempt = null;
+        localStorage.removeItem(attemptKey);
+        if (
+          status.attempt === "found" &&
+          ACTIVE.includes(status.order.status) &&
+          !allowAnother.current
+        ) {
+          setActiveOrder(status.order);
+          return;
+        }
+      }
+      allowAnother.current = false;
+      attempt ??= { fingerprint, key: crypto.randomUUID() };
+      localStorage.setItem(attemptKey, JSON.stringify(attempt));
       const order = orderSchema.parse(
         await sendCommand({ ...input, idempotencyKey: attempt.key }),
       );
       if (JSON.stringify(readCart()) === JSON.stringify(cart)) writeCart(null);
-      localStorage.removeItem("onza-checkout-attempt");
+      localStorage.removeItem(attemptKey);
       setPlaced(order);
       setTimeout(() => router.push(`/orders/${order.id}`), 1800);
     } catch (e) {
@@ -134,8 +200,12 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
         setExpired(true);
         return;
       }
+      // Un rechazo definitivo del servidor revierte toda la transacción: no hay pedido que proteger con la misma clave.
+      if (e instanceof CommandError && DEFINITIVE.includes(e.code))
+        localStorage.removeItem(attemptKey);
       setError({
         code: e instanceof CommandError ? e.code : "UNKNOWN",
+        detail: e instanceof CommandError ? e.detail : undefined,
         message:
           e instanceof CommandError
             ? e.message
@@ -152,18 +222,35 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
     }
   };
   const total = cartTotal(cart);
-  const reviewable =
+  const affected = error?.detail?.productId
+    ? cart.items.find((i) => i.productId === error.detail?.productId)
+    : undefined;
+  const lineIssue =
     error && ["OUT_OF_STOCK", "PRICE_CHANGED"].includes(error.code);
-  const unresolved =
+  const retryable =
     error &&
-    !reviewable &&
-    ![
-      "OFFLINE",
-      "CONNECTION_ERROR",
-      "VENUE_CLOSED",
-      "VENUE_PAUSED",
-      "VENUE_CAPACITY",
-    ].includes(error.code);
+    !lineIssue &&
+    !DEFINITIVE.includes(error.code) &&
+    error.code !== "OFFLINE";
+  const fixLine = () => {
+    if (!affected || !error) return;
+    if (error.code === "OUT_OF_STOCK")
+      setProductQuantity(affected.productId, 0);
+    else if (error.detail?.priceMinor !== undefined)
+      writeCart({
+        ...cart,
+        items: cart.items.map((i) =>
+          i.productId === affected.productId
+            ? {
+                ...i,
+                priceMinor: error.detail?.priceMinor ?? i.priceMinor,
+                version: error.detail?.version ?? i.version,
+              }
+            : i,
+        ),
+      });
+    setError(null);
+  };
   return (
     <>
       <Link className="back" href="/cart">
@@ -180,7 +267,10 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
         </div>
         <div className="lines">
           {cart.items.map((i) => (
-            <div className="line" key={i.productId}>
+            <div
+              className={`line ${affected?.productId === i.productId ? "issue" : ""}`}
+              key={i.productId}
+            >
               <span className="q">{i.quantity}×</span>
               <span>{i.name}</span>
               <span className="amt">
@@ -236,6 +326,36 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
         <p className="muted t-label">
           Podés cancelar hasta que el local acepte tu pedido.
         </p>
+        {activeOrder && (
+          <Notice
+            tone="warning"
+            title="Ya tenés un pedido activo"
+            action={
+              <div className="row wrap">
+                <Link
+                  className={buttonClass({ variant: "secondary", size: "sm" })}
+                  href={`/orders/${activeOrder.id}`}
+                >
+                  Ver pedido activo
+                </Link>
+                <Button
+                  variant="quiet"
+                  size="sm"
+                  onClick={() => {
+                    allowAnother.current = true;
+                    void submit();
+                  }}
+                >
+                  Hacer otro pedido
+                </Button>
+              </div>
+            }
+          >
+            Tu intento anterior creó el pedido #{activeOrder.public_code} en{" "}
+            {activeOrder.venue.name} ({statusLabels[activeOrder.status]}).
+            Revisalo antes de pedir otra ronda.
+          </Notice>
+        )}
         {error && (
           <Notice
             tone="danger"
@@ -243,45 +363,51 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
               error.code === "OFFLINE" ? "Sin conexión" : "No se hizo el pedido"
             }
             action={
-              reviewable ? (
+              lineIssue && affected ? (
+                <Button variant="secondary" size="sm" onClick={fixLine}>
+                  {error.code === "OUT_OF_STOCK" ? (
+                    `Quitar ${affected.name}`
+                  ) : (
+                    <>
+                      Aceptar <Price amount={error.detail?.priceMinor ?? 0} />
+                    </>
+                  )}
+                </Button>
+              ) : lineIssue ? (
                 <Link
                   className={buttonClass({ variant: "secondary", size: "sm" })}
                   href="/cart"
                 >
                   Revisar carrito
                 </Link>
-              ) : unresolved ? (
+              ) : retryable || error.code === "OFFLINE" ? (
                 <div className="row wrap">
-                  <Link
-                    className={buttonClass({
-                      variant: "secondary",
-                      size: "sm",
-                    })}
-                    href="/orders"
-                  >
-                    Consultar mis pedidos
-                  </Link>
                   <Button
-                    variant="quiet"
+                    variant="secondary"
                     size="sm"
-                    onClick={() => setConfirmRetry(true)}
+                    onClick={() => void submit()}
                   >
-                    Ya revisé · nuevo intento
+                    Reintentar
                   </Button>
+                  {retryable && (
+                    <Link
+                      className={buttonClass({ variant: "quiet", size: "sm" })}
+                      href="/orders"
+                    >
+                      Consultar mis pedidos
+                    </Link>
+                  )}
                 </div>
-              ) : error.code === "OFFLINE" ||
-                error.code === "CONNECTION_ERROR" ? (
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => void submit()}
-                >
-                  Reintentar
-                </Button>
               ) : undefined
             }
           >
-            {error.message}
+            {affected && error.code === "OUT_OF_STOCK"
+              ? `${affected.name} se agotó. Quitalo para pedir el resto.`
+              : affected && error.code === "PRICE_CHANGED"
+                ? `${affected.name} cambió de precio. Revisá el total antes de pedir.`
+                : error.message}
+            {retryable &&
+              " Reintentar usa el mismo intento: no se duplica el pedido."}
           </Notice>
         )}
         <div className="sticky-cta">
@@ -302,28 +428,6 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
         </div>
       </div>
       <SessionExpiredSheet open={expired} next="/checkout" />
-      <Sheet
-        open={confirmRetry}
-        onOpenChange={setConfirmRetry}
-        title="¿Ya revisaste tus pedidos?"
-        description="Iniciar otro intento puede crear otro pedido si el anterior se confirmó."
-        actions={
-          <>
-            <Button variant="secondary" onClick={() => setConfirmRetry(false)}>
-              Volver
-            </Button>
-            <Button
-              onClick={() => {
-                localStorage.removeItem("onza-checkout-attempt");
-                setError(null);
-                setConfirmRetry(false);
-              }}
-            >
-              Empezar un intento nuevo
-            </Button>
-          </>
-        }
-      />
     </>
   );
 }

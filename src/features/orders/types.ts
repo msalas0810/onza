@@ -27,6 +27,10 @@ export const orderSchema = z.object({
   ready_at: z.string().nullable(),
   delivered_at: z.string().nullable(),
   deadline: z.string(),
+  // Entrada a la cola de barra (inicio del plazo de aceptación) y hora del servidor al responder. Opcionales: una base sin la
+  // migración 013 no los envía.
+  queued_at: z.string().nullable().optional(),
+  server_now: z.string().optional(),
   business_date: z.string(),
   claim_id: z.string().nullable(),
   claimed_elsewhere: z.boolean().nullable(),

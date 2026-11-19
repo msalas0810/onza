@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { z } from "zod";
 import Link from "next/link";
 import {
   BarChart3,
@@ -38,6 +39,13 @@ import { SessionExpiredSheet } from "@/features/orders/components/session-expire
 import { TeamPanel } from "@/features/team/components/team-panel";
 import { adminTabIds, adminTabLabels, type AdminTab } from "../admin-tabs";
 
+const productSchema = z.object({
+  id: z.string(),
+  available: z.boolean(),
+  archived: z.boolean(),
+  version: z.number(),
+});
+
 const tabIcons = {
   resumen: BarChart3,
   pedidos: Receipt,
@@ -73,17 +81,31 @@ export function AdminPanel({
   categories,
   summary,
   tab,
+  editId,
 }: {
   venue: Venue;
   products: Product[];
   categories: { id: string; label: string }[];
   summary: VenueSummary;
   tab: AdminTab;
+  editId?: string;
 }) {
   const [date, setDate] = useState(summary.business_date);
   const [metrics, setMetrics] = useState(summary);
   const [filter, setFilter] = useState("");
-  const [edit, setEdit] = useState<Product | null | undefined>(undefined);
+  // Estado confirmado por el servidor para cada producto tocado en esta pantalla (antes de que llegue el refresh).
+  const [confirmed, setConfirmed] = useState<Record<string, Product>>({});
+  const [pending, setPending] = useState<Record<string, boolean>>({});
+  const [rowErrors, setRowErrors] = useState<Record<string, string>>({});
+  const [menuView, setMenuView] = useState<"active" | "archived">("active");
+  const catalog = products.map((p) => {
+    const known = confirmed[p.id];
+    // El refresh del servidor manda cuando trae una versión igual o más nueva que la confirmada localmente.
+    return known && known.version >= p.version ? { ...p, ...known } : p;
+  });
+  const [edit, setEdit] = useState<Product | null | undefined>(() =>
+    editId ? products.find((p) => p.id === editId) : undefined,
+  );
   const [error, setError] = useState("");
   const [saved, setSaved] = useState("");
   const [busy, setBusy] = useState(false);
@@ -144,6 +166,52 @@ export function AdminPanel({
       setBusy(false);
     }
   };
+  /** Agotar/reactivar o archivar/restaurar. Optimista con reversión: si el servidor falla, vuelve al valor anterior. */
+  const productCommand = async (
+    product: Product,
+    input:
+      | { action: "product_availability"; available: boolean }
+      | { action: "product_archive"; archived: boolean },
+    message = "",
+  ) => {
+    setPending((current) => ({
+      ...current,
+      [product.id]:
+        input.action === "product_availability" ? input.available : true,
+    }));
+    setRowErrors(({ [product.id]: _old, ...rest }) => (void _old, rest));
+    setSaved("");
+    try {
+      const result = productSchema.parse(
+        await sendCommand({
+          ...input,
+          venueId: venue.id,
+          productId: product.id,
+        }),
+      );
+      setConfirmed((current) => ({
+        ...current,
+        [product.id]: { ...product, ...result },
+      }));
+      if (message) setSaved(message);
+      router.refresh();
+    } catch (e) {
+      if (isSessionError(e)) setExpired(true);
+      else if (isPasswordChangeError(e)) router.push("/equipo/clave");
+      else
+        setRowErrors((current) => ({
+          ...current,
+          [product.id]:
+            e instanceof Error
+              ? `${e.message} Se mantiene el estado anterior.`
+              : "No se guardó el cambio. Se mantiene el estado anterior.",
+        }));
+    } finally {
+      setPending(({ [product.id]: _done, ...rest }) => (void _done, rest));
+    }
+  };
+  const shownAvailable = (p: Product) =>
+    p.id in pending && !p.archived ? pending[p.id] : p.available;
   const ask = (spec: Support) => setSupport({ spec, reason: "", problem: "" });
   const nav = adminTabIds.map((id) => {
     const Icon = tabIcons[id];
@@ -166,16 +234,19 @@ export function AdminPanel({
           o.status,
         ),
   );
+  const archivedProducts = catalog.filter((p) => p.archived);
   const grouped = categories
     .map((c) => ({
       category: c,
-      list: products.filter(
+      list: catalog.filter(
         (p) =>
           p.category_id === c.id &&
+          p.archived === (menuView === "archived") &&
           p.name.toLowerCase().includes(filter.toLowerCase()),
       ),
     }))
     .filter((g) => g.list.length);
+  const soldOut = catalog.filter((p) => !p.archived && !shownAvailable(p));
   return (
     <>
       <div className="row between wrap" style={{ marginBottom: 16 }}>
@@ -509,6 +580,18 @@ export function AdminPanel({
                       onChange={(e) => setFilter(e.target.value)}
                     />
                   </div>
+                  <SegmentedControl<"active" | "archived">
+                    label="Productos"
+                    value={menuView}
+                    options={[
+                      { value: "active", label: "En el menú" },
+                      {
+                        value: "archived",
+                        label: `Archivados (${archivedProducts.length})`,
+                      },
+                    ]}
+                    onChange={setMenuView}
+                  />
                   {grouped.map(({ category, list }) => (
                     <div key={category.id}>
                       <h3
@@ -517,63 +600,110 @@ export function AdminPanel({
                       >
                         {category.label}
                       </h3>
-                      <div className="rows">
-                        {list.map((p) => (
-                          <div className="r wrap" key={p.id}>
-                            <span className="thumb">
-                              <ProductImage
-                                name={p.name}
-                                src={productImageSrc(p)}
-                              />
-                            </span>
-                            <div className="grow">
-                              <div style={{ fontWeight: 600 }}>{p.name}</div>
-                              <div className="sub">
-                                <Price amount={p.price_minor} />
-                                {p.available ? "" : " · Agotado"}
+                      <div className="rows product-rows">
+                        {list.map((p) => {
+                          const available = shownAvailable(p);
+                          return (
+                            <div className="product-row" key={p.id}>
+                              <span className="thumb">
+                                <ProductImage
+                                  name={p.name}
+                                  src={productImageSrc(p)}
+                                />
+                              </span>
+                              <div className="product-row-main">
+                                <div className="product-row-name">{p.name}</div>
+                                <div className="sub">
+                                  <Price amount={p.price_minor} />
+                                  {p.archived ? (
+                                    <StatusBadge>Archivado</StatusBadge>
+                                  ) : (
+                                    !available && (
+                                      <StatusBadge tone="warning">
+                                        Agotado
+                                      </StatusBadge>
+                                    )
+                                  )}
+                                </div>
+                                {rowErrors[p.id] && (
+                                  <p className="inline-error" role="alert">
+                                    {rowErrors[p.id]}
+                                  </p>
+                                )}
+                              </div>
+                              <div className="product-row-actions">
+                                {p.archived ? (
+                                  <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    loading={p.id in pending}
+                                    onClick={() =>
+                                      void productCommand(
+                                        p,
+                                        {
+                                          action: "product_archive",
+                                          archived: false,
+                                        },
+                                        `${p.name} volvió al menú como agotado. Habilitalo cuando quieras venderlo.`,
+                                      )
+                                    }
+                                  >
+                                    Restaurar
+                                  </Button>
+                                ) : (
+                                  <>
+                                    <Toggle
+                                      label={
+                                        <span className="t-label">
+                                          Disponible
+                                          <span className="sr-only">
+                                            {" "}
+                                            para pedir: {p.name}
+                                          </span>
+                                        </span>
+                                      }
+                                      checked={available}
+                                      disabled={p.id in pending}
+                                      onChange={(next) =>
+                                        void productCommand(p, {
+                                          action: "product_availability",
+                                          available: next,
+                                        })
+                                      }
+                                    />
+                                    <Button
+                                      variant="quiet"
+                                      size="sm"
+                                      onClick={() => setEdit(p)}
+                                    >
+                                      Editar
+                                    </Button>
+                                    <Button
+                                      variant="quiet"
+                                      size="sm"
+                                      onClick={() => setArchive(p)}
+                                    >
+                                      Archivar
+                                    </Button>
+                                  </>
+                                )}
                               </div>
                             </div>
-                            <Toggle
-                              label={
-                                <span className="sr-only">
-                                  Disponible: {p.name}
-                                </span>
-                              }
-                              checked={p.available}
-                              disabled={busy}
-                              onChange={(available) =>
-                                void run({
-                                  action: "product_save",
-                                  venueId: venue.id,
-                                  productId: p.id,
-                                  expectedVersion: p.version,
-                                  available,
-                                })
-                              }
-                            />
-                            <Button
-                              variant="quiet"
-                              size="sm"
-                              onClick={() => setEdit(p)}
-                            >
-                              Editar
-                            </Button>
-                            <Button
-                              variant="quiet"
-                              size="sm"
-                              onClick={() => setArchive(p)}
-                            >
-                              Archivar
-                            </Button>
-                          </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   ))}
                   {!grouped.length && (
                     <EmptyState
                       icon={Wine}
-                      title={filter ? "Sin resultados" : "El menú está vacío"}
+                      title={
+                        filter
+                          ? "Sin resultados"
+                          : menuView === "archived"
+                            ? "No hay productos archivados"
+                            : "El menú está vacío"
+                      }
                     />
                   )}
                 </>
@@ -643,29 +773,36 @@ export function AdminPanel({
               </section>
               <section className="block-card">
                 <h2>Agotados ahora</h2>
-                {products.some((p) => !p.available) ? (
+                {soldOut.length ? (
                   <div className="rows">
-                    {products
-                      .filter((p) => !p.available)
-                      .map((p) => (
-                        <div className="r" key={p.id}>
-                          <span className="grow">{p.name}</span>
-                          <Toggle
-                            label={<span className="t-label">Disponible</span>}
-                            checked={false}
-                            disabled={busy}
-                            onChange={() =>
-                              void run({
-                                action: "product_save",
-                                venueId: venue.id,
-                                productId: p.id,
-                                expectedVersion: p.version,
-                                available: true,
-                              })
-                            }
-                          />
-                        </div>
-                      ))}
+                    {soldOut.map((p) => (
+                      <div className="r wrap" key={p.id}>
+                        <Link
+                          className="grow"
+                          href={`/admin/${venue.id}?tab=menu&editar=${p.id}`}
+                          style={{ fontWeight: 600 }}
+                        >
+                          {p.name}
+                        </Link>
+                        <Toggle
+                          label={<span className="t-label">Disponible</span>}
+                          checked={false}
+                          disabled={p.id in pending}
+                          onChange={() =>
+                            void productCommand(
+                              p,
+                              { action: "product_availability", available: true },
+                              `${p.name} vuelve a estar disponible.`,
+                            )
+                          }
+                        />
+                        {rowErrors[p.id] && (
+                          <p className="inline-error" role="alert">
+                            {rowErrors[p.id]}
+                          </p>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <p className="muted">Todo disponible.</p>
@@ -794,7 +931,7 @@ export function AdminPanel({
         open={!!archive}
         onOpenChange={(open) => !open && setArchive(null)}
         title={archive ? `¿Archivar ${archive.name}?` : "Archivar"}
-        description="Los pedidos históricos conservan sus datos."
+        description="Deja de verse en el menú del cliente. Los pedidos históricos conservan nombre y precio. Podés restaurarlo desde Archivados."
         actions={
           <>
             <Button variant="secondary" onClick={() => setArchive(null)}>
@@ -807,13 +944,11 @@ export function AdminPanel({
                 if (!archive) return;
                 const product = archive;
                 setArchive(null);
-                await run({
-                  action: "product_save",
-                  venueId: venue.id,
-                  productId: product.id,
-                  expectedVersion: product.version,
-                  archived: true,
-                });
+                await productCommand(
+                  product,
+                  { action: "product_archive", archived: true },
+                  `${product.name} quedó en Archivados.`,
+                );
               }}
             >
               Archivar

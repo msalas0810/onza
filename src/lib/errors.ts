@@ -1,4 +1,9 @@
+// El orden importa: errorCode toma la primera clave contenida en el texto (ORDER_EXPIRED antes que EXPIRED).
 export const messages: Record<string, string> = {
+  ORDER_EXPIRED:
+    "Pasaron los cinco minutos para aceptar este pedido. Venció y la reserva quedó liberada.",
+  PRODUCT_ARCHIVED:
+    "Este producto está archivado. Restauralo antes de habilitarlo para vender.",
   PICKUP_KEY_NOT_CONFIGURED:
     "El ticket no está disponible en este momento. Volvé a consultar o pedí ayuda al local.",
   SUPABASE_NOT_CONFIGURED:
@@ -25,6 +30,7 @@ export const messages: Record<string, string> = {
   PRICE_CHANGED:
     "El menú cambió. Volvé al carrito, revisá los precios y confirmá otra vez.",
   OUT_OF_STOCK: "Un producto ya no está disponible. Revisá el carrito.",
+  INVALID_TOKEN: "No pudimos preparar el ticket. Intentá de nuevo.",
   VERSION_CONFLICT:
     "El pedido cambió en otra sesión. Actualizá para ver su estado.",
   INVALID_TRANSITION: "Esta acción no está disponible en el estado actual.",
@@ -98,4 +104,29 @@ export function errorMessage(error: unknown) {
     messages[errorCode(error)] ??
     "No pudimos completar la operación. Revisá tu conexión y consultá el estado antes de reintentar."
   );
+}
+
+/** Detalle seguro de un rechazo del servidor (qué línea revisar). Nunca incluye datos personales ni de pago. */
+export type FailureDetail = {
+  productId?: string;
+  priceMinor?: number;
+  version?: number;
+  retryAt?: string;
+};
+export class CommandFailure extends Error {
+  constructor(
+    code: string,
+    public detail?: FailureDetail,
+  ) {
+    super(code);
+  }
+}
+/** Toma solo los campos conocidos de una respuesta de error de la base. */
+export function failureDetail(value: Record<string, unknown>) {
+  const detail: FailureDetail = {};
+  if (typeof value.productId === "string") detail.productId = value.productId;
+  if (typeof value.priceMinor === "number") detail.priceMinor = value.priceMinor;
+  if (typeof value.version === "number") detail.version = value.version;
+  if (typeof value.retryAt === "string") detail.retryAt = value.retryAt;
+  return Object.keys(detail).length ? detail : undefined;
 }

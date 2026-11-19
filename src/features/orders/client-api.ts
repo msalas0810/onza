@@ -1,8 +1,10 @@
 "use client";
+import type { FailureDetail } from "@/lib/errors";
 export class CommandError extends Error {
   constructor(
     message: string,
     public code: string,
+    public detail?: FailureDetail,
   ) {
     super(message);
   }
@@ -43,7 +45,11 @@ export async function sendCommand(input: Record<string, unknown>) {
       typeof result === "object" && result && "error" in result
         ? String(result.error)
         : "UNKNOWN_ERROR";
-    throw new CommandError(message, code);
+    const detail =
+      typeof result === "object" && result && "detail" in result
+        ? (result.detail as FailureDetail | undefined)
+        : undefined;
+    throw new CommandError(message, code, detail ?? undefined);
   }
   return result;
 }

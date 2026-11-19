@@ -37,6 +37,8 @@ await db.exec(
 await db.exec(
   readFileSync("supabase/migrations/202611170012_demo_listing.sql", "utf8"),
 );
+for (const file of ["202611190013_order_window_availability.sql"])
+  await db.exec(readFileSync(`supabase/migrations/${file}`, "utf8"));
 const { rows } = await db.query(
   `select table_name,column_name,data_type,is_nullable,column_default from information_schema.columns where table_schema='public' order by table_name,ordinal_position`,
 );

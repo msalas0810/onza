@@ -15,6 +15,8 @@ export function useLiveOrders({
   const [revision, setRevision] = useState(0);
   const [sessionExpired, setSessionExpired] = useState(false);
   const [access, setAccess] = useState<"ok" | "lost" | "password">("ok");
+  // Diferencia entre el reloj del servidor y el del dispositivo: los plazos se cuentan con la hora del servidor.
+  const [clockOffset, setClockOffset] = useState(0);
   const refresh = useCallback(() => setRevision((n) => n + 1), []);
   useEffect(() => {
     const controller = new AbortController();
@@ -61,7 +63,10 @@ export function useLiveOrders({
               ? String(json.message)
               : "No pudimos consultar los pedidos.",
           );
-        setOrders(z.array(orderSchema).parse(json));
+        const parsed = z.array(orderSchema).parse(json);
+        const serverNow = parsed.find((o) => o.server_now)?.server_now;
+        if (serverNow) setClockOffset(Date.parse(serverNow) - Date.now());
+        setOrders(parsed);
         setError("");
         if (realtimeConnected) setConnection("Conectado");
       } catch (e) {
@@ -177,13 +182,13 @@ export function useLiveOrders({
           !o.claim_id &&
           !o.claimed_elsewhere,
       )
-      .map((o) => Date.parse(o.deadline))
+      .map((o) => Date.parse(o.deadline) - clockOffset)
       .filter((time) => time > Date.now())
       .sort((a, b) => a - b)[0];
     if (!deadline) return;
     const timer = setTimeout(refresh, deadline - Date.now() + 1000);
     return () => clearTimeout(timer);
-  }, [orders, refresh]);
+  }, [orders, refresh, clockOffset]);
   return {
     orders,
     order: orders.find((order) => order.id === orderId),
@@ -193,5 +198,6 @@ export function useLiveOrders({
     refresh,
     sessionExpired,
     access,
+    clockOffset,
   };
 }

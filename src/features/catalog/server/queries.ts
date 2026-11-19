@@ -33,17 +33,29 @@ export async function getVenues() {
   }
   return [];
 }
+/**
+ * Menú publicado. Orden estable por nombre: agotar un producto no lo mueve de lugar (antes saltaba al final y parecía
+ * desaparecer). Los agotados siguen visibles con su etiqueta; los archivados no se publican.
+ */
 export async function getPublishedMenu(venueId: string) {
+  return menuQuery(venueId, false);
+}
+/** Menú completo para administración: incluye archivados (la política products_read solo se los muestra al admin). */
+export async function getAdminMenu(venueId: string) {
+  return menuQuery(venueId, true);
+}
+async function menuQuery(venueId: string, includeArchived: boolean) {
   const db = await serverDb();
+  let productQuery = db
+    .from("products")
+    .select("*")
+    .eq("venue_id", venueId)
+    .order("name")
+    .order("id")
+    .limit(300);
+  if (!includeArchived) productQuery = productQuery.eq("archived", false);
   const [products, categories] = await Promise.all([
-    db
-      .from("products")
-      .select("*")
-      .eq("venue_id", venueId)
-      .eq("archived", false)
-      .order("available", { ascending: false })
-      .order("name")
-      .limit(200),
+    productQuery,
     db
       .from("categories")
       .select("*")

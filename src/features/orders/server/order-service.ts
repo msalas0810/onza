@@ -14,6 +14,7 @@ import QRCode from "qrcode";
 import { accountsRequired } from "@/lib/access-policy";
 import { passwordChangePending } from "@/lib/supabase/guards";
 import { scenariosEnabled } from "@/features/payments/server/provider";
+import { CommandFailure, failureDetail } from "@/lib/errors";
 export async function executeCommand(raw: unknown) {
   assertMockPayments();
   const command = commandSchema.parse(raw);
@@ -60,9 +61,18 @@ export async function executeCommand(raw: unknown) {
     !Array.isArray(data) &&
     "error" in data
   )
-    throw new Error(await explainDenied(db, String(data.error)));
-  if (command.action === "venue_update" || command.action === "product_save")
+    throw new CommandFailure(
+      await explainDenied(db, String(data.error)),
+      failureDetail(data),
+    );
+  if (
+    command.action === "venue_update" ||
+    command.action === "product_save" ||
+    command.action === "product_availability" ||
+    command.action === "product_archive"
+  )
     return data;
+  if (command.action === "attempt_status") return attemptStatus(data);
   return enrichOrder(data);
 }
 /**
@@ -94,6 +104,19 @@ async function assertCanOrder(
     .select("user_id")
     .maybeSingle();
   if (!profile) throw new Error("ONBOARDING_REQUIRED");
+}
+/** Resultado de un intento previo de checkout: sin pedido, o el pedido que creó (con su ticket si corresponde). */
+async function attemptStatus(data: unknown) {
+  if (
+    data &&
+    typeof data === "object" &&
+    !Array.isArray(data) &&
+    "attempt" in data &&
+    data.attempt === "found" &&
+    "order" in data
+  )
+    return { attempt: "found", order: await enrichOrder(data.order) };
+  return { attempt: "none" };
 }
 export async function enrichOrder(data: unknown) {
   const order = orderSchema.parse(data);

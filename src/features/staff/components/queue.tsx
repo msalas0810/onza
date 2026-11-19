@@ -23,6 +23,7 @@ import { ReconnectingBanner } from "@/components/ui/connection-banner";
 import { SessionExpiredSheet } from "@/features/orders/components/session-expired-sheet";
 import { PickupPanel } from "@/features/pickup/components/pickup-panel";
 import { useOnline } from "@/lib/use-online";
+import { formatClock } from "@/lib/clock";
 import type { Venue } from "@/features/catalog/server/queries";
 
 const ScanSheet = dynamic(
@@ -44,6 +45,12 @@ const rejectReasons = [
 
 const minutesSince = (iso: string, now: number) =>
   Math.max(0, Math.floor((now - new Date(iso).getTime()) / 60000));
+/** Tiempo restante en mm:ss. */
+export const countdown = (ms: number) => {
+  const total = Math.max(0, Math.ceil(ms / 1000));
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`;
+};
+const clockTime = formatClock;
 
 /** Reloj para los minutos de espera: se actualiza solo, sin pedir datos nuevos. */
 function useNow(interval = 30000) {
@@ -64,9 +71,13 @@ export function StaffQueue({ venue }: { venue: Venue }) {
     refresh,
     sessionExpired,
     access,
+    clockOffset,
   } = useLiveOrders({ venueId: venue.id });
   const online = useOnline();
-  const now = useNow();
+  const hasNew = orders.some((o) => o.status === "queued");
+  // Con pedidos nuevos el reloj avanza cada segundo para la cuenta regresiva; si no, cada 30 s.
+  const deviceNow = useNow(hasNew ? 1000 : 30000);
+  const now = deviceNow + clockOffset;
   const [tab, setTab] = useState<string>("queued");
   const [cardErrors, setCardErrors] = useState<
     Record<string, { message: string; version: number }>
@@ -135,6 +146,16 @@ export function StaffQueue({ venue }: { venue: Venue }) {
     [],
   );
 
+  // Un pedido que llega a 0:00 se reconcilia en el servidor (vence y libera la reserva) con una consulta nueva.
+  const lapsedIds = orders
+    .filter(
+      (o) => o.status === "queued" && Date.parse(o.deadline) - now <= 0,
+    )
+    .map((o) => o.id)
+    .join(",");
+  useEffect(() => {
+    if (lapsedIds) refresh();
+  }, [lapsedIds, refresh]);
   const openPickup = (options: { resume?: string } = {}) => {
     setCredential(null);
     setResumeOrderId(options.resume ?? null);
@@ -168,6 +189,10 @@ export function StaffQueue({ venue }: { venue: Venue }) {
       });
     } catch (e) {
       if (isSessionError(e)) setExpired(true);
+      else if (e instanceof CommandError && e.code === "ORDER_EXPIRED")
+        setNotice(
+          `#${order.public_code} venció: pasaron los cinco minutos para aceptarlo. La reserva quedó liberada.`,
+        );
       else if (e instanceof CommandError && e.code === "VERSION_CONFLICT")
         setNotice(
           `#${order.public_code} cambió en otro dispositivo o el cliente lo canceló. Mostramos su estado actual.`,
@@ -390,7 +415,10 @@ export function StaffQueue({ venue }: { venue: Venue }) {
                   );
                   const late = state !== "ready" && minutes >= 10;
                   const failure = cardErrors[o.id];
-                  const disabled = !online || busy === o.id;
+                  const left =
+                    state === "queued" ? Date.parse(o.deadline) - now : 0;
+                  const lapsed = state === "queued" && left <= 0;
+                  const disabled = !online || busy === o.id || lapsed;
                   return (
                     <article
                       key={o.id}
@@ -399,13 +427,36 @@ export function StaffQueue({ venue }: { venue: Venue }) {
                     >
                       <div className="row between">
                         <span className="num">#{o.public_code}</span>
-                        <span className={`wait ${late ? "late" : ""}`}>
-                          <Clock size={16} aria-hidden="true" />
-                          {state === "ready"
-                            ? `Listo hace ${minutes} min`
-                            : `Espera ${minutes} min`}
-                        </span>
+                        {state === "queued" ? (
+                          <span
+                            className={`wait countdown ${lapsed ? "late" : left <= 60000 ? "soon" : ""}`}
+                            aria-label={
+                              lapsed
+                                ? "Plazo para aceptar vencido"
+                                : `Quedan ${countdown(left)} para aceptar`
+                            }
+                          >
+                            <Clock size={16} aria-hidden="true" />
+                            {lapsed ? "Venció" : countdown(left)}
+                          </span>
+                        ) : (
+                          <span className={`wait ${late ? "late" : ""}`}>
+                            <Clock size={16} aria-hidden="true" />
+                            {state === "ready"
+                              ? `Listo hace ${minutes} min`
+                              : `Espera ${minutes} min`}
+                          </span>
+                        )}
                       </div>
+                      {state === "queued" && (
+                        <p className="entered t-label muted">
+                          Entró a las{" "}
+                          <time dateTime={o.queued_at ?? o.created_at}>
+                            {clockTime(o.queued_at ?? o.created_at)}
+                          </time>
+                          {lapsed && " · ya no se puede aceptar"}
+                        </p>
+                      )}
                       <ul className="items">
                         {o.items.map((i) => (
                           <li key={i.id}>
@@ -437,8 +488,9 @@ export function StaffQueue({ venue }: { venue: Venue }) {
                           </Button>
                           <Button
                             size="lg"
+                            variant="success"
                             loading={busy === o.id}
-                            disabled={!online}
+                            disabled={!online || lapsed}
                             onClick={() => void act(o, "accept")}
                           >
                             Aceptar

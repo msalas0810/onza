@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 
 export type ButtonVariant =
-  "primary" | "secondary" | "quiet" | "danger" | "inverse";
+  "primary" | "secondary" | "quiet" | "danger" | "inverse" | "success";
 type ButtonLook = {
   variant?: ButtonVariant;
   size?: "sm" | "md" | "lg";

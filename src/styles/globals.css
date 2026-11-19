@@ -468,6 +468,14 @@ time {
   background: #f4f1ed;
   color: #0d0d0e;
 }
+/* Verde semántico para aceptar/entregar. En oscuro el token es claro, por eso el texto usa el fondo. */
+.btn.success {
+  background: var(--onza-success-text);
+  color: var(--onza-bg);
+}
+.btn.success:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--onza-success-text) 88%, var(--onza-text));
+}
 .btn.block {
   width: 100%;
 }
@@ -2032,3 +2040,91 @@ input.code-input {
   color: var(--onza-text);
   text-decoration: none;
 }
+
+/* Plan de pulido · Entrega 1: fila de producto en Administración. El nombre nunca se parte letra por letra: en pantallas
+   angostas las acciones bajan a su propia línea. */
+.product-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-areas: "thumb main" "actions actions";
+  align-items: center;
+  column-gap: var(--onza-space-12);
+  row-gap: var(--onza-space-8);
+  padding-block: var(--onza-space-12);
+  border-bottom: 1px solid var(--onza-border);
+}
+.product-row .thumb {
+  grid-area: thumb;
+  position: relative;
+  width: 3rem;
+  height: 3rem;
+  overflow: hidden;
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-surface);
+}
+.product-row .thumb img {
+  object-fit: cover;
+}
+.product-row-main {
+  grid-area: main;
+  min-width: 0;
+}
+.product-row-name {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  hyphens: auto;
+}
+.product-row .sub {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--onza-space-8);
+  font-size: var(--onza-type-label-size);
+  color: var(--onza-text-muted);
+}
+.product-row-actions {
+  grid-area: actions;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--onza-space-4) var(--onza-space-8);
+}
+.product-row-actions .toggle {
+  margin-inline-end: auto;
+  gap: var(--onza-space-8);
+}
+.product-row .inline-error,
+.rows .r .inline-error {
+  margin-top: var(--onza-space-4);
+  flex-basis: 100%;
+  font-size: var(--onza-type-label-size);
+  color: var(--onza-danger-text);
+}
+@media (min-width: 40rem) {
+  .product-row {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "thumb main actions";
+  }
+  .product-row-actions .toggle {
+    margin-inline-end: 0;
+  }
+}
+.line.issue {
+  padding-inline: var(--onza-space-12);
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-danger-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--onza-danger-text) 35%, transparent);
+}
+
+.ocard .wait.countdown {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+}
+.ocard .wait.soon {
+  color: var(--onza-warning-text);
+}
+.ocard .entered {
+  margin: 0;
+}
+.ocard .wait.countdown.late { color: var(--onza-danger-text); }

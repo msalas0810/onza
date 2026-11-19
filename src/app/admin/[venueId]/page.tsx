@@ -1,6 +1,6 @@
 import { StaffShell } from "@/components/ui/staff-shell";
 import { staffGate } from "@/components/ui/staff-gate";
-import { getPublishedMenu } from "@/features/catalog/server/queries";
+import { getAdminMenu } from "@/features/catalog/server/queries";
 import { getVenueSummary } from "@/features/analytics/server/queries";
 import { businessDate } from "@/features/analytics/business-date";
 import { AdminPanel } from "@/features/admin/components/admin-panel";
@@ -14,10 +14,10 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ venueId: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; editar?: string }>;
 }) {
   const { venueId } = await params;
-  const { tab } = await searchParams;
+  const { tab, editar } = await searchParams;
   const current: AdminTab = isAdminTab(tab) ? tab : "resumen";
   const context = await loadStaffContext(venueId, true);
   const gate = staffGate(context, `/admin/${venueId}?tab=${current}`);
@@ -25,7 +25,7 @@ export default async function Page({
   let data;
   try {
     const [menu, summary] = await Promise.all([
-      getPublishedMenu(venueId),
+      getAdminMenu(venueId),
       getVenueSummary(venueId, businessDate()),
     ]);
     data = { menu, summary };
@@ -43,10 +43,12 @@ export default async function Page({
       canSwitch={context.venueCount > 1}
     >
       <AdminPanel
+        key={`${current}:${editar ?? ""}`}
         venue={context.venue}
         {...data.menu}
         summary={data.summary}
         tab={current}
+        editId={editar}
       />
     </StaffShell>
   );
