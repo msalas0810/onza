@@ -109,3 +109,19 @@ No se incluyeron fotografías licenciadas; las fixtures conservan `photo_path=nu
 ## Verificación local del flujo completo (sin Supabase remoto)
 
 `node scripts/verify-local-flow.mjs [--shots]` levanta un servidor de verificación (`scripts/local-shim/`: las migraciones reales sobre PGlite detrás de la parte de la API de Supabase que usa la app) y recorre con Chromium: cliente pide → barra recibe y acepta → marca listo → cliente muestra el ticket → barra valida y entrega, más cancelación, rechazo, permisos entre locales, clave temporal, quitar acceso, stock que cambia, sesión vencida y desconexión. Guarda `docs/evidence/v1/flow-verification.json` y capturas. **No es Supabase**: no prueba Realtime, Storage, correo, Google ni límites de tasa; no sustituye la verificación contra `onza-dev`.
+
+### Plan de pulido (noviembre 2026)
+
+Estado, evidencia, decisiones y bloqueos por entrega: `docs/plan-pulido-registro.md`. Migraciones nuevas (aditivas, sin aplicar en remoto): `202611190013` a `202611190019`. Para probar contra el shim:
+
+```bash
+node scripts/local-shim/index.mjs &   # :54321, datos limpios en cada arranque
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=local-shim-publishable \
+SUPABASE_SERVICE_ROLE_KEY=local-shim-service-role APP_ORIGIN=http://127.0.0.1:3100 DEMO_MODE=true \
+PAYMENT_PROVIDER=mock REAL_PAYMENTS_ENABLED=false ACCOUNTS_REQUIRED=true ENABLE_DESIGN_SYSTEM=true \
+PICKUP_TOKEN_ENCRYPTION_KEY=$(node -e 'process.stdout.write(Buffer.alloc(32,7).toString("base64"))') \
+npx next dev --hostname 127.0.0.1 -p 3100
+ONZA_APP=http://127.0.0.1:3100 node scripts/verify-pulido-all.mjs   # reinicia el shim entre grupos (detené el anterior)
+```
+
+Personas del shim (cualquier contraseña): `maria@correo.demo` y `sofia@correo.demo` (clientes), `jorge@equipo.demo` (empleado de Mil948), `ana@equipo.demo` (admin de Mil948 y empleada de Stiefel), `luis@equipo.demo` (clave temporal).

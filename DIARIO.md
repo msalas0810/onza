@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `fix/hosted-integration`; corrección `bea7907` publicada; cierre documental posterior local (git log). Sin merge a `main` |
+| Rama vigente de trabajo | `feat/plan-pulido` (local, sin push) sobre `fix/hosted-integration` `fed5794`: seis entregas del plan de pulido con commits revisables. `fix/hosted-integration` sigue siendo la rama desplegada. Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
-| Commit desplegado en Vercel | `bea79075dfb74a6fae5a8d5f25ceca3f1814aaa2`, Preview READY `dpl_E2CuD4eFbPYKrjrQwNAxZDp6aSVd`, alias confirmado; cuatro logins y acceso común por HTTPS aprobados |
+| Commit desplegado en Vercel | `fed579403d75da1d49cc54f0af9239b55c125706`, Preview READY `dpl_8emjFDVbshCsg5xBBsiaKNFSpEqT`. Video e ingreso laboral comprobados por HTTPS. |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Prueba física de Manu: cliente en teléfono y bartender en computadora, ambos en Mil948. Migraciones 011/012, seed real y accesos ya preparados. Alta laboral/cambio temporal, fotos y coordenadas siguen fuera de esta comprobación puntual. |
+| Siguiente tarea exacta | Revisar `feat/plan-pulido` (ver `docs/plan-pulido-registro.md`), decidir el Preview y aplicar las migraciones 013–019 primero en un proyecto de prueba aislado. Antes: accesos de clientes y personal con video por dispositivo publicados y comprobados (`fed5794`). Próxima prueba en Safari de iPad y iPhone físicos. Cliente y bartender pueden usar Mil948. Migraciones 011/012, seed real y accesos ya preparados. Alta laboral/cambio temporal, fotos y coordenadas siguen fuera de esta comprobación puntual. |
 
 ### Pendientes abiertos
 
@@ -89,6 +89,52 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-19-04 · Implementar las seis entregas del plan de pulido en rama local
+
+- **Fecha y hora:** 2026-11-19 03:20–05:10 (America/Costa_Rica)
+- **Persona:** Manu (encargo nocturno sin confirmaciones intermedias).
+- **IA:** Claude Code · claude-opus-5-5
+- **Rama y commits:** `feat/plan-pulido` desde `fed5794` · `47c3bf1`, `7bfb779`, `4c24f05`, `0250975`, `dd21af8`, `d1dc154`, `f785f01` y el cierre documental. Sin push.
+- **Qué cambió:** E1 plazo de 5:00 desde la cola, cupos sin pedidos vencidos ni inciertos fuera de plazo, intento de checkout por cuenta (sin bloqueo tras rechazos), agotar/archivar/restaurar sin perder productos. E2 lockup único con punto rojo, accesos con vidrio y alta sin tabs, Explorar con sugerencias, pedidos por noche operativa, Cuenta con avatar privado. E3 entrada por rol, barra con una mano, retiro QR primero con código agrupado, «¡Disfrutá!». E4 Admin en teléfono, resumen por período, portada/logo con punto focal. E5 límite por cancelaciones en observación y lista de espera. E6 aceptación automática apagada por defecto.
+- **Archivos clave:** `supabase/migrations/202611190013…19`, `src/features/orders/components/checkout.tsx`, `src/features/staff/components/queue.tsx`, `src/features/pickup/components/pickup-panel.tsx`, `src/features/admin/components/admin-panel.tsx`, `src/features/analytics/components/*`, `src/components/ui/brand.tsx`, `docs/plan-pulido-registro.md`.
+- **Verificado:** `npm test` 40 archivos/155 pruebas (PGlite, migraciones reales), typecheck, lint, build y `check-kit`. Regresión final con `node scripts/verify-pulido-all.mjs` (Chromium contra `scripts/local-shim`, datos limpios por grupo): E1 10/10, E2 27/27, E3 21/21, E4 21/21, video por dispositivo 11/11, E5 9/9, E6 9/9; video también 11/11 en WebKit (emulación); e2e de tarjeta 14/14.
+- **No verificado:** Safari y dispositivos físicos (solo emulación), cámara real, subida real a Storage (avatar, portada, logo), Realtime y correo (el shim no los tiene), migraciones en Supabase real. Nada se aplicó a `onza-dev` ni a producción.
+- **Decisiones:** ver secciones de decisiones en `docs/plan-pulido-registro.md`. Se conserva una línea «sin relación comercial con el local» en la cabecera del local (locales reales sin acuerdo). Este commit también incluye las entradas D-2026-11-19-01..03 que Codex dejó solo en local.
+- **Pendientes / siguiente paso:** bloqueos con comando exacto en el registro: decodificador QR alternativo (instalar `jsqr@1.4.0` fue denegado), cron para `auto_accept_tick`, Storage real, fotos con permiso, prueba física.
+
+
+### D-2026-11-19-03 · Compartir el fondo de video con el acceso de personal
+
+- **Fecha** 2026-11-19 (America/Costa_Rica).
+- **Persona** Manu. **IA** Codex · GPT-6.2-sol.
+- **Rama y commit** `fix/hosted-integration` · `fed5794`.
+- **Qué cambió** `/equipo/acceso` comparte el fondo y los assets del acceso de clientes. Video horizontal en computadora e iPad y vertical en iPhone. Conserva el formulario laboral y su composición.
+- **Verificado** Build y ESLint. En Chromium, capturas de escritorio e iPhone y comprobación local y por HTTPS de ambos accesos en escritorio, iPhone e iPad emulados. Solo se descarga el MP4 correspondiente. Fallback al póster y login laboral real hasta barra de Mil948 aprobados. Preview READY `dpl_8emjFDVbshCsg5xBBsiaKNFSpEqT`.
+- **Pendiente** Safari en dispositivos físicos. Diario actualizado localmente.
+
+
+### D-2026-11-19-02 · Llevar el video horizontal a iPad y computadora
+
+- **Fecha** 2026-11-19 (America/Costa_Rica).
+- **Persona** Manu. **IA** Codex · GPT-6.2-sol.
+- **Rama y commit** `fix/hosted-integration` · `2d3925d`.
+- **Qué cambió** `/acceso` usa video horizontal 1440×810 en computadora y ambas orientaciones de iPad. iPhone usa el video vertical existente. Google y Apple figuran como “Próximamente” y están deshabilitados. Correo, personal y enlaces legales conservan sus destinos. El iPad usa su pantalla completa con el sombreado de la referencia.
+- **Verificado** Build y ESLint aprobados. Capturas de Chromium comparadas con el HTML. En local y por HTTPS se comprobaron cuatro vistas, rotación del iPad, una sola variante de video por dispositivo, 0.75×, fallback a póster, ausencia de solicitudes OAuth y login real por correo hasta Mil948. MP4 H.264 de 24 fps con una única pista de video.
+- **Preview** READY `dpl_DfAUM4t1974yiWxj81PeDgQbr2u3`. Alias https://onza-demo.vercel.app/acceso confirmado.
+- **Pendiente** Safari en iPad e iPhone físicos. Diario local excluido del commit de la app.
+
+
+### D-2026-11-19-01 · Portar el acceso móvil con video aprobado
+
+- **Fecha:** 2026-11-19 (America/Costa_Rica).
+- **Persona:** Manu. **IA:** Codex · GPT-6.
+- **Rama:** `fix/hosted-integration`; commit del cambio consultable en git log.
+- **Qué cambió:** solo `/acceso` móvil hasta 600 px, según HTML local aprobado. MP4 y póster extraídos del HTML; original y referencia fuera del repositorio. Duotono, sombras, medidas, botones y ajuste bajo preservados; escritorio Particle Wave y equipo conservados. Autenticación existente sin modificaciones.
+- **Verificado:** build y ESLint de TSX aprobados; captura 390×844 comparada con HTML; once controles puntuales locales, incluidos login correo real con destino, invocación OAuth interceptada, personal, video inline/muted/loop 0.75×, fallback por autoplay bloqueado, movimiento reducido y cero MP4 en escritorio. MP4 avc1/H.264, 540×960, 993 cuadros, escala 12288 y delta 512 (24 fps), única pista de video sin audio.
+- **No verificado:** iPhone físico y Google completo; Preview READY `dpl_EaMpDDEUmjZx2NiUWu3pypsgQXqu` y alias confirmados; once controles anteriores también aprobados por HTTPS. URL inmutable: https://onza-demo-o3skldnzv-msalas0810s-projects.vercel.app. Commit `3babdcb`.
+- **Decisión:** diario conservado solo localmente; el usuario exige que el nuevo commit contenga exclusivamente `/acceso` y assets de producción.
+
 
 ### D-2026-11-17-07 · Preparar accesos del demo en onza-dev
 
