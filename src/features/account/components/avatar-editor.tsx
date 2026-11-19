@@ -5,10 +5,7 @@ import { Camera } from "lucide-react";
 import { browserDb } from "@/lib/supabase/browser";
 import { Button } from "@/components/ui/primitives";
 import { Sheet } from "@/components/ui/sheet";
-import {
-  checkVenueImage,
-  VENUE_IMAGE_ACCEPT,
-} from "@/features/admin/venue-image";
+import { checkVenueImage, VENUE_IMAGE_ACCEPT } from "@/features/admin/venue-image";
 
 const BUCKET = "avatars";
 const MAX_BYTES = 1024 * 1024;
@@ -44,15 +41,7 @@ function useAvatar(path: string | null) {
   return path ? url : null;
 }
 
-export function Avatar({
-  name,
-  src,
-  size = "md",
-}: {
-  name: string;
-  src: string | null;
-  size?: "md" | "lg";
-}) {
+export function Avatar({ name, src, size = "md" }: { name: string; src: string | null; size?: "md" | "lg" }) {
   return (
     <span className={`avatar ${size}`} aria-hidden="true">
       {src ? (
@@ -66,13 +55,7 @@ export function Avatar({
   );
 }
 
-export function AvatarEditor({
-  name,
-  path,
-}: {
-  name: string;
-  path: string | null;
-}) {
+export function AvatarEditor({ name, path }: { name: string; path: string | null }) {
   const router = useRouter();
   const current = useAvatar(path);
   const [open, setOpen] = useState(false);
@@ -81,18 +64,14 @@ export function AvatarEditor({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const input = useRef<HTMLInputElement>(null);
-  useEffect(
-    () => () => void (preview && URL.revokeObjectURL(preview)),
-    [preview],
-  );
+  useEffect(() => () => void (preview && URL.revokeObjectURL(preview)), [preview]);
 
   const pick = async (chosen: File | undefined) => {
     setError("");
     if (!chosen) return;
     const check = await checkVenueImage(chosen);
     if (!check.ok) return setError(check.message);
-    if (chosen.size > MAX_BYTES)
-      return setError("La foto pesa más de 1 MB. Reducila e intentá otra vez.");
+    if (chosen.size > MAX_BYTES) return setError("La foto pesa más de 1 MB. Reducila e intentá otra vez.");
     setFile(chosen);
     setPreview(URL.createObjectURL(chosen));
   };
@@ -114,24 +93,14 @@ export function AvatarEditor({
       if (!data.user) throw new Error("Tu sesión venció. Volvé a entrar.");
       const next = `${data.user.id}/avatar-${crypto.randomUUID()}.${check.extension}`;
       const storage = db.storage.from(BUCKET);
-      const upload = await storage.upload(next, file, {
-        contentType: check.type,
-        upsert: false,
-      });
-      if (upload.error)
-        throw new Error(
-          "No pudimos subir la foto. Revisá tu conexión e intentá otra vez.",
-        );
-      const { data: result, error: rpcError } = await db.rpc(
-        "update_profile_avatar",
-        { path: next },
-      );
+      const upload = await storage.upload(next, file, { contentType: check.type, upsert: false });
+      if (upload.error) throw new Error("No pudimos subir la foto. Revisá tu conexión e intentá otra vez.");
+      const { data: result, error: rpcError } = await db.rpc("update_profile_avatar", { path: next });
       if (rpcError) {
         await storage.remove([next]);
         throw new Error("No pudimos guardar la foto.");
       }
-      const previous = (result as { previousPath?: string | null } | null)
-        ?.previousPath;
+      const previous = (result as { previousPath?: string | null } | null)?.previousPath;
       if (previous) await storage.remove([previous]).catch(() => undefined);
       finish();
     } catch (e) {
@@ -145,17 +114,10 @@ export function AvatarEditor({
     setError("");
     try {
       const db = browserDb();
-      const { data, error: rpcError } = await db.rpc("update_profile_avatar", {
-        path: null,
-      });
+      const { data, error: rpcError } = await db.rpc("update_profile_avatar", { path: null });
       if (rpcError) throw new Error("No pudimos quitar la foto.");
-      const previous = (data as { previousPath?: string | null } | null)
-        ?.previousPath;
-      if (previous)
-        await db.storage
-          .from(BUCKET)
-          .remove([previous])
-          .catch(() => undefined);
+      const previous = (data as { previousPath?: string | null } | null)?.previousPath;
+      if (previous) await db.storage.from(BUCKET).remove([previous]).catch(() => undefined);
       finish();
     } catch (e) {
       setError(e instanceof Error ? e.message : "No pudimos quitar la foto.");
@@ -165,12 +127,7 @@ export function AvatarEditor({
   };
   return (
     <>
-      <button
-        type="button"
-        className="avatar-button"
-        onClick={() => setOpen(true)}
-        aria-label="Editar foto de perfil"
-      >
+      <button type="button" className="avatar-button" onClick={() => setOpen(true)} aria-label="Editar foto de perfil">
         <Avatar name={name} src={current} size="lg" />
         <span className="avatar-edit" aria-hidden="true">
           <Camera size={14} />
@@ -191,19 +148,11 @@ export function AvatarEditor({
         actions={
           <>
             {path && !file && (
-              <Button
-                variant="danger"
-                loading={busy}
-                onClick={() => void remove()}
-              >
+              <Button variant="danger" loading={busy} onClick={() => void remove()}>
                 Quitar foto
               </Button>
             )}
-            <Button
-              disabled={!file}
-              loading={busy && !!file}
-              onClick={() => void save()}
-            >
+            <Button disabled={!file} loading={busy && !!file} onClick={() => void save()}>
               Guardar
             </Button>
           </>
