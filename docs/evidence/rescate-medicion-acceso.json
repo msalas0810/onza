@@ -1,0 +1,105 @@
+{
+  "environment": "next build + next start local, Chromium emulado, servidor de verificación local; sin red limitada",
+  "access": [
+    {
+      "route": "/acceso",
+      "device": "iPhone 14",
+      "requests": 24,
+      "total_kb": 5955,
+      "mp4_files": [
+        "/access/access-mobile.mp4"
+      ],
+      "mp4_transferred_kb": 4730
+    },
+    {
+      "route": "/acceso",
+      "device": "iPad vertical",
+      "requests": 24,
+      "total_kb": 2710,
+      "mp4_files": [
+        "/access/access-horizontal.mp4"
+      ],
+      "mp4_transferred_kb": 1488
+    },
+    {
+      "route": "/acceso",
+      "device": "iPad horizontal",
+      "requests": 24,
+      "total_kb": 2710,
+      "mp4_files": [
+        "/access/access-horizontal.mp4"
+      ],
+      "mp4_transferred_kb": 1488
+    },
+    {
+      "route": "/acceso",
+      "device": "Escritorio 1440",
+      "requests": 24,
+      "total_kb": 2710,
+      "mp4_files": [
+        "/access/access-horizontal.mp4"
+      ],
+      "mp4_transferred_kb": 1488
+    },
+    {
+      "route": "/equipo/acceso",
+      "device": "iPhone 14",
+      "requests": 20,
+      "total_kb": 5949,
+      "mp4_files": [
+        "/access/access-mobile.mp4"
+      ],
+      "mp4_transferred_kb": 4730
+    },
+    {
+      "route": "/equipo/acceso",
+      "device": "iPad vertical",
+      "requests": 20,
+      "total_kb": 2705,
+      "mp4_files": [
+        "/access/access-horizontal.mp4"
+      ],
+      "mp4_transferred_kb": 1488
+    },
+    {
+      "route": "/equipo/acceso",
+      "device": "iPad horizontal",
+      "requests": 20,
+      "total_kb": 2705,
+      "mp4_files": [
+        "/access/access-horizontal.mp4"
+      ],
+      "mp4_transferred_kb": 1488
+    },
+    {
+      "route": "/equipo/acceso",
+      "device": "Escritorio 1440",
+      "requests": 20,
+      "total_kb": 2705,
+      "mp4_files": [
+        "/access/access-horizontal.mp4"
+      ],
+      "mp4_transferred_kb": 1488
+    }
+  ],
+  "js": [
+    {
+      "route": "/acceso",
+      "script_files": 11,
+      "raw_kb": 861,
+      "gzip_kb": 256
+    },
+    {
+      "route": "/equipo/acceso",
+      "script_files": 11,
+      "raw_kb": 860,
+      "gzip_kb": 256
+    },
+    {
+      "route": "/login",
+      "script_files": 11,
+      "raw_kb": 860,
+      "gzip_kb": 256
+    }
+  ]
+}
