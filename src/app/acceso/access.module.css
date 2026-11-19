@@ -738,3 +738,18 @@
     animation: none;
   }
 }
+
+/* Pantallas de 320–359 px: el botón deshabilitado con «Próximamente» no cabe con la medida aprobada; se compacta
+   sin cambiar la composición ni el texto. */
+@media (max-width: 22.5rem) {
+  .videoAccess .actions :global(.auth-provider) {
+    padding: 0 14px;
+    gap: 8px;
+    font-size: 13px;
+    letter-spacing: 0;
+  }
+  .videoAccess[data-access-device="phone"] .actions :global(.soon) {
+    padding: 4px 5px;
+    font-size: 8.5px;
+  }
+}
