@@ -24,4 +24,4 @@ Recorre los flujos principales en Chromium (Playwright preinstalado), comprueba 
 - Sin autenticación, red ni pagos. Cuentas ficticias con dominio `.demo`; cualquier contraseña entra.
 - Locales reales con datos de demo: menús, precios, horarios, estados, distancias y pedidos simulados. Coordenadas, fotos y logos pendientes (no se inventaron). Sin relación comercial ni autorización de los locales.
 - El QR del ticket es ilustrativo; el fondo del acceso en la app es Particle Wave original (aquí, negro liso con nota).
-- `design/bocetos/` queda como antecedente histórico.
+- Los bocetos antiguos (`design/bocetos/`) se retiraron del repo; quedan en el historial de git.

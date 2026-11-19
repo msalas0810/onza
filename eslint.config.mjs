@@ -9,7 +9,6 @@ export default defineConfig([
     "next-env.d.ts",
     "playwright-report/**",
     "test-results/**",
-    "design/bocetos/**",
     "design/maquetas-v1/**",
   ]),
 ]);

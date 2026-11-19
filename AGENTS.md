@@ -8,7 +8,7 @@ Al terminar, agregar una entrada nueva en `DIARIO.md` (fecha, persona, IA y mode
 
 ## Documento canónico de producto
 
-Las decisiones vigentes (acceso obligatorio, cuenta personal vs. laboral, dos permisos laborales, onboarding y privacidad, reglas R1–R6) están en la **sección 0 de `Onza-Product-Blueprint-v3.md`**. Ahí manda lo más reciente; donde otro documento (incluido `Onza-UX-v2.md`, `README.md` y `docs/01…`) lo contradiga, es histórico. Los bocetos de `design/bocetos/` son históricos. El plan vigente es `docs/plan-v1.md` (fases F1–F7 con estado) y la propuesta visual vigente es `design/maquetas-v1/` con su `GUIA.md`: son maquetas para revisión, no funciones implementadas.
+Las decisiones vigentes (acceso obligatorio, cuenta personal vs. laboral, dos permisos laborales, onboarding y privacidad, reglas R1–R6) están en la **sección 0 de `Onza-Product-Blueprint-v3.md`**. Ahí manda lo más reciente; donde otro documento (incluido `Onza-UX-v2.md`, `README.md` y `docs/01…`) lo contradiga, es histórico. Los bocetos antiguos (`design/bocetos/`) se retiraron del repo en la limpieza de noviembre de 2026; siguen en el historial de git y archivados fuera del repo. El plan vigente es `docs/plan-v1.md` (fases F1–F7 con estado) y la propuesta visual vigente es `design/maquetas-v1/` con su `GUIA.md`: son maquetas para revisión, no funciones implementadas.
 
 ## Orden de lectura
 
