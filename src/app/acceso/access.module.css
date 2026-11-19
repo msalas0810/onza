@@ -307,3 +307,285 @@
   text-transform: uppercase;
   color: var(--onza-text-muted);
 }
+
+.content {
+  display: contents;
+}
+.legal,
+.mobileStaff,
+.film,
+.vignette,
+.shade {
+  display: none;
+}
+.desktopWave {
+  width: 100%;
+  height: 100%;
+}
+.filter {
+  position: absolute;
+}
+
+/* Approved video composition. These overrides belong only to /acceso. */
+@media (max-width: 600px) {
+  .mobileAccess {
+    --onza-bg: #090909;
+    --onza-text: #f4f1ed;
+    display: block;
+    padding: 0;
+    background: #090909;
+  }
+  .mobileAccess .content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    min-height: 100svh;
+    max-width: 440px;
+    margin: auto;
+    padding: clamp(65px, 11.1svh, 110px) max(28px, env(safe-area-inset-right))
+      max(26px, env(safe-area-inset-bottom))
+      max(28px, env(safe-area-inset-left));
+  }
+  .mobileAccess .hero {
+    width: 100%;
+    padding: 0;
+  }
+  .mobileAccess .wave {
+    position: fixed;
+    inset: 0;
+    mask-image: none;
+  }
+  .film,
+  .vignette,
+  .shade {
+    display: block;
+    position: absolute;
+    inset: 0;
+  }
+  .film {
+    z-index: -4;
+    overflow: hidden;
+    background: #090909 url("/access/access-poster.jpg") center top / cover
+      no-repeat;
+  }
+  .film video {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 30%;
+    filter: url("#access-duotone");
+    opacity: 0;
+  }
+  .vignette {
+    z-index: -3;
+    background: linear-gradient(
+      90deg,
+      #0006,
+      transparent 25%,
+      transparent 75%,
+      #0006
+    );
+  }
+  .shade {
+    z-index: -2;
+    background: linear-gradient(
+      180deg,
+      rgba(9, 9, 9, 0.23) 0%,
+      rgba(9, 9, 9, 0.18) 24%,
+      rgba(9, 9, 9, 0.38) 34%,
+      rgba(9, 9, 9, 0.83) 49%,
+      #090909 64%,
+      #090909 100%
+    );
+  }
+  .mobileAccess .brand {
+    gap: 14px;
+    margin: 0;
+    filter: drop-shadow(0 2px 20px #0004);
+  }
+  .mobileAccess .shot {
+    width: 52px;
+    height: 58px;
+    background: #a43849;
+  }
+  .mobileAccess .wordmark {
+    width: 218px;
+    height: calc(218px * 358 / 1337);
+    background: white;
+  }
+  .mobileAccess .dot {
+    display: none;
+  }
+  .mobileAccess .title {
+    margin: 34px 0 0;
+    font-size: 27px;
+    line-height: 1.16;
+    letter-spacing: -1.05px;
+    font-weight: 650;
+    text-shadow: 0 2px 20px #0006;
+  }
+  .mobileAccess .subtitle {
+    font-size: 13px;
+    line-height: 1.6;
+    color: #d1c9c7;
+    margin: 14px 0 0;
+    letter-spacing: -0.1px;
+  }
+  .mobileAccess .actions {
+    margin-top: 45px;
+    max-width: none;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+  }
+  .mobileAccess .actions :global(.stack.tight) {
+    gap: 10px;
+  }
+  .mobileAccess .actions :global(.auth-provider) {
+    height: 52px;
+    min-height: 52px;
+    padding: 0 22px;
+    border-radius: 999px;
+    gap: 12px;
+    font-size: 14px;
+    font-weight: 560;
+    letter-spacing: -0.25px;
+  }
+  .mobileAccess .actions :global(.auth-provider svg) {
+    width: 20px;
+    height: 20px;
+  }
+  .mobileAccess .actions :global(.auth-provider.primary) {
+    background: #f4f1ed;
+    color: #121212;
+    border: 1px solid transparent;
+    box-shadow: 0 1px 0 #fff inset;
+  }
+  .mobileAccess .actions :global(.auth-provider.primary svg) {
+    background: url("/access/google.svg") center / contain no-repeat;
+  }
+  .mobileAccess .actions :global(.auth-provider.primary svg path) {
+    visibility: hidden;
+  }
+  .mobileAccess .actions :global(.auth-provider:disabled) {
+    background: #ffffff09;
+    border-color: #ffffff05;
+    color: #8a8785;
+    cursor: not-allowed;
+  }
+  .mobileAccess .actions :global(.auth-provider:disabled svg) {
+    background: url("/access/apple.svg") center / contain no-repeat;
+  }
+  .mobileAccess .actions :global(.auth-provider:disabled svg path) {
+    visibility: hidden;
+  }
+  .mobileAccess .actions :global(.soon) {
+    margin-left: auto;
+    padding: 5px 7px;
+    background: #ffffff09;
+    border-radius: 5px;
+    font-size: 9px;
+    font-weight: 450;
+    color: #a9a5a3;
+    letter-spacing: 0;
+  }
+  .mobileAccess .actions :global(.email-access) {
+    margin-top: 0;
+  }
+  .mobileAccess .actions :global(.email-access)::before {
+    content: "o";
+    display: block;
+    margin: 17px 0;
+    height: 13px;
+    line-height: 13px;
+    font-size: 11px;
+    color: #787573;
+    background:
+      linear-gradient(#ffffff18, #ffffff18) left center / calc(50% - 18px) 1px
+        no-repeat,
+      linear-gradient(#ffffff18, #ffffff18) right center / calc(50% - 18px) 1px
+        no-repeat;
+  }
+  .mobileAccess .actions :global(summary.auth-provider) {
+    background: transparent;
+    border-color: #ffffff40;
+    color: #f4f1ed;
+  }
+  .mobileAccess .actions :global(summary.auth-provider:hover) {
+    background: #ffffff08;
+  }
+  .mobileAccess .legal {
+    display: block;
+    font-size: 10px;
+    line-height: 1.8;
+    color: #918b87;
+    margin: 19px -7px 0;
+  }
+  .legal a {
+    text-underline-offset: 3px;
+    text-decoration-color: #8885;
+  }
+  .mobileAccess .staff {
+    margin-top: auto;
+    padding-top: 45px;
+    min-height: 0;
+    font-size: 12px;
+    color: #c3bdba;
+  }
+  .mobileAccess .staff a {
+    min-height: 0;
+    padding: 15px 0;
+    margin: -15px 0;
+    gap: 8px;
+    color: #c3bdba;
+  }
+  .mobileAccess .mobileStaff {
+    display: inline;
+  }
+  .mobileAccess .desktopStaff,
+  .mobileAccess .demo,
+  .mobileAccess .destination {
+    display: none;
+  }
+}
+@media (max-height: 740px) and (max-width: 600px) {
+  .mobileAccess .content {
+    padding-top: 38px;
+  }
+  .mobileAccess .shot {
+    width: 41px;
+    height: 46px;
+  }
+  .mobileAccess .wordmark {
+    width: 190px;
+    height: calc(190px * 358 / 1337);
+  }
+  .mobileAccess .brand {
+    gap: 10px;
+  }
+  .mobileAccess .title {
+    margin-top: 25px;
+    font-size: 25px;
+  }
+  .mobileAccess .actions {
+    margin-top: 28px;
+  }
+  .mobileAccess .actions :global(.auth-provider) {
+    height: 48px;
+    min-height: 48px;
+  }
+  .mobileAccess .staff {
+    padding-top: 28px;
+  }
+  .mobileAccess .legal {
+    margin-top: 14px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .film video {
+    display: none;
+  }
+}
