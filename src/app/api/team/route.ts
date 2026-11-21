@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { ZodError, z } from "zod";
 import { isAllowedRequestOrigin } from "@/lib/request-origin";
 import { errorCode, errorMessage } from "@/lib/errors";
+import { auditFields, logEvent, readJson, requestId } from "@/lib/audit-log";
 import {
   executeTeamCommand,
   listTeam,
@@ -43,13 +44,19 @@ export async function POST(request: Request) {
       { error: "NOT_AUTHORIZED", message: "Origen no autorizado." },
       { status: 403, headers },
     );
+  const id = requestId(request);
+  const started = Date.now();
+  let fields: ReturnType<typeof auditFields> = {};
   try {
-    if (Number(request.headers.get("content-length") ?? 0) > 4000)
-      throw new Error("INVALID_INPUT");
-    return NextResponse.json(await executeTeamCommand(await request.json()), {
-      headers,
-    });
+    const body = await readJson(request, 4000);
+    fields = auditFields(body);
+    const result = await executeTeamCommand(body);
+    logEvent({ event: "team", requestId: id, status: 200, ms: Date.now() - started, ...fields });
+    return NextResponse.json(result, { headers: { ...headers, "x-onza-request-id": id } });
   } catch (error) {
-    return failure(error);
+    const response = failure(error);
+    logEvent({ event: "team", requestId: id, status: response.status, code: error instanceof ZodError ? "INVALID_INPUT" : errorCode(error), ms: Date.now() - started, ...fields });
+    response.headers.set("x-onza-request-id", id);
+    return response;
   }
 }

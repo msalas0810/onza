@@ -3,19 +3,26 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 import { executeCommand } from "@/features/orders/server/order-service";
 import { CommandFailure, errorCode, errorMessage } from "@/lib/errors";
+import { auditFields, logEvent, readJson, requestId } from "@/lib/audit-log";
 export const dynamic = "force-dynamic";
 export async function POST(request: Request) {
-  if (!isAllowedRequestOrigin(request))
+  const id = requestId(request);
+  const started = Date.now();
+  let fields: ReturnType<typeof auditFields> = {};
+  if (!isAllowedRequestOrigin(request)) {
+    logEvent({ event: "command", requestId: id, status: 403, code: "NOT_AUTHORIZED" });
     return NextResponse.json(
       { error: "NOT_AUTHORIZED", message: "Origen no autorizado." },
-      { status: 403 },
+      { status: 403, headers: { "x-onza-request-id": id } },
     );
+  }
   try {
-    if (Number(request.headers.get("content-length") ?? 0) > 20000)
-      throw new Error("INVALID_INPUT");
-    const result = await executeCommand(await request.json());
+    const body = await readJson(request, 20000);
+    fields = auditFields(body);
+    const result = await executeCommand(body);
+    logEvent({ event: "command", requestId: id, status: 200, ms: Date.now() - started, ...fields });
     return NextResponse.json(result, {
-      headers: { "Cache-Control": "no-store" },
+      headers: { "Cache-Control": "no-store", "x-onza-request-id": id },
     });
   } catch (error) {
     const code = error instanceof ZodError ? "INVALID_INPUT" : errorCode(error);
@@ -40,9 +47,10 @@ export async function POST(request: Request) {
                     ? 429
                     : 409;
     const detail = error instanceof CommandFailure ? error.detail : undefined;
+    logEvent({ event: "command", requestId: id, status, code, ms: Date.now() - started, ...fields });
     return NextResponse.json(
       { error: code, message: errorMessage(new Error(code)), detail },
-      { status, headers: { "Cache-Control": "no-store" } },
+      { status, headers: { "Cache-Control": "no-store", "x-onza-request-id": id } },
     );
   }
 }
