@@ -20,11 +20,16 @@ export const LATER_MIGRATIONS = [
   "202611190019_auto_accept.sql",
   "202611190020_profile_details.sql",
   "202611210021_audit_hardening.sql",
+  "202611210022_revoke_public_table_writes.sql",
 ];
 export async function database() {
   const db = new PGlite();
   await db.exec(
-    `create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key,email text);create function auth.uid() returns uuid language sql stable as $$select (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid$$;`,
+    `create role anon;create role authenticated;
+     -- Como en un proyecto Supabase: cada objeto nuevo de public nace con todos los privilegios para anon/authenticated.
+     alter default privileges in schema public grant all on tables to anon,authenticated;
+     alter default privileges in schema public grant all on functions to anon,authenticated;
+     create schema auth;create table auth.users(id uuid primary key,email text);create function auth.uid() returns uuid language sql stable as $$select (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid$$;`,
   );
   await db.exec(
     `create function auth.jwt() returns jsonb language sql stable as $$select nullif(current_setting('request.jwt.claims',true),'')::jsonb$$; grant usage on schema auth to authenticated,anon;grant execute on all functions in schema auth to authenticated,anon;`,

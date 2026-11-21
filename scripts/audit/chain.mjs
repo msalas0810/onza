@@ -28,6 +28,12 @@ grant usage on schema storage to anon,authenticated,service_role;
 grant select,insert,update,delete on storage.objects to anon,authenticated,service_role;
 grant select on storage.buckets to anon,authenticated,service_role;
 create publication supabase_realtime;
+-- Supabase concede por defecto TODO en public a anon/authenticated/service_role a cada objeto nuevo (ALTER DEFAULT PRIVILEGES del
+-- rol postgres). Sin esto el catálogo se ve más cerrado de lo que está en un proyecto real; las migraciones deben revocar a mano.
+alter default privileges in schema public grant all on tables to anon, authenticated, service_role;
+alter default privileges in schema public grant all on functions to anon, authenticated, service_role;
+alter default privileges in schema public grant all on sequences to anon, authenticated, service_role;
+grant usage on schema public to anon, authenticated, service_role;
 `;
 
 /** Aplica la cadena. `upTo`: prefijo (inclusive) del último archivo; `only`: lista explícita. */

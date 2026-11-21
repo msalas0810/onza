@@ -29,6 +29,7 @@ const MIGRATIONS = [
   "202611190019_auto_accept.sql",
   "202611190020_profile_details.sql",
   "202611210021_audit_hardening.sql",
+  "202611210022_revoke_public_table_writes.sql",
 ];
 const TABLES = new Set([
   "venues",

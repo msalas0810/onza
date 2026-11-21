@@ -46,6 +46,7 @@ for (const file of [
   "202611190019_auto_accept.sql",
   "202611190020_profile_details.sql",
   "202611210021_audit_hardening.sql",
+  "202611210022_revoke_public_table_writes.sql",
 ])
   await db.exec(readFileSync(`supabase/migrations/${file}`, "utf8"));
 const { rows } = await db.query(

@@ -341,3 +341,56 @@ describe("equipo y plataforma", () => {
     await db.exec(`insert into public.memberships(user_id,venue_id,role) values('${ids.staff}','${ids.venue}','bartender')`);
   });
 });
+
+describe("catálogo de permisos (bajo los permisos por defecto de Supabase)", () => {
+  it("ninguna tabla pública concede escritura, TRUNCATE, REFERENCES ni TRIGGER a anon o authenticated", async () => {
+    await db.exec("reset role");
+    const { rows } = await db.query<{ t: string; g: string; p: string }>(
+      `select table_name t,grantee g,privilege_type p from information_schema.role_table_grants
+       where table_schema='public' and grantee in ('anon','authenticated') and privilege_type<>'SELECT' order by 1,2,3`,
+    );
+    expect(rows).toEqual([]);
+  });
+  it("lectura pública solo en catálogo; el resto exige sesión; order_events no se lee directo", async () => {
+    await db.exec("reset role");
+    const { rows } = await db.query<{ t: string; g: string }>(
+      `select table_name t,grantee g from information_schema.role_table_grants
+       where table_schema='public' and grantee in ('anon','authenticated') and privilege_type='SELECT' order by 1,2`,
+    );
+    const granted = rows.map((r) => `${r.t}:${r.g}`).sort();
+    expect(granted).toEqual(
+      [
+        "categories:anon", "categories:authenticated", "products:anon", "products:authenticated", "venues:anon", "venues:authenticated",
+        "memberships:authenticated", "orders:authenticated", "order_items:authenticated", "profiles:authenticated", "staff_accounts:authenticated",
+      ].sort(),
+    );
+  });
+  it("funciones públicas ejecutables por anon: solo la utilidad de fecha; las privadas, solo los dos predicados de RLS", async () => {
+    await db.exec("reset role");
+    const anon = await db.query<{ f: string }>(
+      `select n.nspname||'.'||p.proname f from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+       where n.nspname in ('public','private') and has_function_privilege('anon',p.oid,'execute') order by 1`,
+    );
+    expect(anon.rows.map((r) => r.f)).toEqual(["private.can_read_order", "private.is_staff", "public.business_date_at"]);
+    const serverOnly = await db.query<{ f: string }>(
+      `select p.proname f from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+       where n.nspname='public' and has_function_privilege('authenticated',p.oid,'execute') and p.proname in ('team_lookup_email','team_attach','complete_password_change','auto_accept_tick')`,
+    );
+    expect(serverOnly.rows).toEqual([]);
+  });
+  it("toda función SECURITY DEFINER fija search_path (sin secuestro de esquema)", async () => {
+    await db.exec("reset role");
+    const { rows } = await db.query<{ f: string }>(
+      `select n.nspname||'.'||p.proname f from pg_proc p join pg_namespace n on n.oid=p.pronamespace
+       where n.nspname in ('public','private') and p.prosecdef and not coalesce(p.proconfig::text like '%search_path%',false)`,
+    );
+    expect(rows).toEqual([]);
+  });
+  it("todas las tablas de public y private tienen RLS activo", async () => {
+    await db.exec("reset role");
+    const { rows } = await db.query<{ t: string }>(
+      `select c.relnamespace::regnamespace||'.'||c.relname t from pg_class c where c.relkind='r' and c.relnamespace in ('public'::regnamespace,'private'::regnamespace) and not c.relrowsecurity`,
+    );
+    expect(rows).toEqual([]);
+  });
+});
