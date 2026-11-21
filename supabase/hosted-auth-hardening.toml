@@ -1,0 +1,17 @@
+# PROPUESTA de endurecimiento de Auth para el proyecto alojado (auditoría 2026-11-21). NO se aplicó a ningún proyecto.
+# Distinta de hosted-auth.toml (cambios ya necesarios). Pasos para una persona autorizada:
+#   1. Revisar el valor ACTUAL de cada clave con `supabase config diff --remote=<ref>` (o el Dashboard → Authentication).
+#   2. Aplicar primero en un proyecto de prueba aislado y verificar ingreso, registro, recuperación y alta de equipo.
+#   3. Recién entonces repetir en el proyecto alojado. Cada clave es independiente: se pueden aplicar por separado.
+[auth]
+# La app exige 8 en el formulario, pero un registro directo contra la API acepta el mínimo de Auth (6 por defecto).
+minimum_password_length = 10
+password_requirements = "lower_upper_letters_digits"
+# Rotación de refresh token con ventana de reutilización corta (recomendado por Supabase para sesiones largas de PWA).
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10
+# Con false, quien escribe el correo de otra persona crea una cuenta a su nombre sin confirmar que le pertenece.
+[auth.email]
+enable_confirmations = true
+double_confirm_changes = true
+# El alta de equipo usa email_confirm:true del lado servidor (no depende de esta clave).

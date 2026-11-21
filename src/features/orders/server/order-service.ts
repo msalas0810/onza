@@ -15,6 +15,7 @@ import { accountsRequired } from "@/lib/access-policy";
 import { passwordChangePending } from "@/lib/supabase/guards";
 import { scenariosEnabled } from "@/features/payments/server/provider";
 import { CommandFailure, failureDetail } from "@/lib/errors";
+import { isOwnStorageUrl } from "@/lib/storage-url";
 export async function executeCommand(raw: unknown) {
   assertMockPayments();
   const command = commandSchema.parse(raw);
@@ -42,6 +43,8 @@ export async function executeCommand(raw: unknown) {
     input = { ...rest, tokenHash: tokenHash(token) };
   }
   if (command.action === "venue_branding") {
+    if (!isOwnStorageUrl(command.coverUrl) || !isOwnStorageUrl(command.logoUrl))
+      throw new Error("INVALID_BRANDING");
     const { data, error } = await db.rpc("update_venue_branding", { input });
     if (error) throw new Error(error.message);
     return data;
@@ -52,6 +55,8 @@ export async function executeCommand(raw: unknown) {
     return data;
   }
   if (command.action === "product_image") {
+    if (!isOwnStorageUrl(command.imageUrl))
+      throw new Error("INVALID_PRODUCT_IMAGE");
     const { data, error } = await db.rpc("update_product_image", { input });
     if (error) throw new Error(error.message);
     return data;

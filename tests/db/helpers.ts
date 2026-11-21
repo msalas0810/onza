@@ -19,6 +19,7 @@ export const LATER_MIGRATIONS = [
   "202611190018_abuse_waitlist.sql",
   "202611190019_auto_accept.sql",
   "202611190020_profile_details.sql",
+  "202611210021_audit_hardening.sql",
 ];
 export async function database() {
   const db = new PGlite();
@@ -73,6 +74,8 @@ export async function database() {
   for (const file of LATER_MIGRATIONS)
     await db.exec(readFileSync(`supabase/migrations/${file}`, "utf8"));
   await db.exec(readFileSync("supabase/seed.sql", "utf8"));
+  // Los resultados de pago simulados (rechazo, timeout) son solo de pruebas: el valor por defecto de la base es cerrado.
+  await db.exec("update private.configuration set allow_scenarios=true where id");
   await db.exec(
     `insert into auth.users values('${ids.customer}'),('${ids.other}'),('${ids.staff}'),('${ids.admin}');insert into public.memberships(user_id,venue_id,role) values('${ids.staff}','${ids.venue}','bartender'),('${ids.admin}','${ids.venue}','admin');`,
   );
