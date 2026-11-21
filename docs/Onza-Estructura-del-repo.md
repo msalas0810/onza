@@ -10,6 +10,7 @@ Documento único de ubicaciones. Si cambia algo de lo que sigue, se cambia acá 
 | Migraciones SQL y semillas | `supabase/migrations/`, `supabase/seed.sql` | Supabase, pruebas (PGlite), servidor de verificación |
 | Pruebas | `tests/` (unidad e integración, PGlite), `tests/e2e/` (Playwright) | `npm test`, `npm run test:e2e` |
 | Scripts de verificación y medición | `scripts/` (`verify-*.mjs`, `measure-*.mjs`, `local-shim/`) | A mano, contra el servidor de verificación local |
+| Auditoría de seguridad y escala | `scripts/audit/` (Postgres real aislado, concurrencia, migraciones, carga, secretos), `supabase/ops/` (operaciones que NO son migraciones), `docs/Onza-Auditoria-seguridad-y-escala.md`, `docs/Onza-Runbook-operacion.md`, evidencia en `docs/evidence/audit/` | A mano; `scripts/audit/pg.mjs` explica el requisito (Postgres embebido fuera del repo) |
 | Marca | `brand/svg/` (fuente de los SVG), `brand/fonts/` (Inter + licencia) | `scripts/check-kit.py` |
 | Copia pública de marca y fuentes | `public/brand/`, `public/fonts/` | Runtime |
 | Tokens de diseño | `design/tokens.json` → `design/tokens.css` (generado con `scripts/generate-tokens.py`) | Estilos |

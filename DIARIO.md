@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `review/rescate-entrega` (local, sin push) sobre `feat/plan-pulido` `83ba141`: auditoría, brechas cerradas y limpieza (ver `docs/Onza-Matriz-de-entrega.md`). Antes: `feat/plan-pulido` sobre `fix/hosted-integration` `fed5794`: seis entregas del plan de pulido con commits revisables. `fix/hosted-integration` sigue siendo la rama desplegada. Sin merge a `main` |
+| Rama vigente de trabajo | `audit/seguridad-escala` (local, sin push) desde `review/rescate-entrega` `1090b4e`: auditoría de seguridad y escala con correcciones (migraciones 021–024, sin aplicar en remoto). Antes: `review/rescate-entrega` (publicada como Preview) sobre `feat/plan-pulido` `83ba141`. `fix/hosted-integration` sigue siendo la rama desplegada. Sin merge a `main` |
 | `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
 | Commit desplegado en Vercel | `fed579403d75da1d49cc54f0af9239b55c125706`, Preview READY `dpl_8emjFDVbshCsg5xBBsiaKNFSpEqT`. Video e ingreso laboral comprobados por HTTPS. |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Revisar `feat/plan-pulido` (ver `docs/plan-pulido-registro.md`), decidir el Preview y aplicar las migraciones 013–019 primero en un proyecto de prueba aislado. Antes: accesos de clientes y personal con video por dispositivo publicados y comprobados (`fed5794`). Próxima prueba en Safari de iPad y iPhone físicos. Cliente y bartender pueden usar Mil948. Migraciones 011/012, seed real y accesos ya preparados. Alta laboral/cambio temporal, fotos y coordenadas siguen fuera de esta comprobación puntual. |
+| Siguiente tarea exacta | Revisar `audit/seguridad-escala` (ver `docs/Onza-Auditoria-seguridad-y-escala.md`, §10). Después, en un proyecto Supabase **aislado**: `db push --dry-run` (013–024), aplicar, y probar sesiones/Storage/Realtime reales. Antes: aplicar las migraciones 013–020 en un proyecto de prueba (el dry-run contra `onza-dev` listó exactamente esas ocho; no se aplicó nada). Próxima prueba en Safari de iPad y iPhone físicos. |
 
 ### Pendientes abiertos
 
@@ -56,9 +56,11 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-002 | Pruebas en iPhone y Android físicos (cámara, audio, safe area, foreground) | 2026-11-15 |
 | PEN-003 | Fotos finales con derechos de uso (hoy `photo_path=null`, fallback tipográfico) | 2026-11-15 |
 | PEN-004 | CI del código `e1e8987` aprobado: jobs checks y supabase-integration, run 43937917513. Cierre documental posterior sin cambios de aplicación. | 2026-11-16 |
-| PEN-005 | Scheduler durable para expiraciones; hoy el barrido corre solo cuando hay tráfico | 2026-11-15 |
+| PEN-005 | Scheduler durable para expiraciones; hoy el barrido corre solo cuando hay tráfico. Configuración lista en `supabase/ops/pg_cron_auto_accept.sql` (no aplicada: cambio remoto) | 2026-11-15 |
 | PEN-006 | Cobros reales: falta acuerdo y manual de BAC. Ver `docs/03-bac-y-pagos.md` | 2026-11-15 |
 | PEN-007 | Corregido el registro: las migraciones 005–007 ya estaban aplicadas al iniciar esta sesión; 12 productos tenían imagen. Se aplicaron únicamente las nuevas 008/009. No se inventaron portadas ni coordenadas. | 2026-11-16 |
+| PEN-009 | Auditoría 2026-11-21: sin probar contra Supabase Auth/Realtime/Storage reales (cookies, refresh, expiración, revocación). Pasos exactos en `docs/Onza-Auditoria-seguridad-y-escala.md` §10 | 2026-11-21 |
+| PEN-010 | Confirmar el límite de 60 validaciones de retiro por minuto (migración 024) y aplicar 021–024 en un proyecto aislado | 2026-11-21 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -89,6 +91,20 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-21-01 · Auditoría defensiva de seguridad y escala, con correcciones
+
+- **Fecha y hora:** 2026-11-21 00:00–02:00 (America/Costa_Rica)
+- **Persona:** Manu (encargo «Hacé el audit defensivo de seguridad y escala de Onza e implementá las correcciones»).
+- **IA:** Claude Code · claude-sonnet-5-5
+- **Rama y commits:** `audit/seguridad-escala` desde `1090b4e` (local, **sin push, sin deploy, sin migraciones remotas**) · `2b7d769`, `9d240ab`, `08062f2`, `cc70ba5`, `8f15892`, `a4abec0` y el cierre documental.
+- **Qué cambió:** Sesiones: cerrar sesión ya no cierra todas las sesiones de la cuenta (solo este dispositivo; «en todos» es explícito), una pestaña se entera si otra cierra sesión o cambia de cuenta, y un fallo transitorio de Auth o de la base muestra «reintentá» (503) en vez de tratar a la persona como sin sesión o como cuenta personal. Permisos: migraciones **021** (la cuenta del equipo, la sesión invitada y el perfil incompleto no compran ni llamando a la RPC directo; pagos simulados cerrados por defecto; el cliente no lee `actor_id` ni `metadata` de los eventos), **022** (sin escritura directa en tablas públicas pese a los permisos por defecto de Supabase), CSP parcial y cabeceras anti-clickjacking, imágenes solo del Storage propio, registro estructurado con ID de correlación. Escala: migración **023** (`order_list(venue)` de ~3,3 s a ~0,1 s con 20 000 pedidos del local, índice del barrido, informes sin desborde de `integer`) y **024** (límite de validación de retiros de 10 a 60 por minuto: decisión de seguridad a confirmar).
+- **Archivos clave:** `docs/Onza-Auditoria-seguridad-y-escala.md` (informe, matriz de roles, hallazgos, pendientes), `docs/Onza-Runbook-operacion.md`, `supabase/migrations/202611210021…24`, `supabase/ops/pg_cron_auto_accept.sql` (no aplicada), `supabase/hosted-auth-hardening.toml` (propuesta), `scripts/audit/*`, `scripts/verify-audit-sesiones.mjs`, `tests/db/audit-permissions.test.ts`, `src/proxy.ts`, `src/components/ui/auth-sync.tsx`, `src/lib/{audit-log,storage-url}.ts`, `docs/evidence/audit/`.
+- **Verificado:** `npm run check`: tipos y lint sin errores, 44 archivos / 195 pruebas (antes 41 / 157), `next build` correcto. Matriz de permisos (30 pruebas; 8 de ellas fallan sin 021 y 4 sin 022). Postgres 17 real y aislado (embedded-postgres): `concurrency.mjs` 31/31 (12 escenarios, sin duplicados ni deadlocks), `migrations.mjs` 14/14 (base vacía vs salto desde 012 con 100 000 pedidos: mismo esquema final, datos intactos). Navegador contra el servidor local simulado: `verify-audit-sesiones` 44/44 y `verify-pulido-all` sin regresiones. Carga sintética en la capa de base de datos (100 sesiones, 30 checkouts/min por 15 min, 60/min por 3 min): sin errores inesperados ni duplicados; antes/después de 023 en `docs/evidence/audit/`. `npm audit` 0 vulnerabilidades; `scan-secrets` sin hallazgos.
+- **No verificado:** Supabase Auth real (cookies, refresh y expiración reales; revocación de sesión), PostgREST, Realtime (latencia y plazo de revocación), Storage real, correo, `onza-dev` (no se tocó), Safari/iPhone/iPad/Android físicos, carga de Next/PostgREST/Realtime, hardware de Supabase, MFA. `scripts/verify-local-flow.mjs` está desactualizado frente a la interfaz del rescate (no se comprobó si ya fallaba antes).
+- **Decisiones:** `Cliente` y `Equipo` siguen siendo cuentas distintas (el plan suponía una sola identidad); cierre por dispositivo; el SQL 001–020 no se modificó (todo cambio es una migración posterior); no se reemplazó `onza_command` (las reglas viven en triggers). `docs/Onza-Plan-seguridad-y-escala.md` sigue sin versionar y sin cambios; los ajustes al plan están en el informe, §2.
+- **Pendientes / siguiente paso:** (1) revisar la rama; (2) en un **proyecto Supabase aislado** (no `onza-dev`): `npx supabase db push --dry-run` debe listar 013–024 → aplicar → `update private.configuration set accounts_required=true` si la app usa `ACCOUNTS_REQUIRED=true`; (3) probar sesiones, Storage y Realtime reales ahí (hace falta Docker para el entorno local completo); (4) decidir el programador (`pg_cron`), el endurecimiento de Auth y el límite de 60 retiros/min; (5) recomendado: `order_list(venue)` que devuelva solo activos + últimos 20 cerrados (siguiente cuello medido).
+
 
 ### D-2026-11-19-05 · Rescate: auditoría con la app abierta, brechas cerradas y limpieza
 
