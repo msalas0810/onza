@@ -1,4 +1,4 @@
-// Migraciones 013–022 sobre Postgres 17 REAL y aislado: (A) desde una base vacía y (B) actualizando desde 012 con datos
+// Migraciones 013–024 sobre Postgres 17 REAL y aislado: (A) desde una base vacía y (B) actualizando desde 012 con datos
 // ficticios en todos los estados; compara el esquema final de ambos caminos, comprueba que los datos se conservan y que la
 // aplicación sigue funcionando sobre pedidos antiguos, y mide cuánto tarda el salto sobre un volumen grande.
 // Trata 001–012 como historial: no se modifican; solo se aplican los archivos tal como están.
@@ -62,9 +62,9 @@ async function people(db) {
 }
 
 try {
-  /* A · Base vacía → 001–022 */
+  /* A · Base vacía → 001–024 */
   const a = await pg.database({ label: "empty" });
-  check("A Base vacía: 001–022 se aplican sin errores", true);
+  check("A Base vacía: 001–024 se aplican sin errores", true);
   const fpA = await fingerprint(a);
 
   /* B · 001–012 con datos → 013–021 */
@@ -122,7 +122,7 @@ try {
     await b.query(readFileSync(new URL(`../../supabase/migrations/${file}`, import.meta.url), "utf8"));
     timings.push([step(file), Date.now() - t]);
   }
-  check(`B Salto 012 → 022 con ${volume} pedidos: aplica sin errores`, true);
+  check(`B Salto 012 → 024 con ${volume} pedidos: aplica sin errores`, true);
   console.log(`  tiempos por migración (ms): ${timings.map(([s, ms]) => `${s.slice(6)}=${ms}`).join(" ")}; total ${timings.reduce((x, [, ms]) => x + ms, 0)} ms`);
   check("B Ninguna migración tarda más de 5 s sobre ese volumen (sin bloqueos largos de tabla)", timings.every(([, ms]) => ms < 5000), JSON.stringify(timings));
 
@@ -139,7 +139,7 @@ try {
   const onlyA = fpA.filter((l) => !fpB.includes(l));
   const onlyB = fpB.filter((l) => !fpA.includes(l));
   check("A≡B El esquema final (columnas, restricciones, índices, funciones, políticas, triggers, permisos) es idéntico por ambos caminos", onlyA.length === 0 && onlyB.length === 0, `solo-vacía=${JSON.stringify(onlyA.slice(0, 4))} solo-salto=${JSON.stringify(onlyB.slice(0, 4))}`);
-  check("A≡B Mismo conjunto de migraciones (22 archivos)", all.length === 22, String(all.length));
+  check("A≡B Mismo conjunto de migraciones (24 archivos)", all.length === 24, String(all.length));
 
   /* La aplicación sigue funcionando sobre pedidos antiguos y nuevos */
   const old2 = await run(b, staff, { action: "get", orderId: orders[2].id });

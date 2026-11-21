@@ -1,0 +1,55 @@
+Fixtures: 25000 pedidos históricos (5000 de esta noche) en 1.4 s; pool=20; etiqueta=plan-completo
+Fase corta: 20 sesiones, 30 checkouts/min, 1 min
+Fase sostenida: 100 sesiones, 30 checkouts/min, 15 min
+Fase ráfaga: 60 checkouts/min, 3 min
+
+fase:operación                              n     p50    p95    p99    max   espera-pool-p95 (ms)
+p1-corta:accept                               32      6   12.6   13.8   13.8      0.1
+p1-corta:catalog.menu                         40    1.7      3    5.3    5.3        0
+p1-corta:catalog.venues                       40    1.4    2.2    6.1    6.1      0.1
+p1-corta:checkout(create)                     33    7.1   19.5   20.4   20.4      0.2
+p1-corta:ready                                 7    6.5   11.5   11.5   11.5      0.1
+p1-corta:refetch.order_list(customer)         72    3.7    6.5    6.9    6.9        0
+p1-corta:refetch.order_list(venue)           216   57.2  133.2  135.4  143.5        0
+p1-corta:refetch.sweep                       288    1.4    2.9    8.6     11      0.4
+p1-corta:report.summary_range(night)           2  208.6  208.6  208.6  208.6      0.1
+p1-corta:report.timing_stats                   2   93.8   93.8   93.8   93.8        0
+p2-sostenida:accept                          451    4.9    8.1   10.3   32.6      0.1
+p2-sostenida:capture                         403    3.9      6    9.7   31.2        0
+p2-sostenida:catalog.menu                   3004    1.5    2.6    4.7   31.1        0
+p2-sostenida:catalog.venues                 3004    1.2    2.1    6.1   51.8      0.1
+p2-sostenida:checkout(create)                468    6.4   14.5   18.1   38.1      0.1
+p2-sostenida:complete                        403    3.6    5.4    7.1   27.6        0
+p2-sostenida:ready                           455    5.1    9.3   14.8   31.5      0.1
+p2-sostenida:refetch.order_list(customer)   1760    3.1    6.2   11.1   48.9        0
+p2-sostenida:refetch.order_list(venue)      5280   64.3  157.8  228.7  338.6        0
+p2-sostenida:refetch.sweep                  7040    1.1    2.6    6.2   33.6      0.3
+p2-sostenida:report.summary_range(night)      30   79.8   94.4  182.3  182.3      0.1
+p2-sostenida:report.timing_stats              30   28.3   33.6  122.3  122.3        0
+p2-sostenida:resolve                         451    4.4    7.4   20.8   53.7        0
+p3-rafaga:accept                              94    5.7   11.9     46     46      0.1
+p3-rafaga:capture                             89    5.2      9   14.3   14.3        0
+p3-rafaga:catalog.menu                       621    1.7    3.6      9   15.8        0
+p3-rafaga:catalog.venues                     621    1.3    3.6    9.5   53.4      0.1
+p3-rafaga:checkout(create)                   174    5.6   19.1   45.3   59.7      0.1
+p3-rafaga:complete                            89    5.4    8.5     15     15        0
+p3-rafaga:ready                              100    6.4   12.4   17.4   17.4      0.1
+p3-rafaga:refetch.order_list(customer)       376    4.2   10.9   19.1     55        0
+p3-rafaga:refetch.order_list(venue)         1128  169.3  241.2    273    333        0
+p3-rafaga:refetch.sweep                     1504    1.4    4.3   10.8   53.2      0.4
+p3-rafaga:report.summary_range(night)          6  235.1    320    320    320      0.1
+p3-rafaga:report.timing_stats                  6  107.2  133.3  133.3  133.3        0
+p3-rafaga:resolve                             94    5.9   10.5     59     59        0
+
+Errores: 
+  [esperado]   p2-sostenida:resolve:RATE_LIMITED × 48
+  [esperado]   p2-sostenida:checkout(create):VENUE_CAPACITY × 17
+  [esperado]   p3-rafaga:resolve:RATE_LIMITED × 5
+  [esperado]   p3-rafaga:checkout(create):VENUE_CAPACITY × 81
+
+Esperas de Postgres (muestras de sesiones activas): cpu/idle-in-tx 99% · Timeout:VacuumDelay 1% · Client:ClientRead 1%
+CPU del servidor Postgres (suma de procesos, 1 núcleo = 100): p50=28 p95=145 máx=439
+Pedidos creados en la prueba: 577 (entregados 492); ciclos completos 492; activos tras la fase sostenida 81
+Integridad tras la carga: sin duplicados, sobreventas ni cobros inconsistentes
+SYNCHRONOUS TERMINATION NOTICE: When explicitly exiting the process via process.exit or via a parent process, asynchronous tasks in your exitHooks will not run. Either remove these tasks, use gracefulExit() instead of process.exit(), or ensure your parent process sends a SIGINT to the process running this code.
+ALLDONE

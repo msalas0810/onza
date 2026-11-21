@@ -1,0 +1,358 @@
+{
+  "cfg": {
+    "sessions": 100,
+    "checkouts": 30,
+    "minutes": 4,
+    "burst": 60,
+    "burstMinutes": 1,
+    "pool": 20,
+    "history": 5000,
+    "devices": 3,
+    "label": "despues-024",
+    "json": "docs/evidence/audit/load-despues-024.json",
+    "warm": 20,
+    "life": 6
+  },
+  "rows": [
+    {
+      "label": "p1-corta:accept",
+      "n": 24,
+      "p50": 7,
+      "p95": 10.9,
+      "p99": 11.1,
+      "max": 11.1,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p1-corta:catalog.menu",
+      "n": 40,
+      "p50": 2.3,
+      "p95": 4.5,
+      "p99": 6.7,
+      "max": 6.7,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p1-corta:catalog.venues",
+      "n": 40,
+      "p50": 1.4,
+      "p95": 4.9,
+      "p99": 6.9,
+      "max": 6.9,
+      "waitP95": 0.2
+    },
+    {
+      "label": "p1-corta:checkout(create)",
+      "n": 25,
+      "p50": 7.7,
+      "p95": 18.2,
+      "p99": 21,
+      "max": 21,
+      "waitP95": 0.2
+    },
+    {
+      "label": "p1-corta:ready",
+      "n": 6,
+      "p50": 10.5,
+      "p95": 12.9,
+      "p99": 12.9,
+      "max": 12.9,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p1-corta:refetch.order_list(customer)",
+      "n": 55,
+      "p50": 4.1,
+      "p95": 9.4,
+      "p99": 12,
+      "max": 12,
+      "waitP95": 0
+    },
+    {
+      "label": "p1-corta:refetch.order_list(venue)",
+      "n": 165,
+      "p50": 111.8,
+      "p95": 131.2,
+      "p99": 133.8,
+      "max": 133.8,
+      "waitP95": 0
+    },
+    {
+      "label": "p1-corta:refetch.sweep",
+      "n": 220,
+      "p50": 1.6,
+      "p95": 6.4,
+      "p99": 7.1,
+      "max": 7.3,
+      "waitP95": 1.6
+    },
+    {
+      "label": "p1-corta:report.summary_range(night)",
+      "n": 2,
+      "p50": 254.3,
+      "p95": 254.3,
+      "p99": 254.3,
+      "max": 254.3,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p1-corta:report.timing_stats",
+      "n": 2,
+      "p50": 171.8,
+      "p95": 171.8,
+      "p99": 171.8,
+      "max": 171.8,
+      "waitP95": 0
+    },
+    {
+      "label": "p2-sostenida:accept",
+      "n": 142,
+      "p50": 4.5,
+      "p95": 8.8,
+      "p99": 12.5,
+      "max": 13.8,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p2-sostenida:capture",
+      "n": 122,
+      "p50": 3.8,
+      "p95": 5.9,
+      "p99": 8.5,
+      "max": 25.1,
+      "waitP95": 0
+    },
+    {
+      "label": "p2-sostenida:catalog.menu",
+      "n": 817,
+      "p50": 1.6,
+      "p95": 2.7,
+      "p99": 4.9,
+      "max": 30.7,
+      "waitP95": 0
+    },
+    {
+      "label": "p2-sostenida:catalog.venues",
+      "n": 817,
+      "p50": 1.3,
+      "p95": 2.1,
+      "p99": 5,
+      "max": 32.7,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p2-sostenida:checkout(create)",
+      "n": 141,
+      "p50": 6.7,
+      "p95": 16.1,
+      "p99": 32.3,
+      "max": 33.3,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p2-sostenida:complete",
+      "n": 122,
+      "p50": 3.6,
+      "p95": 6.3,
+      "p99": 8.1,
+      "max": 8.6,
+      "waitP95": 0
+    },
+    {
+      "label": "p2-sostenida:ready",
+      "n": 136,
+      "p50": 5.2,
+      "p95": 8.4,
+      "p99": 8.9,
+      "max": 10.6,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p2-sostenida:refetch.order_list(customer)",
+      "n": 541,
+      "p50": 3,
+      "p95": 5.9,
+      "p99": 11,
+      "max": 17.4,
+      "waitP95": 0
+    },
+    {
+      "label": "p2-sostenida:refetch.order_list(venue)",
+      "n": 1620,
+      "p50": 63.7,
+      "p95": 136,
+      "p99": 167.9,
+      "max": 203.5,
+      "waitP95": 0
+    },
+    {
+      "label": "p2-sostenida:refetch.sweep",
+      "n": 2164,
+      "p50": 1.1,
+      "p95": 2.6,
+      "p99": 5.4,
+      "max": 9.9,
+      "waitP95": 0.4
+    },
+    {
+      "label": "p2-sostenida:report.summary_range(night)",
+      "n": 8,
+      "p50": 70.8,
+      "p95": 195.5,
+      "p99": 195.5,
+      "max": 195.5,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p2-sostenida:report.timing_stats",
+      "n": 8,
+      "p50": 28.1,
+      "p95": 97.6,
+      "p99": 97.6,
+      "max": 97.6,
+      "waitP95": 0
+    },
+    {
+      "label": "p2-sostenida:resolve",
+      "n": 122,
+      "p50": 4.8,
+      "p95": 7.5,
+      "p99": 9.2,
+      "max": 34.1,
+      "waitP95": 0
+    },
+    {
+      "label": "p3-rafaga:accept",
+      "n": 54,
+      "p50": 4.9,
+      "p95": 6.6,
+      "p99": 6.7,
+      "max": 6.7,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p3-rafaga:capture",
+      "n": 49,
+      "p50": 4,
+      "p95": 6.1,
+      "p99": 7.4,
+      "max": 7.4,
+      "waitP95": 0
+    },
+    {
+      "label": "p3-rafaga:catalog.menu",
+      "n": 210,
+      "p50": 1.4,
+      "p95": 2.3,
+      "p99": 2.7,
+      "max": 2.8,
+      "waitP95": 0
+    },
+    {
+      "label": "p3-rafaga:catalog.venues",
+      "n": 210,
+      "p50": 1,
+      "p95": 2,
+      "p99": 2.1,
+      "max": 2.3,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p3-rafaga:checkout(create)",
+      "n": 54,
+      "p50": 5.7,
+      "p95": 11.5,
+      "p99": 14.1,
+      "max": 14.1,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p3-rafaga:complete",
+      "n": 49,
+      "p50": 3.5,
+      "p95": 4.9,
+      "p99": 8.2,
+      "max": 8.2,
+      "waitP95": 0
+    },
+    {
+      "label": "p3-rafaga:ready",
+      "n": 54,
+      "p50": 4.7,
+      "p95": 8.7,
+      "p99": 9.8,
+      "max": 9.8,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p3-rafaga:refetch.order_list(customer)",
+      "n": 211,
+      "p50": 2.9,
+      "p95": 5.1,
+      "p99": 9.9,
+      "max": 31.2,
+      "waitP95": 0
+    },
+    {
+      "label": "p3-rafaga:refetch.order_list(venue)",
+      "n": 636,
+      "p50": 71.5,
+      "p95": 84.9,
+      "p99": 92.7,
+      "max": 96.1,
+      "waitP95": 0
+    },
+    {
+      "label": "p3-rafaga:refetch.sweep",
+      "n": 844,
+      "p50": 1,
+      "p95": 2.3,
+      "p99": 5.3,
+      "max": 10.1,
+      "waitP95": 0.4
+    },
+    {
+      "label": "p3-rafaga:report.summary_range(night)",
+      "n": 2,
+      "p50": 90,
+      "p95": 90,
+      "p99": 90,
+      "max": 90,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p3-rafaga:report.timing_stats",
+      "n": 2,
+      "p50": 27.9,
+      "p95": 27.9,
+      "p99": 27.9,
+      "max": 27.9,
+      "waitP95": 0
+    },
+    {
+      "label": "p3-rafaga:resolve",
+      "n": 49,
+      "p50": 4.6,
+      "p95": 8.1,
+      "p99": 10.7,
+      "max": 10.7,
+      "waitP95": 0
+    }
+  ],
+  "errors": [],
+  "waits": {
+    "cpu/idle-in-tx": 162,
+    "Timeout:VacuumDelay": 1,
+    "Client:ClientRead": 1
+  },
+  "cpu": {
+    "p50": 22.8,
+    "p95": 123.19999999999999,
+    "max": 255.20000000000002
+  },
+  "finals": {
+    "orders": 220,
+    "delivered": 171
+  },
+  "integrity": []
+}

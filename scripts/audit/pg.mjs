@@ -43,8 +43,9 @@ export async function startPostgres({ port = 54500 + Math.floor(Math.random() * 
   return {
     pg,
     port,
+    dir,
     /** Base nueva con el stub de Supabase y las migraciones pedidas. */
-    async database({ upTo, from, only, files, label = "t" } = {}) {
+    async database({ upTo, from, only, files, skip = [], label = "t" } = {}) {
       const name = `${label}_${Date.now().toString(36)}_${counter++}`;
       await admin.query(`create database ${name}`);
       const pool = new pg.Pool({ host: "127.0.0.1", port, user: "postgres", password: "audit", database: name, max: 60 });
@@ -57,6 +58,7 @@ export async function startPostgres({ port = 54500 + Math.floor(Math.random() * 
         if (upTo && id > upTo) continue;
         if (from && id <= from) continue;
         if (only && !only.includes(id)) continue;
+        if (skip.includes(id)) continue;
         await pool.query(read(file));
       }
       return { name, pool, query: (...a) => pool.query(...a) };

@@ -1,7 +1,7 @@
 name: Onza CI
 on:
   push:
-    branches: [main, "feat/**", "fix/**"]
+    branches: [main, "feat/**", "fix/**", "review/**", "audit/**"]
   pull_request:
 permissions:
   contents: read
@@ -23,6 +23,19 @@ jobs:
         with:
           name: browser-failures
           path: test-results/
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      # Vulnerabilidades conocidas en dependencias de producción (alta o crítica rompen el job).
+      - run: npm audit --omit=dev --audit-level=high
+      # Patrones de claves en archivos versionados y NEXT_PUBLIC_* permitidas; no imprime valores.
+      - run: node scripts/audit/scan-secrets.mjs
   supabase-integration:
     runs-on: ubuntu-latest
     timeout-minutes: 25

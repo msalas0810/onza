@@ -1,0 +1,409 @@
+{
+  "cfg": {
+    "sessions": 100,
+    "checkouts": 30,
+    "minutes": 3,
+    "burst": 60,
+    "burstMinutes": 1,
+    "pool": 20,
+    "history": 5000,
+    "devices": 3,
+    "label": "antes-023",
+    "json": "docs/evidence/audit/load-antes-023.json",
+    "warm": 20,
+    "life": 6
+  },
+  "rows": [
+    {
+      "label": "p1-corta:accept",
+      "n": 31,
+      "p50": 7.6,
+      "p95": 13,
+      "p99": 54,
+      "max": 54,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p1-corta:capture",
+      "n": 1,
+      "p50": 3.5,
+      "p95": 3.5,
+      "p99": 3.5,
+      "max": 3.5,
+      "waitP95": 0
+    },
+    {
+      "label": "p1-corta:catalog.menu",
+      "n": 43,
+      "p50": 2.7,
+      "p95": 19.8,
+      "p99": 43.3,
+      "max": 43.3,
+      "waitP95": 13.9
+    },
+    {
+      "label": "p1-corta:catalog.venues",
+      "n": 43,
+      "p50": 2.1,
+      "p95": 69.5,
+      "p99": 214,
+      "max": 214,
+      "waitP95": 1398.1
+    },
+    {
+      "label": "p1-corta:checkout(create)",
+      "n": 32,
+      "p50": 11.6,
+      "p95": 133,
+      "p99": 154.9,
+      "max": 154.9,
+      "waitP95": 880.5
+    },
+    {
+      "label": "p1-corta:complete",
+      "n": 1,
+      "p50": 3,
+      "p95": 3,
+      "p99": 3,
+      "max": 3,
+      "waitP95": 0
+    },
+    {
+      "label": "p1-corta:ready",
+      "n": 7,
+      "p50": 7.6,
+      "p95": 9.8,
+      "p99": 9.8,
+      "max": 9.8,
+      "waitP95": 0.1
+    },
+    {
+      "label": "p1-corta:refetch.order_list(customer)",
+      "n": 71,
+      "p50": 2.9,
+      "p95": 21.9,
+      "p99": 43.5,
+      "max": 43.5,
+      "waitP95": 15.4
+    },
+    {
+      "label": "p1-corta:refetch.order_list(venue)",
+      "n": 207,
+      "p50": 2013.6,
+      "p95": 8935.5,
+      "p99": 10253.9,
+      "max": 10620.4,
+      "waitP95": 29.9
+    },
+    {
+      "label": "p1-corta:refetch.sweep",
+      "n": 284,
+      "p50": 4.7,
+      "p95": 35.2,
+      "p99": 59.3,
+      "max": 66.6,
+      "waitP95": 57.6
+    },
+    {
+      "label": "p1-corta:report.summary_range(night)",
+      "n": 2,
+      "p50": 163.2,
+      "p95": 163.2,
+      "p99": 163.2,
+      "max": 163.2,
+      "waitP95": 49
+    },
+    {
+      "label": "p1-corta:report.timing_stats",
+      "n": 2,
+      "p50": 70.9,
+      "p95": 70.9,
+      "p99": 70.9,
+      "max": 70.9,
+      "waitP95": 0
+    },
+    {
+      "label": "p1-corta:resolve",
+      "n": 1,
+      "p50": 5.8,
+      "p95": 5.8,
+      "p99": 5.8,
+      "max": 5.8,
+      "waitP95": 0
+    },
+    {
+      "label": "p2-sostenida:accept",
+      "n": 83,
+      "p50": 6.5,
+      "p95": 73.4,
+      "p99": 189.3,
+      "max": 189.3,
+      "waitP95": 165884.9
+    },
+    {
+      "label": "p2-sostenida:capture",
+      "n": 50,
+      "p50": 9.7,
+      "p95": 83.4,
+      "p99": 133.8,
+      "max": 133.8,
+      "waitP95": 160583.7
+    },
+    {
+      "label": "p2-sostenida:catalog.menu",
+      "n": 458,
+      "p50": 1.8,
+      "p95": 19.4,
+      "p99": 46.7,
+      "max": 69.4,
+      "waitP95": 25896.8
+    },
+    {
+      "label": "p2-sostenida:catalog.venues",
+      "n": 458,
+      "p50": 0.8,
+      "p95": 12.1,
+      "p99": 52,
+      "max": 172.3,
+      "waitP95": 21493.5
+    },
+    {
+      "label": "p2-sostenida:checkout(create)",
+      "n": 82,
+      "p50": 8.4,
+      "p95": 55.6,
+      "p99": 73.2,
+      "max": 73.2,
+      "waitP95": 26219.3
+    },
+    {
+      "label": "p2-sostenida:complete",
+      "n": 42,
+      "p50": 7.3,
+      "p95": 63.9,
+      "p99": 193.3,
+      "max": 193.3,
+      "waitP95": 161270.8
+    },
+    {
+      "label": "p2-sostenida:ready",
+      "n": 91,
+      "p50": 8.9,
+      "p95": 111.8,
+      "p99": 364.3,
+      "max": 364.3,
+      "waitP95": 173699.4
+    },
+    {
+      "label": "p2-sostenida:refetch.order_list(customer)",
+      "n": 240,
+      "p50": 3.9,
+      "p95": 52.2,
+      "p99": 82.8,
+      "max": 102.8,
+      "waitP95": 147241.2
+    },
+    {
+      "label": "p2-sostenida:refetch.order_list(venue)",
+      "n": 709,
+      "p50": 7283.3,
+      "p95": 29276.3,
+      "p99": 45331.2,
+      "max": 50334.3,
+      "waitP95": 136108.2
+    },
+    {
+      "label": "p2-sostenida:refetch.sweep",
+      "n": 992,
+      "p50": 3.5,
+      "p95": 52.5,
+      "p99": 128.2,
+      "max": 437,
+      "waitP95": 28273
+    },
+    {
+      "label": "p2-sostenida:report.summary_range(night)",
+      "n": 4,
+      "p50": 308.1,
+      "p95": 413.7,
+      "p99": 413.7,
+      "max": 413.7,
+      "waitP95": 7989.8
+    },
+    {
+      "label": "p2-sostenida:report.timing_stats",
+      "n": 4,
+      "p50": 270.8,
+      "p95": 329.1,
+      "p99": 329.1,
+      "max": 329.1,
+      "waitP95": 24107.1
+    },
+    {
+      "label": "p2-sostenida:resolve",
+      "n": 53,
+      "p50": 7.2,
+      "p95": 82.4,
+      "p99": 232.7,
+      "max": 232.7,
+      "waitP95": 123972.6
+    },
+    {
+      "label": "p3-rafaga:accept",
+      "n": 22,
+      "p50": 6.2,
+      "p95": 32.2,
+      "p99": 49.2,
+      "max": 49.2,
+      "waitP95": 70423.8
+    },
+    {
+      "label": "p3-rafaga:capture",
+      "n": 42,
+      "p50": 7.4,
+      "p95": 99.4,
+      "p99": 114.9,
+      "max": 114.9,
+      "waitP95": 76534
+    },
+    {
+      "label": "p3-rafaga:catalog.menu",
+      "n": 100,
+      "p50": 1.2,
+      "p95": 8.4,
+      "p99": 28.3,
+      "max": 28.3,
+      "waitP95": 89989.3
+    },
+    {
+      "label": "p3-rafaga:catalog.venues",
+      "n": 100,
+      "p50": 1.3,
+      "p95": 38.3,
+      "p99": 109.2,
+      "max": 109.2,
+      "waitP95": 40213.4
+    },
+    {
+      "label": "p3-rafaga:checkout(create)",
+      "n": 60,
+      "p50": 9.4,
+      "p95": 71.2,
+      "p99": 93.9,
+      "max": 93.9,
+      "waitP95": 87519.6
+    },
+    {
+      "label": "p3-rafaga:complete",
+      "n": 32,
+      "p50": 13.2,
+      "p95": 133.7,
+      "p99": 140.5,
+      "max": 140.5,
+      "waitP95": 89125.2
+    },
+    {
+      "label": "p3-rafaga:ready",
+      "n": 16,
+      "p50": 5.9,
+      "p95": 106.7,
+      "p99": 106.7,
+      "max": 106.7,
+      "waitP95": 89347.7
+    },
+    {
+      "label": "p3-rafaga:refetch.order_list(customer)",
+      "n": 142,
+      "p50": 4.7,
+      "p95": 43,
+      "p99": 67.8,
+      "max": 101.5,
+      "waitP95": 85826.7
+    },
+    {
+      "label": "p3-rafaga:refetch.order_list(venue)",
+      "n": 421,
+      "p50": 5688.6,
+      "p95": 19578,
+      "p99": 26953.6,
+      "max": 29695,
+      "waitP95": 89558.2
+    },
+    {
+      "label": "p3-rafaga:refetch.sweep",
+      "n": 620,
+      "p50": 3.7,
+      "p95": 51.1,
+      "p99": 82.9,
+      "max": 135,
+      "waitP95": 89516.2
+    },
+    {
+      "label": "p3-rafaga:report.summary_range(night)",
+      "n": 1,
+      "p50": 298.1,
+      "p95": 298.1,
+      "p99": 298.1,
+      "max": 298.1,
+      "waitP95": 85674.4
+    },
+    {
+      "label": "p3-rafaga:report.timing_stats",
+      "n": 1,
+      "p50": 162.1,
+      "p95": 162.1,
+      "p99": 162.1,
+      "max": 162.1,
+      "waitP95": 14883
+    },
+    {
+      "label": "p3-rafaga:resolve",
+      "n": 44,
+      "p50": 7.1,
+      "p95": 53.2,
+      "p99": 154.3,
+      "max": 154.3,
+      "waitP95": 61653.9
+    }
+  ],
+  "errors": [
+    {
+      "k": "p1-corta:report.summary_range(night):integer out of range",
+      "n": 2,
+      "expected": false
+    },
+    {
+      "k": "p2-sostenida:report.summary_range(night):integer out of range",
+      "n": 4,
+      "expected": false
+    },
+    {
+      "k": "p3-rafaga:report.summary_range(night):integer out of range",
+      "n": 1,
+      "expected": false
+    },
+    {
+      "k": "p3-rafaga:checkout(create):VENUE_CAPACITY",
+      "n": 15,
+      "expected": true
+    },
+    {
+      "k": "p3-rafaga:resolve:RATE_LIMITED",
+      "n": 5,
+      "expected": true
+    }
+  ],
+  "waits": {
+    "cpu/idle-in-tx": 10925
+  },
+  "cpu": {
+    "p50": 459.00000000000006,
+    "p95": 837.5,
+    "max": 899.8000000000002
+  },
+  "finals": {
+    "orders": 159,
+    "delivered": 93
+  },
+  "integrity": []
+}

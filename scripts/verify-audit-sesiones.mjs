@@ -164,6 +164,7 @@ try {
     const good = await context.cookies();
     await context.clearCookies();
     await page.goto(`${APP}/orders`);
+    await settle(page);
     check("Cliente sin sesión en /orders → /acceso con destino", path(page) === "/acceso?next=%2Forders", path(page));
     await page.locator("summary", { hasText: "Continuar con correo" }).click();
     await page.getByLabel("Correo").fill(people.maria.email);
@@ -174,6 +175,7 @@ try {
     await context.close();
     const st = await open(null);
     await st.page.goto(`${APP}/staff/${MIL}`);
+    await settle(st.page);
     check("Equipo sin sesión → /equipo/acceso con destino", path(st.page) === `/equipo/acceso?next=${encodeURIComponent(`/staff/${MIL}`)}`, path(st.page));
     await st.page.getByLabel("Correo del trabajo").fill(people.jorge.email);
     await st.page.getByLabel("Contraseña").fill("cualquiera-largo-1");
@@ -189,6 +191,7 @@ try {
     const before = (await logouts()).length;
     const { context, page } = await open(null);
     await page.goto(`${APP}/equipo/acceso`);
+    await settle(page);
     await page.getByLabel("Correo del trabajo").fill(people.maria.email);
     await page.getByLabel("Contraseña").fill("cualquiera-largo-1");
     await page.getByRole("button", { name: "Ingresar" }).click();
