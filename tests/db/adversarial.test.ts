@@ -28,7 +28,8 @@ it("los intentos de código inválido también consumen el límite", async () =>
   const db = await database();
   try {
     await actor(db, ids.staff, "staff-a", false);
-    for (let i = 0; i < 10; i++)
+    // Límite por cuenta y por minuto: 60 (migración 024; antes 10, insuficiente a la carga objetivo de 30 pedidos/min).
+    for (let i = 0; i < 60; i++)
       await expect(
         command(db, { action: "resolve", venueId: ids.venue, code: "000000" }),
       ).rejects.toThrow("INVALID_PICKUP");

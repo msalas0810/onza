@@ -21,6 +21,8 @@ export const LATER_MIGRATIONS = [
   "202611190020_profile_details.sql",
   "202611210021_audit_hardening.sql",
   "202611210022_revoke_public_table_writes.sql",
+  "202611210023_scale_fixes.sql",
+  "202611210024_resolve_rate_limit.sql",
 ];
 export async function database() {
   const db = new PGlite();
