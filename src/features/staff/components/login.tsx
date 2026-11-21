@@ -3,6 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { browserDb } from "@/lib/supabase/browser";
+import { signOutDevice } from "@/lib/supabase/sign-out";
 import { Button, TextField, Notice } from "@/components/ui/primitives";
 import { errorMessage } from "@/lib/errors";
 
@@ -44,7 +45,7 @@ export function StaffLogin({
           const { data } = await db.rpc("current_account");
           const kind = (data as { kind?: string } | null)?.kind;
           if (kind !== "staff") {
-            await db.auth.signOut();
+            await signOutDevice();
             throw new Error(
               "Esta es una cuenta personal. Para pedir, usá el acceso de clientes.",
             );

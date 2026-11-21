@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { AppHeader, CustomerNavigation } from "@/components/ui/navigation";
+import { AuthSync } from "@/components/ui/auth-sync";
 import { CartScope } from "@/features/orders/components/cart-scope";
 import { currentUserId } from "@/lib/session-user";
 import "@/styles/globals.css";
@@ -21,6 +22,7 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const userId = await currentUserId();
   return (
     <html lang="es-CR" suppressHydrationWarning>
       <head>
@@ -30,7 +32,8 @@ export default async function RootLayout({
         <a className="skip" href="#main">
           Saltar al contenido
         </a>
-        <CartScope userId={await currentUserId()} />
+        <CartScope userId={userId} />
+        <AuthSync userId={userId} />
         <AppHeader />
         <main id="main">{children}</main>
         <CustomerNavigation />

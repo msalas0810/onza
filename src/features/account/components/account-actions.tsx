@@ -3,6 +3,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { LogOut } from "lucide-react";
 import { browserDb } from "@/lib/supabase/browser";
+import { signOutDevice } from "@/lib/supabase/sign-out";
 import { Button, Toggle } from "@/components/ui/primitives";
 /** Voluntary logout clears local data (cart, checkout attempt, drafts); the theme is a device preference and stays. */
 export function clearLocalData() {
@@ -19,9 +20,12 @@ export function LogoutButton({
   to = "/acceso",
   label = "Cerrar sesión",
   compact = false,
+  everywhere = false,
 }: {
   to?: string;
   label?: string;
+  /** Cierra la cuenta en todos los dispositivos (por defecto solo en este). */
+  everywhere?: boolean;
   /** Botón chico para cabeceras: en pantallas angostas queda solo el ícono (con nombre accesible). */
   compact?: boolean;
 }) {
@@ -29,14 +33,14 @@ export function LogoutButton({
   const [busy, setBusy] = useState(false);
   return (
     <Button
-      variant={compact ? "secondary" : "danger"}
+      variant={compact || everywhere ? "secondary" : "danger"}
       size={compact ? "sm" : "md"}
       block={!compact}
       aria-label={label}
       loading={busy}
       onClick={async () => {
         setBusy(true);
-        await browserDb().auth.signOut();
+        await signOutDevice({ everywhere });
         clearLocalData();
         router.replace(to);
         router.refresh();
@@ -54,7 +58,7 @@ export function SwitchAccountButton({ to }: { to: string }) {
       variant="secondary"
       block
       onClick={async () => {
-        await browserDb().auth.signOut();
+        await signOutDevice();
         router.replace(to);
         router.refresh();
       }}

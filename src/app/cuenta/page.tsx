@@ -81,6 +81,10 @@ export default async function Page() {
           )}
         </section>
         <LogoutButton />
+        <LogoutButton
+          everywhere
+          label="Cerrar sesión en todos mis dispositivos"
+        />
       </div>
     </div>
   );

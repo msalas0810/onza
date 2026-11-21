@@ -36,7 +36,9 @@ export async function currentAccount(): Promise<CurrentAccount> {
       email: null,
       profile: null,
     };
-  const { data } = await db.rpc("current_account");
+  const { data, error } = await db.rpc("current_account");
+  // Una falla de la base no puede leerse como «cuenta personal»: se informa para reintentar (error.tsx).
+  if (error) throw new Error("CONNECTION_ERROR");
   const value = data as Partial<Account> | null;
   const account: Account = {
     kind: value?.kind ?? (user.is_anonymous ? "guest" : "customer"),

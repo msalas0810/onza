@@ -29,6 +29,7 @@ export function useLiveOrders({
     let fallbackAttempts = 0;
     let inFlight = false;
     let pendingRefetch = false;
+    let revoked = false;
     const refetch = async (): Promise<void> => {
       if (closed || document.visibilityState !== "visible") return;
       if (inFlight) {
@@ -46,6 +47,16 @@ export function useLiveOrders({
           { cache: "no-store", signal: controller.signal },
         );
         const json: unknown = await response.json();
+        // Sesión vencida o acceso revocado: se retiran los datos privados de la pantalla y se cierra la suscripción
+        // (Realtime ya no entregaría eventos: las políticas RLS se evalúan con la membresía vigente).
+        if (response.status === 401 || response.status === 403) {
+          setOrders([]);
+          if (channel && db) void db.removeChannel(channel);
+          channel = undefined;
+          realtimeConnected = false;
+          fallbackAttempts = 4;
+          revoked = true;
+        }
         if (response.status === 401) setSessionExpired(true);
         if (response.status === 403)
           setAccess(
@@ -123,7 +134,7 @@ export function useLiveOrders({
           return;
         }
         await refetch();
-        if (closed) return;
+        if (closed || revoked) return;
         const filter = venueId
           ? `venue_id=eq.${venueId}`
           : orderId

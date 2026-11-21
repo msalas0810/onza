@@ -65,7 +65,7 @@ try {
   check("Ajustes: recepción, sonido y salir; sin cierre del local para empleado",
     (await settings.getByText("Recibir pedidos nuevos").count()) === 1 &&
       (await settings.getByText("Sonido de pedidos nuevos").count()) === 1 &&
-      (await settings.getByRole("button", { name: "Salir" }).count()) === 1 &&
+      (await settings.getByRole("button", { name: "Salir de este dispositivo" }).count()) === 1 &&
       (await settings.getByText(/Cerrar el local/).count()) === 0);
   await shot(jorge, "e3-ajustes");
   await jorge.keyboard.press("Escape");

@@ -169,6 +169,9 @@ export async function startShim({ port = 54321, quiet = true } = {}) {
   const db = await createDatabase();
   const passwords = new Map();
   const extra = new Map(); // personas creadas desde la app (alta de equipo)
+  // Ganchos SOLO de verificación (no existen en Supabase): fallas transitorias inyectadas y registro de cierres de sesión.
+  const faults = { user: 0, account: 0 };
+  const logouts = [];
   let lock = Promise.resolve();
   const serial = (task) => {
     const next = lock.then(task, task);
@@ -238,6 +241,10 @@ export async function startShim({ port = 54321, quiet = true } = {}) {
     try {
       /* ---------- Auth ---------- */
       if (url.pathname === "/auth/v1/user" && req.method === "GET") {
+        if (faults.user > 0) {
+          faults.user--;
+          return send(res, 503, { code: 503, msg: "fallo transitorio inyectado" });
+        }
         const id = userOf(auth.replace(/^Bearer /i, ""));
         const person = id && (await findPerson("id", id));
         return person
@@ -275,7 +282,10 @@ export async function startShim({ port = 54321, quiet = true } = {}) {
           });
         return send(res, 200, sessionFor(person));
       }
-      if (url.pathname === "/auth/v1/logout") return send(res, 204);
+      if (url.pathname === "/auth/v1/logout") {
+        logouts.push({ scope: url.searchParams.get("scope") ?? "global", user: userOf(auth.replace(/^Bearer /i, "")) });
+        return send(res, 204);
+      }
       if (url.pathname === "/auth/v1/admin/users" && req.method === "POST") {
         if (auth.replace(/^Bearer /i, "") !== SERVICE_KEY)
           return send(res, 403, { msg: "not admin" });
@@ -314,6 +324,10 @@ export async function startShim({ port = 54321, quiet = true } = {}) {
       /* ---------- RPC ---------- */
       const rpc = url.pathname.match(/^\/rest\/v1\/rpc\/([a-z_]+)$/);
       if (rpc) {
+        if (rpc[1] === "current_account" && faults.account > 0) {
+          faults.account--;
+          return send(res, 503, { code: "PGRST000", message: "fallo transitorio inyectado" });
+        }
         const keys = Object.keys(json);
         const args = keys
           .map((k, i) => `${k.replace(/[^a-z_]/g, "")} => $${i + 1}`)
@@ -386,6 +400,12 @@ export async function startShim({ port = 54321, quiet = true } = {}) {
         await serial(() => db.exec(json.sql));
         return send(res, 200, { ok: true });
       }
+      if (url.pathname === "/__fixture/fault" && req.method === "POST") {
+        if (!auth.endsWith(SERVICE_KEY)) return send(res, 401, { message: "requiere la clave de servicio del shim" });
+        faults[json.target] = Number(json.count ?? 0);
+        return send(res, 200, { ok: true });
+      }
+      if (url.pathname === "/__fixture/logouts") return send(res, 200, logouts);
       return send(res, 404, {
         message: `shim: ${req.method} ${url.pathname} no implementado`,
       });

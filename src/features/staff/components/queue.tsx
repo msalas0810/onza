@@ -734,7 +734,12 @@ export function StaffQueue({
               Cambiar de local
             </Link>
           )}
-          <LogoutButton to="/equipo/acceso" label="Salir" />
+          <LogoutButton to="/equipo/acceso" label="Salir de este dispositivo" />
+          <LogoutButton
+            to="/equipo/acceso"
+            everywhere
+            label="Salir en todos mis dispositivos"
+          />
         </div>
       </Sheet>
       <Sheet
