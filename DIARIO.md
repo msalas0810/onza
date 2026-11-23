@@ -39,8 +39,8 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `audit/seguridad-escala` (local, sin push) desde `review/rescate-entrega` `1090b4e`: auditoría de seguridad y escala con correcciones (migraciones 021–024, sin aplicar en remoto). Antes: `review/rescate-entrega` (publicada como Preview) sobre `feat/plan-pulido` `83ba141`. `fix/hosted-integration` sigue siendo la rama desplegada. Sin merge a `main` |
-| `main` | En `cd0faa6`, igual que `feat/local-mvp`: conserva el MVP local anterior. Integración solo por PR, sin merge automático |
+| Rama vigente de trabajo | `main` (consolidada el 2026-11-23: contiene la auditoría `audit/seguridad-escala`, el rescate `1090b4e` y los cambios de Codex). Se trabaja con ramas `feat/*` o `fix/*` y PR. Migraciones 021–024 sin aplicar en remoto |
+| `main` | Fuente única de trabajo en GitHub (`msalas0810/onza`). **Despliegue automático de `main` desactivado en `vercel.json`** hasta aplicar 013–024 en la base alojada |
 | Commit desplegado en Vercel | `fed579403d75da1d49cc54f0af9239b55c125706`, Preview READY `dpl_8emjFDVbshCsg5xBBsiaKNFSpEqT`. Video e ingreso laboral comprobados por HTTPS. |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
@@ -91,6 +91,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-23-01 · Consolidar Onza en `main` y preparar el repo público
+
+- **Fecha y hora:** 2026-11-23 (America/Costa_Rica)
+- **Persona:** Manu (encargo «Consolidá Onza y publicá la versión más actual en main… repo público, única fuente de trabajo»).
+- **IA:** Claude Code · claude-sonnet-5-5
+- **Rama y commits:** `audit/seguridad-escala` `00a29b8` + un commit de consolidación (el que contiene esta entrada); `main` avanza por fast-forward, sin force-push.
+- **Qué cambió:** `audit/seguridad-escala` ya contenía `main`, `fix/hosted-integration` (incluye los cambios de Codex), `review/rescate-entrega` (`1090b4e`), `feat/plan-pulido` y `feat/local-mvp`: ninguna rama tenía trabajo único. README nuevo y mínimo (clonar, correr, abrir un PR); el README anterior se conserva en `docs/Onza-Guia-tecnica.md`. `vercel.json` desactiva el despliegue automático de `main` mientras la base alojada no tenga 013–024. CONTRIBUTING actualizado (ya hay remoto).
+- **Archivos clave:** `README.md`, `docs/Onza-Guia-tecnica.md`, `vercel.json`, `CONTRIBUTING.md`.
+- **Verificado:** `npm run check` (tipos, lint, 195 pruebas, build) en verde antes del commit de consolidación. Revisión de secretos: patrones de claves/JWT/PEM/URLs con credenciales sobre todo el historial (0 coincidencias), los 3 valores secretos de `.env.local` buscados en árbol, historial y bundle (ausentes), `.env.local` ignorado.
+- **No verificado:** que Vercel respete `vercel.json` (se comprueba tras el push); Supabase real (ver PEN-009).
+- **Decisiones:** el guardia de `vercel.json` vive en el repo y no toca la configuración del proyecto Vercel. Se retira cuando 013–024 estén aplicadas y las variables de Production configuradas. `docs/Onza-Plan-seguridad-y-escala.md` queda fuera del repo (respaldado en `~/Documents/Onza`).
+- **Pendientes / siguiente paso:** aplicar 013–024 en un proyecto aislado y luego en el remoto elegido; retirar el bloque de `vercel.json`; revisar la licencia de Particle Wave y definir una `LICENSE` del repo.
 
 ### D-2026-11-21-01 · Auditoría defensiva de seguridad y escala, con correcciones
 
