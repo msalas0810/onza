@@ -207,15 +207,13 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
       hasText: `#${order.public_code}`,
     });
     await incident
-      .getByRole("button", { name: "Retomar retiro validado", exact: true })
+      .getByRole("button", { name: "Retomar entrega", exact: true })
       .click();
     await expect(
-      owner.getByText("Podés entregar", { exact: true }),
+      owner.getByText("Cobro confirmado (simulado).", { exact: true }),
     ).toBeVisible();
     // Al retomar, el formulario de código no se muestra: no queda ninguna credencial a la vista.
-    await expect(
-      owner.getByLabel("Código de retiro (12 caracteres)"),
-    ).toHaveCount(0);
+    await expect(owner.getByLabel("Código privado")).toHaveCount(0);
     await owner
       .getByRole("checkbox", {
         name: "Entregué físicamente el pedido completo.",
