@@ -31,7 +31,7 @@ export async function loginStaff(page: Page, alias = "BARTENDER") {
       sameSite: "Lax" as const,
     })),
   );
-  // Con la sesión del equipo, el acceso entra directo a la barra (un local) o a la lista de locales.
+  // Con la sesión del equipo, el acceso entra directo a la barra o, si la persona administra un solo local, a su administración; con varios locales muestra la lista.
   await page.goto("/equipo/acceso");
-  await expect(page).toHaveURL(/\/(staff\/|equipo\/locales)/);
+  await expect(page).toHaveURL(/\/(staff\/|admin\/|equipo\/locales)/);
 }
