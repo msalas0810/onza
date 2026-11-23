@@ -248,7 +248,13 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     await expect(
       admin.getByRole("heading", { name: "Resumen", exact: true }),
     ).toBeVisible();
-    await expect(admin.getByText("Paloma", { exact: true })).toBeVisible();
+    // Los productos entregados viven en una hoja que se abre desde «Productos».
+    await admin.getByRole("button", { name: /^Productos/ }).click();
+    await expect(
+      admin
+        .getByRole("dialog", { name: "Productos entregados" })
+        .getByText("Paloma", { exact: true }),
+    ).toBeVisible();
   } finally {
     await Promise.all([
       customer.close(),
