@@ -11,11 +11,10 @@ test("cámara no disponible mantiene alternativa manual", async ({ page }) => {
     Object.defineProperty(window, "BarcodeDetector", { value: undefined }),
   );
   await page.reload();
+  // «Validar retiro» abre el escáner. Sin detector de QR (o sin cámara en el runner) pasa solo al código manual.
   await page.getByRole("button", { name: "Validar retiro" }).first().click();
-  await page.getByRole("button", { name: "Escanear QR" }).click();
-  await expect(page.getByText(/Este navegador no tiene escáner/)).toBeVisible();
-  await page.getByRole("button", { name: "Cerrar y usar el código" }).click();
   await expect(
-    page.getByLabel("Código de retiro (12 caracteres)"),
+    page.getByText(/no lee QR|No pudimos usar la cámara/),
   ).toBeVisible();
+  await expect(page.getByLabel("Código privado")).toBeVisible();
 });

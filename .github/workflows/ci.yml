@@ -49,6 +49,8 @@ jobs:
       - run: npm run db:start
       - run: npm run demo:configure
       - run: npm run demo:seed-users
+      # Solo en esta base efímera del runner: los resultados de pago simulados (rechazo, timeout) están cerrados por defecto (migración 021).
+      - run: npx supabase db query "update private.configuration set allow_scenarios=true where id"
       - run: npx supabase test db
       - run: npx playwright install --with-deps chrome
       - run: npm run test:e2e:live -- tests/e2e/full-demo.spec.ts tests/e2e/pickup.spec.ts
