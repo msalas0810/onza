@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { locationSelectionSchema } from "@/features/maps/types";
 const uuid = z.string().uuid();
 const key = z.string().min(1).max(128);
 const version = z.number().int().positive();
@@ -24,6 +25,9 @@ export const createSchema = z.object({
   scenario: z
     .enum(["approved", "declined", "requires_action", "timeout"])
     .default("approved"),
+  // Dónde entregar (opcional). El servidor la valida contra el plano vigente del local ANTES de crear el pedido y la guarda
+  // después; no forma parte del contenido idempotente del pedido (corregirla no crea otro pedido).
+  location: locationSelectionSchema.optional(),
 });
 export const commandSchema = z.discriminatedUnion("action", [
   createSchema,

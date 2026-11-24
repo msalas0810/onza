@@ -5,6 +5,7 @@ import { z } from "zod";
 import Link from "next/link";
 import {
   BarChart3,
+  Map as MapIcon,
   Receipt,
   Store,
   ToggleLeft,
@@ -26,6 +27,7 @@ import {
   Toggle,
 } from "@/components/ui/primitives";
 import { Sheet } from "@/components/ui/sheet";
+import { MapsAdmin } from "@/features/maps/components/maps-admin";
 import { ProductEditor } from "./product-editor";
 import { VenueProfile } from "./venue-profile";
 import { ProductImage } from "@/features/catalog/components/product-image";
@@ -54,6 +56,7 @@ const tabIcons = {
   menu: Wine,
   disponibilidad: ToggleLeft,
   negocio: Store,
+  mapas: MapIcon,
   equipo: Users,
 } as const;
 
@@ -85,6 +88,7 @@ export function AdminPanel({
   period,
   tab,
   editId,
+  mapId,
 }: {
   venue: Venue;
   products: Product[];
@@ -93,6 +97,8 @@ export function AdminPanel({
   period: Period;
   tab: AdminTab;
   editId?: string;
+  /** Mapa abierto en el editor (pestaña «Mapas»). */
+  mapId?: string;
 }) {
   const [filter, setFilter] = useState("");
   // Estado confirmado por el servidor para cada producto tocado en esta pantalla (antes de que llegue el refresh).
@@ -849,6 +855,12 @@ export function AdminPanel({
                 </div>
               </form>
             </div>
+          )}
+          {tab === "mapas" && (
+            <MapsAdmin
+              venue={{ id: venue.id, slug: venue.slug, name: venue.name }}
+              editMapId={mapId}
+            />
           )}
           {tab === "equipo" && (
             <TeamPanel venueId={venue.id} venueName={venue.name} />

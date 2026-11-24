@@ -2,15 +2,18 @@ import { defineConfig } from "@playwright/test";
 // Pruebas de navegador contra la app local apuntada al servidor de verificación (scripts/local-shim), sin bases remotas.
 // Uso: levantar shim + `next dev -p 3100` (ver docs/plan-pulido-registro.md) y luego
 //   npx playwright test -c playwright.local.config.ts venue-card
-// PLAYWRIGHT_CHROMIUM permite usar un Chromium ya instalado si la versión de Playwright no tiene el suyo descargado.
+// PLAYWRIGHT_CHROMIUM permite usar un Chromium ya instalado si la versión de Playwright no tiene el suyo descargado;
+// PLAYWRIGHT_NO_SANDBOX=1 agrega --no-sandbox (necesario al ejecutar como root, p. ej. en contenedores).
 export default defineConfig({
   testDir: "tests/e2e",
   use: {
     baseURL: process.env.ONZA_APP ?? "http://127.0.0.1:3100",
     headless: true,
-    launchOptions: process.env.PLAYWRIGHT_CHROMIUM
-      ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM }
-      : {},
+    launchOptions: {
+      ...(process.env.PLAYWRIGHT_CHROMIUM ? { executablePath: process.env.PLAYWRIGHT_CHROMIUM } : {}),
+      // Como root (contenedores) Chromium exige --no-sandbox.
+      ...(process.env.PLAYWRIGHT_NO_SANDBOX ? { args: ["--no-sandbox"] } : {}),
+    },
   },
   reporter: "line",
   workers: 2,

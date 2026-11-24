@@ -20,6 +20,7 @@ import { formatClock } from "@/lib/clock";
 import { SessionExpiredSheet } from "./session-expired-sheet";
 import { ReconnectingBanner } from "@/components/ui/connection-banner";
 import { EnjoyMoment } from "./enjoy";
+import { OrderLocationCard } from "@/features/maps/components/order-location";
 
 /** «¡Disfrutá!» una sola vez por pedido, y solo cerca de la entrega: en el historial queda el comprobante. */
 function useEnjoyOnce(order: Order | undefined) {
@@ -159,7 +160,9 @@ export function OrderDetail({ id }: { id: string }) {
             <div className="grow">
               <h2>Listo para retirar</h2>
               <span className="t-label">
-                Mostrá el código o el QR en {order.venue.pickup_label}.
+                {order.location
+                  ? "Cuando te lo lleven, mostrá el código o el QR al personal."
+                  : `Mostrá el código o el QR en ${order.venue.pickup_label}.`}
               </span>
             </div>
           </div>
@@ -268,6 +271,7 @@ export function OrderDetail({ id }: { id: string }) {
           ["queued", "preparing", "delivered"].includes(order.status) && (
             <OrderTimeline order={order} />
           )}
+        <OrderLocationCard order={order} refresh={refresh} />
         {["queued", "preparing"].includes(order.status) && (
           <ReadySound orders={orders} />
         )}

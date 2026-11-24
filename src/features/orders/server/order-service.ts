@@ -16,6 +16,11 @@ import { passwordChangePending } from "@/lib/supabase/guards";
 import { scenariosEnabled } from "@/features/payments/server/provider";
 import { CommandFailure, failureDetail } from "@/lib/errors";
 import { isOwnStorageUrl } from "@/lib/storage-url";
+import { errorCode } from "@/lib/errors";
+import {
+  setLocation,
+  validateLocation,
+} from "@/features/maps/server/location-rpc";
 export async function executeCommand(raw: unknown) {
   assertMockPayments();
   const command = commandSchema.parse(raw);
@@ -32,11 +37,17 @@ export async function executeCommand(raw: unknown) {
     throw new Error("CONNECTION_ERROR");
   if (authError || !user) throw new Error("SESSION_REQUIRED");
   if (command.action === "create") await assertCanOrder(db, user.is_anonymous);
-  let input: Json = command;
+  // La ubicación de entrega no viaja dentro del pedido: se valida antes de crearlo y se guarda después (ver más abajo).
+  const selection = command.action === "create" ? command.location : undefined;
+  const body: Command =
+    command.action === "create" && command.location
+      ? withoutLocation(command)
+      : command;
+  let input: Json = body;
   // Simulated outcomes are for tests only: never selectable from the customer or bar UI.
-  if (!scenariosEnabled() && "scenario" in command)
-    input = { ...command, scenario: "approved" };
-  if (command.action === "create")
+  if (!scenariosEnabled() && "scenario" in body)
+    input = { ...body, scenario: "approved" };
+  if (body.action === "create")
     input = { ...(input as object), ...createPickupToken() };
   if (command.action === "resolve" && command.token) {
     const { token, ...rest } = command;
@@ -61,6 +72,9 @@ export async function executeCommand(raw: unknown) {
     if (error) throw new Error(error.message);
     return data;
   }
+  // Una ubicación inválida (fuera del plano, zona sin entrega, mapa de otro local) se rechaza antes de crear nada.
+  if (command.action === "create" && selection)
+    await validateLocation(db, command.venueId, selection);
   const { error: sweepError } = await db.rpc("sweep_orders");
   if (sweepError) throw new Error(sweepError.message);
   const { data, error } = await db.rpc("onza_command", { input });
@@ -83,7 +97,33 @@ export async function executeCommand(raw: unknown) {
   )
     return data;
   if (command.action === "attempt_status") return attemptStatus(data);
+  if (command.action === "create" && selection) return withLocation(db, data, selection);
   return enrichOrder(data);
+}
+function withoutLocation(c: Extract<Command, { action: "create" }>) {
+  const copy: Record<string, unknown> = { ...c };
+  delete copy.location;
+  return copy as Extract<Command, { action: "create" }>;
+}
+/**
+ * Guarda la ubicación en el pedido recién creado. El pedido ya existe y es válido aunque esto falle (p. ej. el plano cambió
+ * entre la comprobación y el guardado): se devuelve igual, con `location_error`, y el cliente puede corregirla desde su pedido.
+ */
+async function withLocation(
+  db: Awaited<ReturnType<typeof serverDb>>,
+  created: unknown,
+  selection: NonNullable<Extract<Command, { action: "create" }>["location"]>,
+) {
+  const id =
+    created && typeof created === "object" && "id" in created
+      ? String(created.id)
+      : null;
+  if (!id) return enrichOrder(created);
+  try {
+    return await enrichOrder(await setLocation(db, id, selection));
+  } catch (e) {
+    return { ...(await enrichOrder(created)), location_error: errorCode(e) };
+  }
 }
 /**
  * Un "no autorizado" de una cuenta del equipo con contraseña temporal pendiente se informa como tal, para que la pantalla

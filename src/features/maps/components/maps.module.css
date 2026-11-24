@@ -1,0 +1,531 @@
+/* Mapa interactivo. Solo tokens de design/tokens.css: nada de colores o espaciados sueltos. */
+
+/* ---- Visor ------------------------------------------------------------------------------------------------------------ */
+.viewport {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 240px;
+  overflow: hidden;
+  background: var(--onza-surface);
+  border-radius: var(--onza-radius-media);
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: grab;
+}
+.viewport:active {
+  cursor: grabbing;
+}
+.viewport:focus-visible {
+  outline: 3px solid var(--onza-focus);
+  outline-offset: 2px;
+}
+.layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  transform-origin: 0 0;
+  will-change: transform;
+}
+.image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  -webkit-user-drag: none;
+  background: var(--onza-surface-raised);
+}
+.zones {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+.zone {
+  stroke-width: 2px;
+  vector-effect: non-scaling-stroke;
+  stroke-linejoin: round;
+}
+.zoneGeneral {
+  fill: color-mix(in srgb, var(--onza-text) 7%, transparent);
+  stroke: color-mix(in srgb, var(--onza-text) 50%, transparent);
+}
+.zoneVip {
+  fill: color-mix(in srgb, var(--onza-brand) 18%, transparent);
+  stroke: var(--onza-brand);
+}
+.zoneAllow {
+  fill: color-mix(in srgb, var(--onza-success-text) 16%, transparent);
+  stroke: var(--onza-success-text);
+}
+.zoneRestrict {
+  fill: color-mix(in srgb, var(--onza-danger-text) 24%, transparent);
+  stroke: var(--onza-danger-text);
+  stroke-dasharray: 6 4;
+}
+.zoneSelected {
+  stroke-width: 4px;
+}
+.zoneDraft {
+  stroke: var(--onza-brand);
+  stroke-width: 3px;
+  stroke-dasharray: 2 6;
+  stroke-linecap: round;
+}
+.overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.zoneName {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 2px var(--onza-space-8);
+  border-radius: var(--onza-radius-pill);
+  background: color-mix(in srgb, var(--onza-surface-raised) 88%, transparent);
+  color: var(--onza-text);
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.zoneNameRestrict {
+  color: var(--onza-danger-text);
+}
+.markerWrap {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+}
+.marker {
+  position: absolute;
+  left: -22px;
+  top: -22px;
+  width: var(--onza-size-touch-min);
+  height: var(--onza-size-touch-min);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--onza-text);
+  pointer-events: auto;
+  cursor: pointer;
+}
+.marker:focus-visible {
+  outline: 3px solid var(--onza-focus);
+  outline-offset: -2px;
+  border-radius: var(--onza-radius-control);
+}
+.markerDraggable {
+  cursor: grab;
+  touch-action: none;
+}
+.markerPin {
+  top: -44px;
+  place-items: end center;
+}
+.markerVertex {
+  cursor: move;
+}
+.dot {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--onza-radius-pill);
+  background: var(--onza-surface-raised);
+  border: 2px solid var(--onza-text);
+  box-shadow: var(--onza-layout-elevation-1);
+}
+.tone_vip .dot {
+  border-color: var(--onza-brand);
+  color: var(--onza-brand-text);
+}
+.tone_selected .dot {
+  background: var(--onza-brand);
+  border-color: var(--onza-brand);
+  color: var(--onza-on-brand);
+}
+.tone_invalid .dot {
+  border-color: var(--onza-danger-text);
+  color: var(--onza-danger-text);
+}
+.pinSvg {
+  display: block;
+  filter: drop-shadow(
+    0 2px 3px color-mix(in srgb, var(--onza-text) 40%, transparent)
+  );
+}
+.pinSvg path {
+  fill: var(--onza-brand);
+  stroke: var(--onza-surface-raised);
+  stroke-width: 2px;
+}
+.pinSvg circle {
+  fill: var(--onza-surface-raised);
+}
+.tone_invalid .pinSvg path {
+  fill: var(--onza-danger-text);
+}
+.vertexDot {
+  width: 16px;
+  height: 16px;
+  border-radius: var(--onza-radius-pill);
+  background: var(--onza-brand);
+  border: 3px solid var(--onza-surface-raised);
+  box-shadow: var(--onza-layout-elevation-1);
+}
+.tone_selected .vertexDot {
+  background: var(--onza-text);
+}
+.markerLabel {
+  position: absolute;
+  left: 20px;
+  top: -11px;
+  padding: 2px var(--onza-space-8);
+  border: 1px solid var(--onza-border);
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-surface-raised);
+  color: var(--onza-text);
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.controls {
+  position: absolute;
+  right: var(--onza-space-12);
+  bottom: var(--onza-space-12);
+  display: grid;
+  gap: var(--onza-space-8);
+  z-index: 2;
+}
+.controls button {
+  display: grid;
+  place-items: center;
+  width: var(--onza-size-touch-min);
+  height: var(--onza-size-touch-min);
+  border: 1px solid var(--onza-control-border);
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-surface-raised);
+  color: var(--onza-text);
+  box-shadow: var(--onza-layout-elevation-1);
+  cursor: pointer;
+}
+.controls button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.controls button:focus-visible {
+  outline: 3px solid var(--onza-focus);
+  outline-offset: 2px;
+}
+.status {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--onza-space-8);
+  padding: var(--onza-space-24);
+  text-align: center;
+  background: color-mix(in srgb, var(--onza-surface) 90%, transparent);
+  color: var(--onza-text);
+}
+
+/* ---- Selector del cliente (diálogo) ------------------------------------------------------------------------------------ */
+.dialog {
+  position: fixed;
+  z-index: 41;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  background: var(--onza-bg);
+  color: var(--onza-text);
+}
+@media (min-width: 720px) {
+  .dialog {
+    inset: 4vh auto auto 50%;
+    transform: translateX(-50%);
+    width: min(980px, 94vw);
+    height: 92vh;
+    border-radius: var(--onza-radius-sheet);
+    overflow: hidden;
+    box-shadow: var(--onza-layout-elevation-1);
+  }
+}
+.dialogHead {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--onza-space-12);
+  padding: var(--onza-space-16) var(--onza-space-16) var(--onza-space-8);
+  padding-top: max(var(--onza-space-16), env(safe-area-inset-top));
+}
+.dialogHead h2 {
+  margin: 0;
+}
+.dialogTabs {
+  padding: 0 var(--onza-space-16) var(--onza-space-8);
+}
+.dialogMap {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding: 0 var(--onza-space-16);
+}
+.dialogFoot {
+  display: grid;
+  gap: var(--onza-space-12);
+  padding: var(--onza-space-12) var(--onza-space-16)
+    max(var(--onza-space-16), env(safe-area-inset-bottom));
+}
+.dialogActions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--onza-space-8);
+}
+.dialogActions > :last-child {
+  flex: 1 1 12rem;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--onza-space-8);
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.legend span {
+  padding: 2px var(--onza-space-8);
+  border-radius: var(--onza-radius-pill);
+  border: 1px solid currentColor;
+}
+.legendRestrict {
+  color: var(--onza-danger-text);
+  background: var(--onza-danger-soft);
+}
+.legendAllow {
+  color: var(--onza-success-text);
+  background: var(--onza-success-soft);
+}
+.summary {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+}
+.summaryOk,
+.summaryError {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--onza-space-8);
+  font-weight: 600;
+}
+.summaryOk {
+  color: var(--onza-success-text);
+}
+.summaryError {
+  color: var(--onza-danger-text);
+}
+
+/* ---- Resumen y vista en miniatura (checkout, pedido, equipo) -------------------------------------------------------------- */
+.card {
+  display: grid;
+  gap: var(--onza-space-12);
+  padding: var(--onza-space-16);
+  border: 1px solid var(--onza-border);
+  border-radius: var(--onza-layout-card-radius);
+  background: var(--onza-surface-raised);
+}
+.cardHead {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-8);
+  font-weight: 700;
+}
+.cardRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--onza-space-8);
+  align-items: center;
+}
+.cardRow > .grow {
+  flex: 1 1 15rem;
+  min-width: 0;
+}
+.mini {
+  position: relative;
+  height: 180px;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--onza-space-4);
+  padding: 2px var(--onza-space-8);
+  border-radius: var(--onza-radius-pill);
+  background: var(--onza-brand-soft);
+  color: var(--onza-brand-text);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+.chipNeutral {
+  background: var(--onza-surface);
+  color: var(--onza-text-muted);
+}
+
+/* ---- Equipo: referencias y nota del código ------------------------------------------------------------------------------- */
+.refs {
+  display: grid;
+  gap: var(--onza-space-4);
+  margin: var(--onza-space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.refs li {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-8);
+}
+.codeNote {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--onza-space-8);
+}
+.codeNote > svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+/* ---- Editor (administración) --------------------------------------------------------------------------------------------- */
+.editor {
+  display: grid;
+  gap: var(--onza-space-16);
+}
+@media (min-width: 980px) {
+  .editor {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    align-items: start;
+  }
+}
+.editorMap {
+  position: relative;
+  height: min(70dvh, 720px);
+  min-height: 320px;
+}
+.editorSide {
+  display: grid;
+  gap: var(--onza-space-16);
+}
+.tools {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+  gap: var(--onza-space-8);
+}
+.tool {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-8);
+  min-height: var(--onza-size-touch-min);
+  padding: 0 var(--onza-space-12);
+  border: 1px solid var(--onza-control-border);
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-surface-raised);
+  color: var(--onza-text);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.tool[aria-pressed="true"] {
+  background: var(--onza-brand);
+  border-color: var(--onza-brand);
+  color: var(--onza-on-brand);
+}
+.tool:focus-visible {
+  outline: 3px solid var(--onza-focus);
+  outline-offset: 2px;
+}
+.inspector {
+  display: grid;
+  gap: var(--onza-space-12);
+}
+.itemList {
+  display: grid;
+  gap: var(--onza-space-4);
+  max-height: 220px;
+  overflow: auto;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.itemList button {
+  width: 100%;
+  min-height: var(--onza-size-touch-min);
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-8);
+  padding: 0 var(--onza-space-12);
+  border: 1px solid transparent;
+  border-radius: var(--onza-radius-control);
+  background: none;
+  color: var(--onza-text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.itemList button[aria-current="true"] {
+  background: var(--onza-brand-soft);
+  border-color: var(--onza-brand);
+}
+.qrBox,
+.staffBox {
+  display: grid;
+  gap: var(--onza-space-8);
+  padding: var(--onza-space-12);
+  border: 1px solid var(--onza-border);
+  border-radius: var(--onza-radius-control);
+  margin: 0;
+}
+.saveBar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--onza-space-8);
+  padding: var(--onza-space-12) 0
+    max(var(--onza-space-12), env(safe-area-inset-bottom));
+  background: var(--onza-bg);
+  border-top: 1px solid var(--onza-border);
+}
+.saveBar .grow {
+  flex: 1 1 12rem;
+}
+.dropzone {
+  display: grid;
+  place-items: center;
+  gap: var(--onza-space-8);
+  min-height: 240px;
+  padding: var(--onza-space-24);
+  border: 2px dashed var(--onza-control-border);
+  border-radius: var(--onza-radius-media);
+  background: var(--onza-surface);
+  text-align: center;
+}
+.mapList {
+  display: grid;
+  gap: var(--onza-space-12);
+}

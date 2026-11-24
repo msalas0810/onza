@@ -2,6 +2,8 @@
 
 Web móvil para pedir en la barra y retirar con QR. Cliente, barra y administración del local sobre Next.js 16, React 19, TypeScript y Supabase. **Todo el dinero es simulado** (pagos mock); no hay cobros reales.
 
+Opcional por local: **mapa interactivo de ubicación y entrega** sobre el plano propio del local o de cada edición de evento, sin GPS ni servicios externos de mapas (guía: [`docs/Onza-Mapa-interactivo.md`](docs/Onza-Mapa-interactivo.md)).
+
 `main` es la única fuente de trabajo. El estado vigente y las decisiones están en [`DIARIO.md`](DIARIO.md); la guía técnica extensa, en [`docs/Onza-Guia-tecnica.md`](docs/Onza-Guia-tecnica.md).
 
 ## Clonar y correr

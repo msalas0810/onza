@@ -128,6 +128,10 @@ ONZA_APP=http://127.0.0.1:3100 node scripts/verify-pulido-all.mjs   # reinicia e
 
 Personas del shim (cualquier contraseña): `maria@correo.demo` y `sofia@correo.demo` (clientes), `jorge@equipo.demo` (empleado de Mil948), `ana@equipo.demo` (admin de Mil948 y empleada de Stiefel), `luis@equipo.demo` (clave temporal).
 
+### Mapa interactivo de ubicación y entrega (noviembre de 2026)
+
+Planos propios por local o edición de evento, con versiones inmutables, ubicación normalizada por pedido, vista del equipo y entrega solo con código válido. Modelo, reglas, seguridad, pruebas y límites de la verificación: `docs/Onza-Mapa-interactivo.md`. Migraciones nuevas (aditivas, **sin aplicar en remoto**): `202611240025` y `202611240026`. Pruebas de navegador: `tests/e2e/maps.spec.ts` (shim + `next dev`, ver arriba; reiniciar el shim entre ejecuciones).
+
 ### Auditoría de seguridad y escala (noviembre de 2026)
 
 Informe, matriz de roles, hallazgos con su prueba y pendientes: `docs/Onza-Auditoria-seguridad-y-escala.md`; operación: `docs/Onza-Runbook-operacion.md`. Migraciones nuevas (aditivas, **sin aplicar en remoto**): `202611210021` a `202611210023`. Las pruebas de concurrencia, migraciones y carga usan un Postgres 17 real y efímero que se instala **una vez fuera del repo** (instrucciones en `scripts/audit/pg.mjs`); no tocan ningún proyecto remoto:

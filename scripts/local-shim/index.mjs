@@ -32,6 +32,7 @@ const MIGRATIONS = [
   "202611210022_revoke_public_table_writes.sql",
   "202611210023_scale_fixes.sql",
   "202611210024_resolve_rate_limit.sql",
+  "202611240025_venue_maps.sql",
 ];
 const TABLES = new Set([
   "venues",
@@ -94,6 +95,7 @@ export async function createDatabase() {
   for (const file of MIGRATIONS)
     await db.exec(read(`supabase/migrations/${file}`));
   await db.exec(read("supabase/seed.sql"));
+  await db.exec(read("supabase/seed-maps.sql"));
   const fixture = JSON.parse(read("fixtures/real-venues.json"));
   const q = (v) =>
     v === null || v === undefined

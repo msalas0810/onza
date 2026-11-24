@@ -30,6 +30,8 @@ import {
 } from "./waitlist-panel";
 import { formatClock } from "@/lib/clock";
 import { useOnline } from "@/lib/use-online";
+import { CheckoutLocation } from "@/features/maps/components/delivery-location";
+import type { LocationSelection } from "@/features/maps/types";
 
 /** Rechazos en los que el servidor no creó nada: el intento se puede descartar sin riesgo de duplicar. */
 const DEFINITIVE = [
@@ -46,6 +48,10 @@ const DEFINITIVE = [
   "STAFF_CANNOT_ORDER",
   "ONBOARDING_REQUIRED",
   "CANCEL_COOLDOWN",
+  // Ubicación de entrega rechazada antes de crear el pedido.
+  "LOCATION_RESTRICTED",
+  "LOCATION_OUT_OF_MAP",
+  "MAP_UNAVAILABLE",
 ];
 const ACTIVE = ["pending_authorization", "queued", "preparing", "ready"];
 const legacyAttemptKey = "onza-checkout-attempt";
@@ -83,6 +89,8 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
   const [activeOrder, setActiveOrder] = useState<Order | null>(null);
   const [waiting, setWaiting] = useState<WaitlistEntry | null>(null);
   const [joining, setJoining] = useState(false);
+  // Dónde entregar (opcional). No forma parte de la huella del intento: corregirla no crea otro pedido.
+  const [location, setLocation] = useState<LocationSelection | null>(null);
   const venueId = cart?.venueId;
   // Recuperar el lugar en la lista de espera al volver a esta pantalla (vive en el servidor).
   useEffect(() => {
@@ -141,6 +149,12 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           <br />
           Te avisamos cuando esté listo.
         </p>
+        {placed.location_error && (
+          <p className="muted t-label" role="status">
+            No pudimos guardar tu ubicación. Podés marcarla de nuevo desde tu
+            pedido.
+          </p>
+        )}
         <Link
           className={buttonClass({ variant: "secondary" })}
           href={`/orders/${placed.id}`}
@@ -233,7 +247,11 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       attempt ??= { fingerprint, key: crypto.randomUUID() };
       localStorage.setItem(attemptKey, JSON.stringify(attempt));
       const order = orderSchema.parse(
-        await sendCommand({ ...input, idempotencyKey: attempt.key }),
+        await sendCommand({
+          ...input,
+          idempotencyKey: attempt.key,
+          ...(location ? { location } : {}),
+        }),
       );
       setWaiting(null);
       if (JSON.stringify(readCart()) === JSON.stringify(cart)) writeCart(null);
@@ -365,6 +383,11 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
         <p className="muted t-label">
           Podés cancelar hasta que el local acepte tu pedido.
         </p>
+        <CheckoutLocation
+          venueId={cart.venueId}
+          value={location}
+          onChange={setLocation}
+        />
         {activeOrder && (
           <Notice
             tone="warning"

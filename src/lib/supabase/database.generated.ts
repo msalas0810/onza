@@ -100,6 +100,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      order_locations: {
+        Row: {
+          order_id: string;
+          venue_id: string;
+          map_id: string;
+          map_version: number;
+          delivery_method: string;
+          x: number;
+          y: number;
+          zone_id: string | null;
+          zone_name: string | null;
+          element_id: string | null;
+          element_label: string | null;
+          reference_id: string | null;
+          reference_label: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          order_id: string;
+          venue_id: string;
+          map_id: string;
+          map_version: number;
+          delivery_method: string;
+          x: number;
+          y: number;
+          zone_id?: string | null;
+          zone_name?: string | null;
+          element_id?: string | null;
+          element_label?: string | null;
+          reference_id?: string | null;
+          reference_label?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          order_id?: string;
+          venue_id?: string;
+          map_id?: string;
+          map_version?: number;
+          delivery_method?: string;
+          x?: number;
+          y?: number;
+          zone_id?: string | null;
+          zone_name?: string | null;
+          element_id?: string | null;
+          element_label?: string | null;
+          reference_id?: string | null;
+          reference_label?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
       orders: {
         Row: {
           id: string;
@@ -117,6 +171,7 @@ export type Database = {
           deadline: string;
           business_date: string;
           queued_at: string | null;
+          location_updated_at: string | null;
         };
         Insert: {
           id?: string;
@@ -134,6 +189,7 @@ export type Database = {
           deadline: string;
           business_date?: string;
           queued_at?: string | null;
+          location_updated_at?: string | null;
         };
         Update: {
           id?: string;
@@ -151,6 +207,7 @@ export type Database = {
           deadline?: string;
           business_date?: string;
           queued_at?: string | null;
+          location_updated_at?: string | null;
         };
         Relationships: [];
       };
@@ -239,6 +296,7 @@ export type Database = {
           onboarded_at?: string;
           updated_at?: string;
           avatar_path?: string | null;
+          favorite_drink?: string | null;
         };
         Update: {
           user_id?: string;
@@ -257,6 +315,7 @@ export type Database = {
           onboarded_at?: string;
           updated_at?: string;
           avatar_path?: string | null;
+          favorite_drink?: string | null;
         };
         Relationships: [];
       };
@@ -281,6 +340,123 @@ export type Database = {
           must_change_password?: boolean;
           created_by?: string | null;
           created_at?: string;
+        };
+        Relationships: [];
+      };
+      venue_map_versions: {
+        Row: {
+          map_id: string;
+          venue_id: string;
+          version: number;
+          source_revision: number;
+          image_path: string;
+          image_width: number;
+          image_height: number;
+          layout: Json;
+          published_at: string;
+          published_by: string | null;
+        };
+        Insert: {
+          map_id: string;
+          venue_id: string;
+          version: number;
+          source_revision: number;
+          image_path: string;
+          image_width: number;
+          image_height: number;
+          layout: Json;
+          published_at?: string;
+          published_by?: string | null;
+        };
+        Update: {
+          map_id?: string;
+          venue_id?: string;
+          version?: number;
+          source_revision?: number;
+          image_path?: string;
+          image_width?: number;
+          image_height?: number;
+          layout?: Json;
+          published_at?: string;
+          published_by?: string | null;
+        };
+        Relationships: [];
+      };
+      venue_map_zone_staff: {
+        Row: {
+          map_id: string;
+          venue_id: string;
+          zone_id: string;
+          user_id: string;
+        };
+        Insert: {
+          map_id: string;
+          venue_id: string;
+          zone_id: string;
+          user_id: string;
+        };
+        Update: {
+          map_id?: string;
+          venue_id?: string;
+          zone_id?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      venue_maps: {
+        Row: {
+          id: string;
+          venue_id: string;
+          name: string;
+          kind: string;
+          event_name: string | null;
+          site_label: string | null;
+          event_date: string | null;
+          status: string;
+          published_version: number | null;
+          draft_revision: number;
+          draft_image_path: string | null;
+          draft_image_width: number | null;
+          draft_image_height: number | null;
+          draft_layout: Json;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          venue_id: string;
+          name: string;
+          kind?: string;
+          event_name?: string | null;
+          site_label?: string | null;
+          event_date?: string | null;
+          status?: string;
+          published_version?: number | null;
+          draft_revision?: number;
+          draft_image_path?: string | null;
+          draft_image_width?: number | null;
+          draft_image_height?: number | null;
+          draft_layout?: Json;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          venue_id?: string;
+          name?: string;
+          kind?: string;
+          event_name?: string | null;
+          site_label?: string | null;
+          event_date?: string | null;
+          status?: string;
+          published_version?: number | null;
+          draft_revision?: number;
+          draft_image_path?: string | null;
+          draft_image_width?: number | null;
+          draft_image_height?: number | null;
+          draft_layout?: Json;
+          created_at?: string;
+          updated_at?: string;
         };
         Relationships: [];
       };
@@ -414,10 +590,6 @@ export type Database = {
         Returns: undefined;
       };
       update_profile_avatar: { Args: { path: string | null }; Returns: Json };
-      update_profile_details: {
-        Args: { full_name: string; username: string; favorite_drink?: string | null };
-        Returns: Json;
-      };
       venue_summary_range: {
         Args: { venue: string; from_day: string; to_day: string };
         Returns: Json;
@@ -433,6 +605,28 @@ export type Database = {
         Returns: Json;
       };
       auto_accept_tick: { Args: Record<never, never>; Returns: number };
+      update_profile_details: {
+        Args: {
+          full_name: string;
+          username: string;
+          favorite_drink?: string | null;
+        };
+        Returns: Json;
+      };
+      map_admin_list: { Args: { venue: string }; Returns: Json };
+      map_admin_get: { Args: { map: string }; Returns: Json };
+      map_create: { Args: { input: Json }; Returns: Json };
+      map_update_meta: { Args: { input: Json }; Returns: Json };
+      map_save_draft: { Args: { input: Json }; Returns: Json };
+      map_publish: { Args: { input: Json }; Returns: Json };
+      map_archive: { Args: { input: Json }; Returns: Json };
+      map_duplicate: { Args: { input: Json }; Returns: Json };
+      map_assign_staff: { Args: { input: Json }; Returns: Json };
+      map_for_venue: { Args: { venue: string }; Returns: Json };
+      map_version_get: { Args: { map: string; ver: number }; Returns: Json };
+      order_location_validate: { Args: { input: Json }; Returns: Json };
+      order_location_set: { Args: { input: Json }; Returns: Json };
+      order_location_clear: { Args: { input: Json }; Returns: Json };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

@@ -14,10 +14,10 @@ export default async function Page({
   searchParams,
 }: {
   params: Promise<{ venueId: string }>;
-  searchParams: Promise<{ tab?: string; editar?: string }>;
+  searchParams: Promise<{ tab?: string; editar?: string; mapa?: string }>;
 }) {
   const { venueId } = await params;
-  const { tab, editar } = await searchParams;
+  const { tab, editar, mapa } = await searchParams;
   const current: AdminTab = isAdminTab(tab) ? tab : "resumen";
   const context = await loadStaffContext(venueId, true);
   const gate = staffGate(context, `/admin/${venueId}?tab=${current}`);
@@ -44,13 +44,14 @@ export default async function Page({
       canSwitch={context.venueCount > 1}
     >
       <AdminPanel
-        key={`${current}:${editar ?? ""}`}
+        key={`${current}:${editar ?? ""}:${mapa ?? ""}`}
         venue={context.venue}
         {...data.menu}
         summary={data.summary}
         period={data.period}
         tab={current}
         editId={editar}
+        mapId={mapa && /^[0-9a-f-]{36}$/i.test(mapa) ? mapa : undefined}
       />
     </StaffShell>
   );

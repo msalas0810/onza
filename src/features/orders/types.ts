@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { orderLocationSchema } from "@/features/maps/types";
 export const orderSchema = z.object({
   id: z.string(),
   venue_id: z.string(),
@@ -39,6 +40,10 @@ export const orderSchema = z.object({
   qr_data_url: z.string().optional(),
   pickup_code: z.string().optional(),
   ticket_error: z.enum(["unavailable", "qr_unavailable"]).optional(),
+  // Dónde entregar (mapa interactivo). Ausente si el pedido no la tiene o si la base no tiene la migración 025.
+  location: orderLocationSchema.nullable().optional(),
+  location_updated_at: z.string().nullable().optional(),
+  location_error: z.string().optional(),
   venue: z.object({
     id: z.string(),
     name: z.string(),

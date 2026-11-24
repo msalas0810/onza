@@ -1,5 +1,20 @@
 // El orden importa: errorCode toma la primera clave contenida en el texto (ORDER_EXPIRED antes que EXPIRED).
 export const messages: Record<string, string> = {
+  // Mapa interactivo. Las claves más largas van primero: errorCode toma la primera contenida en el texto.
+  INVALID_MAP_LAYOUT:
+    "El plano tiene datos no válidos (elementos o zonas fuera del plano, repetidos o incompletos). Revisalo y guardá otra vez.",
+  INVALID_MAP_IMAGE:
+    "La imagen del plano no es válida. Subila de nuevo desde esta pantalla (JPG, PNG, WebP o SVG seguro).",
+  INVALID_MAP: "Revisá el nombre y, para una edición de evento, su fecha.",
+  MAP_IMAGE_REQUIRED: "Subí la imagen del plano antes de publicarlo.",
+  MAP_UNAVAILABLE:
+    "Este local no tiene un plano disponible ahora. Podés pedir igual y retirar en la barra.",
+  MAP_LIMIT: "Llegaste al máximo de mapas de este local. Archivá o reutilizá uno.",
+  NO_CHANGES: "No hay cambios nuevos para publicar.",
+  LOCATION_OUT_OF_MAP: "Ese punto está fuera del plano. Tocá dentro del plano.",
+  LOCATION_RESTRICTED: "En esa zona no hacemos entregas. Elegí otro punto.",
+  LOCATION_LOCKED:
+    "Ya no se puede cambiar la ubicación: el pedido terminó o el equipo ya empezó la entrega.",
   ORDER_EXPIRED:
     "Pasaron los cinco minutos para aceptar este pedido. Venció y la reserva quedó liberada.",
   PRODUCT_ARCHIVED:

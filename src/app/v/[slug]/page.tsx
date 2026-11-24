@@ -5,14 +5,18 @@ import { ProductMenu } from "@/features/catalog/components/product-menu";
 import { VenueHero } from "@/features/catalog/components/venue-hero";
 import { ConfigurationState } from "@/components/ui/configuration-state";
 import { Notice, buttonClass } from "@/components/ui/primitives";
+import { TableContextBanner } from "@/features/maps/components/table-context";
 
 export const dynamic = "force-dynamic";
 export default async function MenuPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string }>;
+  searchParams: Promise<{ mesa?: string }>;
 }) {
   const { slug } = await params;
+  const { mesa } = await searchParams;
   let venue, menu;
   try {
     venue = await getVenue(slug);
@@ -49,6 +53,9 @@ export default async function MenuPage({
         </Notice>
       ) : (
         <>
+          {mesa && /^[A-Za-z0-9_-]{1,40}$/.test(mesa) && (
+            <TableContextBanner venueId={venue.id} tableId={mesa} />
+          )}
           {venue.paused && (
             <Notice tone="warning" title="Pedidos pausados">
               Podés armar tu ronda. Vas a poder pedir cuando el local reanude.

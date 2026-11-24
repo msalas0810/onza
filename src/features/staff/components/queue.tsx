@@ -32,6 +32,10 @@ import { formatClock } from "@/lib/clock";
 import { countdownText } from "@/features/orders/countdown";
 import type React from "react";
 import type { Venue } from "@/features/catalog/server/queries";
+import {
+  OrderLocationLine,
+  StaffLocationDialog,
+} from "@/features/maps/components/staff-location";
 
 const lanes = [
   ["queued", "Nuevos"],
@@ -99,6 +103,8 @@ export function StaffQueue({
   const [resumeOrderId, setResumeOrderId] = useState<string | null>(null);
   const [pickupRevision, setPickupRevision] = useState(0);
   const [rejecting, setRejecting] = useState<Order | null>(null);
+  // Pedido cuya ubicación se está mirando en el plano (se busca por id para ver siempre el estado más reciente).
+  const [viewingId, setViewingId] = useState<string | null>(null);
   const [reason, setReason] = useState<string>(rejectReasons[0]);
   const [detail, setDetail] = useState("");
   const [reasonError, setReasonError] = useState("");
@@ -511,6 +517,7 @@ export function StaffQueue({
                           return `${units} ${units === 1 ? "producto" : "productos"}`;
                         })()}
                       </div>
+                      <OrderLocationLine order={o} onView={() => setViewingId(o.id)} />
                       {failure && failure.version === o.version && (
                         <p className="inline-error" role="alert">
                           {failure.message}
@@ -742,6 +749,67 @@ export function StaffQueue({
           />
         </div>
       </Sheet>
+      {(() => {
+        const viewing = viewingId ? orders.find((o) => o.id === viewingId) : undefined;
+        if (!viewing) return null;
+        const left = Date.parse(viewing.deadline) - now;
+        const lapsed = viewing.status === "queued" && left <= 0;
+        return (
+          <StaffLocationDialog
+            order={viewing}
+            onClose={() => setViewingId(null)}
+            actions={
+              viewing.status === "queued" ? (
+                <>
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    disabled={!online || busy === viewing.id || lapsed}
+                    onClick={() => {
+                      setReasonError("");
+                      setViewingId(null);
+                      setRejecting(viewing);
+                    }}
+                  >
+                    Rechazar
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="success"
+                    loading={busy === viewing.id}
+                    disabled={!online || lapsed}
+                    onClick={() => void act(viewing, "accept")}
+                  >
+                    Aceptar
+                  </Button>
+                </>
+              ) : viewing.status === "preparing" ? (
+                <Button
+                  size="lg"
+                  loading={busy === viewing.id}
+                  disabled={!online}
+                  onClick={() => void act(viewing, "ready")}
+                >
+                  Marcar listo
+                </Button>
+              ) : viewing.status === "ready" ? (
+                <Button
+                  variant="secondary"
+                  size="lg"
+                  disabled={!online}
+                  onClick={() => {
+                    setViewingId(null);
+                    openPickup();
+                  }}
+                >
+                  <ScanLine size={20} aria-hidden="true" />
+                  Validar retiro
+                </Button>
+              ) : undefined
+            }
+          />
+        );
+      })()}
       <Sheet
         open={!!rejecting}
         onOpenChange={(open) => !open && setRejecting(null)}
