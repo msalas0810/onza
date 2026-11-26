@@ -3,6 +3,7 @@ export const adminTabIds = [
   "pedidos",
   "menu",
   "disponibilidad",
+  "entrega",
   "negocio",
   "equipo",
 ] as const;
@@ -12,6 +13,7 @@ export const adminTabLabels: Record<AdminTab, string> = {
   pedidos: "Pedidos",
   menu: "Menú",
   disponibilidad: "Disponibilidad",
+  entrega: "Entrega",
   negocio: "Negocio",
   equipo: "Equipo",
 };

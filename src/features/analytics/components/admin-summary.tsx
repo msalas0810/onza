@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CalendarDays, ChevronRight } from "lucide-react";
+import { CalendarDays, ChevronRight, Download } from "lucide-react";
 import {
   Button,
   EmptyState,
@@ -46,6 +46,36 @@ export function AdminSummary({
   const [draft, setDraft] = useState<Period>(initialPeriod);
   const [metric, setMetric] = useState<ChartMetric>("orders");
   const [products, setProducts] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportNote, setExportNote] = useState("");
+  const days = Math.round((Date.parse(period.to) - Date.parse(period.from)) / 86_400_000) + 1;
+  const tooLong = days > 93;
+  /** Descarga los pedidos del período en CSV para el cierre de caja. La API vuelve a comprobar que sea administración. */
+  const exportCsv = async () => {
+    setExporting(true);
+    setExportNote("");
+    try {
+      const response = await fetch(`/api/export?venue=${venueId}&from=${period.from}&to=${period.to}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("export");
+      const blob = await response.blob();
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `onza-pedidos-${period.from}_${period.to}.csv`;
+      document.body.append(link);
+      link.click();
+      link.remove();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+      setExportNote(
+        response.headers.get("X-Onza-Truncated") === "1"
+          ? "El archivo tiene los primeros 5 000 pedidos. Elegí un período más corto para el resto."
+          : "Archivo descargado.",
+      );
+    } catch {
+      setExportNote("No pudimos generar el archivo. Revisá tu conexión e intentá de nuevo.");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   useEffect(() => {
     const controller = new AbortController();
@@ -72,19 +102,38 @@ export function AdminSummary({
     <section className="stack">
       <div className="row between wrap">
         <h2>Resumen</h2>
-        <button
-          type="button"
-          className="period-button"
-          aria-haspopup="dialog"
-          onClick={() => {
-            setDraft(period);
-            setPicking(true);
-          }}
-        >
-          <CalendarDays size={18} aria-hidden="true" />
-          <span>{periodLabel(period)}</span>
-        </button>
+        <div className="row wrap">
+          <button
+            type="button"
+            className="period-button"
+            aria-haspopup="dialog"
+            onClick={() => {
+              setDraft(period);
+              setPicking(true);
+            }}
+          >
+            <CalendarDays size={18} aria-hidden="true" />
+            <span>{periodLabel(period)}</span>
+          </button>
+          <Button
+            variant="secondary"
+            size="sm"
+            loading={exporting}
+            disabled={tooLong}
+            onClick={() => void exportCsv()}
+            aria-describedby="export-hint"
+          >
+            <Download size={16} aria-hidden="true" />
+            Exportar CSV
+          </Button>
+        </div>
       </div>
+      <p className="muted t-label" id="export-hint" role="status">
+        {tooLong
+          ? "Para exportar elegí un período de hasta 93 días."
+          : exportNote ||
+            "El CSV trae cada pedido del período con su estado, lugar de entrega, horas y montos. Sin datos de clientes."}
+      </p>
       <p className="muted t-label">
         Noches operativas de 06:00 a 06:00 (Costa Rica). Montos simulados: no hay cobros reales.
       </p>

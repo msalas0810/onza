@@ -7,6 +7,7 @@ import { AdminPanel } from "@/features/admin/components/admin-panel";
 import { isAdminTab, type AdminTab } from "@/features/admin/admin-tabs";
 import { loadStaffContext } from "@/features/team/server/staff-context";
 import { ConfigurationState } from "@/components/ui/configuration-state";
+import { listSpots } from "@/features/delivery/server/queries";
 
 export const dynamic = "force-dynamic";
 export default async function Page({
@@ -25,11 +26,13 @@ export default async function Page({
   let data;
   try {
     const period = tonight();
-    const [menu, summary] = await Promise.all([
+    const [menu, summary, spots] = await Promise.all([
       getAdminMenu(venueId),
       getVenueSummaryRange(venueId, period.from, period.to),
+      // Una base sin la migración 025 no tiene lugares: el panel sigue funcionando como siempre.
+      listSpots(venueId).catch(() => []),
     ]);
-    data = { menu, summary, period };
+    data = { menu, summary, spots, period };
   } catch (error) {
     return (
       <StaffShell venue={context.venue} person={context.person}>
@@ -48,6 +51,7 @@ export default async function Page({
         venue={context.venue}
         {...data.menu}
         summary={data.summary}
+        spots={data.spots}
         period={data.period}
         tab={current}
         editId={editar}

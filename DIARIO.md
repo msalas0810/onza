@@ -39,13 +39,14 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
+| Rama en revisión | `feat/entrega-mesa-admin` (entrega en el lugar, Picnic y admin; migración 025 sin aplicar en remoto; ver D-2026-11-26-01) |
 | Rama vigente de trabajo | `main` (consolidada el 2026-11-23: contiene la auditoría `audit/seguridad-escala`, el rescate `1090b4e` y los cambios de Codex). Se trabaja con ramas `feat/*` o `fix/*` y PR. Migraciones 021–024 sin aplicar en remoto |
 | `main` | Fuente única de trabajo en GitHub (`msalas0810/onza`). **Despliegue automático de `main` desactivado en `vercel.json`** hasta aplicar 013–024 en la base alojada |
 | Commit desplegado en Vercel | `fed579403d75da1d49cc54f0af9239b55c125706`, Preview READY `dpl_8emjFDVbshCsg5xBBsiaKNFSpEqT`. Video e ingreso laboral comprobados por HTTPS. |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Revisar `audit/seguridad-escala` (ver `docs/Onza-Auditoria-seguridad-y-escala.md`, §10). Después, en un proyecto Supabase **aislado**: `db push --dry-run` (013–024), aplicar, y probar sesiones/Storage/Realtime reales. Antes: aplicar las migraciones 013–020 en un proyecto de prueba (el dry-run contra `onza-dev` listó exactamente esas ocho; no se aplicó nada). Próxima prueba en Safari de iPad y iPhone físicos. |
+| Siguiente tarea exacta | Revisar `feat/entrega-mesa-admin` (D-2026-11-26-01). Antes: revisar `audit/seguridad-escala` (ver `docs/Onza-Auditoria-seguridad-y-escala.md`, §10). Después, en un proyecto Supabase **aislado**: `db push --dry-run` (013–024), aplicar, y probar sesiones/Storage/Realtime reales. Antes: aplicar las migraciones 013–020 en un proyecto de prueba (el dry-run contra `onza-dev` listó exactamente esas ocho; no se aplicó nada). Próxima prueba en Safari de iPad y iPhone físicos. |
 
 ### Pendientes abiertos
 
@@ -61,6 +62,7 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-007 | Corregido el registro: las migraciones 005–007 ya estaban aplicadas al iniciar esta sesión; 12 productos tenían imagen. Se aplicaron únicamente las nuevas 008/009. No se inventaron portadas ni coordenadas. | 2026-11-16 |
 | PEN-009 | Auditoría 2026-11-21: la CI ya prueba login y Realtime reales (2026-11-23); sigue sin probarse contra Supabase real: Storage, cookies/refresh, expiración, revocación y cierre por dispositivo. Pasos exactos en `docs/Onza-Auditoria-seguridad-y-escala.md` §10 | 2026-11-21 |
 | PEN-010 | Confirmar el límite de 60 validaciones de retiro por minuto (migración 024) y aplicar 021–024 en un proyecto aislado | 2026-11-21 |
+| PEN-011 | Entrega en el lugar: aplicar la migración 025 con 013–024 en un proyecto aislado, probar Realtime real y el escaneo del QR en iPhone/Android físicos, y cargar los datos reales de Picnic (el seed es ilustrativo). Ver `docs/Onza-Entrega-en-el-lugar.md` §6 | 2026-11-26 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -91,6 +93,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-26-01 · Entrega en el lugar (mesa, zona o puesto), flujo de Picnic y mejoras del administrador
+
+- **Fecha y hora:** 2026-11-26 (America/Costa_Rica)
+- **Persona:** Manu (encargo «Revisá la plataforma de Alberto y usala como referencia para mejorar Onza»).
+- **IA:** Claude Code · claude-sonnet-5-5
+- **Rama y commits:** `feat/entrega-mesa-admin` desde `main` (`e415735`), solo commits locales (sin push, sin deploy, sin migraciones remotas): ver `git log main..feat/entrega-mesa-admin`.
+- **Qué cambió:** Migración **025**: cada local (o evento) elige si entrega solo en la barra (por defecto, nada cambia), en el lugar del cliente o ambas, con lugares nombrados y validados (mesas, zonas, puestos). El servidor valida el lugar al pedir y al cambiarlo; el cliente puede corregirlo hasta la entrega; la cola del equipo muestra «Llevar a Mesa 7 · Jardín» y «Entregar en…»; la entrega se confirma con el mismo QR/código privado del retiro y queda dónde, cuándo y quién. Admin: pestaña **Entrega** (configuración, lugares, alta por rango, QR y hoja imprimible), panel **Ahora** con reanudar en un toque y **Exportar CSV**. Picnic como demo ficticio en `seed.sql`. Se corrigió el middleware: al pasar por el acceso descartaba la query y el QR de una mesa perdía su lugar.
+- **Archivos clave:** `supabase/migrations/202611260025_location_delivery.sql`, `src/features/delivery/*`, `src/features/orders/components/{checkout,order-detail}.tsx`, `src/features/staff/components/queue.tsx`, `src/features/admin/components/{admin-panel,now-panel}.tsx`, `src/app/admin/[venueId]/qr`, `src/app/api/{delivery,export}`, `scripts/verify-entrega-lugar.mjs`, `docs/Onza-Entrega-en-el-lugar.md` (comparación, decisiones, cómo probar, pendientes).
+- **Verificado:** `npm run check` en verde (46 archivos / 218 pruebas, antes 44 / 195; build correcto). 15 pruebas de base nuevas sobre PGlite con roles y RLS, matriz de permisos actualizada, y recorrido en navegador contra el shim local con Chromium (43 comprobaciones a 360/390/1280 px): Picnic de punta a punta, local normal con retiro por código, y administración. Evidencia en `docs/evidence/entrega-lugar/`.
+- **No verificado:** Supabase real (Auth, Realtime, Storage: el shim no los tiene), Safari/iPhone y escaneo real del QR, migración sobre `onza-dev` o un proyecto aislado (no se aplicó nada remoto), datos reales de Picnic.
+- **Decisiones:** hallazgo: en la referencia, el flujo de Picnic no está en `main` sino en la rama `claude/map-in-settings` y usa un mapa con punto, no mesas; se implementaron lugares nombrados validados. Confirmación con el QR/código privado de Onza (sin segundo código). `create_order` se envuelve (`create_order_base` queda intacta) en vez de copiarse de nuevo. Un evento es un local. No se copió código de la referencia (sin licencia). Detalle y alternativas en `docs/Onza-Entrega-en-el-lugar.md`.
+- **Pendientes / siguiente paso:** aplicar 013–025 en un proyecto aislado y repetir el recorrido con Realtime real; probar en iPhone y Android; cargar los datos reales de Picnic desde Administración → Entrega.
 
 ### D-2026-11-23-01 · Consolidar Onza en `main` y preparar el repo público
 

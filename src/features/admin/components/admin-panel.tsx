@@ -5,6 +5,7 @@ import { z } from "zod";
 import Link from "next/link";
 import {
   BarChart3,
+  MapPin,
   Receipt,
   Store,
   ToggleLeft,
@@ -39,6 +40,9 @@ import { useLiveOrders } from "@/features/orders/use-live-orders";
 import { statusLabels, paymentLabels } from "@/features/orders/types";
 import { SessionExpiredSheet } from "@/features/orders/components/session-expired-sheet";
 import { TeamPanel } from "@/features/team/components/team-panel";
+import { DeliveryAdmin } from "@/features/delivery/components/delivery-admin";
+import { NowPanel } from "./now-panel";
+import { spotText, type Spot } from "@/features/delivery/types";
 import { adminTabIds, adminTabLabels, type AdminTab } from "../admin-tabs";
 
 const productSchema = z.object({
@@ -53,6 +57,7 @@ const tabIcons = {
   pedidos: Receipt,
   menu: Wine,
   disponibilidad: ToggleLeft,
+  entrega: MapPin,
   negocio: Store,
   equipo: Users,
 } as const;
@@ -82,6 +87,7 @@ export function AdminPanel({
   products,
   categories,
   summary,
+  spots,
   period,
   tab,
   editId,
@@ -90,6 +96,7 @@ export function AdminPanel({
   products: Product[];
   categories: { id: string; label: string }[];
   summary: RangeSummary | null;
+  spots: Spot[];
   period: Period;
   tab: AdminTab;
   editId?: string;
@@ -275,6 +282,19 @@ export function AdminPanel({
             </p>
           )}
           {tab === "resumen" && (
+            <NowPanel
+              venue={venue}
+              orders={orders}
+              soldOut={soldOut.length}
+              onResume={() =>
+                run(
+                  { action: "venue_update", venueId: venue.id, openState: "open", paused: false },
+                  "El local vuelve a recibir pedidos.",
+                )
+              }
+            />
+          )}
+          {tab === "resumen" && (
             <AdminSummary
               venueId={venue.id}
               initial={summary}
@@ -326,6 +346,21 @@ export function AdminPanel({
                     {paymentLabels[o.payment_state]} (simulado) ·{" "}
                     <Price amount={o.total_minor} />
                   </p>
+                  {o.fulfillment === "location" && (
+                    <p className="where-line">
+                      <MapPin size={16} aria-hidden="true" />
+                      {o.status === "delivered"
+                        ? `Entregado en ${spotText(o)}`
+                        : `Entrega en ${spotText(o)}`}
+                      {o.status === "delivered" && o.delivered_at && (
+                        <span className="muted">
+                          {" "}
+                          · {new Intl.DateTimeFormat("es-CR", { timeZone: "America/Costa_Rica", hour: "2-digit", minute: "2-digit" }).format(new Date(o.delivered_at))}
+                          {o.delivered_by_name ? ` · ${o.delivered_by_name}` : ""}
+                        </span>
+                      )}
+                    </p>
+                  )}
                   {financialIssue(o) && (
                     <StatusBadge tone="warning">Incidencia de cobro</StatusBadge>
                   )}
@@ -786,6 +821,13 @@ export function AdminPanel({
                 )}
               </section>
             </div>
+          )}
+          {tab === "entrega" && (
+            <DeliveryAdmin
+              venue={venue}
+              spots={spots}
+              availableProducts={catalog.filter((p) => !p.archived && p.available).length}
+            />
           )}
           {tab === "negocio" && (
             <div className="stack loose">

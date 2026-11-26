@@ -128,6 +128,10 @@ ONZA_APP=http://127.0.0.1:3100 node scripts/verify-pulido-all.mjs   # reinicia e
 
 Personas del shim (cualquier contraseña): `maria@correo.demo` y `sofia@correo.demo` (clientes), `jorge@equipo.demo` (empleado de Mil948), `ana@equipo.demo` (admin de Mil948 y empleada de Stiefel), `luis@equipo.demo` (clave temporal).
 
+### Entrega en el lugar y administración (noviembre de 2026)
+
+Migración `202611260025` (aditiva, **sin aplicar en remoto**). Diseño, decisiones y pasos para probar Picnic: `docs/Onza-Entrega-en-el-lugar.md`. Recorrido en navegador con el shim y `next dev` (como arriba): `ONZA_APP=http://127.0.0.1:3100 node scripts/verify-entrega-lugar.mjs [carpeta-capturas]` (reiniciá el shim antes de repetirlo: crea pedidos).
+
 ### Auditoría de seguridad y escala (noviembre de 2026)
 
 Informe, matriz de roles, hallazgos con su prueba y pendientes: `docs/Onza-Auditoria-seguridad-y-escala.md`; operación: `docs/Onza-Runbook-operacion.md`. Migraciones nuevas (aditivas, **sin aplicar en remoto**): `202611210021` a `202611210023`. Las pruebas de concurrencia, migraciones y carga usan un Postgres 17 real y efímero que se instala **una vez fuera del repo** (instrucciones en `scripts/audit/pg.mjs`); no tocan ningún proyecto remoto:
