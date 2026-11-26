@@ -18,6 +18,7 @@ import {
   Price,
   EmptyState,
   Notice,
+  SegmentedControl,
   buttonClass,
 } from "@/components/ui/primitives";
 import { sendCommand, CommandError, isSessionError } from "../client-api";
@@ -30,6 +31,19 @@ import {
 } from "./waitlist-panel";
 import { formatClock } from "@/lib/clock";
 import { useOnline } from "@/lib/use-online";
+import { SpotPicker } from "@/features/delivery/components/spot-picker";
+import {
+  readSpotPreference,
+  writeSpotPreference,
+} from "@/features/delivery/spot-preference";
+import {
+  deliveryOptionsSchema,
+  offersBar,
+  offersLocation,
+  spotText,
+  yourSpot,
+  type DeliveryOptions,
+} from "@/features/delivery/types";
 
 /** Rechazos en los que el servidor no creó nada: el intento se puede descartar sin riesgo de duplicar. */
 const DEFINITIVE = [
@@ -46,6 +60,9 @@ const DEFINITIVE = [
   "STAFF_CANNOT_ORDER",
   "ONBOARDING_REQUIRED",
   "CANCEL_COOLDOWN",
+  "SPOT_REQUIRED",
+  "SPOT_INVALID",
+  "DELIVERY_UNAVAILABLE",
 ];
 const ACTIVE = ["pending_authorization", "queued", "preparing", "ready"];
 const legacyAttemptKey = "onza-checkout-attempt";
@@ -118,6 +135,50 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       setJoining(false);
     }
   };
+  // Cómo entrega este local y dónde quiere recibirlo el cliente. Los lugares los valida el servidor al pedir.
+  const [options, setOptions] = useState<DeliveryOptions | null>(null);
+  const [optionsError, setOptionsError] = useState(false);
+  const [reloadOptions, setReloadOptions] = useState(0);
+  const [way, setWay] = useState<"bar" | "location">("bar");
+  const [spotId, setSpotId] = useState<string | null>(null);
+  const wayTouched = useRef(false);
+  useEffect(() => {
+    if (!venueId) return;
+    let closed = false;
+    void fetch(`/api/delivery?venue=${venueId}`, { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error("delivery");
+        return deliveryOptionsSchema.parse(await response.json());
+      })
+      .then((next) => {
+        if (closed) return;
+        const saved = readSpotPreference(venueId);
+        const known = (id: string | null) =>
+          id !== null && next.spots.some((spot) => spot.id === id);
+        setOptions(next);
+        setOptionsError(false);
+        setSpotId((current) =>
+          known(current) ? current : known(saved) ? saved : null,
+        );
+        setWay((current) =>
+          next.mode === "location"
+            ? "location"
+            : next.mode === "bar"
+              ? "bar"
+              : wayTouched.current
+                ? current
+                : known(saved)
+                  ? "location"
+                  : "bar",
+        );
+      })
+      .catch(() => {
+        if (!closed) setOptionsError(true);
+      });
+    return () => {
+      closed = true;
+    };
+  }, [venueId, reloadOptions]);
   const allowAnother = useRef(false);
   const [busy, setBusy] = useState(false);
   const [expired, setExpired] = useState(false);
@@ -139,7 +200,9 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
         <p>
           #{placed.public_code} · {placed.venue.name}
           <br />
-          Te avisamos cuando esté listo.
+          {placed.spot_label
+            ? `Te lo llevamos a ${spotText(placed)}. Te avisamos cuando esté listo.`
+            : "Te avisamos cuando esté listo."}
         </p>
         <Link
           className={buttonClass({ variant: "secondary" })}
@@ -170,6 +233,13 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
     setActiveOrder(null);
     let attemptKey = legacyAttemptKey;
     try {
+      if (options && offersLocation(options.mode) && way === "location" && !spotId) {
+        setError({
+          code: "SPOT_REQUIRED",
+          message: `Elegí ${yourSpot(options.noun)} para que te lleven el pedido.`,
+        });
+        return;
+      }
       const db = browserDb();
       const {
         data: { user },
@@ -204,6 +274,15 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
         termsVersion: "demo-v1",
         privacyVersion: "demo-v1",
         adult,
+        // Un local solo de barra no envía nada nuevo: el pedido es idéntico al de siempre.
+        ...(options && offersLocation(options.mode)
+          ? {
+              delivery:
+                way === "location" && spotId
+                  ? { mode: "location", spotId }
+                  : { mode: "bar" },
+            }
+          : {}),
       };
       const fingerprint = JSON.stringify(input);
       const previous = readAttempt(attemptKey) ?? readAttempt(legacyAttemptKey);
@@ -248,6 +327,15 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       // Un rechazo definitivo del servidor revierte toda la transacción: no hay pedido que proteger con la misma clave.
       if (e instanceof CommandError && DEFINITIVE.includes(e.code))
         localStorage.removeItem(attemptKey);
+      // El local cambió sus lugares mientras tanto: se vuelve a leer la lista y se elige de nuevo.
+      if (
+        e instanceof CommandError &&
+        ["SPOT_INVALID", "SPOT_REQUIRED", "DELIVERY_UNAVAILABLE"].includes(e.code)
+      ) {
+        setSpotId(null);
+        if (venueId) writeSpotPreference(venueId, null);
+        setReloadOptions((n) => n + 1);
+      }
       setError({
         code: e instanceof CommandError ? e.code : "UNKNOWN",
         detail: e instanceof CommandError ? e.detail : undefined,
@@ -267,6 +355,7 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
     }
   };
   const total = cartTotal(cart);
+  const chosenSpot = options?.spots.find((spot) => spot.id === spotId);
   const affected = error?.detail?.productId
     ? cart.items.find((i) => i.productId === error.detail?.productId)
     : undefined;
@@ -308,8 +397,76 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       <div className="stack">
         <div className="panel">
           <strong>{cart.venueName}</strong>
-          <div className="muted t-label">Retiro: {cart.pickupLabel}</div>
+          <div className="muted t-label">
+            {options && offersLocation(options.mode) && way === "location"
+              ? `Entrega: ${chosenSpot ? spotText({ spot_label: chosenSpot.label, spot_area: chosenSpot.area }) : `en ${yourSpot(options.noun)} (sin elegir)`}`
+              : `Retiro: ${options?.pickupLabel ?? cart.pickupLabel}`}
+          </div>
         </div>
+        {optionsError && (
+          <Notice
+            tone="warning"
+            title="No pudimos cargar cómo entrega este local"
+            action={
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => setReloadOptions((n) => n + 1)}
+              >
+                Reintentar
+              </Button>
+            }
+          >
+            Necesitamos saberlo para enviar tu pedido a la barra o a tu lugar.
+          </Notice>
+        )}
+        {options && offersLocation(options.mode) && (
+          <section className="delivery-choice" aria-labelledby="delivery-title">
+            <h2 id="delivery-title" className="t-heading">
+              ¿Cómo recibís tu pedido?
+            </h2>
+            {offersBar(options.mode) && (
+              <SegmentedControl<"bar" | "location">
+                block
+                label="Cómo recibís tu pedido"
+                value={way}
+                options={[
+                  { value: "bar", label: "Retirar en la barra" },
+                  {
+                    value: "location",
+                    label: `Llevarlo a mi ${options.noun.toLowerCase()}`,
+                  },
+                ]}
+                onChange={(next) => {
+                  wayTouched.current = true;
+                  setWay(next);
+                }}
+              />
+            )}
+            {way === "location" ? (
+              <>
+                <p className="muted t-label">
+                  Elegí {yourSpot(options.noun)} y te lo llevamos. Cuando
+                  llegue, mostrá el QR o el código privado de tu pedido.
+                </p>
+                <SpotPicker
+                  spots={options.spots}
+                  noun={options.noun}
+                  value={spotId}
+                  onChange={(id) => {
+                    setSpotId(id);
+                    if (venueId) writeSpotPreference(venueId, id);
+                  }}
+                />
+              </>
+            ) : (
+              <p className="muted t-label">
+                Retiralo en {options.pickupLabel} con el QR o el código privado
+                de tu pedido.
+              </p>
+            )}
+          </section>
+        )}
         <div className="lines">
           {cart.items.map((i) => (
             <div
@@ -479,11 +636,25 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
               size="lg"
               block
               onClick={submit}
-              disabled={!adult || !policy || !online}
+              disabled={
+                !adult ||
+                !policy ||
+                !online ||
+                !options ||
+                (offersLocation(options.mode) && way === "location" && !spotId)
+              }
               loading={busy}
             >
               Pedir · <Price amount={total} />
             </Button>
+            {options &&
+              offersLocation(options.mode) &&
+              way === "location" &&
+              !spotId && (
+                <p className="btn-note">
+                  Elegí {yourSpot(options.noun)} para poder pedir.
+                </p>
+              )}
             {!online && (
               <p className="btn-note">
                 Sin conexión: el pedido no se va a enviar.

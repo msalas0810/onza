@@ -10,8 +10,11 @@ import { buttonClass } from "@/components/ui/primitives";
 export function EnjoyMoment({
   venueName,
   menuHref,
+  where,
 }: {
   venueName: string;
+  /** Dónde y a qué hora se entregó, si fue en el lugar del cliente: «Mesa 7 · Jardín a las 21:32». */
+  where?: string;
   /** Menú del mismo local, o null si ya no está disponible (se ofrece Explorar). */
   menuHref: string | null;
 }) {
@@ -55,7 +58,9 @@ export function EnjoyMoment({
       <h2 id="enjoy-title" className="enjoy-title">
         ¡Disfrutá!
       </h2>
-      <p className="muted">Tu pedido en {venueName} está entregado.</p>
+      <p className="muted">
+        Tu pedido en {venueName} está entregado{where ? ` en ${where}` : ""}.
+      </p>
       <Link className={buttonClass({ size: "lg", block: true })} href={menuHref ?? "/"}>
         {menuHref ? "Volver al menú" : "Explorar locales"}
       </Link>

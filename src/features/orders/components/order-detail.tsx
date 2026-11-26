@@ -2,9 +2,15 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Bell, ChevronLeft, Lock, RefreshCw } from "lucide-react";
+import { Bell, ChevronLeft, Lock, MapPin, RefreshCw } from "lucide-react";
 import { useLiveOrders } from "../use-live-orders";
-import { statusLabels, paymentLabels, type Order } from "../types";
+import {
+  statusLabels,
+  orderStatusLabel,
+  paymentLabels,
+  orderSchema,
+  type Order,
+} from "../types";
 import {
   Button,
   Price,
@@ -20,6 +26,15 @@ import { formatClock } from "@/lib/clock";
 import { SessionExpiredSheet } from "./session-expired-sheet";
 import { ReconnectingBanner } from "@/components/ui/connection-banner";
 import { EnjoyMoment } from "./enjoy";
+import { SpotPicker } from "@/features/delivery/components/spot-picker";
+import { writeSpotPreference } from "@/features/delivery/spot-preference";
+import {
+  deliveryOptionsSchema,
+  offersLocation,
+  spotText,
+  yourSpot,
+  type DeliveryOptions,
+} from "@/features/delivery/types";
 
 /** «¡Disfrutá!» una sola vez por pedido, y solo cerca de la entrega: en el historial queda el comprobante. */
 function useEnjoyOnce(order: Order | undefined) {
@@ -80,6 +95,7 @@ export function OrderDetail({ id }: { id: string }) {
   const [confirmCancel, setConfirmCancel] = useState(false);
   const [expired, setExpired] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [moving, setMoving] = useState<DeliveryOptions | "loading" | "error" | null>(null);
   const actionKey = useRef<string | null>(null);
   useWakeLock(order?.status === "ready" && !!order.pickup_code);
   const enjoy = useEnjoyOnce(order);
@@ -113,6 +129,37 @@ export function OrderDetail({ id }: { id: string }) {
       refresh();
     }
   };
+  /** El cliente corrige su lugar mientras el pedido no se haya entregado. El servidor valida que sea de este local. */
+  const openMove = async () => {
+    if (!order) return;
+    setMoving("loading");
+    try {
+      const response = await fetch(`/api/delivery?venue=${order.venue_id}`, { cache: "no-store" });
+      if (!response.ok) throw new Error("delivery");
+      setMoving(deliveryOptionsSchema.parse(await response.json()));
+    } catch {
+      setMoving("error");
+    }
+  };
+  const moveTo = async (spotId: string) => {
+    if (!order || busy) return;
+    setBusy(true);
+    setNotice("");
+    try {
+      orderSchema.parse(await sendCommand({ action: "order_change_spot", orderId: order.id, spotId }));
+      writeSpotPreference(order.venue_id, spotId);
+      setMoving(null);
+    } catch (e) {
+      if (isSessionError(e)) setExpired(true);
+      else {
+        setMoving(null);
+        setNotice(e instanceof Error ? e.message : "No pudimos cambiar tu lugar.");
+      }
+    } finally {
+      setBusy(false);
+      refresh();
+    }
+  };
   if (sessionExpired || expired)
     return <SessionExpiredSheet open next={`/orders/${id}`} />;
   if (loading) return <p role="status">Consultando tu pedido…</p>;
@@ -135,6 +182,11 @@ export function OrderDetail({ id }: { id: string }) {
   const financial =
     paymentLabels[order.payment_state] ?? "Estado de pago pendiente";
   const ready = order.status === "ready";
+  const toLocation = order.fulfillment === "location";
+  const noun = order.venue.spot_noun ?? "Mesa";
+  const canMove =
+    toLocation &&
+    ["pending_authorization", "queued", "preparing", "ready"].includes(order.status);
   return (
     <>
       <Link className="back" href="/orders">
@@ -147,7 +199,7 @@ export function OrderDetail({ id }: { id: string }) {
         <div className="row between">
           <h1 className="t-title num">#{order.public_code}</h1>
           <StatusBadge tone={tone(order.status)}>
-            {statusLabels[order.status]}
+            {orderStatusLabel(order)}
           </StatusBadge>
         </div>
       </div>
@@ -157,18 +209,38 @@ export function OrderDetail({ id }: { id: string }) {
           <div className="ready-head" role="status">
             <Bell size={24} className="anim-bell" aria-hidden="true" />
             <div className="grow">
-              <h2>Listo para retirar</h2>
+              <h2>{toLocation ? "Listo: te lo llevamos" : "Listo para retirar"}</h2>
               <span className="t-label">
-                Mostrá el código o el QR en {order.venue.pickup_label}.
+                {toLocation
+                  ? `Va a ${spotText(order)}. Mostrá el QR o el código al equipo cuando llegue.`
+                  : `Mostrá el código o el QR en ${order.venue.pickup_label}.`}
               </span>
             </div>
+          </div>
+        )}
+        {canMove && (
+          <div className="spot-here">
+            <MapPin size={20} aria-hidden="true" />
+            <div className="grow">
+              <strong>Entrega en {spotText(order)}</strong>
+              <span className="muted t-label">
+                {order.spot_changed_at
+                  ? `Lugar actualizado a las ${formatClock(order.spot_changed_at).replace(/\.$/, "")}.`
+                  : `¿No estás ahí? Cambiá ${yourSpot(noun)} hasta que llegue.`}
+              </span>
+            </div>
+            <Button variant="secondary" size="sm" onClick={() => void openMove()}>
+              Cambiar
+            </Button>
           </div>
         )}
         {ready && (
           <section className="ticket" aria-label="Ticket de retiro">
             <div>
-              <div className="small">Retirá en</div>
-              <div className="where">{order.venue.pickup_label}</div>
+              <div className="small">{toLocation ? "Te lo llevamos a" : "Retirá en"}</div>
+              <div className="where">
+                {toLocation ? spotText(order) : order.venue.pickup_label}
+              </div>
             </div>
             {order.qr_data_url && (
               <div className="qr">
@@ -207,9 +279,9 @@ export function OrderDetail({ id }: { id: string }) {
                 <details className="ticket-help">
                   <summary>¿Cómo se usa?</summary>
                   <p className="small">
-                    Mostrá el QR o decí el código en la barra. El número
+                    Mostrá el QR o decí el código {toLocation ? "al equipo cuando llegue a tu lugar" : "en la barra"}. El número
                     #{order.public_code} identifica el pedido pero no sirve para
-                    retirar. No compartas este código.
+                    {toLocation ? " recibirlo" : " retirar"}. No compartas este código.
                   </p>
                 </details>
               </>
@@ -246,6 +318,11 @@ export function OrderDetail({ id }: { id: string }) {
           (enjoy ? (
             <EnjoyMoment
               venueName={order.venue.name}
+              where={
+                toLocation
+                  ? `${spotText(order)}${order.delivered_at ? ` a las ${formatClock(order.delivered_at)}` : ""}`
+                  : undefined
+              }
               menuHref={
                 order.venue.slug && order.venue.open_state !== "closed"
                   ? `/v/${order.venue.slug}`
@@ -254,9 +331,13 @@ export function OrderDetail({ id }: { id: string }) {
             />
           ) : (
             <Notice tone="success" title="Entregado · comprobante">
-              {order.delivered_at
-                ? `Retirado a las ${formatClock(order.delivered_at)}.`
-                : "Pedido retirado."}
+              {toLocation
+                ? order.delivered_at
+                  ? `Entregado en ${spotText(order)} a las ${formatClock(order.delivered_at)}.`
+                  : `Entregado en ${spotText(order)}.`
+                : order.delivered_at
+                  ? `Retirado a las ${formatClock(order.delivered_at)}.`
+                  : "Pedido retirado."}
             </Notice>
           ))}
         {order.status === "pending_authorization" && (
@@ -316,6 +397,28 @@ export function OrderDetail({ id }: { id: string }) {
             "solicitá ayuda presencial en la barra."}
         </p>
       </div>
+      <Sheet
+        open={moving !== null}
+        onOpenChange={(open) => !open && setMoving(null)}
+        title="¿Dónde estás ahora?"
+        description={`Elegí ${yourSpot(noun)}. El equipo ve el cambio al instante.`}
+      >
+        {moving === "loading" && <p role="status">Cargando lugares…</p>}
+        {moving === "error" && (
+          <Notice tone="danger" title="No pudimos cargar los lugares">
+            Volvé a intentar en unos segundos.
+          </Notice>
+        )}
+        {moving && typeof moving === "object" && offersLocation(moving.mode) && (
+          <SpotPicker
+            spots={moving.spots}
+            noun={moving.noun}
+            value={order.spot_id ?? null}
+            name="move-spot"
+            onChange={(spot) => void moveTo(spot)}
+          />
+        )}
+      </Sheet>
       <Sheet
         open={confirmCancel}
         onOpenChange={setConfirmCancel}

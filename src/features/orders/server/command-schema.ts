@@ -18,6 +18,13 @@ export const createSchema = z.object({
     .min(1)
     .max(20),
   idempotencyKey: key,
+  // Dónde se entrega. Sin este campo el pedido es de retiro en barra, como siempre. El servidor valida el lugar.
+  delivery: z
+    .discriminatedUnion("mode", [
+      z.object({ mode: z.literal("bar") }),
+      z.object({ mode: z.literal("location"), spotId: uuid }),
+    ])
+    .optional(),
   termsVersion: z.literal("demo-v1"),
   privacyVersion: z.literal("demo-v1"),
   adult: z.literal(true),
@@ -47,6 +54,38 @@ export const commandSchema = z.discriminatedUnion("action", [
     venueId: uuid,
     enabled: z.boolean(),
     maxPreparing: z.number().int().min(1).max(50).optional(),
+  }),
+  z.object({
+    action: z.literal("venue_delivery"),
+    venueId: uuid,
+    mode: z.enum(["bar", "both", "location"]),
+    noun: z.string().trim().min(1).max(20).optional(),
+  }),
+  z.object({
+    action: z.literal("spot_save"),
+    venueId: uuid,
+    spotId: uuid.optional(),
+    label: z.string().trim().min(1).max(40),
+    area: z.string().trim().max(40).optional(),
+    enabled: z.boolean().optional(),
+  }),
+  z.object({
+    action: z.literal("spot_bulk"),
+    venueId: uuid,
+    prefix: z.string().trim().max(30),
+    from: z.number().int().min(1).max(9999),
+    to: z.number().int().min(1).max(9999),
+    area: z.string().trim().max(40).optional(),
+  }),
+  z.object({
+    action: z.literal("spot_delete"),
+    venueId: uuid,
+    spotId: uuid,
+  }),
+  z.object({
+    action: z.literal("order_change_spot"),
+    orderId: uuid,
+    spotId: uuid,
   }),
   z.object({
     action: z.literal("product_archive"),

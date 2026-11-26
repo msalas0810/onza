@@ -1,7 +1,8 @@
 "use client";
 import Link from "next/link";
 import { useLiveOrders } from "../use-live-orders";
-import { statusLabels } from "../types";
+import { orderStatusLabel } from "../types";
+import { spotText } from "@/features/delivery/types";
 import {
   EmptyState,
   ErrorState,
@@ -76,11 +77,13 @@ export function OrderList() {
             {first ? `${first.quantity}× ${first.name_snapshot}` : ""}
             {more > 0 && ` · +${more} más`}
             {` · ${units} ${units === 1 ? "producto" : "productos"}`}
+            {o.fulfillment === "location" &&
+              ` · ${o.status === "delivered" ? "Entregado en" : "Entrega en"} ${spotText(o)}`}
           </p>
           <div className="row between">
             <span className="num muted t-label">#{o.public_code}</span>
             <StatusBadge tone={tone(o.status)}>
-              {statusLabels[o.status]}
+              {orderStatusLabel(o)}
             </StatusBadge>
           </div>
         </div>

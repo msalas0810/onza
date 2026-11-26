@@ -16,6 +16,13 @@ import { passwordChangePending } from "@/lib/supabase/guards";
 import { scenariosEnabled } from "@/features/payments/server/provider";
 import { CommandFailure, failureDetail } from "@/lib/errors";
 import { isOwnStorageUrl } from "@/lib/storage-url";
+/** Administración de la entrega en el lugar: cada acción es una función de la base que comprueba el permiso del local. */
+const deliveryRpc = {
+  venue_delivery: "venue_delivery_config",
+  spot_save: "venue_spot_save",
+  spot_bulk: "venue_spot_bulk",
+  spot_delete: "venue_spot_delete",
+} as const;
 export async function executeCommand(raw: unknown) {
   assertMockPayments();
   const command = commandSchema.parse(raw);
@@ -53,6 +60,19 @@ export async function executeCommand(raw: unknown) {
     const { data, error } = await db.rpc("venue_auto_accept", { input });
     if (error) throw new Error(await explainDenied(db, error.message));
     return data;
+  }
+  if (command.action in deliveryRpc) {
+    const name = deliveryRpc[command.action as keyof typeof deliveryRpc];
+    const { data, error } = await db.rpc(name, { input });
+    if (error) throw new Error(await explainDenied(db, error.message));
+    return data;
+  }
+  if (command.action === "order_change_spot") {
+    const { data, error } = await db.rpc("order_change_spot", { input });
+    if (error) throw new Error(await explainDenied(db, error.message));
+    if (data && typeof data === "object" && !Array.isArray(data) && "error" in data)
+      throw new CommandFailure(String(data.error), failureDetail(data));
+    return enrichOrder(data);
   }
   if (command.action === "product_image") {
     if (!isOwnStorageUrl(command.imageUrl))

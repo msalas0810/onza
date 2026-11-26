@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Clock, History, ScanLine, Settings2 } from "lucide-react";
+import { Clock, History, MapPin, ScanLine, Settings2 } from "lucide-react";
 import { useLiveOrders } from "@/features/orders/use-live-orders";
 import {
   sendCommand,
@@ -32,6 +32,7 @@ import { formatClock } from "@/lib/clock";
 import { countdownText } from "@/features/orders/countdown";
 import type React from "react";
 import type { Venue } from "@/features/catalog/server/queries";
+import { spotText } from "@/features/delivery/types";
 
 const lanes = [
   ["queued", "Nuevos"],
@@ -86,6 +87,8 @@ export function StaffQueue({
   const deviceNow = useNow(hasNew ? 1000 : 30000);
   const now = deviceNow + clockOffset;
   const [tab, setTab] = useState<string>("queued");
+  // Zona que atiende esta persona: «all», «bar» (retiros en barra) o el nombre de una zona de entrega.
+  const [zone, setZone] = useState<string>("all");
   const [cardErrors, setCardErrors] = useState<
     Record<string, { message: string; version: number }>
   >({});
@@ -305,6 +308,17 @@ export function StaffQueue({
   const active = orders.filter((o) =>
     ["queued", "preparing", "ready"].includes(o.status),
   );
+  // Zonas con pedidos en curso para entregar en el lugar; con una sola zona (o ninguna) el filtro no aporta.
+  const zones = [
+    ...new Set(
+      active.filter((o) => o.fulfillment === "location").map((o) => o.spot_area || "Sin zona"),
+    ),
+  ].sort((a, b) => a.localeCompare(b, "es"));
+  const showZones = active.some((o) => o.fulfillment === "location");
+  const inZone = (o: Order) =>
+    zone === "all" ||
+    (zone === "bar" ? o.fulfillment !== "location" : o.fulfillment === "location" && (o.spot_area || "Sin zona") === zone);
+  const toBring = orders.filter((o) => o.status === "ready" && o.fulfillment === "location").length;
   const waiting = orders.filter((o) =>
     ["queued", "preparing"].includes(o.status),
   );
@@ -327,6 +341,13 @@ export function StaffQueue({
           <h1 className="t-title">Barra</h1>
           <p className="muted t-label" role="status">
             {venue.pickup_label}
+            {toBring > 0 && (
+              <>
+                {" "}
+                · <strong className="num">{toBring}</strong>{" "}
+                {toBring === 1 ? "listo para llevar" : "listos para llevar"}
+              </>
+            )}
             {waiting.length > 0 && (
               <>
                 {" "}
@@ -382,6 +403,25 @@ export function StaffQueue({
           <Notice tone={error ? "danger" : "warning"}>{error || notice}</Notice>
         )}
       </div>
+      {showZones && (
+        <div className="chips" role="group" aria-label="Qué atiendo" style={{ marginBottom: 12 }}>
+          {[
+            ["all", "Todo"],
+            ["bar", "Barra"],
+            ...zones.map((z) => [z, z] as const),
+          ].map(([value, label]) => (
+            <button
+              type="button"
+              className="chip"
+              key={value}
+              aria-current={zone === value ? "true" : undefined}
+              onClick={() => setZone(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
       <div
         className="board-tabs"
         role="tablist"
@@ -406,7 +446,7 @@ export function StaffQueue({
           >
             {label}
             <span className="n">
-              {orders.filter((o) => o.status === state).length}
+              {orders.filter((o) => o.status === state && inZone(o)).length}
             </span>
           </button>
         ))}
@@ -423,7 +463,7 @@ export function StaffQueue({
       <div className="board">
         {lanes.map(([state, label]) => {
           const list = orders
-            .filter((o) => o.status === state)
+            .filter((o) => o.status === state && inZone(o))
             .sort((a, b) => a.created_at.localeCompare(b.created_at));
           return (
             <section
@@ -479,6 +519,21 @@ export function StaffQueue({
                           </span>
                         )}
                       </div>
+                      {o.fulfillment === "location" && (
+                        <div className="where">
+                          <p
+                            className={`where-line ${o.spot_changed_at && Date.parse(o.spot_changed_at) > now - 10 * 60000 ? "moved" : ""}`}
+                          >
+                            <MapPin size={16} aria-hidden="true" />
+                            <span>Llevar a {spotText(o)}</span>
+                          </p>
+                          {o.spot_changed_at && (
+                            <span className="muted t-label">
+                              El cliente cambió su lugar a las {clockTime(o.spot_changed_at)}
+                            </span>
+                          )}
+                        </div>
+                      )}
                       {state === "queued" && (
                         <p className="entered t-label muted">
                           Entró a las{" "}
@@ -561,7 +616,9 @@ export function StaffQueue({
                             onClick={() => openPickup()}
                           >
                             <ScanLine size={20} aria-hidden="true" />
-                            Validar retiro
+                            {o.fulfillment === "location"
+                              ? `Entregar en ${o.spot_label}`
+                              : "Validar retiro"}
                           </Button>
                         </div>
                       )}
@@ -634,6 +691,14 @@ export function StaffQueue({
                   {o.items
                     .map((i) => `${i.quantity}× ${i.name_snapshot}`)
                     .join(", ")}
+                  {o.fulfillment === "location" && o.spot_label && (
+                    <>
+                      {" · "}
+                      {o.status === "delivered" ? "Entregado en" : "Era para"} {spotText(o)}
+                      {o.status === "delivered" && o.delivered_at && ` a las ${clockTime(o.delivered_at)}`}
+                      {o.status === "delivered" && o.delivered_by_name && ` · ${o.delivered_by_name}`}
+                    </>
+                  )}
                 </span>
                 <StatusBadge
                   tone={o.status === "delivered" ? "success" : "danger"}

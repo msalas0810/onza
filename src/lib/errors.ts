@@ -19,6 +19,20 @@ export const messages: Record<string, string> = {
     "Este local está cerrado. Tu carrito sigue disponible para cuando vuelva a abrir.",
   ALREADY_DELIVERED:
     "Este retiro ya fue utilizado. El pedido está entregado; no lo entregués otra vez.",
+  SPOT_REQUIRED:
+    "Este local entrega en tu lugar: elegí dónde recibir tu pedido.",
+  SPOT_INVALID:
+    "Ese lugar ya no está disponible en este local. Elegí otro y volvé a pedir.",
+  DELIVERY_UNAVAILABLE:
+    "Este local no entrega en el lugar. Retirá tu pedido en la barra.",
+  SPOT_DUPLICATE: "Ya existe un lugar con ese nombre en este local.",
+  SPOT_IN_USE:
+    "Ese lugar ya recibió pedidos, así que no se puede borrar. Deshabilitalo y el historial lo conserva.",
+  NO_SPOTS:
+    "Agregá y habilitá al menos un lugar antes de activar la entrega en el lugar.",
+  LAST_SPOT:
+    "Es el último lugar habilitado. Volvé primero a «Solo barra» o habilitá otro lugar.",
+  TOO_MANY_SPOTS: "Un local puede tener hasta 300 lugares.",
   INVALID_INPUT: "Revisá los datos e intentá nuevamente.",
   INVALID_LOCATION:
     "Ingresá latitud entre -90 y 90 y longitud entre -180 y 180, o dejá ambas vacías.",

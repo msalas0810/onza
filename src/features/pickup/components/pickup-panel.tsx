@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Check,
   Keyboard,
+  MapPin,
   ScanLine,
 } from "lucide-react";
 import { Button, Price, Notice } from "@/components/ui/primitives";
@@ -13,6 +14,7 @@ import { productImageSrc } from "@/features/catalog/product-image-src";
 import { sendCommand } from "@/features/orders/client-api";
 import { orderSchema, type Order } from "@/features/orders/types";
 import { formatPickupCode, isPickupCode, normalizePickupCode } from "../code";
+import { spotText } from "@/features/delivery/types";
 
 type Detector = {
   detect: (video: HTMLVideoElement) => Promise<{ rawValue: string }[]>;
@@ -225,7 +227,10 @@ export function PickupPanel({
               <path d="M20 6 9 17l-5-5" />
             </svg>
           </span>
-          <strong className="t-heading">Entregado #{order.public_code}</strong>
+          <strong className="t-heading">
+            Entregado #{order.public_code}
+            {order.fulfillment === "location" && ` en ${spotText(order)}`}
+          </strong>
           <span>
             {order.items.map((i) => `${i.quantity}× ${i.name_snapshot}`).join(", ")}
           </span>
@@ -327,6 +332,12 @@ export function PickupPanel({
               <strong className="num">#{order.public_code}</strong>
               <Price amount={order.total_minor} />
             </div>
+            {order.fulfillment === "location" && (
+              <p className="where-line" role="status">
+                <MapPin size={16} aria-hidden="true" />
+                Entregar en {spotText(order)}
+              </p>
+            )}
             <ul className="pickup-items">
               {order.items.map((i) => (
                 <li key={i.id}>
@@ -395,7 +406,11 @@ export function PickupPanel({
                       disabled={!captured}
                       onChange={(e) => setPhysical(e.target.checked)}
                     />
-                    <span>Entregué físicamente el pedido completo.</span>
+                    <span>
+                      {order.fulfillment === "location"
+                        ? `Entregué el pedido completo en ${spotText(order)}.`
+                        : "Entregué físicamente el pedido completo."}
+                    </span>
                   </label>
                   <Button
                     size="lg"

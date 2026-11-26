@@ -32,6 +32,14 @@ export const orderSchema = z.object({
   queued_at: z.string().nullable().optional(),
   server_now: z.string().optional(),
   business_date: z.string(),
+  // Entrega en el lugar (migración 025). Opcionales: una base sin esa migración no los envía y todo es retiro en barra.
+  fulfillment: z.enum(["bar", "location"]).optional(),
+  spot_id: z.string().nullable().optional(),
+  spot_label: z.string().nullable().optional(),
+  spot_area: z.string().nullable().optional(),
+  spot_changed_at: z.string().nullable().optional(),
+  // Solo para el equipo del local: quién registró la entrega.
+  delivered_by_name: z.string().nullable().optional(),
   claim_id: z.string().nullable(),
   claimed_elsewhere: z.boolean().nullable(),
   encrypted_token: z.string().nullable().optional(),
@@ -48,6 +56,8 @@ export const orderSchema = z.object({
     slug: z.string().optional(),
     open_state: z.string().optional(),
     paused: z.boolean().optional(),
+    delivery_mode: z.enum(["bar", "both", "location"]).optional(),
+    spot_noun: z.string().optional(),
   }),
   items: z.array(
     z.object({
@@ -67,6 +77,7 @@ export const orderSchema = z.object({
       type: z.string(),
       created_at: z.string(),
       to_status: z.string().nullable(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
     }),
   ),
 });
@@ -81,6 +92,13 @@ export const statusLabels: Record<Order["status"], string> = {
   expired: "Pedido vencido",
   uncollected: "No recogido",
 };
+/** Un pedido que se entrega en el lugar no «se retira»: lo lleva el equipo. */
+export const orderStatusLabel = (
+  order: Pick<Order, "status" | "fulfillment">,
+) =>
+  order.status === "ready" && order.fulfillment === "location"
+    ? "Listo · te lo llevamos"
+    : statusLabels[order.status];
 export const paymentLabels: Record<string, string> = {
   authorizing: "Reserva pendiente de acción",
   authorized: "Monto reservado",

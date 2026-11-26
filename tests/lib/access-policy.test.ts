@@ -20,6 +20,18 @@ describe("política de acceso", () => {
       );
     expect(decideAccess("/v/sala-norte", guest)).toContain("/acceso?next=");
   });
+  it("el QR de una mesa conserva su lugar al pasar por el acceso y por el perfil", () => {
+    const spot = "?spot=50000000-0000-4000-8000-000000000003";
+    expect(decideAccess("/v/picnic", none, spot)).toBe(
+      `/acceso?next=${encodeURIComponent(`/v/picnic${spot}`)}`,
+    );
+    expect(decideAccess("/v/picnic", fresh, spot)).toBe(
+      `/onboarding?next=${encodeURIComponent(`/v/picnic${spot}`)}`,
+    );
+    // El destino sigue siendo una ruta relativa del mismo sitio.
+    expect(safeNext(`/v/picnic${spot}`)).toBe(`/v/picnic${spot}`);
+    expect(safeNext(`//evil.test${spot}`)).toBe("/");
+  });
   it("cliente sin onboarding va a completar su perfil conservando destino", () => {
     expect(decideAccess("/v/patio", fresh)).toBe(
       "/onboarding?next=%2Fv%2Fpatio",

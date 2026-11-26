@@ -28,9 +28,16 @@ export function safeNext(value: string | null | undefined, fallback = "/") {
   return value;
 }
 
-/** Returns a redirect target, or null when the request may continue. */
-export function decideAccess(path: string, account: Account): string | null {
-  const here = encodeURIComponent(path);
+/**
+ * Returns a redirect target, or null when the request may continue. `search` (con su «?») viaja en el destino posterior al
+ * acceso: el QR de una mesa (/v/local?spot=…) debe volver con su lugar después de entrar o crear la cuenta.
+ */
+export function decideAccess(
+  path: string,
+  account: Account,
+  search = "",
+): string | null {
+  const here = encodeURIComponent(path + search);
   const signedOutCustomer = account.kind === "none" || account.kind === "guest";
   if (path === "/login") return "/equipo/acceso";
   if (path === "/onboarding") {

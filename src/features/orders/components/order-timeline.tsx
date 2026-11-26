@@ -34,6 +34,7 @@ export function OrderTimeline({ order }: { order: Order }) {
   return (
     <ol className="tl" aria-label="Seguimiento del pedido">
       {steps.map((step, i) => {
+        const location = order.fulfillment === "location" && step.status === "ready";
         const state =
           i < current || order.status === "delivered"
             ? "done"
@@ -50,9 +51,15 @@ export function OrderTimeline({ order }: { order: Order }) {
               {state === "done" && <Check size={14} aria-hidden="true" />}
             </span>
             <div>
-              <div className="t">{step.title}</div>
+              <div className="t">
+                {location ? "Listo · te lo llevamos" : step.title}
+              </div>
               {state === "now" && step.hint && (
-                <div className="s">{step.hint}</div>
+                <div className="s">
+                  {location
+                    ? "Mostrá el QR o el código al equipo cuando llegue"
+                    : step.hint}
+                </div>
               )}
               {state && (order[step.at] ?? (step.at === "queued_at" ? order.created_at : null)) && (
                 <time

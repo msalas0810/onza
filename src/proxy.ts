@@ -61,7 +61,7 @@ export async function proxy(request: NextRequest) {
       mustChangePassword: value?.mustChangePassword === true,
     };
   }
-  const target = decideAccess(pathname, account);
+  const target = decideAccess(pathname, account, request.nextUrl.search);
   return target ? redirect(request, response, target) : response;
 }
 function transientFailure(error: { name?: string; status?: number }) {
