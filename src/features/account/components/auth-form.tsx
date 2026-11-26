@@ -206,10 +206,15 @@ export function AuthForm({
           >
             Entrar como invitado <span className="soon">Solo demo</span>
           </Button>
-          <p className="notice" role={guestError ? "alert" : undefined}>
-            {guestError ||
-              "Sin cuenta: la sesión de invitado se guarda en este navegador."}
-          </p>
+          {guestError ? (
+            <p className="notice error" role="alert">
+              {guestError}
+            </p>
+          ) : (
+            <p className="hint">
+              Sin cuenta: la sesión de invitado se guarda en este navegador.
+            </p>
+          )}
         </div>
       )}
     </>
