@@ -92,6 +92,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 
 > Más recientes arriba.
 
+### D-2026-11-26-01 · Botón «Entrar como invitado» solo en demo
+
+- **Fecha:** 2026-11-26 (America/Costa_Rica)
+- **Persona:** Manu (encargo «agrega una opción de ingresar como invitado sin login»).
+- **IA:** Claude Code · claude-haiku-5-5
+- **Rama y commits:** `claude/affectionate-fermat-s2u74m` · commit de este cambio (ver `git log`).
+- **Qué cambió:** en `/acceso` aparece «Entrar como invitado · Solo demo», que abre la sesión anónima que ya usa el checkout. Solo se muestra con `GUEST_ACCESS_ENABLED=true`, sin `ACCOUNTS_REQUIRED` y fuera de `VERCEL_ENV=production`. Si ya hay una sesión en el navegador, no la reemplaza: muestra un aviso. Un fallo se muestra en la pantalla, no en un toast.
+- **Decisión:** la regla 0.1 #2 del blueprint (login obligatorio) no cambia. Pedí confirmación antes de implementar y se eligió la opción demo. Navegar sin cuenta en producción sigue pendiente de ratificación.
+- **Archivos clave:** `src/lib/access-policy.ts` (`guestEntryEnabled`), `src/app/acceso/page.tsx`, `src/features/account/components/auth-form.tsx`, `tests/lib/access-policy.test.ts`, `.env.example`.
+- **Verificado:** `npm run typecheck` sin errores; `npm test` 44 archivos / 196 pruebas en verde; `npm run build` sin errores; prettier en los archivos tocados. En Chromium con `next start` y `GUEST_ACCESS_ENABLED=true` (390 px, sin Supabase configurado): el botón aparece, la página responde 200, sin errores de página ni desborde horizontal, y el clic muestra el aviso de error en pantalla.
+- **No verificado:** el sign-in anónimo con éxito contra Supabase (no hay proyecto configurado aquí); el comportamiento con la bandera apagada en el navegador; Safari/iPhone físicos; el aviso de la captura sigue con el estilo de bloque grande (pendiente de ajuste visual). ESLint solo se corrió sobre los archivos tocados (sin errores); no se corrió sobre todo el repo.
+- **Pendientes / siguiente paso:** reducir el aviso de invitado a una línea de ayuda; comprobar con la bandera apagada; probar el sign-in real en un proyecto Supabase aislado.
+
 ### D-2026-11-23-01 · Consolidar Onza en `main` y preparar el repo público
 
 - **Fecha y hora:** 2026-11-23 (America/Costa_Rica)

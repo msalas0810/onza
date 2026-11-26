@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { AuthForm } from "@/features/account/components/auth-form";
-import { safeNext } from "@/lib/access-policy";
+import { guestEntryEnabled, safeNext } from "@/lib/access-policy";
 import { AccessScreen } from "./access-screen";
 import { OnzaLogo } from "@/components/ui/brand";
 import styles from "./access.module.css";
@@ -26,6 +26,7 @@ export default async function Page({
         <div className={styles.actions}>
           <AuthForm
             next={destination}
+            guestEntry={guestEntryEnabled()}
             notice={
               error
                 ? "El enlace venció o ya se usó. Intentá de nuevo."

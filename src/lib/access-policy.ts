@@ -16,6 +16,17 @@ export const accountsRequired = (
   env: Record<string, string | undefined> = process.env,
 ) => env.ACCOUNTS_REQUIRED === "true";
 
+/**
+ * Botón «Entrar como invitado» (solo demo). Cerrado por defecto y cerrado siempre que las cuentas sean
+ * obligatorias o el despliegue sea de producción: un invitado no puede explorar ni pedir en esos casos.
+ */
+export const guestEntryEnabled = (
+  env: Record<string, string | undefined> = process.env,
+) =>
+  env.GUEST_ACCESS_ENABLED === "true" &&
+  !accountsRequired(env) &&
+  env.VERCEL_ENV !== "production";
+
 const CUSTOMER = /^\/(v|cart|checkout|orders|cuenta|settings)(\/|$)|^\/$/;
 const STAFF = /^\/(staff|admin|onza)(\/|$)|^\/equipo\/(locales|clave)$/;
 const CUSTOMER_ENTRY = /^\/(acceso|confirmar|recuperar)$/;

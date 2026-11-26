@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { decideAccess, safeNext, accountsRequired } from "@/lib/access-policy";
+import {
+  decideAccess,
+  safeNext,
+  accountsRequired,
+  guestEntryEnabled,
+} from "@/lib/access-policy";
 const none = { kind: "none", onboarded: false } as const;
 const guest = { kind: "guest", onboarded: false } as const;
 const fresh = { kind: "customer", onboarded: false } as const;
@@ -74,6 +79,29 @@ describe("política de acceso", () => {
   it("sin la bandera el demo conserva el flujo invitado", () => {
     expect(accountsRequired({})).toBe(false);
     expect(accountsRequired({ ACCOUNTS_REQUIRED: "true" })).toBe(true);
+  });
+  it("el botón de invitado solo aparece con la bandera, sin cuentas obligatorias y fuera de producción", () => {
+    expect(guestEntryEnabled({})).toBe(false);
+    expect(guestEntryEnabled({ GUEST_ACCESS_ENABLED: "false" })).toBe(false);
+    expect(guestEntryEnabled({ GUEST_ACCESS_ENABLED: "true" })).toBe(true);
+    expect(
+      guestEntryEnabled({
+        GUEST_ACCESS_ENABLED: "true",
+        ACCOUNTS_REQUIRED: "true",
+      }),
+    ).toBe(false);
+    expect(
+      guestEntryEnabled({
+        GUEST_ACCESS_ENABLED: "true",
+        VERCEL_ENV: "production",
+      }),
+    ).toBe(false);
+    expect(
+      guestEntryEnabled({
+        GUEST_ACCESS_ENABLED: "true",
+        VERCEL_ENV: "preview",
+      }),
+    ).toBe(true);
   });
   it("una cuenta del equipo con contraseña temporal pendiente solo puede cambiarla", () => {
     const pending = {

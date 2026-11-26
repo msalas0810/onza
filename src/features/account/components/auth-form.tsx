@@ -10,7 +10,16 @@ import { safeNext } from "@/lib/access-policy";
 type Mode = "in" | "up";
 const callback = (next: string) =>
   `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
-export function AuthForm({ next, notice }: { next: string; notice?: string }) {
+export function AuthForm({
+  next,
+  notice,
+  guestEntry = false,
+}: {
+  next: string;
+  notice?: string;
+  /** Solo demo: muestra «Entrar como invitado» (la bandera la decide el servidor). */
+  guestEntry?: boolean;
+}) {
   const router = useRouter();
   const [mode, setMode] = useState<Mode>("in");
   const [email, setEmail] = useState("");
@@ -18,7 +27,37 @@ export function AuthForm({ next, notice }: { next: string; notice?: string }) {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState(notice ?? "");
   const [busy, setBusy] = useState(false);
+  const [guestError, setGuestError] = useState("");
+  const [guestBusy, setGuestBusy] = useState(false);
   const up = mode === "up";
+
+  async function enterAsGuest() {
+    setGuestError("");
+    setGuestBusy(true);
+    try {
+      const db = browserDb();
+      const {
+        data: { user },
+      } = await db.auth.getUser();
+      // Una sesión existente no se reemplaza en silencio: signInAnonymously cambiaría la cuenta del navegador.
+      if (user) {
+        setGuestError(
+          "Ya hay una sesión iniciada en este navegador. Continuá con esa cuenta o cerrala antes de entrar como invitado.",
+        );
+        return;
+      }
+      const { error: e } = await db.auth.signInAnonymously();
+      if (e) throw e;
+      router.replace(next);
+      router.refresh();
+    } catch {
+      setGuestError(
+        "No pudimos abrir una sesión de invitado. Intentá de nuevo en unos minutos.",
+      );
+    } finally {
+      setGuestBusy(false);
+    }
+  }
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
@@ -137,10 +176,7 @@ export function AuthForm({ next, notice }: { next: string; notice?: string }) {
               {up ? "Crear cuenta" : "Ingresar"}
             </Button>
             {!up && (
-              <Link
-                className="link-button"
-                href="/recuperar"
-              >
+              <Link className="link-button" href="/recuperar">
                 ¿Olvidaste tu contraseña?
               </Link>
             )}
@@ -160,6 +196,22 @@ export function AuthForm({ next, notice }: { next: string; notice?: string }) {
           </form>
         </div>
       </details>
+      {guestEntry && (
+        <div className="stack tight">
+          <Button
+            variant="quiet"
+            className="auth-provider"
+            loading={guestBusy}
+            onClick={enterAsGuest}
+          >
+            Entrar como invitado <span className="soon">Solo demo</span>
+          </Button>
+          <p className="notice" role={guestError ? "alert" : undefined}>
+            {guestError ||
+              "Sin cuenta: la sesión de invitado se guarda en este navegador."}
+          </p>
+        </div>
+      )}
     </>
   );
 }
