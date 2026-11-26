@@ -32,6 +32,7 @@ const MIGRATIONS = [
   "202611210022_revoke_public_table_writes.sql",
   "202611210023_scale_fixes.sql",
   "202611210024_resolve_rate_limit.sql",
+  "202611260025_location_delivery.sql",
 ];
 const TABLES = new Set([
   "venues",
@@ -43,6 +44,7 @@ const TABLES = new Set([
   "orders",
   "order_items",
   "order_events",
+  "delivery_spots",
 ]);
 export const SERVICE_KEY = "local-shim-service-role";
 export const PUBLISHABLE_KEY = "local-shim-publishable";
@@ -136,7 +138,9 @@ export async function createDatabase() {
       (${q(people.jorge.id)},${q(id("mil948"))},'bartender'),
       (${q(people.ana.id)},${q(id("mil948"))},'admin'),
       (${q(people.ana.id)},${q(id("stiefel-pub"))},'bartender'),
-      (${q(people.luis.id)},${q(id("mil948"))},'bartender');
+      (${q(people.luis.id)},${q(id("mil948"))},'bartender'),
+      (${q(people.jorge.id)},'20000000-0000-4000-8000-000000000004','bartender'),
+      (${q(people.ana.id)},'20000000-0000-4000-8000-000000000004','admin');
   `);
   return db;
 }

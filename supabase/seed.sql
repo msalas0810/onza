@@ -23,3 +23,21 @@ insert into public.categories(id,venue_id,label,position) values ('a589fcba-2e8b
 insert into public.products(id,venue_id,category_id,name,description,price_minor,available) values ('30000000-0000-4000-8000-000000000011','20000000-0000-4000-8000-000000000002','a589fcba-2e8b-5764-9281-a17da14229e5','Cerveza','Botella individual.',250000,true) on conflict(id) do nothing;
 insert into public.categories(id,venue_id,label,position) values ('e1658121-b911-56db-9e26-10ec5a248474','20000000-0000-4000-8000-000000000002','Sin alcohol',8) on conflict(id) do nothing;
 insert into public.products(id,venue_id,category_id,name,description,price_minor,available) values ('30000000-0000-4000-8000-000000000012','20000000-0000-4000-8000-000000000002','e1658121-b911-56db-9e26-10ec5a248474','Soda cítrica','Bebida sin alcohol.',200000,true) on conflict(id) do nothing;
+
+-- Picnic (demo ficticio): un bar que entrega en la mesa o en la zona del cliente, o lo deja para retirar en la barra.
+-- Menú y lugares de ejemplo para recorrer el flujo; no son datos reales del local. Los edita su administración en Entrega.
+insert into public.venues(id,slug,name,zone,open_state,pickup_label,delivery_mode,spot_noun) values ('20000000-0000-4000-8000-000000000004','picnic','Picnic','Terraza y jardín','open','Barra principal','both','Mesa') on conflict(id) do nothing;
+insert into public.categories(id,venue_id,label,position) values
+ ('40000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000004','Cocteles',9),
+ ('40000000-0000-4000-8000-000000000002','20000000-0000-4000-8000-000000000004','Cervezas',10),
+ ('40000000-0000-4000-8000-000000000003','20000000-0000-4000-8000-000000000004','Sin alcohol',11) on conflict(id) do nothing;
+insert into public.products(id,venue_id,category_id,name,description,price_minor,available) values
+ ('30000000-0000-4000-8000-000000000013','20000000-0000-4000-8000-000000000004','40000000-0000-4000-8000-000000000001','Spritz','Aperitivo, espumante y soda.',500000,true),
+ ('30000000-0000-4000-8000-000000000014','20000000-0000-4000-8000-000000000004','40000000-0000-4000-8000-000000000001','Mojito','Ron, menta, limón y soda.',500000,true),
+ ('30000000-0000-4000-8000-000000000015','20000000-0000-4000-8000-000000000004','40000000-0000-4000-8000-000000000001','Gin tonic','Gin y agua tónica.',500000,true),
+ ('30000000-0000-4000-8000-000000000016','20000000-0000-4000-8000-000000000004','40000000-0000-4000-8000-000000000002','Cerveza','Botella individual.',250000,true),
+ ('30000000-0000-4000-8000-000000000017','20000000-0000-4000-8000-000000000004','40000000-0000-4000-8000-000000000003','Limonada','Limón, hielo y menta.',200000,true) on conflict(id) do nothing;
+insert into public.delivery_spots(id,venue_id,label,area,position) select ('50000000-0000-4000-8000-0000000000'||lpad(n::text,2,'0'))::uuid,'20000000-0000-4000-8000-000000000004','Mesa '||n,case when n<=6 then 'Terraza' else 'Jardín' end,n from generate_series(1,10) n on conflict do nothing;
+insert into public.delivery_spots(id,venue_id,label,area,position) values
+ ('50000000-0000-4000-8000-000000000051','20000000-0000-4000-8000-000000000004','VIP 1','Zona VIP',51),
+ ('50000000-0000-4000-8000-000000000052','20000000-0000-4000-8000-000000000004','VIP 2','Zona VIP',52) on conflict do nothing;

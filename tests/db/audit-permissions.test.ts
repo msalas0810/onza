@@ -351,7 +351,7 @@ describe("catálogo de permisos (bajo los permisos por defecto de Supabase)", ()
     );
     expect(rows).toEqual([]);
   });
-  it("lectura pública solo en catálogo; el resto exige sesión; order_events no se lee directo", async () => {
+  it("lectura pública solo en catálogo y lugares habilitados; el resto exige sesión; order_events no se lee directo", async () => {
     await db.exec("reset role");
     const { rows } = await db.query<{ t: string; g: string }>(
       `select table_name t,grantee g from information_schema.role_table_grants
@@ -361,6 +361,8 @@ describe("catálogo de permisos (bajo los permisos por defecto de Supabase)", ()
     expect(granted).toEqual(
       [
         "categories:anon", "categories:authenticated", "products:anon", "products:authenticated", "venues:anon", "venues:authenticated",
+        // Lugares de entrega: públicos para el checkout; la política RLS solo deja ver los habilitados (025).
+        "delivery_spots:anon", "delivery_spots:authenticated",
         "memberships:authenticated", "orders:authenticated", "order_items:authenticated", "profiles:authenticated", "staff_accounts:authenticated",
       ].sort(),
     );

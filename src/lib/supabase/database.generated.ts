@@ -25,6 +25,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      delivery_spots: {
+        Row: {
+          id: string;
+          venue_id: string;
+          label: string;
+          area: string;
+          position: number;
+          enabled: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          venue_id: string;
+          label: string;
+          area?: string;
+          position?: number;
+          enabled?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          venue_id?: string;
+          label?: string;
+          area?: string;
+          position?: number;
+          enabled?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       memberships: {
         Row: { user_id: string; venue_id: string; role: string };
         Insert: { user_id: string; venue_id: string; role: string };
@@ -117,6 +147,11 @@ export type Database = {
           deadline: string;
           business_date: string;
           queued_at: string | null;
+          fulfillment: string;
+          spot_id: string | null;
+          spot_label: string | null;
+          spot_area: string | null;
+          spot_changed_at: string | null;
         };
         Insert: {
           id?: string;
@@ -134,6 +169,11 @@ export type Database = {
           deadline: string;
           business_date?: string;
           queued_at?: string | null;
+          fulfillment?: string;
+          spot_id?: string | null;
+          spot_label?: string | null;
+          spot_area?: string | null;
+          spot_changed_at?: string | null;
         };
         Update: {
           id?: string;
@@ -151,6 +191,11 @@ export type Database = {
           deadline?: string;
           business_date?: string;
           queued_at?: string | null;
+          fulfillment?: string;
+          spot_id?: string | null;
+          spot_label?: string | null;
+          spot_area?: string | null;
+          spot_changed_at?: string | null;
         };
         Relationships: [];
       };
@@ -239,6 +284,7 @@ export type Database = {
           onboarded_at?: string;
           updated_at?: string;
           avatar_path?: string | null;
+          favorite_drink?: string | null;
         };
         Update: {
           user_id?: string;
@@ -257,6 +303,7 @@ export type Database = {
           onboarded_at?: string;
           updated_at?: string;
           avatar_path?: string | null;
+          favorite_drink?: string | null;
         };
         Relationships: [];
       };
@@ -309,6 +356,8 @@ export type Database = {
           cover_focus_y: number;
           auto_accept: boolean;
           auto_accept_max_preparing: number;
+          delivery_mode: string;
+          spot_noun: string;
         };
         Insert: {
           id?: string;
@@ -334,6 +383,8 @@ export type Database = {
           cover_focus_y?: number;
           auto_accept?: boolean;
           auto_accept_max_preparing?: number;
+          delivery_mode?: string;
+          spot_noun?: string;
         };
         Update: {
           id?: string;
@@ -359,6 +410,8 @@ export type Database = {
           cover_focus_y?: number;
           auto_accept?: boolean;
           auto_accept_max_preparing?: number;
+          delivery_mode?: string;
+          spot_noun?: string;
         };
         Relationships: [];
       };
@@ -414,10 +467,6 @@ export type Database = {
         Returns: undefined;
       };
       update_profile_avatar: { Args: { path: string | null }; Returns: Json };
-      update_profile_details: {
-        Args: { full_name: string; username: string; favorite_drink?: string | null };
-        Returns: Json;
-      };
       venue_summary_range: {
         Args: { venue: string; from_day: string; to_day: string };
         Returns: Json;
@@ -433,6 +482,23 @@ export type Database = {
         Returns: Json;
       };
       auto_accept_tick: { Args: Record<never, never>; Returns: number };
+      update_profile_details: {
+        Args: {
+          full_name: string;
+          username: string;
+          favorite_drink?: string | null;
+        };
+        Returns: Json;
+      };
+      order_change_spot: { Args: { input: Json }; Returns: Json };
+      venue_delivery_config: { Args: { input: Json }; Returns: Json };
+      venue_spot_save: { Args: { input: Json }; Returns: Json };
+      venue_spot_bulk: { Args: { input: Json }; Returns: Json };
+      venue_spot_delete: { Args: { input: Json }; Returns: Json };
+      venue_orders_export: {
+        Args: { venue: string; from_day: string; to_day: string };
+        Returns: Json;
+      };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

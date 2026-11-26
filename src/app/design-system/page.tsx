@@ -43,6 +43,8 @@ const sampleVenue: Venue = {
   cover_focus_y: 50,
   auto_accept: false,
   auto_accept_max_preparing: 5,
+  delivery_mode: "bar",
+  spot_noun: "Mesa",
 };
 
 // Sample drinks for reviewing the menu rows and the drink editor. Nothing here is saved.
