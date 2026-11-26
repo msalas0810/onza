@@ -230,6 +230,19 @@ describe("pedidos: quién puede comprar (auditoría)", () => {
     await db.exec("reset role");
     await db.exec(`delete from public.staff_accounts where user_id='${u.noProfile}'`);
   });
+  it("con cuentas obligatorias y guests_allowed=true el invitado pide sin perfil; el equipo sigue sin comprar", async () => {
+    await db.exec("reset role");
+    await db.exec("update private.configuration set accounts_required=true, guests_allowed=true where id");
+    try {
+      await as(u.other, "dev-guest", true);
+      expect((await command(db, createInput("guest-allowed-buys"))).id).toBeTruthy();
+      await as(u.noProfile);
+      await rejects(command(db, createInput("noprofile-still-blocked")), "ONBOARDING_REQUIRED");
+    } finally {
+      await db.exec("reset role");
+      await db.exec("update private.configuration set accounts_required=false, guests_allowed=false where id");
+    }
+  });
   it("con cuentas obligatorias: sin invitados ni perfiles incompletos; con perfil, sí", async () => {
     await db.exec("reset role");
     await db.exec("update private.configuration set accounts_required=true where id");

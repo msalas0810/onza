@@ -11,7 +11,7 @@ import {
 import { assertMockPayments } from "@/features/payments/server/provider";
 import { orderSchema } from "../types";
 import QRCode from "qrcode";
-import { accountsRequired } from "@/lib/access-policy";
+import { accountsRequired, guestsAllowed } from "@/lib/access-policy";
 import { passwordChangePending } from "@/lib/supabase/guards";
 import { scenariosEnabled } from "@/features/payments/server/provider";
 import { CommandFailure, failureDetail } from "@/lib/errors";
@@ -108,7 +108,10 @@ async function assertCanOrder(
     .limit(1);
   if (membership?.length) throw new Error("STAFF_CANNOT_ORDER");
   if (!accountsRequired()) return;
-  if (anonymous) throw new Error("ACCOUNT_REQUIRED");
+  if (anonymous) {
+    if (!guestsAllowed()) throw new Error("ACCOUNT_REQUIRED");
+    return;
+  }
   const { data: profile } = await db
     .from("profiles")
     .select("user_id")

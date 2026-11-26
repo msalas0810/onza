@@ -45,7 +45,7 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Revisar `audit/seguridad-escala` (ver `docs/Onza-Auditoria-seguridad-y-escala.md`, §10). Después, en un proyecto Supabase **aislado**: `db push --dry-run` (013–024), aplicar, y probar sesiones/Storage/Realtime reales. Antes: aplicar las migraciones 013–020 en un proyecto de prueba (el dry-run contra `onza-dev` listó exactamente esas ocho; no se aplicó nada). Próxima prueba en Safari de iPad y iPhone físicos. |
+| Siguiente tarea exacta | (Nuevo 2026-11-26: entrada como invitado en `claude/cool-hawking-4i6xag`, ver D-2026-11-26-01; migración 025 sin aplicar.) Revisar `audit/seguridad-escala` (ver `docs/Onza-Auditoria-seguridad-y-escala.md`, §10). Después, en un proyecto Supabase **aislado**: `db push --dry-run` (013–024), aplicar, y probar sesiones/Storage/Realtime reales. Antes: aplicar las migraciones 013–020 en un proyecto de prueba (el dry-run contra `onza-dev` listó exactamente esas ocho; no se aplicó nada). Próxima prueba en Safari de iPad y iPhone físicos. |
 
 ### Pendientes abiertos
 
@@ -91,6 +91,18 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-26-01 · Entrar como invitado en el acceso (opcional, apagado por defecto)
+
+- **Fecha y hora:** 2026-11-26 (America/Costa_Rica)
+- **Persona:** Manu (pedido: «añadí entrar como invitado además de log in, que uno pueda pedir sin tener obligatoriamente log in»).
+- **IA:** Claude Code · claude-sonnet-5-5
+- **Rama y commits:** `claude/cool-hawking-4i6xag` · hash en el commit de esta entrada (ver `git log`).
+- **Qué cambió:** `/acceso` muestra el botón «Entrar como invitado» (abre sesión anónima de Supabase y sigue al destino) cuando `GUEST_ACCESS=true` junto a `ACCOUNTS_REQUIRED=true`. El invitado puede ver locales, carrito, checkout (acepta mayoría de edad y condiciones ahí) y pedidos; `/cuenta`, `/onboarding`, lista de espera y portal laboral siguen exigiendo cuenta. Sin la bandera nada cambia. Migración **aditiva** `202611260025` con `private.configuration.guests_allowed` (default false) que ajusta el trigger de pedidos. Esto relaja la decisión del blueprint §0 («acceso obligatorio») por pedido expreso del dueño; confirmar que se ratifica.
+- **Archivos clave:** `src/lib/access-policy.ts`, `src/proxy.ts`, `src/features/account/components/guest-entry.tsx`, `src/app/acceso/page.tsx`, `src/features/orders/components/checkout.tsx`, `src/features/orders/server/order-service.ts`, `supabase/migrations/202611260025_guest_access.sql`.
+- **Verificado:** `npm run check` (typecheck, lint, 198 pruebas incl. política de acceso y la prueba SQL con `guests_allowed`, build) en este contenedor.
+- **No verificado:** recorrido real en navegador ni contra Supabase alojado (la sesión anónima debe estar habilitada en Auth); migración 025 sin aplicar en remoto (R4); sin prueba en teléfono. Al activar: `GUEST_ACCESS=true` y `update private.configuration set guests_allowed=true`.
+- **Pendientes / siguiente paso:** revisar el diseño del botón en `/acceso` (móvil/escritorio) con capturas; aplicar 021–025 en un proyecto aislado y probar el flujo invitado → pedido.
 
 ### D-2026-11-23-01 · Consolidar Onza en `main` y preparar el repo público
 

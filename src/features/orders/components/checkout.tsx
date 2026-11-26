@@ -68,13 +68,21 @@ const attemptStatusSchema = z.discriminatedUnion("attempt", [
   z.object({ attempt: z.literal("found"), order: orderSchema }),
 ]);
 
-export function Checkout({ accounts = false }: { accounts?: boolean }) {
+export function Checkout({
+  accounts = false,
+  guests = false,
+}: {
+  accounts?: boolean;
+  guests?: boolean;
+}) {
   const cart = useCart();
   const router = useRouter();
   const online = useOnline();
   // Con cuentas, la mayoría de edad y las condiciones se aceptaron (con fecha y versión) en el perfil.
-  const [adult, setAdult] = useState(accounts);
-  const [policy, setPolicy] = useState(accounts);
+  // Con invitados permitidos, quien no tiene cuenta las acepta acá; quien ya tiene cuenta las aceptó en su perfil.
+  const [adult, setAdult] = useState(accounts && !guests);
+  const [policy, setPolicy] = useState(accounts && !guests);
+  const [guest, setGuest] = useState<boolean | null>(guests ? null : false);
   const [error, setError] = useState<{
     code: string;
     message: string;
@@ -84,9 +92,33 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
   const [waiting, setWaiting] = useState<WaitlistEntry | null>(null);
   const [joining, setJoining] = useState(false);
   const venueId = cart?.venueId;
+  const consentHere = !accounts || (guests && guest !== false);
+  // La lista de espera es solo de cuentas: un invitado no la usa.
+  const waitlistEnabled = accounts && guest === false;
+  useEffect(() => {
+    if (!guests) return;
+    let closed = false;
+    void browserDb()
+      .auth.getUser()
+      .then(({ data: { user } }) => {
+        if (closed) return;
+        const anonymous = !user || user.is_anonymous === true;
+        setGuest(anonymous);
+        if (!anonymous) {
+          setAdult(true);
+          setPolicy(true);
+        }
+      })
+      .catch(() => {
+        if (!closed) setGuest(true);
+      });
+    return () => {
+      closed = true;
+    };
+  }, [guests]);
   // Recuperar el lugar en la lista de espera al volver a esta pantalla (vive en el servidor).
   useEffect(() => {
-    if (!accounts || !venueId) return;
+    if (!waitlistEnabled || !venueId) return;
     let closed = false;
     void waitlistRequest("status", venueId)
       .then((entry) => {
@@ -100,7 +132,7 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
     return () => {
       closed = true;
     };
-  }, [accounts, venueId]);
+  }, [waitlistEnabled, venueId]);
   const joinWaitlist = async () => {
     if (!venueId) return;
     setJoining(true);
@@ -174,7 +206,7 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       const {
         data: { user },
       } = await db.auth.getUser();
-      if (accounts) {
+      if (accounts && !guests) {
         if (!user || user.is_anonymous) {
           setExpired(true);
           return;
@@ -185,7 +217,7 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           throw new Error(
             "No pudimos iniciar tu sesión invitada. Volvé a intentarlo en unos minutos.",
           );
-      } else if (!user.is_anonymous) {
+      } else if (!user.is_anonymous && !accounts) {
         throw new Error(
           "Estás usando una sesión de personal. Abrí una ventana o perfil separado para pedir como invitado.",
         );
@@ -333,7 +365,7 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           <Lock size={16} aria-hidden="true" />
           Sin cobro real · no pedimos tarjeta
         </p>
-        {!accounts && (
+        {consentHere && (
           <>
             <label className="checkbox">
               <input
@@ -423,7 +455,7 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
                 >
                   Revisar carrito
                 </Link>
-              ) : error.code === "VENUE_CAPACITY" && accounts && !waiting ? (
+              ) : error.code === "VENUE_CAPACITY" && waitlistEnabled && !waiting ? (
                 <Button
                   size="sm"
                   loading={joining}

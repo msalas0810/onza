@@ -4,6 +4,7 @@ import { isConfigured, supabaseConfig } from "@/lib/supabase/config";
 import {
   accountsRequired,
   decideAccess,
+  guestsAllowed,
   type Account,
 } from "@/lib/access-policy";
 const PASS_THROUGH = /^\/(api|auth)(\/|$)/;
@@ -61,7 +62,7 @@ export async function proxy(request: NextRequest) {
       mustChangePassword: value?.mustChangePassword === true,
     };
   }
-  const target = decideAccess(pathname, account);
+  const target = decideAccess(pathname, account, guestsAllowed());
   return target ? redirect(request, response, target) : response;
 }
 function transientFailure(error: { name?: string; status?: number }) {

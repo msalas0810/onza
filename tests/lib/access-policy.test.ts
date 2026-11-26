@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { decideAccess, safeNext, accountsRequired } from "@/lib/access-policy";
+import {
+  decideAccess,
+  safeNext,
+  accountsRequired,
+  guestsAllowed,
+} from "@/lib/access-policy";
 const none = { kind: "none", onboarded: false } as const;
 const guest = { kind: "guest", onboarded: false } as const;
 const fresh = { kind: "customer", onboarded: false } as const;
@@ -19,6 +24,19 @@ describe("política de acceso", () => {
         `/acceso?next=${encodeURIComponent(p)}`,
       );
     expect(decideAccess("/v/sala-norte", guest)).toContain("/acceso?next=");
+  });
+  it("con invitados permitidos el invitado entra al área de pedidos sin perfil, pero no a la cuenta ni al equipo", () => {
+    for (const p of ["/", "/v/sala-norte", "/cart", "/checkout", "/orders", "/settings", "/acceso"])
+      expect(decideAccess(p, guest, true)).toBeNull();
+    expect(decideAccess("/cuenta", guest, true)).toBe("/acceso?next=%2Fcuenta");
+    expect(decideAccess("/onboarding", guest, true)).toBe("/acceso");
+    expect(decideAccess("/staff/abc", guest, true)).toBe("/equipo/acceso?next=%2Fstaff%2Fabc");
+    // Sin sesión alguna el acceso sigue siendo obligatorio, aun con la bandera.
+    expect(decideAccess("/v/sala-norte", none, true)).toBe("/acceso?next=%2Fv%2Fsala-norte");
+  });
+  it("la bandera de invitados está apagada por defecto", () => {
+    expect(guestsAllowed({})).toBe(false);
+    expect(guestsAllowed({ GUEST_ACCESS: "true" })).toBe(true);
   });
   it("cliente sin onboarding va a completar su perfil conservando destino", () => {
     expect(decideAccess("/v/patio", fresh)).toBe(

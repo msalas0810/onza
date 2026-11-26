@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { AuthForm } from "@/features/account/components/auth-form";
-import { safeNext } from "@/lib/access-policy";
+import { guestsAllowed, safeNext } from "@/lib/access-policy";
+import { GuestEntry } from "@/features/account/components/guest-entry";
 import { AccessScreen } from "./access-screen";
 import { OnzaLogo } from "@/components/ui/brand";
 import styles from "./access.module.css";
@@ -32,6 +33,7 @@ export default async function Page({
                 : undefined
             }
           />
+          {guestsAllowed() && <GuestEntry next={destination} />}
           <p className={styles.legal}>
             Al continuar aceptás las <Link href="/policies">condiciones</Link> y
             la <Link href="/policies">política de privacidad</Link>.
