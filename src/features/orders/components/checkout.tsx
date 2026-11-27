@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft, Lock } from "lucide-react";
+import { ChevronLeft, Lock, MapPin } from "lucide-react";
 import { browserDb } from "@/lib/supabase/browser";
 import { z } from "zod";
 import { errorMessage, type FailureDetail } from "@/lib/errors";
@@ -150,7 +150,6 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
   // Dónde quiere recibirlo: un toque en el mapa (con la mesa del QR como pista) o un lugar de la lista.
   const [pref, setPref] = useState<LocationPref | null>(null);
   const wayTouched = useRef(false);
-  const deliveryRef = useRef<HTMLElement>(null);
   const choice = options
     ? describeChoice(pref, options.spots, options.map ?? null)
     : null;
@@ -412,37 +411,14 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       </Link>
       <div className="page-head">
         <h1 className="t-title">Confirmar pedido</h1>
+        {/* Con entrega en el lugar, el mapa de abajo ya dice dónde: acá solo el local, y el lugar elegido va junto a «Pedir». */}
+        <p className="muted">
+          {cart.venueName}
+          {!(options && offersLocation(options.mode) && way === "location") &&
+            `, retiro en ${options?.pickupLabel ?? cart.pickupLabel}`}
+        </p>
       </div>
       <div className="stack">
-        <div className="panel">
-          <strong>{cart.venueName}</strong>
-          <div className="muted t-label">
-            {options && offersLocation(options.mode) && way === "location"
-              ? `Entrega: ${choice ? choice.text || "tu punto en el mapa" : `en ${yourSpot(options.noun)} (sin elegir)`}`
-              : `Retiro: ${options?.pickupLabel ?? cart.pickupLabel}`}
-            {options && offersLocation(options.mode) && way === "location" && (
-              <>
-                {" · "}
-                <button
-                  type="button"
-                  className="link-button"
-                  onClick={() =>
-                    deliveryRef.current?.scrollIntoView({
-                      behavior: window.matchMedia(
-                        "(prefers-reduced-motion: reduce)",
-                      ).matches
-                        ? "auto"
-                        : "smooth",
-                      block: "center",
-                    })
-                  }
-                >
-                  {choice ? "Editar" : options.map ? "Marcar en el mapa" : "Elegir"}
-                </button>
-              </>
-            )}
-          </div>
-        </div>
         {optionsError && (
           <Notice
             tone="warning"
@@ -462,7 +438,6 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
         )}
         {options && offersLocation(options.mode) && (
           <section
-            ref={deliveryRef}
             className="delivery-choice"
             aria-labelledby="delivery-title"
           >
@@ -491,9 +466,8 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
               <>
                 <p className="muted t-label">
                   {options.map
-                    ? "Tocá el mapa donde estás y te lo llevamos. "
-                    : `Elegí ${yourSpot(options.noun)} y te lo llevamos. `}
-                  Cuando llegue, mostrá el QR o el código privado de tu pedido.
+                    ? "Tocá el mapa donde estás. Otro toque lo mueve."
+                    : `Elegí ${yourSpot(options.noun)}.`}
                 </p>
                 <LocationPicker
                   noun={options.noun}
@@ -695,16 +669,20 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
             >
               Pedir · <Price amount={total} />
             </Button>
-            {options &&
-              offersLocation(options.mode) &&
-              way === "location" &&
-              !choice && (
-                <p className="btn-note">
-                  {options.map
-                    ? "Tocá el mapa donde estás para poder pedir."
-                    : `Elegí ${yourSpot(options.noun)} para poder pedir.`}
-                </p>
-              )}
+            {options && offersLocation(options.mode) && way === "location" && (
+              <p className="btn-note" aria-live="polite">
+                {choice ? (
+                  <>
+                    <MapPin size={14} aria-hidden="true" />
+                    {`Entrega: ${choice.text || "tu punto en el mapa"}`}
+                  </>
+                ) : options.map ? (
+                  "Tocá el mapa donde estás para poder pedir."
+                ) : (
+                  `Elegí ${yourSpot(options.noun)} para poder pedir.`
+                )}
+              </p>
+            )}
             {!online && (
               <p className="btn-note">
                 Sin conexión: el pedido no se va a enviar.

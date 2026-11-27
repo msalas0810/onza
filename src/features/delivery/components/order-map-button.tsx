@@ -31,8 +31,9 @@ type PinOrder = {
 };
 
 /**
- * «Ver en el mapa» para la barra: abre el mismo plano que vio el cliente con su pin exacto y, si existe, el nombre de la mesa o
- * zona. Las formas del mapa vigente se leen al abrir; sin ellas se ve igual el pin sobre la imagen.
+ * El pin del pedido para la barra. En la tarjeta se ve un recorte del MISMO plano centrado en el punto que marcó el cliente
+ * (sin abrir nada); tocarlo abre el plano completo con el nombre de la mesa o zona. Las formas del mapa vigente se leen al
+ * abrir; sin ellas se ve igual el pin sobre la imagen.
  */
 export function OrderMapButton({
   order,
@@ -57,9 +58,32 @@ export function OrderMapButton({
   const name = spotText(order) || MAP_NAME_FALLBACK;
   return (
     <>
-      <Button variant="secondary" size={size} onClick={load}>
-        <MapIcon size={16} aria-hidden="true" /> Ver en el mapa
-      </Button>
+      {size === "sm" ? (
+        <button
+          type="button"
+          className="pin-peek"
+          onClick={load}
+          aria-label={`Ver en el mapa: ${name}`}
+          style={{
+            backgroundImage: `url(${JSON.stringify(order.map.image_url)})`,
+            // background-position en % alinea el punto (x, y) de la imagen con el mismo % de la caja: el pin cae justo ahí.
+            backgroundPosition: `${order.map_x * 100}% ${order.map_y * 100}%`,
+          }}
+        >
+          <span
+            className="pin-peek-pin"
+            aria-hidden="true"
+            style={{ left: `${order.map_x * 100}%`, top: `${order.map_y * 100}%` }}
+          />
+          <span className="pin-peek-label">
+            <MapIcon size={14} aria-hidden="true" /> Ver en el mapa
+          </span>
+        </button>
+      ) : (
+        <Button variant="secondary" size={size} onClick={load}>
+          <MapIcon size={16} aria-hidden="true" /> Ver en el mapa
+        </Button>
+      )}
       <Sheet
         open={open}
         onOpenChange={setOpen}

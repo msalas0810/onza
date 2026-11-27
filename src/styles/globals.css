@@ -521,6 +521,10 @@ time {
   }
 }
 .btn-note {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--onza-space-4);
   font-size: var(--onza-type-label-size);
   color: var(--onza-text-muted);
   text-align: center;
@@ -3604,7 +3608,7 @@ button.link-button {
   filter: drop-shadow(0 2px 3px #0d0d0e66);
 }
 .plan-pin svg {
-  animation: plan-drop 0.18s ease-out;
+  animation: plan-drop 0.22s var(--onza-motion-ease) both;
 }
 .plan-pin-body {
   fill: var(--onza-mark);
@@ -3646,15 +3650,70 @@ button.link-button {
   outline: 3px solid var(--onza-focus);
   outline-offset: 2px;
 }
+/* Recorte del plano en la tarjeta de la barra: el mismo punto que marcó el cliente, sin abrir nada. */
+.pin-peek {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 128px;
+  padding: 0;
+  overflow: hidden;
+  border-radius: var(--onza-radius-control);
+  border: 1px solid var(--onza-border);
+  background-color: var(--onza-bg);
+  background-repeat: no-repeat;
+  background-size: 260% auto;
+  cursor: zoom-in;
+  color: var(--onza-text);
+}
+.pin-peek:focus-visible {
+  outline: 3px solid var(--onza-focus);
+  outline-offset: 2px;
+}
+.pin-peek-pin {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  margin: -28px 0 0 -12px; /* la punta del pin queda sobre el punto */
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  background: var(--onza-mark);
+  border: 3px solid var(--onza-surface-raised);
+  box-shadow: var(--onza-layout-elevation-2);
+}
+.pin-peek-pin::after {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: var(--onza-on-brand);
+}
+.pin-peek-label {
+  position: absolute;
+  right: var(--onza-space-8);
+  bottom: var(--onza-space-8);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--onza-space-4);
+  padding: var(--onza-space-4) var(--onza-space-8);
+  border-radius: var(--onza-radius-pill);
+  background: var(--onza-surface-raised);
+  font-size: var(--onza-type-caption-size);
+  font-weight: 600;
+}
 @keyframes plan-flash {
   50% {
     stroke-opacity: 0.25;
   }
 }
 @keyframes plan-drop {
-  from {
-    transform: translateY(-10px);
-    opacity: 0.4;
+  0% {
+    transform: translateY(-14px);
+    opacity: 0.3;
+  }
+  70% {
+    transform: translateY(1px);
+    opacity: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {

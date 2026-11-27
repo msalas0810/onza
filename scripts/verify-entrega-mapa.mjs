@@ -294,12 +294,15 @@ try {
   await maria.getByText("Entrega: Mesa 7 · Jardín").waitFor();
   await showPlan(maria);
   await shot(maria, "03-checkout-mapa-390", false);
-  // Resumen editable: «Editar» lleva al mapa.
+  // El lugar elegido se confirma junto a «Pedir», sin un resumen duplicado arriba (D-2026-11-27-01).
   check(
-    "El resumen del pedido ofrece «Editar» para volver al mapa",
-    (await maria
-      .getByRole("button", { name: "Editar", exact: true })
-      .count()) === 1,
+    "El lugar elegido se ve junto a «Pedir» y no se repite arriba con «Editar»",
+    (await maria.locator(".sticky-cta .btn-note").innerText()).includes(
+      "Entrega: Mesa 7 · Jardín",
+    ) &&
+      (await maria
+        .getByRole("button", { name: "Editar", exact: true })
+        .count()) === 0,
   );
   await maria.getByRole("button", { name: /^Pedir/ }).click();
   await maria.waitForURL(/\/orders\//, { timeout: 15000 });
@@ -415,7 +418,7 @@ try {
   check(
     "Con «Retirar en la barra» el mapa desaparece y el resumen dice Retiro",
     (await maria.locator(".plan-box").count()) === 0 &&
-      (await text(maria)).includes("Retiro: Barra principal"),
+      (await text(maria)).includes("retiro en Barra principal"),
   );
   await shot(maria, "06-checkout-retiro-barra-390", false);
   await maria.getByRole("button", { name: /^Pedir/ }).click();
@@ -459,7 +462,7 @@ try {
   await sofia.goto(`${APP}/v/mil948`);
   await addToCart(sofia, "Margarita");
   await sofia.goto(`${APP}/checkout`);
-  await sofia.getByText(/Retiro:/).waitFor();
+  await sofia.getByText(/retiro en /).waitFor();
   check(
     "Un local normal (solo barra) no pregunta por el lugar ni muestra mapa",
     !(await text(sofia)).includes("¿Cómo recibís tu pedido?") &&

@@ -167,8 +167,8 @@ try {
   check("Un local solo de barra no muestra entrada por lugar", !(await text(sofia)).includes("te lo llevamos"));
   await addToCart(sofia, "Margarita");
   await sofia.goto(`${APP}/checkout`);
-  await sofia.getByText(/Retiro:/).waitFor();
-  check("El checkout de un local solo de barra no pregunta por el lugar", !(await text(sofia)).includes("¿Cómo recibís tu pedido?") && (await text(sofia)).includes("Retiro: Barra principal"));
+  await sofia.getByText(/retiro en /).waitFor();
+  check("El checkout de un local solo de barra no pregunta por el lugar", !(await text(sofia)).includes("¿Cómo recibís tu pedido?") && (await text(sofia)).includes("retiro en Barra principal"));
   await shot(sofia, "09-checkout-barra-390");
   await sofia.getByRole("button", { name: /^Pedir/ }).click();
   await sofia.waitForURL(/\/orders\//, { timeout: 15000 });

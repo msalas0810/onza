@@ -378,6 +378,7 @@ export function PlanMap({
           )}
           {pin && (
             <span
+              key={`${pin.x},${pin.y}`} // cada toque vuelve a «soltar» el pin
               className="plan-pin"
               data-plan-pin
               aria-hidden="true"
