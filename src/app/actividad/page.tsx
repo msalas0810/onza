@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Activity, ChevronLeft } from "lucide-react";
+import { Activity, ChevronLeft, MapPin } from "lucide-react";
 import { EmptyState, ErrorState, StatusBadge } from "@/components/ui/primitives";
 import { errorMessage } from "@/lib/errors";
-import { getVenueActivity } from "@/features/social/server/social-service";
+import { getSocialOverview, getVenueActivity } from "@/features/social/server/social-service";
+import { formatClock } from "@/lib/clock";
 import { ActivityMap, projectVenues, type ActivityPoint } from "@/features/social/components/activity-map";
 import { simulatedActivity } from "@/features/social/activity-fixtures";
 
@@ -19,13 +20,25 @@ async function loadPoints(simulated: boolean): Promise<{ points: readonly Activi
   }
 }
 
+/** Amigos que comparten su local ahora (solo amistades aceptadas: lo decide social_overview en la base). */
+async function loadSharingFriends() {
+  try {
+    return (await getSocialOverview()).friends.flatMap((f) => (f.venue ? [{ ...f, venue: f.venue }] : []));
+  } catch {
+    return null; // la actividad se muestra igual; la sección de amigos queda oculta
+  }
+}
+
 export default async function ActivityPage({
   searchParams,
 }: {
   searchParams: Promise<{ ejemplo?: string }>;
 }) {
   const simulated = (await searchParams).ejemplo === "1";
-  const result = await loadPoints(simulated);
+  const [result, sharing] = await Promise.all([
+    loadPoints(simulated),
+    simulated ? Promise.resolve(null) : loadSharingFriends(),
+  ]);
   return (
     <div className="page">
       <Link className="back" href="/">
@@ -60,8 +73,33 @@ export default async function ActivityPage({
             </div>
           }
         >
-          Aparece un local cuando 3 o más personas marcan que están ahí.
+          Aparece un local cuando 5 o más personas marcan que están ahí.
         </EmptyState>
+      )}
+      {sharing && (
+        <section className="block-card" aria-labelledby="friends-here">
+          <h2 id="friends-here">Tus amigos</h2>
+          {sharing.length ? (
+            <ul className="rows">
+              {sharing.map((f) => (
+                <li className="r" key={f.id}>
+                  <span className="grow">
+                    <strong>{f.name}</strong> <span className="muted">@{f.username}</span>
+                    <br />
+                    <Link className="friend-venue t-label" href={`/v/${f.venue.slug}`}>
+                      <MapPin size={14} aria-hidden="true" />
+                      {f.venue.name}, hasta las {formatClock(f.venue.expiresAt)}
+                    </Link>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="muted">
+              Ningún amigo comparte su local ahora. <Link href="/amigos">Ir a Amigos</Link>
+            </p>
+          )}
+        </section>
       )}
       {simulated && (
         <Link className="btn secondary" href="/actividad">

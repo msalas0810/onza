@@ -28,7 +28,7 @@ Cualquier contraseña entra. Todo es ficticio y los pagos son simulados.
 
 | Rol | Entrar en | Cuenta |
 | --- | --- | --- |
-| Cliente | `/acceso` | `maria@correo.demo` (también `sofia@`, `tomas@`, `valeria@correo.demo`) |
+| Cliente | `/acceso` | `maria@correo.demo` (también `sofia@`, `tomas@`, `valeria@`, `diego@correo.demo`) |
 | Picnic por QR de mesa | `/v/picnic?spot=50000000-0000-4000-8000-000000000007` | cliente |
 | Barra | `/equipo/acceso` | `jorge@equipo.demo` (Picnic y Mil948) |
 | Administración | `/equipo/acceso` | `ana@equipo.demo` (admin de Picnic y Mil948) |

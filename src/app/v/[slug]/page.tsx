@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, MapPinCheck } from "lucide-react";
 import { getVenue, getPublishedMenu } from "@/features/catalog/server/queries";
 import { ProductMenu } from "@/features/catalog/components/product-menu";
 import { VenueHero } from "@/features/catalog/components/venue-hero";
@@ -38,10 +38,18 @@ export default async function MenuPage({
   const closed = venue.open_state === "closed";
   return (
     <div className="page menu">
-      <Link className="back" href="/">
-        <ChevronLeft size={16} aria-hidden="true" />
-        Explorar
-      </Link>
+      <div className="row between venue-top">
+        <Link className="back" href="/">
+          <ChevronLeft size={16} aria-hidden="true" />
+          Explorar
+        </Link>
+        {/* Voluntario y aparte del pedido: marcar que estás acá no pide nada ni comparte nada por sí solo. */}
+        {!closed && (
+          <Link className="btn quiet sm" href={`/amigos?local=${encodeURIComponent(venue.slug)}`}>
+            <MapPinCheck size={16} aria-hidden="true" /> Estoy acá
+          </Link>
+        )}
+      </div>
       <VenueHero venue={venue} />
       {closed ? (
         <Notice

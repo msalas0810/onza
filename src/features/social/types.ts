@@ -44,7 +44,7 @@ export const activitySchema = z.array(
   }),
 );
 
-/** El nivel nunca es un número de personas: es un rango (3–9, 10–24, 25 o más). */
+/** El nivel nunca es un número de personas: es un rango (5–9, 10–24, 25 o más). */
 export const activityLevelLabel: Record<1 | 2 | 3, string> = {
   1: "Algo de movimiento",
   2: "Movido",

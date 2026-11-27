@@ -4,7 +4,7 @@
 -- * La señal de actividad son CHECK-INS voluntarios («Estoy acá»), de una cuenta de cliente con perfil, con vencimiento
 --   (60, 120 o 180 min). Pedir NO crea un check-in: esta migración no toca pedidos ni lee sus tablas.
 -- * Cada persona tiene a lo sumo UN check-in activo: el mapa cuenta personas, no toques.
--- * El mapa de actividad nunca devuelve conteos: solo un nivel (1, 2 o 3) y solo para locales con 3 o más personas activas
+-- * El mapa de actividad nunca devuelve conteos: solo un nivel (1, 2 o 3) y solo para locales con 5 o más personas activas
 --   y coordenadas cargadas (las coordenadas se cargan solo si se verificaron; ver 009 y scripts/seed-real-venues.mjs).
 -- * Compartir con amigos es un interruptor del check-in, apagado por defecto. Vence con el check-in y se apaga al instante.
 --   Solo lo ven amistades ACEPTADAS. Nunca se comparte el pin de entrega, GPS, historial ni datos de pedidos.
@@ -156,7 +156,7 @@ begin
  );
 end $$;
 
--- Mapa de actividad: locales con coordenadas y 3 o más personas con check-in activo. Solo el nivel, nunca el número.
+-- Mapa de actividad: locales con coordenadas y 5 o más personas con check-in activo. Solo el nivel, nunca el número.
 create function public.venue_activity() returns jsonb language sql stable security definer set search_path='' as $$
  select coalesce(jsonb_agg(jsonb_build_object('venueId',v.id,'name',v.name,'slug',v.slug,'zone',v.zone,
     'latitude',v.latitude,'longitude',v.longitude,
@@ -164,7 +164,7 @@ create function public.venue_activity() returns jsonb language sql stable securi
  from (select c.venue_id, count(distinct c.user_id) as people from public.venue_checkins c
        where c.ended_at is null and c.expires_at>now() group by c.venue_id) a
  join public.venues v on v.id=a.venue_id
- where a.people>=3 and v.demo_listed and v.latitude is not null and v.longitude is not null;
+ where a.people>=5 and v.demo_listed and v.latitude is not null and v.longitude is not null;
 $$;
 
 revoke all on function private.social_user() from public, anon, authenticated;

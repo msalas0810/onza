@@ -1,6 +1,6 @@
 {
-  "generado": "2026-11-27T07:00:44.858Z",
-  "total": 23,
+  "generado": "2026-11-27T07:50:40.778Z",
+  "total": 26,
   "fallos": 0,
   "resultados": [
     {
@@ -54,6 +54,11 @@
       "detail": ""
     },
     {
+      "name": "Desde el local, «Estoy acá» lleva a Amigos con ese local elegido",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "Compartir arranca apagado",
       "ok": true,
       "detail": ""
@@ -84,6 +89,16 @@
       "detail": ""
     },
     {
+      "name": "En Actividad, su amiga ve «Tus amigos: María en Picnic, hasta las …»",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "En Actividad, alguien fuera de la relación no ve a María",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "Dejar de compartir es inmediato",
       "ok": true,
       "detail": ""
@@ -94,12 +109,12 @@
       "detail": "200"
     },
     {
-      "name": "Con 2 personas (conteo chico) el local no aparece",
+      "name": "Con 4 personas (conteo chico) el local no aparece",
       "ok": true,
       "detail": ""
     },
     {
-      "name": "Con 3 personas aparece Picnic con un nivel, sin números de personas",
+      "name": "Con 5 personas aparece Picnic con un nivel, sin números de personas",
       "ok": true,
       "detail": ""
     },

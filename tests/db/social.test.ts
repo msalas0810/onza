@@ -83,17 +83,17 @@ describe("social: check-in y mapa de actividad", () => {
     );
     expect(active.rows[0].n).toBe(1);
   });
-  it("sin actividad devuelve vacío; menos de 3 personas no se muestra; 3 o más da solo un nivel, sin conteos", async () => {
+  it("sin actividad devuelve vacío; menos de 5 personas no se muestra; 5 o más da solo un nivel, sin conteos", async () => {
     const db = await setup();
     await as(db, ids.customer);
     expect(await activity(db)).toEqual([]);
-    for (const user of [ids.customer, ids.other]) {
+    for (const user of [ids.customer, ids.other, extra[0], extra[1]]) {
       await as(db, user);
       await checkin(db);
       await checkin(db); // la misma persona otra vez no suma
     }
-    expect(await activity(db)).toEqual([]); // 2 personas: conteo chico, oculto
-    await as(db, extra[0]);
+    expect(await activity(db)).toEqual([]); // 4 personas: conteo chico, oculto
+    await as(db, extra[2]);
     await checkin(db);
     const rows = await activity(db);
     expect(rows).toHaveLength(1);
@@ -102,13 +102,14 @@ describe("social: check-in y mapa de actividad", () => {
   });
   it("lo vencido, lo cerrado y los locales sin coordenadas no cuentan", async () => {
     const db = await setup();
-    for (const user of [ids.customer, ids.other, extra[0]]) {
+    const everyone = [ids.customer, ids.other, ...extra];
+    for (const user of everyone) {
       await as(db, user);
       await checkin(db, ids.patio); // Patio Central no tiene coordenadas
     }
     await as(db, ids.customer);
     expect(await activity(db)).toEqual([]);
-    for (const user of [ids.customer, ids.other, extra[0]]) {
+    for (const user of everyone) {
       await as(db, user);
       await checkin(db);
     }

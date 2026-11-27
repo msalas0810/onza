@@ -83,6 +83,13 @@ export const people = {
     username: "valeriac",
     kind: "customer",
   },
+  diego: {
+    id: "10000000-0000-4000-8000-0000000000b5",
+    email: "diego@correo.demo",
+    name: "Diego Rojas",
+    username: "diegor",
+    kind: "customer",
+  },
   jorge: {
     id: "10000000-0000-4000-8000-0000000000c1",
     email: "jorge@equipo.demo",
@@ -144,7 +151,7 @@ export async function createDatabase() {
     await db.exec(
       `insert into auth.users(id,email) values(${q(p.id)},${q(p.email)})`,
     );
-  for (const p of [people.maria, people.sofia, people.tomas, people.valeria])
+  for (const p of [people.maria, people.sofia, people.tomas, people.valeria, people.diego])
     await db.exec(
       `insert into public.profiles(user_id,full_name,username,phone_country,phone_e164,birth_date,terms_version,privacy_version,terms_accepted_at) values(${q(p.id)},${q(p.name)},${q(p.username)},'+506','+50688887777','1995-05-05','borrador-1','borrador-1',now())`,
     );

@@ -66,7 +66,7 @@ run(process.execPath, ["node_modules/next/dist/bin/next", "dev", "--hostname", "
 });
 console.log(`
 Onza demo local (datos ficticios, pagos simulados). Cualquier contraseña entra.
-  Cliente        ${APP}/acceso          maria@correo.demo (también sofia@, tomas@, valeria@correo.demo)
+  Cliente        ${APP}/acceso          maria@correo.demo (también sofia@, tomas@, valeria@, diego@correo.demo)
   Picnic por QR  ${APP}/v/picnic?spot=50000000-0000-4000-8000-000000000007   (Mesa 7 · Jardín)
   Barra          ${APP}/equipo/acceso   jorge@equipo.demo  → Picnic o Mil948
   Admin          ${APP}/equipo/acceso   ana@equipo.demo    → Administración de Picnic o Mil948

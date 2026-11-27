@@ -63,7 +63,7 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-009 | Auditoría 2026-11-21: la CI ya prueba login y Realtime reales (2026-11-23); sigue sin probarse contra Supabase real: Storage, cookies/refresh, expiración, revocación y cierre por dispositivo. Pasos exactos en `docs/Onza-Auditoria-seguridad-y-escala.md` §10 | 2026-11-21 |
 | PEN-010 | Confirmar el límite de 60 validaciones de retiro por minuto (migración 024) y aplicar 021–024 en un proyecto aislado | 2026-11-21 |
 | PEN-011 | Entrega en el lugar: aplicar la migración 025 con 013–024 en un proyecto aislado, probar Realtime real y el escaneo del QR en iPhone/Android físicos, y cargar los datos reales de Picnic (el seed es ilustrativo). Ver `docs/Onza-Entrega-en-el-lugar.md` §6 | 2026-11-26 |
-| PEN-012 | Actividad y amigos (027): aplicar en un proyecto aislado; cargar coordenadas verificadas de locales reales (hoy ninguno tiene); elegir proveedor de mapa base si se quiere calles; confirmar el umbral de 3 personas. Ver `docs/Onza-Noche-decisiones.md` §4 | 2026-11-27 |
+| PEN-012 | Actividad y amigos (027): aplicar en un proyecto aislado; cargar coordenadas verificadas de locales reales (hoy ninguno tiene); elegir proveedor de mapa base si se quiere calles; revisar con volumen real si el mínimo de 5 personas sube a 10. Ver `docs/Onza-Noche-decisiones.md` §4 | 2026-11-27 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -94,6 +94,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-27-04 · Actividad y amigos: mínimo de 5 personas, «Estoy acá» desde el local y amigos dentro de Actividad
+
+- **Fecha y hora:** 2026-11-27 02:20–02:50 (America/Costa_Rica)
+- **Persona:** Manu (encargo «Continuá… luego Heatmap y Find Friends»).
+- **IA:** Claude Code · claude-opus-5-5
+- **Rama y commits:** `feat/noche-picnic-social` · commit de este bloque (ver `git log`), sobre `eebe593`.
+- **Research:** búsqueda web disponible. Supresión de conteos chicos: [SharedStreets](https://medium.com/sharedstreets/aggregating-trip-data-using-k-anonymization-727d5a6413f3) usa un mínimo de 5; [un estudio sobre series de ubicación agregadas](https://arxiv.org/pdf/1902.07456) muestra que suprimir bajo 10 protege poco ante inferencia de pertenencia; [Transport for NSW](https://arxiv.org/pdf/1704.08547) advierte que un valor suprimido se recalcula si se publica el total. Detalle en `docs/Onza-Noche-decisiones.md` §2.
+- **Qué cambió:** el mapa de actividad muestra un local recién desde **5** personas activas (antes 3). Se corrigió dentro de la migración 027 porque nunca se aplicó fuera de shims efímeros; si ya se hubiera aplicado en alguna base, iría en una migración nueva. Nunca se publica un total, así que no hay de dónde restar. El local tiene un enlace discreto «Estoy acá» → `/amigos?local=<slug>` con el local ya elegido, sin tocar el camino QR → pedir. `/actividad` suma «Tus amigos»: quién comparte su local y hasta qué hora, solo amistades aceptadas (misma regla de `social_overview`). Shim con un quinto cliente ficticio, `diego@correo.demo`.
+- **Archivos clave:** `supabase/migrations/202611270027_social_activity.sql`, `src/app/actividad/page.tsx`, `src/app/v/[slug]/page.tsx`, `tests/db/social.test.ts`, `scripts/verify-amigos-actividad.mjs`, `scripts/local-shim/index.mjs`.
+- **Verificado:** `tests/db/social.test.ts` 8/8 con el umbral nuevo (4 personas ocultas, 5 visibles; vencido, cerrado y sin coordenadas no cuentan). `npm run check` en verde (52 archivos / 257 pruebas, build). Regresión completa en instancia separada (:54322/:3200, shim recién iniciado en cada uno): `verify-entrega-mapa` 51/51, `verify-entrega-lugar` 43/43, `verify-admin-noche` 17/17 y `verify-amigos-actividad` **26/26** (nuevas: «Estoy acá» desde el local; en Actividad la amiga ve «María… Picnic, hasta las…» y un tercero no; 4 personas ocultas y 5 visibles). `scan-secrets` sin hallazgos; detector de Impeccable sin hallazgos. Capturas «después» regeneradas.
+- **No verificado:** Supabase real y la 027 en una base remota; coordenadas verificadas de locales reales (ninguno las tiene, así que la actividad real muestra el estado vacío); mapa base con calles (sin proveedor elegido); vencimiento con reloj real en navegador (cubierto en la base).
+- **Pendientes / siguiente paso:** revisar con volumen real si el mínimo sube a 10 (PEN-012); cargar coordenadas con fuente y fecha; elegir proveedor de mapa base si se quieren calles.
 
 ### D-2026-11-27-03 · Administración: «Antes de abrir», retrasos en preparación y un cierre que se lee solo
 

@@ -43,10 +43,12 @@ const social = async (page, body) => {
 const overview = async (page) => (await page.request.get(`${APP}/api/social`)).json();
 
 try {
-  const [maria, sofia, tomas, ana] = await Promise.all([
+  const [maria, sofia, tomas, valeria, diego, ana] = await Promise.all([
     open(people.maria.email),
     open(people.sofia.email),
     open(people.tomas.email),
+    open(people.valeria.email),
+    open(people.diego.email),
     open(people.ana.email, 1280, 900),
   ]);
 
@@ -82,7 +84,10 @@ try {
   check("Sofía acepta la solicitud recibida", (await text(sofia)).includes("María"));
 
   /* 3 · Compartir: apagado por defecto, visible con vencimiento, se apaga al instante */
-  await maria.goto(`${APP}/amigos?local=picnic`);
+  await maria.goto(`${APP}/v/picnic`);
+  await maria.getByRole("link", { name: "Estoy acá" }).click();
+  await maria.waitForURL(/\/amigos\?local=picnic/);
+  check("Desde el local, «Estoy acá» lleva a Amigos con ese local elegido", (await maria.locator("select").inputValue()) === PICNIC);
   const shareBox = maria.getByRole("switch", { name: "Que mis amigos vean este local" });
   check("Compartir arranca apagado", !(await shareBox.isChecked()));
   await maria.getByRole("button", { name: "1 h" }).click();
@@ -101,6 +106,11 @@ try {
   await shot(sofia, "s3-amiga-ve-local-390");
   const outsider = JSON.stringify(await overview(tomas));
   check("Alguien fuera de la relación no ve nada de María", !outsider.includes("Picnic") && !outsider.includes("mariasolis"));
+  await sofia.goto(`${APP}/actividad`);
+  check("En Actividad, su amiga ve «Tus amigos: María en Picnic, hasta las …»", /María @mariasolis Picnic, hasta las/.test(await text(sofia)));
+  await shot(sofia, "s5-actividad-amigos-390");
+  await tomas.goto(`${APP}/actividad`);
+  check("En Actividad, alguien fuera de la relación no ve a María", (await text(tomas)).includes("Ningún amigo comparte su local ahora") && !(await text(tomas)).includes("mariasolis"));
   await maria.getByRole("switch", { name: /Tus amigos ven/ }).click();
   await maria.getByText("Dejaste de compartir. Nadie lo ve desde ahora.").waitFor();
   seen = await overview(sofia);
@@ -114,12 +124,15 @@ try {
   check("(Preparación) coordenadas de prueba para el local ficticio Picnic", coords.ok(), String(coords.status()));
   await social(sofia, { action: "checkin", venueId: PICNIC, minutes: 60 });
   await maria.goto(`${APP}/actividad`);
-  check("Con 2 personas (conteo chico) el local no aparece", (await text(maria)).includes("Todavía no hay actividad visible"));
   await social(tomas, { action: "checkin", venueId: PICNIC, minutes: 60 });
   await social(tomas, { action: "checkin", venueId: PICNIC, minutes: 60 }); // repetir no suma
+  await social(valeria, { action: "checkin", venueId: PICNIC, minutes: 60 });
+  await maria.reload();
+  check("Con 4 personas (conteo chico) el local no aparece", (await text(maria)).includes("Todavía no hay actividad visible"));
+  await social(diego, { action: "checkin", venueId: PICNIC, minutes: 60 });
   await maria.reload();
   const shown = await text(maria);
-  check("Con 3 personas aparece Picnic con un nivel, sin números de personas", shown.includes("Picnic") && shown.includes("Algo de movimiento") && !/\b3 personas\b/.test(shown));
+  check("Con 5 personas aparece Picnic con un nivel, sin números de personas", shown.includes("Picnic") && shown.includes("Algo de movimiento") && !/\b\d+ personas\b/.test(shown));
   await shot(maria, "s4-actividad-real-390");
 
   /* 5 · Salir y quitar amistad */

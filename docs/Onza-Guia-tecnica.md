@@ -139,11 +139,12 @@ Migraciones `202611270026` (mapa del local con pin) y `202611270027` (check-ins,
 ```bash
 ONZA_APP=http://127.0.0.1:3100 node scripts/verify-entrega-mapa.mjs [carpeta]       # QR → login → pin → pedido → mismo pin en barra → entrega (50)
 ONZA_APP=http://127.0.0.1:3100 node scripts/verify-entrega-lugar.mjs [carpeta]       # lugares nombrados, cola, «Ahora», CSV, QR (43)
-ONZA_APP=http://127.0.0.1:3100 node scripts/verify-amigos-actividad.mjs [carpeta]    # solicitud, aceptar, compartir, cortar, conteos chicos (23)
+ONZA_APP=http://127.0.0.1:3100 node scripts/verify-amigos-actividad.mjs [carpeta]    # solicitud, aceptar, compartir, cortar, conteos chicos, «Estoy acá» desde el local (26)
+ONZA_APP=http://127.0.0.1:3100 node scripts/verify-admin-noche.mjs [carpeta]          # «Ahora», antes de abrir, pausa, menú, agotados, cierre (17)
 ONZA_APP=http://127.0.0.1:3100 node scripts/shots-noche.mjs <carpeta>                # capturas comparables antes/después
 ```
 
-Con otro puerto del shim, agregá `SHIM_URL=http://127.0.0.1:<puerto>`. Clientes extra del shim para amigos: `tomas@correo.demo` y `valeria@correo.demo`.
+Con otro puerto del shim, agregá `SHIM_URL=http://127.0.0.1:<puerto>`. Clientes extra del shim para amigos y actividad: `tomas@`, `valeria@` y `diego@correo.demo` (el mapa de actividad necesita 5 personas para mostrar un local).
 
 ### Auditoría de seguridad y escala (noviembre de 2026)
 
