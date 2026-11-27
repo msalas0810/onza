@@ -66,9 +66,43 @@ node scripts/audit/scan-secrets.mjs   # que no se cuelen secretos ni NEXT_PUBLIC
 
 ## Despliegue
 
-El demo es https://onza-demo.vercel.app. **Cada push a `main` despliega a Production** en Vercel; las demás ramas generan un Preview. Usa el proyecto Supabase `onza-dev`, con datos de demo y pagos `mock`.
+Hay dos destinos mientras dura la mudanza. Los dos usan el proyecto Supabase `onza-dev`, con datos de demo y pagos `mock`.
 
-- **Antes de integrar a `main` un cambio con migración:** probala en un entorno aislado (la CI levanta un Supabase completo en cada push a `feat/**`), hacé un respaldo, revisá `npx supabase db push --linked --dry-run` y recién ahí aplicala. `main` no debe adelantarse a la base. Aplicar migraciones remotas y cambiar variables lo decide una persona autorizada.
-- **Variables:** `node scripts/configure-vercel-env.mjs` (por `npx --package=vercel`; los valores salen de `.env.local` por stdin y no se imprimen). Production no tiene `SUPABASE_SERVICE_ROLE_KEY`, así que el alta de cuentas del equipo (`/api/team`) no funciona en el demo publicado.
-- **Probar el demo publicado:** `node scripts/verify-dominio-picnic.mjs` (usa las cuentas demo de `.env.local`; deja un pedido de prueba entregado en Picnic). Pasos a mano en `DIARIO.md`, D-2026-11-27-05.
+- **Vercel (el publicado hoy):** https://onza-demo.vercel.app. Sigue desplegando por su integración con Git: **cada push a `main` despliega a Production**. Sus variables se cambian en el panel de Vercel. No se corta hasta el cambio de dominio.
+- **Cloudflare Workers (nuevo):** Next 16 con [`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare). Dos entornos en `wrangler.jsonc`: `preview` (worker `onza-preview`) y `production` (worker `onza`).
+
+**Antes de integrar a `main` un cambio con migración:** probala en un entorno aislado (la CI levanta un Supabase completo en cada push a `feat/**`), hacé un respaldo, revisá `npx supabase db push --linked --dry-run` y recién ahí aplicala. `main` no debe adelantarse a la base. Aplicar migraciones remotas y cambiar variables lo decide una persona autorizada.
+
+### Workers: comandos
+
+```sh
+npm run cf:build              # empaqueta, revisa secretos y mide el tamaño
+npm run cf:preview            # lo anterior + el Worker en workerd local, en http://127.0.0.1:3000
+npm run cf:deploy:preview     # lo anterior + despliegue a onza-preview (requiere sesión de Cloudflare)
+npm run cf:deploy:production  # idem, worker onza
+```
+
+- **Usá siempre `npm run cf:*`.** `opennextjs-cloudflare build` copia **todos** los valores de `.env*` dentro del Worker, incluida la `service_role`. `scripts/cf-build.mjs` deja solo las `NEXT_PUBLIC_*`, busca los secretos en todo el bundle y, si encuentra uno, borra `.open-next/` y falla.
+- **Tamaño:** el build falla si el Worker comprimido pasa de 3072 KiB, el tope del plan Free. El otro tope de Free (10 ms de CPU por petición) no se puede medir en local: mirá `npx wrangler tail --env preview` en el Worker desplegado. Pasar a un plan pago lo decide el dueño.
+- **Variables:** las `NEXT_PUBLIC_*` se fijan al compilar (salen de `.env.local` o del entorno). Las de servidor no secretas están en `vars` de `wrangler.jsonc`. `APP_ORIGIN` y los secretos se cargan una vez por entorno (abajo).
+- **Vista local:** `cf:preview` **no** lee `.env.local` en el Worker. Creá `.dev.vars.preview` (ignorado por git) con `APP_ORIGIN=http://127.0.0.1:3000`, `PICKUP_TOKEN_ENCRYPTION_KEY`, `PICKUP_TOKEN_KEY_VERSION` y, si usás `/api/team`, `SUPABASE_SERVICE_ROLE_KEY`. Sin `APP_ORIGIN` todos los POST responden 403. Para correr los recorridos sin Supabase real, ver [`docs/Onza-Guia-tecnica.md`](docs/Onza-Guia-tecnica.md#el-mismo-recorrido-sobre-workers).
+- **Proxy:** `src/proxy.ts` corre como middleware de Node, que el adaptador marca como **experimental**. Si una versión lo rompe, la alternativa es renombrarlo a `src/middleware.ts` (runtime edge, en desuso pero soportado en Next 16).
+- **Estáticos:** Cloudflare los sirve sin pasar por Next; sus headers están en `public/_headers`.
+
+### Workers: pasos manuales del dueño
+
+En este orden, una sola vez.
+
+1. **Cuenta de Cloudflare (plan Free)** y `npx wrangler login`.
+2. **Primer despliegue del preview:** `npm run cf:deploy:preview`, con `.env.local` apuntando a `onza-dev`. Anotá la URL `https://onza-preview.<cuenta>.workers.dev`. Hasta el paso 3, entrar funciona pero todos los POST se rechazan (falta `APP_ORIGIN`).
+3. **Secretos del preview:** `node scripts/configure-workers-secrets.mjs --env preview --origin https://onza-preview.<cuenta>.workers.dev`.
+   - `PICKUP_TOKEN_ENCRYPTION_KEY` tiene que ser **la misma que usa Vercel**. Con otra, los tickets abiertos no se pueden leer. Comparala antes de cargarla.
+   - `--service-role` carga además `SUPABASE_SERVICE_ROLE_KEY`. Sin ella no funciona el alta del equipo (`/api/team`). Es la decisión pendiente PEN-014.
+4. **Supabase → Authentication → URL Configuration:** sumá `https://onza-preview.<cuenta>.workers.dev/**` a *Redirect URLs*. No quites las de Vercel. *Site URL* cambia recién con el dominio definitivo.
+5. **PEN-015:** el registro de cuentas nuevas falla hasta apagar «Confirm email» o configurar un SMTP propio.
+6. **Verificar el preview:** `ONZA_APP=https://onza-preview.<cuenta>.workers.dev node scripts/verify-dominio-picnic.mjs` (usa las cuentas demo y deja un pedido entregado en Picnic), `npm run verify:hosted:security` y `node --env-file=.env.local scripts/verify-hosted-realtime.mjs`. Los dos últimos prueban Supabase directamente y escriben datos de prueba en `onza-dev`.
+7. **GitHub (opcional, para desplegar desde Actions):** secrets `CLOUDFLARE_API_TOKEN` (permiso *Workers Scripts: Edit*) y `CLOUDFLARE_ACCOUNT_ID`; variables de repositorio `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` y `CLOUDFLARE_DEPLOY_ENABLED=true`. Con eso, cada push a `main` despliega el preview, y production se lanza a mano desde `main` (*Deploy Workers → Run workflow*).
+8. **Production y dominio (más adelante):** repetí 2 a 4 con `production`; sumá el dominio propio al Worker y el DNS; en Supabase cambiá *Site URL* y *Redirect URLs*; cargá de nuevo `APP_ORIGIN` con el dominio; recién ahí desconectá la integración de Git de Vercel.
+
+- **Probar el demo de Vercel:** `node scripts/verify-dominio-picnic.mjs` (sin `ONZA_APP`). Pasos a mano en `DIARIO.md`, D-2026-11-27-05.
 - **Picnic:** es el bloque «Picnic (demo ficticio)» de `supabase/seed.sql`, con su plano ilustrativo. No son datos reales del local.
