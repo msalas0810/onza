@@ -94,6 +94,17 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 
 ## Entradas
 
+### D-2026-11-27-08 · Secrets de cuentas demo cargados en el Worker de Cloudflare
+
+- **Fecha:** 2026-11-27 (America/Costa_Rica)
+- **Persona:** Manu (pasó las credenciales en el chat y pidió dejar activos los botones demo).
+- **IA:** Claude Code · claude-haiku-5-5
+- **Rama y commits:** `claude/eloquent-hamilton-rw4w0y` · hash en el commit de esta entrada.
+- **Qué cambió:** en el Worker `onza-demo` se cargaron como secrets `DEMO_CUSTOMER_*`, `DEMO_BARTENDER_*`, `DEMO_ADMIN_*` y `PICKUP_TOKEN_ENCRYPTION_KEY` (reemplaza la clave generada en D-2026-11-27-06, así los tickets de retiro de `onza-dev` vuelven a poder abrirse). No se guardaron valores en el repo.
+- **Verificado:** `POST /api/demo-session` con `Origin` del Worker devuelve 200 para cliente, bartender y admin.
+- **No verificado:** el recorrido en el navegador después del login (destino de cada rol); Vercel no tiene estas variables.
+- **Pendientes:** rotar la clave de servicio, la clave de cifrado de retiro y las contraseñas demo, porque aparecieron en el chat. Cambiar `onza123` por contraseñas nuevas.
+
 ### D-2026-11-27-07 · Cuentas demo en la pantalla de acceso
 
 - **Fecha:** 2026-11-27 (America/Costa_Rica)
