@@ -25,6 +25,129 @@ export type Database = {
         };
         Relationships: [];
       };
+      loyalty_campaigns: {
+        Row: {
+          id: string;
+          venue_id: string;
+          name: string;
+          funder: string;
+          sponsor_name: string | null;
+          budget_points: number;
+          active: boolean;
+          starts_at: string;
+          ends_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          venue_id: string;
+          name: string;
+          funder: string;
+          sponsor_name?: string | null;
+          budget_points: number;
+          active?: boolean;
+          starts_at?: string;
+          ends_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          venue_id?: string;
+          name?: string;
+          funder?: string;
+          sponsor_name?: string | null;
+          budget_points?: number;
+          active?: boolean;
+          starts_at?: string;
+          ends_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      loyalty_programs: {
+        Row: {
+          venue_id: string;
+          enabled: boolean;
+          base_percent: string;
+          points_valid_days: number;
+          version: number;
+          updated_at: string;
+        };
+        Insert: {
+          venue_id: string;
+          enabled?: boolean;
+          base_percent?: string;
+          points_valid_days?: number;
+          version?: number;
+          updated_at?: string;
+        };
+        Update: {
+          venue_id?: string;
+          enabled?: boolean;
+          base_percent?: string;
+          points_valid_days?: number;
+          version?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      loyalty_rules: {
+        Row: {
+          id: string;
+          venue_id: string;
+          name: string;
+          kind: string;
+          scope_id: string | null;
+          percent: string;
+          weekdays: string | null;
+          hour_from: number | null;
+          hour_to: number | null;
+          min_amount_minor: number;
+          max_points_per_order: number | null;
+          campaign_id: string | null;
+          valid_from: string | null;
+          valid_until: string | null;
+          active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          venue_id: string;
+          name: string;
+          kind: string;
+          scope_id?: string | null;
+          percent: string;
+          weekdays?: string | null;
+          hour_from?: number | null;
+          hour_to?: number | null;
+          min_amount_minor?: number;
+          max_points_per_order?: number | null;
+          campaign_id?: string | null;
+          valid_from?: string | null;
+          valid_until?: string | null;
+          active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          venue_id?: string;
+          name?: string;
+          kind?: string;
+          scope_id?: string | null;
+          percent?: string;
+          weekdays?: string | null;
+          hour_from?: number | null;
+          hour_to?: number | null;
+          min_amount_minor?: number;
+          max_points_per_order?: number | null;
+          campaign_id?: string | null;
+          valid_from?: string | null;
+          valid_until?: string | null;
+          active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       memberships: {
         Row: { user_id: string; venue_id: string; role: string };
         Insert: { user_id: string; venue_id: string; role: string };
@@ -239,6 +362,7 @@ export type Database = {
           onboarded_at?: string;
           updated_at?: string;
           avatar_path?: string | null;
+          favorite_drink?: string | null;
         };
         Update: {
           user_id?: string;
@@ -257,6 +381,7 @@ export type Database = {
           onboarded_at?: string;
           updated_at?: string;
           avatar_path?: string | null;
+          favorite_drink?: string | null;
         };
         Relationships: [];
       };
@@ -414,10 +539,6 @@ export type Database = {
         Returns: undefined;
       };
       update_profile_avatar: { Args: { path: string | null }; Returns: Json };
-      update_profile_details: {
-        Args: { full_name: string; username: string; favorite_drink?: string | null };
-        Returns: Json;
-      };
       venue_summary_range: {
         Args: { venue: string; from_day: string; to_day: string };
         Returns: Json;
@@ -433,6 +554,20 @@ export type Database = {
         Returns: Json;
       };
       auto_accept_tick: { Args: Record<never, never>; Returns: number };
+      update_profile_details: {
+        Args: {
+          full_name: string;
+          username: string;
+          favorite_drink?: string | null;
+        };
+        Returns: Json;
+      };
+      loyalty_config: { Args: { venue: string }; Returns: Json };
+      loyalty_program_save: { Args: { input: Json }; Returns: Json };
+      loyalty_rule_save: { Args: { input: Json }; Returns: Json };
+      loyalty_campaign_save: { Args: { input: Json }; Returns: Json };
+      loyalty_summary: { Args: { venue: string }; Returns: Json };
+      loyalty_account: { Args: Record<never, never>; Returns: Json };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

@@ -32,6 +32,7 @@ const MIGRATIONS = [
   "202611210022_revoke_public_table_writes.sql",
   "202611210023_scale_fixes.sql",
   "202611210024_resolve_rate_limit.sql",
+  "202611270025_loyalty_foundation.sql",
 ];
 const TABLES = new Set([
   "venues",

@@ -45,7 +45,7 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Revisar `audit/seguridad-escala` (ver `docs/Onza-Auditoria-seguridad-y-escala.md`, §10). Después, en un proyecto Supabase **aislado**: `db push --dry-run` (013–024), aplicar, y probar sesiones/Storage/Realtime reales. Antes: aplicar las migraciones 013–020 en un proyecto de prueba (el dry-run contra `onza-dev` listó exactamente esas ocho; no se aplicó nada). Próxima prueba en Safari de iPad y iPhone físicos. |
+| Siguiente tarea exacta | Fidelización: revisar la etapa 1 (`docs/loyalty.md`, migración 025, sin aplicar). El canje en checkout (etapa 2) solo con autorización explícita, porque toca `onza_command`. Antes de cualquier cambio remoto: aplicar 025 en un proyecto aislado. Después, lo que sigue. Pendiente general: revisar `audit/seguridad-escala` (ver `docs/Onza-Auditoria-seguridad-y-escala.md`, §10). Después, en un proyecto Supabase **aislado**: `db push --dry-run` (013–024), aplicar, y probar sesiones/Storage/Realtime reales. Antes: aplicar las migraciones 013–020 en un proyecto de prueba (el dry-run contra `onza-dev` listó exactamente esas ocho; no se aplicó nada). Próxima prueba en Safari de iPad y iPhone físicos. |
 
 ### Pendientes abiertos
 
@@ -61,6 +61,11 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-007 | Corregido el registro: las migraciones 005–007 ya estaban aplicadas al iniciar esta sesión; 12 productos tenían imagen. Se aplicaron únicamente las nuevas 008/009. No se inventaron portadas ni coordenadas. | 2026-11-16 |
 | PEN-009 | Auditoría 2026-11-21: la CI ya prueba login y Realtime reales (2026-11-23); sigue sin probarse contra Supabase real: Storage, cookies/refresh, expiración, revocación y cierre por dispositivo. Pasos exactos en `docs/Onza-Auditoria-seguridad-y-escala.md` §10 | 2026-11-21 |
 | PEN-010 | Confirmar el límite de 60 validaciones de retiro por minuto (migración 024) y aplicar 021–024 en un proyecto aislado | 2026-11-21 |
+| FID-001 | Canje de puntos en el checkout (monto autorizado y capturado = total menos canje). Cambia `onza_command`; requiere autorización explícita y pruebas de concurrencia. Ver `docs/loyalty.md`. | 2026-11-27 |
+| FID-002 | Interfaz de fidelización: panel del local (configuración, campañas, resumen) y saldo/historial del cliente. Hoy solo hay base de datos y servicios. | 2026-11-27 |
+| FID-003 | Programador de vencimientos de puntos (hoy vencen al leer la cuenta). Falta el barrido por local. | 2026-11-27 |
+| FID-004 | Pedido capturado que nunca llega a entregado ni a reembolso: conserva sus puntos. Definir la regla junto con `uncollected`. | 2026-11-27 |
+| FID-005 | Decisión de producto: el blueprint lista «fidelidad» como fuera del MVP. Falta que el dueño lo registre en su sección 0. | 2026-11-27 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -91,6 +96,36 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-27-01 · Fidelización etapa 1: libro de puntos y cashback configurable por local
+
+- **Fecha y hora:** 2026-11-27 (hora no confirmada en America/Costa_Rica)
+- **Persona:** usuario de la sesión (encargo: sistema de fidelización configurable por local, con puntos y cashback).
+- **IA:** Claude Code (identificador de modelo no se registra en el repo por política de la sesión)
+- **Rama y commits:** `claude/kind-cannon-4gv720` sobre `e415735`. El commit que contiene esta entrada: ver `git log`.
+- **Qué cambió:** base de datos para fidelización, sin interfaz ni canje todavía. Cada local define porcentaje base y reglas por todo el local, categoría o producto, con días, franja horaria (hora de Costa Rica), importe mínimo, tope por pedido y vigencia. Campañas con presupuesto y fondeador (local, patrocinador u Onza). Los puntos se abonan al confirmarse el cobro y se revierten con el reembolso. Vencen según el programa. Solo cuentas con perfil completo. Historial de configuración con actor. Ledger append-only.
+- **Archivos clave:** `supabase/migrations/202611270025_loyalty_foundation.sql` (aditiva, sin aplicar), `tests/db/loyalty.test.ts`, `tests/loyalty/types.test.ts`, `src/features/loyalty/{types.ts,server/loyalty-service.ts}`, `docs/loyalty.md`. Se registró la migración en `tests/db/helpers.ts`, `scripts/local-shim/index.mjs` y `scripts/generate-db-types.mjs`. `src/lib/supabase/database.generated.ts` se regeneró de forma aditiva.
+- **Verificado:**
+  - `npm ci` (lockfile) y `npx tsc --noEmit` sin errores.
+  - `npx eslint` de los archivos tocados sin errores. Lint completo del repo (`npm run lint`) sin errores.
+  - Suite completa `npx vitest run`: 46 archivos y 213 pruebas en verde (antes 195; +18 nuevas). Esa corrida fue antes del formateo final de los archivos nuevos.
+  - Tras el formateo: `tests/db/loyalty.test.ts` 13/13, `tests/loyalty/types.test.ts` 5/5 y `tests/db/accounts.test.ts` 6/6, en verde.
+  - `npx next build` terminó con código 0.
+  - Dos fallos de los esquemas zod, detectados en la primera corrida, corregidos: la franja horaria vacía se rechazaba por error de lógica.
+  - Corregido el generador de tipos: `update_profile_details` faltaba en su lista fija de funciones y se perdía al regenerar. Se agregó junto con los RPC nuevos.
+- **No verificado:**
+  - La migración no se aplicó a `onza-dev` ni a ningún proyecto de Supabase. Por eso no hay evidencia de RLS, de permisos reales ni de los RPC con Auth real.
+  - Concurrencia real (dos cobros simultáneos sobre el mismo presupuesto). Las pruebas son secuenciales sobre PGlite.
+  - Interfaz, canje en el checkout, programador de vencimientos y Playwright (no hubo cambios de pantalla).
+  - Pedido capturado sin entregar ni reembolsar (FID-004).
+- **Decisiones:**
+  - Lógica en SQL, dentro de la misma transacción que el cambio a `captured`. No se tocó `onza_command` ni los montos cobrados (R4).
+  - Si varias reglas coinciden con una línea, gana la de mayor porcentaje (no se suman). Una regla al 0 % excluye.
+  - Los puntos se calculan sobre el importe en efectivo, para que el canje futuro no genere recompensas sobre lo pagado con puntos.
+  - Presupuesto con criterio conservador: los vencimientos no lo liberan y un cambio de fondeador tras emitir queda bloqueado.
+  - Sin comisiones de Pedidos: el libro no tiene asientos de comisión.
+  - Alternativas descartadas: calcular en TypeScript después del cobro (ventanas de inconsistencia), y sumar reglas (abuso por solapamiento).
+- **Pendientes / siguiente paso:** FID-001 a FID-005 en "Pendientes abiertos". Detalle en `docs/loyalty.md`. Primero aplicar 025 en un proyecto aislado (`db push --dry-run`).
 
 ### D-2026-11-23-01 · Consolidar Onza en `main` y preparar el repo público
 
