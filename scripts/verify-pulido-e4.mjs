@@ -27,18 +27,19 @@ const noHorizontal = () => page.evaluate(() => document.documentElement.scrollWi
 try {
   await page.goto(`${APP}/equipo/acceso`);
   await page.waitForURL(/\/equipo\/locales/);
-  await page.getByRole("link", { name: "Administrar" }).click();
+  await page.goto(`${APP}/admin/${mil}`); // Ana administra Mil948 y Picnic (025): hay dos «Administrar»
   await page.waitForURL(/\/admin\//);
   const tabs = page.locator("nav.admin-tabs");
   await tabs.locator("a").first().waitFor();
   const labels = await tabs.locator("a").allTextContents();
-  check("Seis secciones en la fila de tabs", ["Resumen", "Pedidos", "Menú", "Disponibilidad", "Negocio", "Equipo"].every((l) => labels.some((t) => t.includes(l))), labels.join(" | "));
+  check("Las secciones del admin están en la fila de tabs (por momento de la noche, D-2026-11-27-01)", ["Ahora", "Pedidos", "Menú y precios", "Capacidad", "Entrega y QR", "Perfil y horario", "Equipo", "Resumen y CSV"].every((l) => labels.some((t) => t.includes(l))), labels.join(" | "));
   const row = await tabs.evaluate((el) => ({ scroll: el.scrollWidth > el.clientWidth, overflow: getComputedStyle(el).overflowX, sticky: getComputedStyle(el).position }));
   check("La fila de tabs desliza sola y queda fija arriba", row.scroll && row.overflow === "auto" && row.sticky === "sticky", JSON.stringify(row));
-  check("La página no se desplaza en horizontal (Resumen)", await noHorizontal());
-  for (const name of ["Equipo", "Negocio", "Disponibilidad", "Menú", "Pedidos", "Resumen"]) {
+  check("La página no se desplaza en horizontal (Ahora)", await noHorizontal());
+  const ids = { Equipo: "equipo", "Perfil y horario": "negocio", Capacidad: "disponibilidad", "Menú y precios": "menu", Pedidos: "pedidos", "Resumen y CSV": "resumen", Ahora: "ahora" };
+  for (const name of Object.keys(ids)) {
     await tabs.getByRole("link", { name }).click();
-    await page.waitForURL(new RegExp(`tab=${{ Equipo: "equipo", Negocio: "negocio", Disponibilidad: "disponibilidad", Menú: "menu", Pedidos: "pedidos", Resumen: "resumen" }[name]}`));
+    await page.waitForURL(new RegExp(`tab=${ids[name]}`));
     const active = tabs.locator('[aria-current="page"]');
     const inView = await active.evaluate((el) => {
       const a = el.getBoundingClientRect();
@@ -93,6 +94,17 @@ try {
   await price.waitFor();
   check("Editar producto a 360 px sin desborde", await noHorizontal());
   await shot("e4-editar-360");
+  // Guardar un precio nuevo y verlo del lado del cliente (persistencia real en la base del shim).
+  await price.fill("5400");
+  await page.getByRole("button", { name: "Guardar producto" }).click();
+  await page.getByRole("dialog").waitFor({ state: "hidden", timeout: 10000 }).catch(() => undefined);
+  const customer = await browser.newContext({ viewport: { width: 390, height: 844 } });
+  await customer.addCookies(await sessionCookies(SHIM, people.maria.email));
+  const menu = await customer.newPage();
+  await menu.goto(`${APP}/v/mil948`);
+  const menuRow = (await menu.locator("article.prow", { hasText: "Gin tonic" }).innerText()).replace(/\s+/g, " ");
+  check("El precio editado en el admin persiste y el cliente lo ve en el menú", /5[\s\u00a0.]?400/.test(menuRow), menuRow);
+  await customer.close();
 
   // Negocio.
   await page.goto(`${APP}/admin/${mil}?tab=negocio`);
