@@ -1,12 +1,11 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Button, StatusBadge } from "@/components/ui/primitives";
+import { Button, Checklist, StatusBadge, type ChecklistItem } from "@/components/ui/primitives";
 import type { Venue } from "@/features/catalog/server/queries";
 import type { Order } from "@/features/orders/types";
+import { minutesSince, PREP_WARNING_MIN, slowPreparation } from "../attention";
 
-const minutesSince = (iso: string, now: number) =>
-  Math.max(0, Math.floor((now - Date.parse(iso)) / 60000));
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
 type Row = {
@@ -26,6 +25,7 @@ export function NowPanel({
   orders,
   soldOut,
   capacity,
+  checklist,
   onResume,
 }: {
   venue: Venue;
@@ -33,6 +33,8 @@ export function NowPanel({
   soldOut: number;
   /** Pedidos activos que admite el local a la vez (Capacidad). */
   capacity: number;
+  /** Lo que conviene revisar antes de abrir; se muestra mientras el local está cerrado. */
+  checklist: ChecklistItem[];
   onResume: () => Promise<boolean>;
 }) {
   const [now, setNow] = useState(() => Date.now());
@@ -73,6 +75,15 @@ export function NowPanel({
       tone: waitReady >= 10 ? "danger" : "warning",
       text: `${plural(ready.length, "pedido listo sin entregar", "pedidos listos sin entregar")}`,
       detail: `${toBring.length ? `${plural(toBring.length, "para llevar al lugar", "para llevar al lugar")} · ` : ""}el más viejo está listo hace ${waitReady} min.`,
+      action: { label: "Ir a la barra", href: `/staff/${venue.id}` },
+    });
+  const slow = slowPreparation(orders, now);
+  if (slow)
+    rows.push({
+      key: "slow",
+      tone: slow.tone,
+      text: `${plural(slow.count, "pedido lleva", "pedidos llevan")} más de ${PREP_WARNING_MIN} min en preparación`,
+      detail: `El más atrasado, ${slow.worst} min. Si no da abasto, pausá los pedidos acá abajo.`,
       action: { label: "Ir a la barra", href: `/staff/${venue.id}` },
     });
   if (incidents.length)
@@ -140,6 +151,12 @@ export function NowPanel({
           >
             {venue.open_state !== "open" ? "Abrir el local" : "Reanudar pedidos"}
           </Button>
+        </div>
+      )}
+      {venue.open_state !== "open" && checklist.length > 0 && (
+        <div className="open-checklist" aria-labelledby="checklist-title">
+          <h3 id="checklist-title">Antes de abrir</h3>
+          <Checklist items={checklist} />
         </div>
       )}
       {rows.length ? (

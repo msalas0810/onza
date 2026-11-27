@@ -151,7 +151,12 @@ export function AdminSummary({
               <span className="hint">de {summary.orders} pedidos</span>
             </div>
             <div className="metric">
-              <span className="muted t-label">Ventas netas</span>
+              <span className="muted t-label">No entregados</span>
+              <span className="v">{summary.canceled_orders}</span>
+              <span className="hint">cancelados, vencidos o sin retirar</span>
+            </div>
+            <div className="metric">
+              <span className="muted t-label">Ventas netas (simuladas)</span>
               <span className="v">
                 <Price amount={summary.net_minor} />
               </span>
@@ -163,14 +168,11 @@ export function AdminSummary({
               <span className="muted t-label">Preparación (mediana)</span>
               <span className="v">{minutes(summary.median_preparation_seconds)}</span>
               <span className="hint">
-                N = {summary.preparation_n}
-                {summary.p90_preparation_seconds !== null && ` · p90 ${minutes(summary.p90_preparation_seconds)}`}
+                {summary.median_wait_seconds !== null
+                  ? `Aceptación ${minutes(summary.median_wait_seconds)}`
+                  : "Sin aceptaciones"}
+                {summary.p90_preparation_seconds !== null && `, p90 ${minutes(summary.p90_preparation_seconds)}`}
               </span>
-            </div>
-            <div className="metric">
-              <span className="muted t-label">Pedidos activos</span>
-              <span className="v">{summary.active_orders}</span>
-              <span className="hint">ahora</span>
             </div>
           </div>
           <div className="block-card reserve-card">
@@ -195,11 +197,6 @@ export function AdminSummary({
                 onChange={setMetric}
               />
             </div>
-            {summary.median_wait_seconds !== null && (
-              <p className="muted t-label">
-                Espera hasta aceptar (mediana): {minutes(summary.median_wait_seconds)} · N = {summary.wait_n}
-              </p>
-            )}
             <SummaryChart summary={summary} metric={metric} />
           </div>
           <button

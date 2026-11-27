@@ -2,10 +2,11 @@
 import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Check, Circle, Copy, Printer, QrCode } from "lucide-react";
+import { Copy, Printer, QrCode } from "lucide-react";
 import type { Venue } from "@/features/catalog/server/queries";
 import {
   Button,
+  Checklist,
   Notice,
   SegmentedControl,
   StatusBadge,
@@ -115,8 +116,8 @@ export function DeliveryAdmin({ venue, spots, map, availableProducts }: Props) {
             {open && ready && availableProducts > 0 ? "Todo listo" : "Falta algo"}
           </StatusBadge>
         </div>
-        <ul className="checklist">
-          {[
+        <Checklist
+          items={[
             {
               done: ready,
               text: "La entrega en el lugar está activa y hay un mapa o lugares habilitados",
@@ -134,15 +135,8 @@ export function DeliveryAdmin({ venue, spots, map, availableProducts }: Props) {
               href: `/admin/${venue.id}?tab=ahora`,
               fix: "Cambiá el estado",
             },
-          ].map((item) => (
-            <li key={item.text} data-done={item.done || undefined}>
-              {item.done ? <Check size={18} aria-hidden="true" /> : <Circle size={18} aria-hidden="true" />}
-              <span className="grow">{item.text}</span>
-              {!item.done && item.href && <Link href={item.href}>{item.fix}</Link>}
-              {!item.done && !item.href && <span className="muted t-label">{item.fix}</span>}
-            </li>
-          ))}
-        </ul>
+          ]}
+        />
       </section>
 
       <section className="block-card" aria-labelledby="delivery-how">

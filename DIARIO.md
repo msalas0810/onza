@@ -95,6 +95,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 
 > Más recientes arriba.
 
+### D-2026-11-27-03 · Administración: «Antes de abrir», retrasos en preparación y un cierre que se lee solo
+
+- **Fecha y hora:** 2026-11-27 01:50–02:20 (America/Costa_Rica)
+- **Persona:** Manu (encargo «Continuá… después seguí con el admin»).
+- **IA:** Claude Code · claude-opus-5-5
+- **Rama y commits:** `feat/noche-picnic-social` · commit de este bloque (ver `git log`), sobre `3c2e982`.
+- **Research:** la búsqueda web **volvió a funcionar** en esta parte. Listas de apertura y cierre de bar ([Toast](https://pos.toasttab.com/blog/on-the-line/bar-opening-and-closing-checklists), [Clover](https://blog.clover.com/free-bar-opening-and-closing-checklists), [WebstaurantStore](https://www.webstaurantstore.com/article/131/bar-closing-checklist.html)): antes de abrir se revisa el stock y lo que falta, y al cerrar se cuadra y se registran diferencias. Temporizadores de cocina ([Shift4 SkyTab](https://shift4.zendesk.com/hc/en-us/articles/4940115080083), [MenuTiger](https://menutiger.helpscoutdocs.com/article/383-how-do-i-change-the-appearance-and-preparation-times-for-my-kitchen-display-system-kds), [GoTab](https://docs.gotab.io/operator/kds-printers-additional-display-setup/kds-ticket-timer/), [Toast KDS](https://doc.toasttab.com/doc/platformguide/platformKDSOverview.html)): dos umbrales, aviso y alerta, en minutos y configurables; no hay un valor estándar.
+- **Qué cambió:** «Ahora» suma (1) **«Antes de abrir»** mientras el local está cerrado: productos disponibles, agotados, horario, entrega en el lugar si aplica y capacidad, cada uno con su atajo, más «Abrir el local»; (2) **retraso en preparación**: aviso desde 10 min y alerta desde 15 (fijos por ahora, marcado como `shortcut` en `src/features/admin/attention.ts`). «Al cerrar» muestra **No entregados** (cancelados, vencidos o sin retirar), **Ventas netas (simuladas)** y la mediana de aceptación junto a la de preparación; «Pedidos activos» salió de ahí porque vive en «Ahora». La lista de Entrega y la de «Antes de abrir» usan un solo componente `Checklist` (`primitives.tsx`). Arreglado: las horas del gráfico se veían corridas y desvanecidas porque heredaban la animación global `.tick` del carrito (ahora `.chart-tick`).
+- **Archivos clave:** `src/features/admin/{attention.ts,components/now-panel.tsx,components/admin-panel.tsx}`, `src/features/analytics/components/{admin-summary,summary-chart}.tsx`, `src/components/ui/primitives.tsx`, `scripts/verify-admin-noche.mjs`, `tests/admin/attention.test.ts`.
+- **Verificado:** `npm run check` en verde (52 archivos / 257 pruebas; nuevas: umbrales de retraso; build). Instancia separada (:54322/:3200, shim recién iniciado): `verify-admin-noche` **17/17**. Cubre: entrada en «Ahora» y navegación agrupada; cerrar → «Antes de abrir» → abrir; pedido nuevo y en preparación en el pulso; pausar y reanudar; teléfono sin desplazamiento horizontal y pestañas bajo la cabecera; precio editado que el cliente ve; agotar en Menú y reactivar desde «Ahora»; pedido cancelado que cuenta en «No entregados»; montos rotulados como simulados. Detector de Impeccable sin hallazgos. Capturas en `docs/evidence/noche/admin/`.
+- **No verificado:** el aviso de retraso en navegador (el shim no adelanta el reloj; está cubierto por la prueba unitaria). `verify-pulido-e4` completo (necesita `verify-pulido-all`, que reinicia el shim de :54321, que no es de esta sesión). Realtime real.
+- **Pendientes / siguiente paso:** umbrales de retraso por local si un dueño los pide; bloque de actividad y amigos.
+
 ### D-2026-11-27-02 · Picnic y barra: el punto marcado se nombra bien y el seguimiento muestra las mesas
 
 - **Fecha y hora:** 2026-11-27 01:30–01:50 (America/Costa_Rica)

@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { OnzaLogo } from "./brand";
 import type React from "react";
 import type {
@@ -8,6 +9,8 @@ import type {
 } from "react";
 import {
   AlertCircle,
+  Check,
+  Circle,
   Minus,
   Plus,
   Trash2,
@@ -356,4 +359,27 @@ export function SegmentedControl<T extends string>({
 /** Marca compacta de cabecera (cliente, equipo y administración): el mismo lockup del acceso. */
 export function BrandMark() {
   return <OnzaLogo size="header" />;
+}
+
+export type ChecklistItem = {
+  done: boolean;
+  text: string;
+  /** Qué hacer si falta (texto del enlace, o una indicación si no hay enlace). */
+  fix?: string;
+  href?: string;
+};
+/** Lista de verificación «listo / falta» con el atajo para resolver lo que falta (Entrega y «Antes de abrir»). */
+export function Checklist({ items }: { items: readonly ChecklistItem[] }) {
+  return (
+    <ul className="checklist">
+      {items.map((item) => (
+        <li key={item.text} data-done={item.done || undefined}>
+          {item.done ? <Check size={18} aria-hidden="true" /> : <Circle size={18} aria-hidden="true" />}
+          <span className="grow">{item.text}</span>
+          {!item.done && item.href && <Link href={item.href}>{item.fix ?? "Revisar"}</Link>}
+          {!item.done && !item.href && item.fix && <span className="muted t-label">{item.fix}</span>}
+        </li>
+      ))}
+    </ul>
+  );
 }

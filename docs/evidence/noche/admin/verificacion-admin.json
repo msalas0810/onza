@@ -1,0 +1,92 @@
+{
+  "generado": "2026-11-27T07:43:02.002Z",
+  "total": 17,
+  "fallos": 0,
+  "resultados": [
+    {
+      "name": "La administración abre en «Ahora»",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "«Ahora» muestra nuevos, preparando, listos y activos frente a la capacidad",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "La navegación está agrupada por momento de la noche",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Con el local cerrado, «Antes de abrir» revisa menú, agotados, horario, entrega y capacidad",
+      "ok": true,
+      "detail": "Antes de abrir 5 productos disponibles en el menú Sin productos agotados Horario: Consultar al local Entrega en el lugar con mapa o lugares habilitados Capacida"
+    },
+    {
+      "name": "Se abre el local desde «Ahora» y la lista desaparece",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Un pedido nuevo aparece en el pulso y como atención con atajo a la barra",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Al aceptarlo en la barra, «Ahora» lo cuenta en preparación",
+      "ok": true,
+      "detail": "{\"Nuevos\":\"0\",\"Preparando\":\"1\",\"Listos\":\"0\",\"Activos\":\"1 de 30\"}"
+    },
+    {
+      "name": "Pausar muestra «Pedidos pausados» y el botón para reanudar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Reanudar en un toque",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "En el teléfono no hay desplazamiento horizontal y las pestañas quedan bajo la cabecera",
+      "ok": true,
+      "detail": "{\"overflow\":false,\"tabsTop\":\"64px\"}"
+    },
+    {
+      "name": "Editar un precio persiste y el cliente lo ve",
+      "ok": true,
+      "detail": "Gin tonicGin y agua tónica.₡5 400Agregar"
+    },
+    {
+      "name": "Lo agotado en Menú aparece en «Ahora» y en la atención",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Se reactiva desde «Ahora»",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "«Al cerrar» muestra entregados, no entregados, ventas netas simuladas y preparación con aceptación",
+      "ok": true,
+      "detail": "Entregados 0 de 2 pedidos No entregados 1 cancelados, vencidos o sin retirar Ventas netas (simuladas) ₡0 Devuelto ₡0 Preparación (mediana) — Aceptación <1 min"
+    },
+    {
+      "name": "El pedido cancelado cuenta como no entregado",
+      "ok": true,
+      "detail": "1"
+    },
+    {
+      "name": "Los montos se rotulan como simulados",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sin errores de página",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}

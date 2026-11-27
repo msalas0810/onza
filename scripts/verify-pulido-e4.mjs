@@ -64,7 +64,7 @@ try {
   await page.goto(`${APP}/admin/${mil}?tab=resumen`);
   await page.locator(".kpis").waitFor();
   const kpis = await page.locator(".kpis .metric").allInnerTexts();
-  check("KPIs: entregados, ventas netas, preparación y pedidos activos", ["Entregados", "Ventas netas", "Preparación", "Pedidos activos"].every((k) => kpis.some((t) => t.includes(k))));
+  check("KPIs de cierre: entregados, no entregados, ventas netas simuladas y preparación con aceptación", ["Entregados", "No entregados", "Ventas netas (simuladas)", "Preparación"].every((k) => kpis.some((t) => t.includes(k))));
   check("Reservas en una tarjeta aparte, como saldo actual", (await page.locator(".reserve-card").innerText()).includes("actual"));
   const delivered = Number((await page.locator(".kpis .metric").first().locator(".v").innerText()).trim());
   check("El resumen de esta noche refleja los pedidos entregados en la prueba de barra", delivered >= 1, String(delivered));

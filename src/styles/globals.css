@@ -3076,7 +3076,7 @@ button.link-button {
   stroke: var(--onza-focus);
   stroke-width: 2;
 }
-.summary-chart .tick,
+.summary-chart .chart-tick,
 .summary-chart .peak {
   font-size: 11px;
   fill: var(--onza-text-muted);
@@ -3957,4 +3957,13 @@ button.link-button {
   display: inline-flex;
   align-items: center;
   gap: var(--onza-space-4);
+}
+
+/* «Antes de abrir» dentro de «Ahora», mientras el local está cerrado. */
+.open-checklist {
+  display: grid;
+  gap: var(--onza-space-8);
+  margin-top: var(--onza-space-16);
+  padding-top: var(--onza-space-16);
+  border-top: 1px solid var(--onza-border);
 }

@@ -88,7 +88,7 @@ export function SummaryChart({ summary, metric }: { summary: RangeSummary; metri
               <rect className="hit" x={PAD.left + i * slot} y={PAD.top} width={slot} height={innerH} />
               <path className={`bar ${active === i ? "on" : ""}`} d={bar(i, r.value)} />
               {i % every === 0 && (
-                <text className="tick" x={PAD.left + i * slot + slot / 2} y={H - 8} textAnchor="middle">
+                <text className="chart-tick" x={PAD.left + i * slot + slot / 2} y={H - 8} textAnchor="middle">
                   {r.label}
                 </text>
               )}

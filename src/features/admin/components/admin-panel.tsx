@@ -26,6 +26,7 @@ import {
   StatusBadge,
   TextField,
   Toggle,
+  type ChecklistItem,
 } from "@/components/ui/primitives";
 import { Sheet } from "@/components/ui/sheet";
 import { ProductEditor } from "./product-editor";
@@ -263,6 +264,40 @@ export function AdminPanel({
     }))
     .filter((g) => g.list.length);
   const soldOut = catalog.filter((p) => !p.archived && !shownAvailable(p));
+  const available = catalog.filter((p) => !p.archived && shownAvailable(p)).length;
+  const tabHref = (id: AdminTab) => `/admin/${venue.id}?tab=${id}`;
+  // «Antes de abrir»: lo que un gerente revisa antes de recibir pedidos, con el atajo a la sección que lo resuelve.
+  const openChecklist: ChecklistItem[] = [
+    {
+      done: available > 0,
+      text: `${available} ${available === 1 ? "producto disponible" : "productos disponibles"} en el menú`,
+      href: tabHref("menu"),
+      fix: "Revisar el menú",
+    },
+    {
+      done: soldOut.length === 0,
+      text: soldOut.length ? `${soldOut.length} agotados (se ven como agotados)` : "Sin productos agotados",
+      href: "#agotados",
+      fix: "Ver agotados",
+    },
+    {
+      done: !!venue.hours?.trim(),
+      text: venue.hours?.trim() ? `Horario: ${venue.hours}` : "Falta el horario",
+      href: tabHref("negocio"),
+      fix: "Cargar horario",
+    },
+    ...(venue.delivery_mode !== "bar"
+      ? [
+          {
+            done: !!map || spots.some((spot) => spot.enabled),
+            text: "Entrega en el lugar con mapa o lugares habilitados",
+            href: tabHref("entrega"),
+            fix: "Configurar entrega",
+          },
+        ]
+      : []),
+    { done: true, text: `Capacidad: ${venue.capacity} pedidos activos a la vez`, href: tabHref("disponibilidad") },
+  ];
   return (
     <>
       <div className="row between wrap" style={{ marginBottom: 16 }}>
@@ -299,6 +334,7 @@ export function AdminPanel({
                 orders={orders}
                 soldOut={soldOut.length}
                 capacity={venue.capacity}
+                checklist={openChecklist}
                 onResume={() =>
                   run(
                     { action: "venue_update", venueId: venue.id, openState: "open", paused: false },
