@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `main` es la única versión oficial (consolidada el 2026-11-27, D-2026-11-27-05). Se trabaja con ramas `feat/*` o `fix/*` y PR |
+| Rama vigente de trabajo | `feat/workers` (Fase 1 del plan `docs/plan-workers-avatars-noche.md`, con PR hacia `main`, sin integrar). `main` sigue siendo la única versión oficial. Se trabaja con ramas `feat/*` o `fix/*` y PR |
 | `main` | Versión oficial. **Cada push a `main` despliega a Production** en Vercel. Código de la app vigente: `8fbe29a` |
 | Commit desplegado en Vercel | La punta de `main`. El primer deployment de Production fue `dpl_8DNAyssP9ShpdqoApx4aeE683Vkh`, desde `238aa87` |
 | Demo desplegada | https://onza-demo.vercel.app (dominio de Production del proyecto `onza-demo`; ya no está atado a la rama `fix/hosted-integration`) |
 | Backend | Supabase alojado `onza-dev` con las migraciones 001–027 aplicadas, `accounts_required=true`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | **Desbloquear el registro (PEN-015):** hoy sigue fallando hasta que una persona desactive «Confirm email» o se configure un SMTP propio. Después, los pendientes de lanzamiento (PEN-016). |
+| Siguiente tarea exacta | **Manu:** pasos manuales de Cloudflare (README → «Workers: pasos manuales del dueño») y verificar el Worker de preview (PEN-017). **La Fase 2 del plan no empieza sin su aviso.** Sigue pendiente desbloquear el registro (PEN-015). |
 
 ### Pendientes abiertos
 
@@ -67,6 +67,9 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-014 | Production no tiene `SUPABASE_SERVICE_ROLE_KEY` (el Preview anterior tampoco): el alta de cuentas del equipo (`/api/team`) no funciona en el demo publicado. Decidir si se carga | 2026-11-27 |
 | PEN-015 | Registro con correo: el alta exige confirmación y el correo integrado de Supabase está en su límite (429 `over_email_send_rate_limit`). Salida inmediata: Dashboard → Authentication → Sign In / Providers → Email → apagar «Confirm email». Salida de lanzamiento: SMTP propio con dominio verificado y volver a encenderlo (la recuperación de contraseña también lo necesita) | 2026-11-27 |
 | PEN-016 | Antes de lanzar: acuerdo, menú y precios reales por local (Picnic sigue con menú, mesas y plano inventados); textos legales revisados; rotar o borrar las cuentas `DEMO_*` y los pedidos de prueba; proyecto de producción separado de `onza-dev`; definir cómo se cobra (Onza no cobra) | 2026-11-27 |
+| PEN-017 | Cloudflare Workers: sin desplegar. Falta cuenta y token, secretos, URLs de Auth, medir el CPU por petición con `wrangler tail` (tope Free: 10 ms) y correr los verificadores contra el preview. Si Free no alcanza, decide Manu | 2026-11-27 |
+| PEN-018 | Cuatro contraseñas `DEMO_*` de `.env.local` tienen 7 caracteres; `.env.example` pide 12 o más. Rotarlas junto con PEN-016 | 2026-11-27 |
+| PEN-019 | `scripts/verify-local-flow.mjs` está desactualizado (falla 2 controles igual en Node y en Workers). `/actividad?ejemplo=1` y `activity-fixtures.ts`, citados en README y `docs/Onza-Noche-decisiones.md`, no existen en el código. Va en la Fase 2 | 2026-11-27 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -95,6 +98,23 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ---
 
 ## Entradas
+
+### D-2026-11-27-07 · Fase 1: Onza compila y corre en Cloudflare Workers (sin desplegar)
+
+- **Fecha y hora:** 2026-11-27 15:21 (America/Costa_Rica)
+- **Persona:** Manu (encargo: plan de Workers, limpieza, personaje y noche social; aprobó el plan con ajustes y pidió ejecutar solo la Fase 1).
+- **IA:** Claude Code · plan con claude-opus-5-5, ejecución con claude-sonnet-5-5
+- **Rama y commits:** `feat/workers` · `82d01cc` (plan), `2ad5127`, `573bdf9`, `b5e5cb9`, `3445281`; esta entrada va en el commit siguiente. `main` no se tocó.
+- **Qué cambió:** la app se empaqueta con `@opennextjs/cloudflare` 1.20.19 y `wrangler` 4.169.0, con entornos `preview` y `production` (`npm run cf:*`). El origen permitido sale solo de `APP_ORIGIN`, el ID de correlación usa `cf-ray`, la CSP ya no abre la barra del Preview de Vercel y se borraron `vercel.json`, `configure-vercel-env.mjs` y `verify-vercel-demo.mjs`. Vercel sigue desplegando por su integración con Git. Sin cambios de base de datos ni migraciones (R4: no aplica).
+- **Hallazgo de seguridad:** `opennextjs-cloudflare build` copia **todos** los valores de `.env*` a `.open-next/cloudflare/next-env.mjs`, que viaja dentro del Worker. En la primera compilación local quedaron ahí las variables de `.env.local`, incluida la `service_role`. **No se desplegó ni se subió nada.** Ahora `scripts/cf-build.mjs` deja solo las `NEXT_PUBLIC_*`, busca los secretos en todo el bundle y borra la salida ante cualquier fallo; `scripts/cf-guard.mjs` hace que `wrangler` rechace un bundle armado a mano (comprobado).
+- **`proxy.ts`:** se queda como está. El adaptador lo soporta como middleware de Node, marcado **experimental**; funcionó en workerd local. Plan B, no aplicado: `src/middleware.ts` en edge.
+- **Node en Workers:** el ticket de retiro (`node:crypto`, AES-256-GCM) y el QR de servidor (`qrcode.toDataURL`) funcionan sin cambios con `nodejs_compat`.
+- **Tamaño:** 2364,96 KiB gzip en local y 2364,42 KiB en CI, de 3072 KiB del plan Free (quedan unos 707 KiB).
+- **Archivos clave:** `wrangler.jsonc`, `open-next.config.ts`, `scripts/cf-build.mjs`, `scripts/cf-guard.mjs`, `scripts/configure-workers-secrets.mjs`, `scripts/lib/worker-env.mjs`, `public/_headers`, `.github/workflows/`, README «Despliegue».
+- **Verificado:** `npm run check` (54 archivos / 268 pruebas y build). CI del push en verde: run 46069266701 (`checks`, `security`, `supabase-integration`, `workers-build`). `npm run cf:build` con `.env.local` presente: 7 secretos buscados, ninguno en el bundle. En **workerd local** contra `scripts/local-shim`: `verify-entrega-lugar` 43/43, `verify-entrega-mapa` 51/51, `verify-admin-noche` 17/17 y `verify-amigos-actividad` 26/26 (login, pedido, barra, ticket con QR y entrega con código), sin errores en el log del Worker; hoja de QR del admin con 34 PNG válidos; headers en un estático y en `/api/health`; POST con origen ajeno → 403; `opennextjs-cloudflare preview` lee `.dev.vars.preview` y no `.env.local`. `scan-secrets` sin hallazgos.
+- **No verificado:** despliegue real en Cloudflare; CPU por petición y el tope de 10 ms del plan Free (en local no se aplica); `wrangler tail`; recorrido en un Worker de preview; `verify:hosted:*` y `verify-dominio-picnic` contra Workers (escriben en `onza-dev` y no se corrieron); `verify:hosted:*` tampoco contra Vercel; `configure-workers-secrets.mjs` contra una cuenta real (solo su validación, con pruebas); el workflow `Deploy Workers` (apagado hasta crear la variable); Realtime y Storage desde el Worker (el shim no los tiene; el navegador se conecta directo a Supabase); teléfonos físicos. El despliegue Preview de Vercel de esta rama no se revisó.
+- **Decisiones:** plan Free primero (Manu); si no alcanza, se pregunta antes de pasar a pago. `verify-local-flow` falla 2 controles igual con `next start`, así que se usaron los cuatro recorridos vigentes; solo se le agregó `SHIM_PORT`. No se detuvo un shim de una sesión anterior que seguía en el 54321: se usó el 54323. La reversión de «pedir no crea check-in» (ahora: borrador privado) quedó aprobada para la Fase 4 y todavía no está implementada.
+- **Pendientes / siguiente paso:** pasos manuales del README y PEN-017. La Fase 2 espera el aviso de Manu.
 
 ### D-2026-11-27-06 · Quitar lo de demo y diagnosticar el registro
 
