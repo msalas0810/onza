@@ -14,3 +14,8 @@ supabase/.temp/
 .vercel/
 # Playwright CLI output (may contain credentials)
 .playwright-cli/
+
+# Cloudflare / OpenNext
+.open-next
+.wrangler
+.dev.vars

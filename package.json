@@ -30,7 +30,10 @@
     "demo:generate-venue-art": "node scripts/generate-venue-placeholders.mjs",
     "demo:seed-product-images": "node --env-file=.env.local scripts/seed-product-images.mjs",
     "demo:generate-drink-art": "node scripts/generate-product-illustrations.mjs",
-    "demo:seed-real-venues": "node --env-file=.env.local scripts/seed-real-venues.mjs"
+    "demo:seed-real-venues": "node --env-file=.env.local scripts/seed-real-venues.mjs",
+    "cf:build": "opennextjs-cloudflare build",
+    "cf:upload-assets": "node scripts/cloudflare-upload-assets.mjs",
+    "cf:deploy": "npm run cf:build && npm run cf:upload-assets && wrangler deploy"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "1.3.1",
@@ -46,6 +49,7 @@
   },
   "devDependencies": {
     "@electric-sql/pglite": "0.5.16",
+    "@opennextjs/cloudflare": "^1.20.19",
     "@playwright/test": "1.65.1",
     "@types/node": "26.6.6",
     "@types/qrcode": "1.5.6",
@@ -57,7 +61,8 @@
     "prettier": "3.10.1",
     "supabase": "3.1.0",
     "typescript": "6.0.3",
-    "vitest": "5.1.0"
+    "vitest": "5.1.0",
+    "wrangler": "^4.169.0"
   },
   "type": "module",
   "overrides": {

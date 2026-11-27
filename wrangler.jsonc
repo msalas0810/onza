@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "onza-demo",
+  "main": "cloudflare/worker.js",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "kv_namespaces": [{ "binding": "ASSETS_KV", "id": "19e514db735b4daf9f2c07dcfa6df565" }],
+  "observability": { "enabled": true },
+  "vars": {
+    "DEMO_MODE": "true",
+    "PAYMENT_PROVIDER": "mock",
+    "REAL_PAYMENTS_ENABLED": "false",
+    "ENABLE_PAYMENT_SCENARIOS": "false",
+    "ACCOUNTS_REQUIRED": "true",
+    "APP_ORIGIN": "https://onza-demo.onza.workers.dev"
+  }
+}

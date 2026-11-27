@@ -42,10 +42,10 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | Rama vigente de trabajo | `main` es la única versión oficial (consolidada el 2026-11-27, D-2026-11-27-05). Se trabaja con ramas `feat/*` o `fix/*` y PR |
 | `main` | Versión oficial. **Cada push a `main` despliega a Production** en Vercel. Código validado en el demo: `238aa87`; los commits posteriores del 2026-11-27 son documentación y scripts |
 | Commit desplegado en Vercel | La punta de `main`. El primer deployment de Production fue `dpl_8DNAyssP9ShpdqoApx4aeE683Vkh`, desde `238aa87` |
-| Demo desplegada | https://onza-demo.vercel.app (dominio de Production del proyecto `onza-demo`; ya no está atado a la rama `fix/hosted-integration`) |
+| Demo desplegada | https://onza-demo.vercel.app (Vercel, sin cambios) y, nuevo y en prueba, https://onza-demo.onza.workers.dev (Cloudflare Workers, mismo Supabase `onza-dev`; ver D-2026-11-27-06) |
 | Backend | Supabase alojado `onza-dev` con las migraciones 001–027 aplicadas, `accounts_required=true`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Prueba física en iPhone y Android del pedido con pin en Picnic, incluido el QR de mesa. Decidir qué hacer con las cuatro ramas sin integrar (PEN-013). |
+| Siguiente tarea exacta | Recorrido completo contra el dominio de Cloudflare con las cuentas demo y decidir si se apaga Vercel (D-2026-11-27-06). Antes: Prueba física en iPhone y Android del pedido con pin en Picnic, incluido el QR de mesa. Decidir qué hacer con las cuatro ramas sin integrar (PEN-013). |
 
 ### Pendientes abiertos
 
@@ -93,6 +93,21 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ---
 
 ## Entradas
+
+### D-2026-11-27-06 · Migrar el hosting de Vercel a Cloudflare Workers
+
+- **Fecha y hora:** 2026-11-27 13:50 (America/Costa_Rica)
+- **Persona:** Manu (encargo: migrar todo a Cloudflare con dominio de Cloudflare y los datos de Onza).
+- **IA:** Claude Code · claude-sonnet-5-5 (la sesión empezó con claude-haiku-5-5; la migración se hizo con Sonnet)
+- **Rama y commits:** `claude/eloquent-hamilton-rw4w0y` · hash en el commit de esta entrada. No se tocó `main`.
+- **Qué cambió:** la app se construye con OpenNext (`@opennextjs/cloudflare` 1.20.19, `wrangler` 4) y corre como Worker `onza-demo` en **https://onza-demo.onza.workers.dev** (subdominio `onza.workers.dev` creado en la cuenta). Usa el mismo Supabase `onza-dev`: no se creó un proyecto nuevo porque la credencial de la sesión solo ve `onza-dev` y no puede crear proyectos ni leer organizaciones. Vercel sigue activo y sin cambios.
+- **Archivos clave:** `wrangler.jsonc`, `open-next.config.ts`, `cloudflare/worker.js`, `scripts/cloudflare-upload-assets.mjs`, scripts `cf:*` en `package.json`.
+- **Archivos estáticos desde KV:** `wrangler deploy` no puede subir assets detrás del proxy de la sesión (el token temporal de subida da 401). Se sirven desde Workers KV (namespace `onza-assets`, binding `ASSETS_KV`, 77 archivos) con un envoltorio mínimo del worker. Con una cuenta o runner normal se puede volver al binding `assets` estándar y borrar el envoltorio.
+- **Secrets en el Worker:** `SUPABASE_SERVICE_ROLE_KEY` (leída de `onza-dev` por la API de gestión, sin imprimirla) y `PICKUP_TOKEN_ENCRYPTION_KEY` **nueva**. La clave anterior no estaba disponible, así que los tickets de retiro abiertos en `onza-dev` ya no se pueden abrir; los nuevos sí. Variables no secretas en `wrangler.jsonc` (`APP_ORIGIN`, `DEMO_MODE`, `PAYMENT_PROVIDER=mock`, `REAL_PAYMENTS_ENABLED=false`, `ACCOUNTS_REQUIRED=true`). La URL y la clave publicable de Supabase se incrustan en el build. No se cargaron contraseñas demo.
+- **Verificado:** `opennextjs-cloudflare build` y `wrangler deploy` terminan sin error. En el dominio: `/` y `/v/sala-norte` redirigen a `/acceso` (login obligatorio) y `/login` a `/equipo/acceso`; `/acceso` 200; CSS y fuente servidos desde KV con su tipo; cabeceras de seguridad y CSP con el origen de `onza-dev`.
+- **No verificado:** login real y flujos de pedido, retiro, QR y Realtime en el dominio nuevo (no hay contraseñas demo en esta sesión; `scripts/verify-dominio-picnic.mjs` apunta al dominio de Vercel); Storage; `/api/team` con la nueva clave de servicio; iPhone y Android físicos. OpenNext avisa que el middleware de Node (`src/proxy.ts`) es **experimental** en Cloudflare: el redirige-a-login funciona, pero el resto no se probó.
+- **Cambios fuera del repo:** se permitió el host `onza-demo.onza.workers.dev` en la red del entorno de Claude Code «Onza» para poder probar.
+- **Pendientes / siguiente paso:** correr el recorrido completo contra el dominio nuevo con las cuentas demo; decidir si se apaga Vercel y si se conecta el repo a Cloudflare (Workers Builds) para desplegar en cada push; un Supabase nuevo requiere una organización a la que la sesión tenga acceso.
 
 ### D-2026-11-27-05 · Consolidar en `main` y publicar el demo
 
