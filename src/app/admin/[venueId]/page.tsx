@@ -4,7 +4,7 @@ import { getAdminMenu } from "@/features/catalog/server/queries";
 import { getVenueSummaryRange } from "@/features/analytics/server/queries";
 import { tonight } from "@/features/analytics/period";
 import { AdminPanel } from "@/features/admin/components/admin-panel";
-import { isAdminTab, type AdminTab } from "@/features/admin/admin-tabs";
+import { defaultAdminTab, isAdminTab, type AdminTab } from "@/features/admin/admin-tabs";
 import { loadStaffContext } from "@/features/team/server/staff-context";
 import { ConfigurationState } from "@/components/ui/configuration-state";
 import { getVenueMap, listSpots } from "@/features/delivery/server/queries";
@@ -19,7 +19,7 @@ export default async function Page({
 }) {
   const { venueId } = await params;
   const { tab, editar } = await searchParams;
-  const current: AdminTab = isAdminTab(tab) ? tab : "resumen";
+  const current: AdminTab = isAdminTab(tab) ? tab : defaultAdminTab;
   const context = await loadStaffContext(venueId, true);
   const gate = staffGate(context, `/admin/${venueId}?tab=${current}`);
   if (gate || !context.ok) return gate;

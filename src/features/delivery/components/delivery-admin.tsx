@@ -131,7 +131,7 @@ export function DeliveryAdmin({ venue, spots, map, availableProducts }: Props) {
             {
               done: open,
               text: venue.open_state !== "open" ? "El local está cerrado" : venue.paused ? "Los pedidos están pausados" : "El local recibe pedidos",
-              href: `/admin/${venue.id}?tab=disponibilidad`,
+              href: `/admin/${venue.id}?tab=ahora`,
               fix: "Cambiá el estado",
             },
           ].map((item) => (

@@ -25,11 +25,14 @@ export function NowPanel({
   venue,
   orders,
   soldOut,
+  capacity,
   onResume,
 }: {
   venue: Venue;
   orders: Order[];
   soldOut: number;
+  /** Pedidos activos que admite el local a la vez (Capacidad). */
+  capacity: number;
   onResume: () => Promise<boolean>;
 }) {
   const [now, setNow] = useState(() => Date.now());
@@ -39,6 +42,10 @@ export function NowPanel({
     return () => clearInterval(timer);
   }, []);
   const queued = orders.filter((o) => o.status === "queued");
+  const preparing = orders.filter((o) => o.status === "preparing");
+  const active = orders.filter((o) =>
+    ["pending_authorization", "queued", "preparing", "ready"].includes(o.status),
+  ).length;
   const ready = orders.filter((o) => o.status === "ready");
   const toBring = ready.filter((o) => o.fulfillment === "location");
   const incidents = orders.filter(
@@ -82,18 +89,39 @@ export function NowPanel({
       tone: "neutral",
       text: plural(soldOut, "producto agotado", "productos agotados"),
       detail: "Los clientes los ven como agotados.",
-      action: { label: "Ver agotados", href: `/admin/${venue.id}?tab=disponibilidad` },
+      action: { label: "Ver agotados", href: `/admin/${venue.id}?tab=ahora#agotados` },
     });
 
   const stopped = venue.open_state !== "open" || venue.paused;
   return (
-    <section className="block-card" aria-labelledby="now-title" style={{ marginBottom: 16 }}>
+    <section className="block-card" aria-labelledby="now-title">
       <div className="row between wrap">
         <h2 id="now-title">Ahora</h2>
         <StatusBadge tone={stopped ? "warning" : "success"}>
           {venue.open_state !== "open" ? "Local cerrado" : venue.paused ? "Pedidos pausados" : "Recibiendo pedidos"}
         </StatusBadge>
       </div>
+      <dl className="now-strip">
+        <div data-tone={queued.length ? "warning" : undefined}>
+          <dt>Nuevos</dt>
+          <dd>{queued.length}</dd>
+        </div>
+        <div>
+          <dt>Preparando</dt>
+          <dd>{preparing.length}</dd>
+        </div>
+        <div data-tone={ready.length ? "warning" : undefined}>
+          <dt>Listos</dt>
+          <dd>{ready.length}</dd>
+        </div>
+        <div data-tone={active >= capacity ? "danger" : undefined}>
+          <dt>Activos</dt>
+          <dd>
+            {active}
+            <span className="muted"> de {capacity}</span>
+          </dd>
+        </div>
+      </dl>
       {stopped && (
         <div className="row between wrap now-stopped">
           <p className="grow">
@@ -117,7 +145,7 @@ export function NowPanel({
       {rows.length ? (
         <div className="rows">
           {rows.map((row) => (
-            <div className="r wrap" key={row.key}>
+            <div className="r wrap now-row" data-tone={row.tone} key={row.key}>
               <div className="grow">
                 <strong>{row.text}</strong>
                 {row.detail && <div className="sub muted t-label">{row.detail}</div>}

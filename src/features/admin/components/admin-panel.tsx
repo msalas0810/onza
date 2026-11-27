@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { z } from "zod";
 import Link from "next/link";
 import {
+  Activity,
   BarChart3,
   MapPin,
   Receipt,
@@ -43,7 +44,7 @@ import { TeamPanel } from "@/features/team/components/team-panel";
 import { DeliveryAdmin } from "@/features/delivery/components/delivery-admin";
 import { NowPanel } from "./now-panel";
 import { spotText, type Spot, type VenueMap } from "@/features/delivery/types";
-import { adminTabIds, adminTabLabels, type AdminTab } from "../admin-tabs";
+import { adminTabGroups, adminTabLabels, type AdminTab } from "../admin-tabs";
 
 const productSchema = z.object({
   id: z.string(),
@@ -53,6 +54,7 @@ const productSchema = z.object({
 });
 
 const tabIcons = {
+  ahora: Activity,
   resumen: BarChart3,
   pedidos: Receipt,
   menu: Wine,
@@ -214,7 +216,7 @@ export function AdminPanel({
   const shownAvailable = (p: Product) =>
     p.id in pending && !p.archived ? pending[p.id] : p.available;
   const ask = (spec: Support) => setSupport({ spec, reason: "", problem: "" });
-  const nav = adminTabIds.map((id) => {
+  const link = (id: AdminTab) => {
     const Icon = tabIcons[id];
     return (
       <Link
@@ -226,7 +228,14 @@ export function AdminPanel({
         {adminTabLabels[id]}
       </Link>
     );
-  });
+  };
+  const sideNav = adminTabGroups.map((group) => (
+    <div className="side-group" key={group.label}>
+      <p className="side-heading">{group.label}</p>
+      {group.tabs.map(link)}
+    </div>
+  ));
+  const tabsNav = adminTabGroups.flatMap((group) => group.tabs.map(link));
   const activeCount = orders.filter((o) =>
     ["pending_authorization", "queued", "preparing", "ready"].includes(o.status),
   ).length;
@@ -258,8 +267,8 @@ export function AdminPanel({
     <>
       <div className="row between wrap" style={{ marginBottom: 16 }}>
         <div>
-          <p className="eyebrow">Administración</p>
           <h1 className="t-title">{venue.name}</h1>
+          <p className="muted t-label">Administración</p>
         </div>
         <Link className="btn secondary sm" href={`/staff/${venue.id}`}>
           Abrir barra
@@ -267,11 +276,11 @@ export function AdminPanel({
       </div>
       <div className="admin">
         <nav className="side" aria-label="Administración">
-          {nav}
+          {sideNav}
         </nav>
         <div>
           <nav className="tabs admin-tabs" aria-label="Administración" ref={tabsRow}>
-            {nav}
+            {tabsNav}
           </nav>
           {error && (
             <div style={{ marginBottom: 16 }}>
@@ -283,18 +292,81 @@ export function AdminPanel({
               {saved}
             </p>
           )}
-          {tab === "resumen" && (
-            <NowPanel
-              venue={venue}
-              orders={orders}
-              soldOut={soldOut.length}
-              onResume={() =>
-                run(
-                  { action: "venue_update", venueId: venue.id, openState: "open", paused: false },
-                  "El local vuelve a recibir pedidos.",
-                )
-              }
-            />
+          {tab === "ahora" && (
+            <div className="stack loose">
+              <NowPanel
+                venue={venue}
+                orders={orders}
+                soldOut={soldOut.length}
+                capacity={venue.capacity}
+                onResume={() =>
+                  run(
+                    { action: "venue_update", venueId: venue.id, openState: "open", paused: false },
+                    "El local vuelve a recibir pedidos.",
+                  )
+                }
+              />
+              <div className="admin-now-grid">
+              <section className="block-card" aria-labelledby="estado-title">
+                <h2 id="estado-title">Estado del local</h2>
+                <SegmentedControl<Availability>
+                  block
+                  label="Estado del local"
+                  value={state}
+                  options={availabilityOptions}
+                  onChange={(next) =>
+                    void run(
+                      {
+                        action: "venue_update",
+                        venueId: venue.id,
+                        openState: next === "closed" ? "closed" : "open",
+                        paused: next === "paused",
+                      },
+                      "Guardado",
+                    )
+                  }
+                />
+                <p className="muted">{availabilityCopy[state]}</p>
+              </section>
+              <section className="block-card" id="agotados" aria-labelledby="agotados-title">
+                <h2 id="agotados-title">Agotados ahora</h2>
+                {soldOut.length ? (
+                  <div className="rows">
+                    {soldOut.map((p) => (
+                      <div className="r wrap" key={p.id}>
+                        <Link
+                          className="grow"
+                          href={`/admin/${venue.id}?tab=menu&editar=${p.id}`}
+                          style={{ fontWeight: 600 }}
+                        >
+                          {p.name}
+                        </Link>
+                        <Toggle
+                          label={<span className="t-label">Disponible</span>}
+                          checked={false}
+                          disabled={p.id in pending}
+                          onChange={() =>
+                            void productCommand(
+                              p,
+                              { action: "product_availability", available: true },
+                              `${p.name} vuelve a estar disponible.`,
+                            )
+                          }
+                        />
+                        {rowErrors[p.id] && (
+                          <p className="inline-error" role="alert">
+                            {rowErrors[p.id]}
+                          </p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="muted">Todo disponible.</p>
+                )}
+              </section>
+              </div>
+            </div>
           )}
           {tab === "resumen" && (
             <AdminSummary
@@ -682,27 +754,6 @@ export function AdminPanel({
           {tab === "disponibilidad" && (
             <div className="stack loose">
               <section className="block-card">
-                <h2>Estado del local</h2>
-                <SegmentedControl<Availability>
-                  block
-                  label="Estado del local"
-                  value={state}
-                  options={availabilityOptions}
-                  onChange={(next) =>
-                    void run(
-                      {
-                        action: "venue_update",
-                        venueId: venue.id,
-                        openState: next === "closed" ? "closed" : "open",
-                        paused: next === "paused",
-                      },
-                      "Guardado",
-                    )
-                  }
-                />
-                <p className="muted">{availabilityCopy[state]}</p>
-              </section>
-              <section className="block-card">
                 <h2>Capacidad</h2>
                 <form
                   className="stack"
@@ -784,43 +835,6 @@ export function AdminPanel({
                   Solo acepta si el local recibe pedidos, el pedido está vigente, la reserva está autorizada, hay stock y
                   lugar en preparación. Una pausa la detiene. El equipo puede volver a manual desde los Ajustes de la barra.
                 </p>
-              </section>
-              <section className="block-card">
-                <h2>Agotados ahora</h2>
-                {soldOut.length ? (
-                  <div className="rows">
-                    {soldOut.map((p) => (
-                      <div className="r wrap" key={p.id}>
-                        <Link
-                          className="grow"
-                          href={`/admin/${venue.id}?tab=menu&editar=${p.id}`}
-                          style={{ fontWeight: 600 }}
-                        >
-                          {p.name}
-                        </Link>
-                        <Toggle
-                          label={<span className="t-label">Disponible</span>}
-                          checked={false}
-                          disabled={p.id in pending}
-                          onChange={() =>
-                            void productCommand(
-                              p,
-                              { action: "product_availability", available: true },
-                              `${p.name} vuelve a estar disponible.`,
-                            )
-                          }
-                        />
-                        {rowErrors[p.id] && (
-                          <p className="inline-error" role="alert">
-                            {rowErrors[p.id]}
-                          </p>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="muted">Todo disponible.</p>
-                )}
               </section>
             </div>
           )}

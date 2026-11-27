@@ -244,7 +244,7 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
     await a.reload();
     await expect(a.locator(".badge", { hasText: "Entregado" })).toBeVisible();
     await login(admin, "ADMIN");
-    await admin.goto(`/admin/${venue}`);
+    await admin.goto(`/admin/${venue}?tab=resumen`);
     await expect(
       admin.getByRole("heading", { name: "Resumen", exact: true }),
     ).toBeVisible();

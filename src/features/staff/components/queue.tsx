@@ -787,7 +787,7 @@ export function StaffQueue({
           {isAdmin && (
             <Link
               className={buttonClass({ variant: "secondary", block: true })}
-              href={`/admin/${venue.id}?tab=disponibilidad`}
+              href={`/admin/${venue.id}?tab=ahora`}
             >
               {closedVenue ? "Abrir el local" : "Cerrar el local"} en
               Administración

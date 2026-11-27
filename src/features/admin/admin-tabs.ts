@@ -1,21 +1,30 @@
+// Las pestañas del administrador se ordenan por el momento de la noche en que se usan, no por tipo de dato.
 export const adminTabIds = [
-  "resumen",
+  "ahora",
   "pedidos",
   "menu",
   "disponibilidad",
   "entrega",
   "negocio",
   "equipo",
+  "resumen",
 ] as const;
 export type AdminTab = (typeof adminTabIds)[number];
+export const defaultAdminTab: AdminTab = "ahora";
 export const adminTabLabels: Record<AdminTab, string> = {
-  resumen: "Resumen",
+  ahora: "Ahora",
   pedidos: "Pedidos",
-  menu: "Menú",
-  disponibilidad: "Disponibilidad",
-  entrega: "Entrega",
-  negocio: "Negocio",
+  menu: "Menú y precios",
+  disponibilidad: "Capacidad",
+  entrega: "Entrega y QR",
+  negocio: "Perfil y horario",
   equipo: "Equipo",
+  resumen: "Resumen y CSV",
 };
+export const adminTabGroups: readonly { label: string; tabs: readonly AdminTab[] }[] = [
+  { label: "Durante la noche", tabs: ["ahora", "pedidos"] },
+  { label: "Antes de abrir", tabs: ["menu", "disponibilidad", "entrega", "negocio", "equipo"] },
+  { label: "Al cerrar", tabs: ["resumen"] },
+];
 export const isAdminTab = (value: unknown): value is AdminTab =>
   adminTabIds.some((id) => id === value);

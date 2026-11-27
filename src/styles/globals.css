@@ -1898,6 +1898,20 @@ a.vcard:focus-visible {
     background: var(--onza-surface);
     color: var(--onza-text);
   }
+  .admin .side {
+    gap: var(--onza-space-16);
+  }
+  .admin .side-group {
+    display: grid;
+    gap: 2px;
+  }
+  .admin .side-heading {
+    margin: 0;
+    padding: 0 var(--onza-space-12) var(--onza-space-4);
+    font-size: var(--onza-type-caption-size);
+    line-height: var(--onza-type-caption-line);
+    color: var(--onza-text-muted);
+  }
   .admin .tabs {
     display: none;
   }
@@ -3432,6 +3446,55 @@ button.link-button {
   border-radius: var(--onza-radius-control);
   border: 1px solid var(--onza-border);
   background: #fff;
+}
+/* Pulso del local en «Ahora»: cuatro números que se leen de un vistazo, en cifras tabulares. */
+.now-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--onza-space-8);
+  margin: var(--onza-space-12) 0;
+}
+.now-strip > div {
+  padding: var(--onza-space-8) var(--onza-space-12);
+  border-radius: var(--onza-radius-control);
+  background: var(--onza-bg);
+  border: 1px solid var(--onza-border);
+}
+.now-strip dt {
+  font-size: var(--onza-type-caption-size);
+  line-height: var(--onza-type-caption-line);
+  color: var(--onza-text-muted);
+}
+.now-strip dd {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.now-strip dd .muted {
+  font-size: var(--onza-type-label-size);
+  font-weight: 500;
+}
+.now-strip [data-tone="warning"] {
+  background: var(--onza-warning-soft);
+  border-color: transparent;
+}
+.now-strip [data-tone="danger"] {
+  background: var(--onza-danger-soft);
+  border-color: transparent;
+}
+.now-row[data-tone="danger"] strong {
+  color: var(--onza-danger-text);
+}
+.admin-now-grid {
+  display: grid;
+  gap: var(--onza-space-16);
+}
+@media (min-width: 900px) {
+  .admin-now-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+  }
 }
 .now-stopped {
   padding: var(--onza-space-12) var(--onza-space-16);
