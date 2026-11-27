@@ -66,4 +66,8 @@ node scripts/audit/scan-secrets.mjs   # que no se cuelen secretos ni NEXT_PUBLIC
 
 ## Despliegue
 
-Vercel construye un Preview por rama. **El despliegue automático de `main` está desactivado en [`vercel.json`](vercel.json)** porque la base alojada todavía no tiene aplicadas las migraciones 013–027 que exige este código. Cuando se apliquen (primero en un proyecto aislado, con `db push --dry-run`) y se configuren las variables de Production, se elimina ese bloque de `vercel.json`. Aplicar migraciones remotas y cambiar variables lo hace una persona autorizada, no un script.
+El demo es https://onza-demo.vercel.app. **Cada push a `main` despliega a Production** en Vercel; las demás ramas generan un Preview. Usa el proyecto Supabase `onza-dev`, con datos de demo y pagos `mock`.
+
+- **Antes de integrar a `main` un cambio con migración:** probala en un entorno aislado (la CI levanta un Supabase completo en cada push a `feat/**`), hacé un respaldo, revisá `npx supabase db push --linked --dry-run` y recién ahí aplicala. `main` no debe adelantarse a la base. Aplicar migraciones remotas y cambiar variables lo decide una persona autorizada.
+- **Variables:** `node scripts/configure-vercel-env.mjs https://onza-demo.vercel.app production` (por `npx --package=vercel`; los valores salen de `.env.local` por stdin y no se imprimen). Production no tiene `SUPABASE_SERVICE_ROLE_KEY`, así que el alta de cuentas del equipo (`/api/team`) no funciona en el demo publicado.
+- **Picnic:** es el bloque «Picnic (demo ficticio)» de `supabase/seed.sql`, con su plano ilustrativo. No son datos reales del local.

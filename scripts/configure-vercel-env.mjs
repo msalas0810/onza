@@ -1,4 +1,4 @@
-// Run via npm exec --package=vercel -- node scripts/configure-vercel-env.mjs
+// Run via npm exec --package=vercel -- node scripts/configure-vercel-env.mjs [https://origin] [preview|production]
 // CLI receives secret values only through stdin; output and error details are withheld.
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -24,6 +24,10 @@ if (
 const origin = process.argv[2] ?? "https://onza-demo-msalas0810.vercel.app";
 if (!/^https:\/\/[a-z0-9.-]+\.vercel\.app$/.test(origin))
   throw new Error("Expected HTTPS Vercel origin");
+const target = process.argv[3] ?? "preview";
+if (!["preview", "production"].includes(target))
+  throw new Error("Expected preview or production");
+// Sin SUPABASE_SERVICE_ROLE_KEY a propósito: el demo publicado no la usa (solo /api/team la necesitaría).
 const values = {
   NEXT_PUBLIC_SUPABASE_URL: local.NEXT_PUBLIC_SUPABASE_URL,
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY:
@@ -34,6 +38,8 @@ const values = {
   PICKUP_TOKEN_ENCRYPTION_KEY: local.PICKUP_TOKEN_ENCRYPTION_KEY,
   PICKUP_TOKEN_KEY_VERSION: local.PICKUP_TOKEN_KEY_VERSION ?? "1",
   ENABLE_DESIGN_SYSTEM: "false",
+  ACCOUNTS_REQUIRED: "true",
+  ENABLE_PAYMENT_SCENARIOS: "false",
   APP_ORIGIN: origin,
 };
 for (const [key, value] of Object.entries(values)) {
@@ -46,9 +52,10 @@ for (const [key, value] of Object.entries(values)) {
         "add",
         key,
         "--environment",
-        "preview",
-        "--git-branch",
-        "fix/hosted-integration",
+        target,
+        ...(target === "preview"
+          ? ["--git-branch", "fix/hosted-integration"]
+          : []),
         "--yes",
         "--force",
         "--scope",
@@ -56,7 +63,7 @@ for (const [key, value] of Object.entries(values)) {
       ],
       { input: value, stdio: ["pipe", "pipe", "pipe"] },
     );
-    console.log(`Configured ${key} (preview branch only)`);
+    console.log(`Configured ${key} (${target})`);
   } catch {
     throw new Error(
       `Failed configuring ${key}; response withheld to protect credentials`,
