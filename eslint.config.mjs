@@ -10,5 +10,6 @@ export default defineConfig([
     "playwright-report/**",
     "test-results/**",
     "design/maquetas-v1/**",
+    ".open-next/**",
   ]),
 ]);

@@ -94,6 +94,20 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 
 ## Entradas
 
+### D-2026-11-27-07 · Cuentas demo en la pantalla de acceso
+
+- **Fecha:** 2026-11-27 (America/Costa_Rica)
+- **Persona:** Manu (encargo: agregar la opción de cuentas demo sin quitar los accesos actuales; no entrar como invitado).
+- **IA:** Claude Code · claude-haiku-5-5 (la implementación se hizo en sesión con claude-sonnet-5-5)
+- **Rama y commits:** `claude/eloquent-hamilton-rw4w0y` · hash en el commit de esta entrada. No se tocó `main`.
+- **Qué cambió:** en `/acceso` aparece «Entrar como cliente demo»; en `/equipo/acceso`, «Entrar como bartender demo» y «Entrar como admin demo». Solo se muestran con `DEMO_MODE=true`. Los formularios de correo y contraseña y los proveedores siguen igual. Las credenciales quedan en el servidor: el botón llama a `POST /api/demo-session` con un rol; no hay invitado.
+- **Archivos clave:** `src/app/api/demo-session/route.ts`, `src/features/demo/server/demo-accounts.ts`, `src/features/demo/components/demo-login.tsx`, `src/app/acceso/page.tsx`, `src/app/equipo/acceso/page.tsx`.
+- **Otros cambios:** `.open-next/**` excluido del lint (el lint marcaba 1974 errores solo en el build generado); `.open-next`, `.wrangler` y `.dev.vars` en `.gitignore`.
+- **Verificado:** `npm run typecheck` (sin errores); `npm run lint` (0 errores, 2 advertencias); `vitest run tests/` 52 archivos / 257 pruebas OK; `opennextjs-cloudflare build` OK; despliegue en `onza-demo.onza.workers.dev`. En vivo: `/acceso` muestra los botones; `POST /api/demo-session` sin `Origin` da 403, con rol inválido 422 y, sin credenciales cargadas, 503 `DEMO_NOT_CONFIGURED`.
+- **No verificado:** entrar de verdad con las cuentas demo en Cloudflare (faltan sus secrets); en Vercel no se desplegó este cambio ni se cargaron las variables `DEMO_*`; prueba en iPhone/Android.
+- **Pendientes / siguiente paso:** cargar `DEMO_CUSTOMER_*`, `DEMO_BARTENDER_*` y `DEMO_ADMIN_*` como secrets del Worker (`wrangler secret put`) y en Vercel si se quiere el mismo comportamiento allí; luego probar cada botón.
+- **Nota:** `AGENTS.md` pide no lanzar producción con accesos públicos de demo; estas cuentas quedan activas solo mientras `DEMO_MODE=true`, que hoy está en el demo público. Decidir si se apaga para producción real.
+
 ### D-2026-11-27-06 · Migrar el hosting de Vercel a Cloudflare Workers
 
 - **Fecha y hora:** 2026-11-27 13:50 (America/Costa_Rica)
