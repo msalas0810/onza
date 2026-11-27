@@ -32,7 +32,7 @@ import { formatClock } from "@/lib/clock";
 import { countdownText } from "@/features/orders/countdown";
 import type React from "react";
 import type { Venue } from "@/features/catalog/server/queries";
-import { spotText } from "@/features/delivery/types";
+import { placePhrase, spotText } from "@/features/delivery/types";
 import { OrderMapButton } from "@/features/delivery/components/order-map-button";
 
 const lanes = [
@@ -526,7 +526,7 @@ export function StaffQueue({
                             className={`where-line ${o.spot_changed_at && Date.parse(o.spot_changed_at) > now - 10 * 60000 ? "moved" : ""}`}
                           >
                             <MapPin size={16} aria-hidden="true" />
-                            <span>Llevar a {spotText(o)}</span>
+                            <span>Llevar {placePhrase(o, "a")}</span>
                           </p>
                           <OrderMapButton order={o} />
                           {o.spot_changed_at && (
@@ -619,7 +619,7 @@ export function StaffQueue({
                           >
                             <ScanLine size={20} aria-hidden="true" />
                             {o.fulfillment === "location"
-                              ? `Entregar en ${o.spot_label}`
+                              ? `Entregar ${placePhrase({ spot_label: o.spot_label }, "en")}`
                               : "Validar retiro"}
                           </Button>
                         </div>

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { groupSpots, spotText, yourSpot, offersBar, offersLocation, type Spot } from "@/features/delivery/types";
+import { groupSpots, placePhrase, spotText, yourSpot, offersBar, offersLocation, type Spot } from "@/features/delivery/types";
 import { csvCell, toCsv } from "@/features/delivery/csv";
 
 const spot = (label: string, area: string, position: number, enabled = true): Spot => ({
@@ -29,6 +29,10 @@ describe("lugares de entrega", () => {
   it("describe el lugar con su zona y concuerda con la palabra del local", () => {
     expect(spotText({ spot_label: "Mesa 4", spot_area: "Terraza" })).toBe("Mesa 4 · Terraza");
     expect(spotText({ spot_label: "Mesa 4", spot_area: null })).toBe("Mesa 4");
+    // Con preposición: nunca «a Punto en el mapa».
+    expect(placePhrase({ spot_label: "Mesa 4", spot_area: "Terraza" }, "a")).toBe("a Mesa 4 · Terraza");
+    expect(placePhrase({ spot_label: "Punto en el mapa", spot_area: "Jardín" }, "a")).toBe("al punto marcado · Jardín");
+    expect(placePhrase({ spot_label: "Punto en el mapa", spot_area: null }, "en")).toBe("en el punto marcado");
     expect(spotText({ spot_label: null })).toBe("");
     expect(yourSpot("Zona")).toBe("tu zona");
     expect(yourSpot(" Puesto ")).toBe("tu puesto");

@@ -3751,7 +3751,7 @@ button.link-button {
   border: 1px solid var(--onza-border);
   background-color: var(--onza-bg);
   background-repeat: no-repeat;
-  background-size: 260% auto;
+  background-size: 200% auto; /* contexto suficiente para ubicar la mesa a simple vista */
   cursor: zoom-in;
   color: var(--onza-text);
 }

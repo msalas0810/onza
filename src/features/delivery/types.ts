@@ -66,6 +66,19 @@ export function spotText(order: {
     : order.spot_label;
 }
 
+/**
+ * La frase con su preposición: «a Mesa 4 · Terraza», «en Mesa 4», o para un pin sin mesa «al punto marcado · Jardín» /
+ * «en el punto marcado» (nunca «a Punto en el mapa»).
+ */
+export function placePhrase(
+  order: { spot_label?: string | null; spot_area?: string | null },
+  prep: "a" | "en",
+) {
+  if (order.spot_label !== MAP_POINT_LABEL) return `${prep} ${spotText(order)}`;
+  const base = prep === "a" ? "al punto marcado" : "en el punto marcado";
+  return order.spot_area ? `${base} · ${order.spot_area}` : base;
+}
+
 /** El artículo concuerda con la palabra que eligió el local: «tu mesa», «tu zona», «tu puesto». */
 export const yourSpot = (noun: string) => `tu ${noun.trim().toLowerCase()}`;
 

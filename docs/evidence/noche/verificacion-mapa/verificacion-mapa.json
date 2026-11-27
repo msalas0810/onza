@@ -1,6 +1,6 @@
 {
-  "generado": "2026-11-27T06:53:53.952Z",
-  "total": 50,
+  "generado": "2026-11-27T07:36:01.649Z",
+  "total": 51,
   "fallos": 0,
   "resultados": [
     {
@@ -89,14 +89,19 @@
       "detail": ""
     },
     {
+      "name": "El seguimiento muestra el pin sobre el mismo plano, con las mesas numeradas como en la barra",
+      "ok": true,
+      "detail": ""
+    },
+    {
       "name": "El cliente mueve su pin desde el seguimiento y se guarda el punto nuevo",
       "ok": true,
       "detail": "0.300,0.330"
     },
     {
-      "name": "La cola dice «Llevar a Punto en el mapa», avisa del cambio y ofrece «Ver en el mapa»",
+      "name": "La cola dice «Llevar al punto marcado», avisa del cambio y ofrece «Ver en el mapa»",
       "ok": true,
-      "detail": "#1CF277 04:56 Llevar a Punto en el mapa Ver en el mapa El cliente cambió su lugar a las 12:53 a.m. Entró a las 12:53 a.m. 1× Cerveza 1× Spritz 2 productos Rechazar Aceptar"
+      "detail": "#24BA70 04:56 Llevar al punto marcado Ver en el mapa El cliente cambió su lugar a las 1:35 a.m. Entró a las 1:35 a.m. 1× Cerveza 1× Spritz 2 productos Rechazar Aceptar"
     },
     {
       "name": "En la computadora de la barra el pin cae en el mismo lugar que en el teléfono (misma fracción de la imagen)",

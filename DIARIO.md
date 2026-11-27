@@ -95,6 +95,18 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 
 > Más recientes arriba.
 
+### D-2026-11-27-02 · Picnic y barra: el punto marcado se nombra bien y el seguimiento muestra las mesas
+
+- **Fecha y hora:** 2026-11-27 01:30–01:50 (America/Costa_Rica)
+- **Persona:** Manu (encargo «Continuá… cerrá y probá Picnic y barra»).
+- **IA:** Claude Code · claude-opus-5-5
+- **Rama y commits:** `feat/noche-picnic-social` · commit de este bloque (ver `git log`), sobre `b54178c`.
+- **Qué cambió:** Un pin entre mesas ya no se lee «Llevar a Punto en el mapa»: la barra dice «Llevar al punto marcado · Jardín», el retiro «Entregar en el punto marcado» y el cliente «Entrega en el punto marcado» (`placePhrase` en `src/features/delivery/types.ts`, una sola regla). El plano del seguimiento del cliente muestra las mesas numeradas, igual que en la barra (antes solo la imagen). El recorte del pin en la tarjeta de la barra se amplió menos (200 %) para ubicar la mesa de un vistazo.
+- **Archivos clave:** `src/features/delivery/types.ts`, `src/features/orders/components/order-detail.tsx`, `src/features/staff/components/queue.tsx`, `src/features/pickup/components/pickup-panel.tsx`, `scripts/verify-entrega-mapa.mjs`.
+- **Verificado:** instancia local separada (shim propio en :54322 y build servido en :3200; los servidores de :3100/:54321 tienen datos viejos y no se tocaron), cada recorrido con el shim recién iniciado: `verify-entrega-mapa` **51/51** (nueva: el seguimiento muestra ≥10 mesas numeradas) y `verify-entrega-lugar` **43/43**. `npm run check` en verde (51 archivos / 255 pruebas, con 3 casos nuevos de `placePhrase`; build). Capturas en `docs/evidence/noche/{verificacion-mapa,verificacion-lugar,despues}`.
+- **No verificado:** Realtime real, Safari e iPhone/Android físicos.
+- **Pendientes / siguiente paso:** el título del plano ampliado en la barra todavía dice «Punto en el mapa» (es el valor guardado en la base); bloque de administración.
+
 ### D-2026-11-27-01 · Picnic de punta a punta, administración por momentos de la noche, actividad y amigos
 
 - **Fecha y hora:** 2026-11-27 00:13–01:10 (America/Costa_Rica)

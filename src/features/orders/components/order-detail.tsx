@@ -32,6 +32,7 @@ import { writeLocationPreference, type LocationPref } from "@/features/delivery/
 import {
   deliveryOptionsSchema,
   offersLocation,
+  placePhrase,
   spotText,
   yourSpot,
   type DeliveryOptions,
@@ -97,6 +98,20 @@ export function OrderDetail({ id }: { id: string }) {
   const [expired, setExpired] = useState(false);
   const [busy, setBusy] = useState(false);
   const [moving, setMoving] = useState<DeliveryOptions | "loading" | "error" | null>(null);
+  // Las mesas numeradas del mapa vigente: el cliente ve su pin sobre el mismo plano, con los mismos números que la barra.
+  const [shapes, setShapes] = useState<DeliveryOptions | null>(null);
+  const shapesVenue = order?.map?.current ? order.venue_id : null;
+  useEffect(() => {
+    if (!shapesVenue) return;
+    let live = true;
+    void fetch(`/api/delivery?venue=${shapesVenue}`, { cache: "no-store" })
+      .then(async (r) => (r.ok ? deliveryOptionsSchema.parse(await r.json()) : null))
+      .then((options) => live && setShapes(options))
+      .catch(() => undefined); // sin formas, el pin se ve igual sobre la imagen
+    return () => {
+      live = false;
+    };
+  }, [shapesVenue]);
   const [draft, setDraft] = useState<LocationPref | null>(null);
   const actionKey = useRef<string | null>(null);
   useWakeLock(order?.status === "ready" && !!order.pickup_code);
@@ -242,7 +257,7 @@ export function OrderDetail({ id }: { id: string }) {
           <div className="spot-here">
             <MapPin size={20} aria-hidden="true" />
             <div className="grow">
-              <strong>Entrega en {spotText(order)}</strong>
+              <strong>Entrega {placePhrase(order, "en")}</strong>
               <span className="muted t-label">
                 {order.spot_changed_at
                   ? `Lugar actualizado a las ${formatClock(order.spot_changed_at).replace(/\.$/, "")}.`
@@ -254,7 +269,14 @@ export function OrderDetail({ id }: { id: string }) {
             </Button>
           </div>
         )}
-        {canMove && <OrderPinMap order={order} label={`Tu lugar en el mapa: ${spotText(order)}`} />}
+        {canMove && (
+          <OrderPinMap
+            order={order}
+            spots={shapes?.spots}
+            serviceArea={shapes?.map?.serviceArea}
+            label={`Tu lugar en el mapa: ${spotText(order)}`}
+          />
+        )}
         {ready && (
           <section className="ticket" aria-label="Ticket de retiro">
             <div>

@@ -312,6 +312,11 @@ try {
     "El seguimiento muestra el mismo pin sobre el mismo mapa",
     near(mariaPin, center(table(7)), 0.01),
   );
+  await maria.locator(".plan-box .plan-table").first().waitFor({ timeout: 10000 });
+  check(
+    "El seguimiento muestra el pin sobre el mismo plano, con las mesas numeradas como en la barra",
+    (await maria.locator(".plan-box .plan-table").count()) >= 10,
+  );
   await shot(maria, "04-seguimiento-pin-390", false);
 
   // El cliente se mueve: toca otro punto, confirma, y el pedido lo refleja.
@@ -321,7 +326,7 @@ try {
   await maria.getByText("Tu punto en el mapa").first().waitFor();
   await maria.getByRole("button", { name: "Confirmar este lugar" }).click();
   await maria
-    .getByText("Entrega en Punto en el mapa")
+    .getByText("Entrega en el punto marcado")
     .waitFor({ timeout: 10000 });
   const movedPin = await pinFraction(maria);
   check(
@@ -337,8 +342,8 @@ try {
   await card.waitFor({ timeout: 15000 });
   const cardText = (await card.innerText()).replace(/\s+/g, " ");
   check(
-    "La cola dice «Llevar a Punto en el mapa», avisa del cambio y ofrece «Ver en el mapa»",
-    cardText.includes("Llevar a Punto en el mapa") &&
+    "La cola dice «Llevar al punto marcado», avisa del cambio y ofrece «Ver en el mapa»",
+    cardText.includes("Llevar al punto marcado") &&
       /cambió su lugar a las/.test(cardText) &&
       cardText.includes("Ver en el mapa"),
     cardText,
@@ -773,7 +778,7 @@ try {
   await tapPlan(sofia, 0.5, 0.3, { touch: true });
   await sofia.getByRole("button", { name: /^Pedir/ }).click();
   await sofia.waitForURL(/\/orders\//, { timeout: 15000 });
-  await sofia.getByText("Entrega en Punto en el mapa").waitFor();
+  await sofia.getByText("Entrega en el punto marcado").waitFor();
   check(
     "Un local sin mesas numeradas entrega solo por pin dentro de su área (y rechaza lo de afuera)",
     true,

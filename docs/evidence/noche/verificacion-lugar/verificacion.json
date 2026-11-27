@@ -1,6 +1,6 @@
 {
   "app": "http://127.0.0.1:3200",
-  "at": "2026-11-27T06:59:28.545Z",
+  "at": "2026-11-27T07:34:46.203Z",
   "results": [
     {
       "name": "El QR de una mesa sin sesión pasa por el acceso y conserva el lugar",
@@ -35,7 +35,7 @@
     {
       "name": "La cola muestra «Llevar a Mesa 7 · Jardín» y avisa que cambió",
       "ok": true,
-      "detail": "#5ACB29 04:57 Llevar a Mesa 7 · Jardín Ver en el mapa El cliente cambió su lugar a las 12:59 a.m. Entró a las 12:59 a.m. 1× Cerveza 1× Spritz 2 productos Rechazar Aceptar"
+      "detail": "#BB0A06 04:57 Llevar a Mesa 7 · Jardín Ver en el mapa El cliente cambió su lugar a las 1:34 a.m. Entró a las 1:34 a.m. 1× Spritz 1× Cerveza 2 productos Rechazar Aceptar"
     },
     {
       "name": "En «Listos» el botón dice «Entregar en Mesa 7» y se cuentan los pedidos para llevar",
@@ -50,7 +50,7 @@
     {
       "name": "La entrega se confirma con el QR/código del cliente y nombra el lugar",
       "ok": true,
-      "detail": "Entregado #5ACB29 en Mesa 7 · Jardín 1× Cerveza, 1× Spritz"
+      "detail": "Entregado #BB0A06 en Mesa 7 · Jardín 1× Spritz, 1× Cerveza"
     },
     {
       "name": "«Cerrados hoy» dice dónde, cuándo y quién entregó",
@@ -135,7 +135,7 @@
     {
       "name": "El CSV trae encabezados, lugar, zona, hora y quién entregó",
       "ok": true,
-      "detail": "2026-11-26,5ACB29,Entregado,En el lugar,Mesa 7,Jardín,2026-11-27 00:59,2026-11-27 00:59,2026-11-27 00:59,Jorge Mora,7500.00,7500.00,0.00,\"1× Cerveza; 1× Spritz\""
+      "detail": "2026-11-26,BB0A06,Entregado,En el lugar,Mesa 7,Jardín,2026-11-27 01:34,2026-11-27 01:34,2026-11-27 01:34,Jorge Mora,7500.00,7500.00,0.00,\"1× Cerveza; 1× Spritz\""
     },
     {
       "name": "El CSV no incluye datos de clientes",
