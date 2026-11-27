@@ -1,6 +1,6 @@
 {
-  "generado": "2026-11-27T06:50:49.232Z",
-  "total": 21,
+  "generado": "2026-11-27T07:00:44.858Z",
+  "total": 23,
   "fallos": 0,
   "resultados": [
     {
@@ -15,6 +15,11 @@
     },
     {
       "name": "Amigos arranca vacío y explica cómo invitar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "«Copiar enlace de invitación» está habilitado",
       "ok": true,
       "detail": ""
     },
@@ -34,7 +39,12 @@
       "detail": ""
     },
     {
-      "name": "El enlace de invitación precarga el @usuario",
+      "name": "El enlace de invitación precarga el @usuario de quien invita",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Si quien invita ya pidió amistad, no se precarga: la acción es aceptar",
       "ok": true,
       "detail": ""
     },

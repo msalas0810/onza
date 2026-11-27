@@ -43,7 +43,10 @@ export function FriendsPanel({
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [handle, setHandle] = useState(invite ?? "");
+  // Si quien invitó ya es amigo o ya pidió amistad, no se precarga: la acción es aceptar, arriba.
+  const known = (u: string) =>
+    initial.friends.some((f) => f.username === u) || initial.incoming.some((r) => r.username === u);
+  const [handle, setHandle] = useState(invite && !known(invite) ? invite : "");
   const [venueId, setVenueId] = useState(preselectVenue ?? venues[0]?.id ?? "");
   const [minutes, setMinutes] = useState<(typeof checkinMinutes)[number]>(120);
   const [share, setShare] = useState(false);
@@ -75,13 +78,13 @@ export function FriendsPanel({
     }
   };
 
-  const link =
-    data.me && typeof window !== "undefined"
-      ? `${window.location.origin}/amigos?agregar=${encodeURIComponent(data.me.username)}`
-      : "";
+  // El enlace se arma al tocar (en el navegador): durante el render del servidor no hay window.
   const copy = async () => {
+    if (!data.me) return;
     try {
-      await navigator.clipboard.writeText(link);
+      await navigator.clipboard.writeText(
+        `${window.location.origin}/amigos?agregar=${encodeURIComponent(data.me.username)}`,
+      );
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -243,7 +246,7 @@ export function FriendsPanel({
                         `yes-${r.id}`,
                         { action: "friend_respond", requestId: r.id, accept: true },
                         `@${r.username} ya es tu amigo.`,
-                      )
+                      ).then((ok) => ok && handle.replace(/^@/, "") === r.username && setHandle(""))
                     }
                   >
                     Aceptar
@@ -281,7 +284,7 @@ export function FriendsPanel({
         {data.me && (
           <div className="invite-link">
             <span className="muted t-label">Tu @usuario es @{data.me.username}</span>
-            <Button variant="quiet" size="sm" onClick={() => void copy()} disabled={!link}>
+            <Button variant="quiet" size="sm" onClick={() => void copy()}>
               {copied ? <Check size={16} aria-hidden="true" /> : <Copy size={16} aria-hidden="true" />}
               {copied ? "Enlace copiado" : "Copiar enlace de invitación"}
             </Button>

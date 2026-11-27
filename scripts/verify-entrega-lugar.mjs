@@ -148,7 +148,7 @@ try {
   await ana.goto(`${APP}/admin/${PICNIC}?tab=entrega`);
   await ana.getByText("Lugares (13)").waitFor();
   await ana.locator(".r", { hasText: "Mesa 9" }).getByRole("switch").click();
-  await ana.getByText("Mesa 9 deshabilitado").waitFor({ timeout: 10000 });
+  await ana.getByText("Mesa 9 deshabilitado: ya no se puede elegir.").waitFor({ timeout: 10000 });
   const item = [{ productId: "30000000-0000-4000-8000-000000000017", quantity: 1, expectedProductVersion: 1 }];
   const create = (key, delivery) => ({ action: "create", venueId: PICNIC, items: item, idempotencyKey: key, termsVersion: "demo-v1", privacyVersion: "demo-v1", adult: true, delivery });
   const disabled = await command(maria, create("spot-disabled", { mode: "location", spotId: spotId(9) }));
@@ -210,18 +210,17 @@ try {
   await maria.getByRole("button", { name: /^Pedir/ }).click();
   await maria.waitForURL(/\/orders\//, { timeout: 15000 });
 
-  await ana.goto(`${APP}/admin/${PICNIC}?tab=resumen`);
-  await ana.getByRole("heading", { name: "Ahora" }).waitFor();
+  await ana.goto(`${APP}/admin/${PICNIC}`); // «Ahora» es la entrada del administrador (D-2026-11-27-01)
+  await ana.getByRole("heading", { name: "Ahora", exact: true }).waitFor();
   await ana.getByText(/pedido nuevo espera/).waitFor({ timeout: 15000 });
   const now = await text(ana);
   check("«Ahora» avisa del pedido nuevo que espera aceptación y enlaza a la barra", /1 pedido nuevo espera aceptación/.test(now) && (await ana.getByRole("link", { name: "Ir a la barra" }).count()) >= 1, now.slice(0, 200));
   await shot(ana, "11-admin-resumen-ahora-1280");
 
-  // Pausar y reanudar con un toque desde «Ahora».
-  await ana.goto(`${APP}/admin/${PICNIC}?tab=disponibilidad`);
+  // Pausar y reanudar con un toque, en la misma pantalla «Ahora».
   await ana.getByRole("button", { name: "Pausado" }).click();
   await ana.getByText("Guardado").waitFor({ timeout: 10000 });
-  await ana.goto(`${APP}/admin/${PICNIC}?tab=resumen`);
+  await ana.getByRole("button", { name: "Reanudar pedidos" }).waitFor({ timeout: 10000 });
   await ana.getByRole("button", { name: "Reanudar pedidos" }).click();
   await ana.getByText("El local vuelve a recibir pedidos.").waitFor({ timeout: 10000 });
   check("Un local pausado se reanuda en un toque desde «Ahora»", true);

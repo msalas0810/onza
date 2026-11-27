@@ -1,5 +1,5 @@
 {
-  "generado": "2026-11-27T06:48:24.385Z",
+  "generado": "2026-11-27T06:53:53.952Z",
   "total": 50,
   "fallos": 0,
   "resultados": [
@@ -96,7 +96,7 @@
     {
       "name": "La cola dice «Llevar a Punto en el mapa», avisa del cambio y ofrece «Ver en el mapa»",
       "ok": true,
-      "detail": "#FEF2F2 04:56 Llevar a Punto en el mapa Ver en el mapa El cliente cambió su lugar a las 12:48 a.m. Entró a las 12:47 a.m. 1× Spritz 1× Cerveza 2 productos Rechazar Aceptar"
+      "detail": "#1CF277 04:56 Llevar a Punto en el mapa Ver en el mapa El cliente cambió su lugar a las 12:53 a.m. Entró a las 12:53 a.m. 1× Cerveza 1× Spritz 2 productos Rechazar Aceptar"
     },
     {
       "name": "En la computadora de la barra el pin cae en el mismo lugar que en el teléfono (misma fracción de la imagen)",

@@ -350,7 +350,8 @@ function LocationLine({
   return (
     <p className="location-line">
       <MapPin size={16} aria-hidden="true" />
-      <span className="grow">Podés buscar por barrio o local.</span>
+      {/* El buscador ya dice «Buscar local, barrio o ciudad»: acá solo la acción de cercanía. */}
+      <span className="grow">Ordenar por cercanía</span>
       <button type="button" className="link-button" onClick={onLocate}>
         Usar mi ubicación
       </button>

@@ -128,12 +128,11 @@ time {
 .muted {
   color: var(--onza-text-muted);
 }
+/* Etiqueta de contexto: en minúscula y sin espaciado, del mismo cuerpo que el resto (sin «eyebrow» en mayúsculas). */
 .eyebrow {
-  font-size: var(--onza-type-caption-size);
-  line-height: var(--onza-type-caption-line);
-  font-weight: var(--onza-type-caption-weight);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
+  font-size: var(--onza-type-label-size);
+  line-height: var(--onza-type-label-line);
+  font-weight: 500;
   color: var(--onza-text-muted);
 }
 .t-title {
@@ -345,6 +344,11 @@ time {
   gap: var(--onza-space-4);
   margin-bottom: var(--onza-space-24);
 }
+/* Título con una acción al lado (Explorar → Actividad): misma línea mientras quepa. */
+.page-head.row {
+  display: flex;
+  gap: var(--onza-space-12);
+}
 .back {
   display: inline-flex;
   align-items: center;
@@ -446,7 +450,7 @@ time {
   color: var(--onza-on-brand);
 }
 .btn.primary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--onza-brand) 88%, #000);
+  background: color-mix(in srgb, var(--onza-brand) 88%, var(--onza-fixed-ink));
 }
 .btn.secondary,
 .button.secondary {
@@ -473,8 +477,8 @@ time {
   border-color: color-mix(in srgb, var(--onza-danger-text) 55%, transparent);
 }
 .btn.inverse {
-  background: #f4f1ed;
-  color: #0d0d0e;
+  background: var(--onza-fixed-paper);
+  color: var(--onza-fixed-ink);
 }
 /* Verde semántico para aceptar/entregar. En oscuro el token es claro, por eso el texto usa el fondo. */
 .btn.success {
@@ -715,7 +719,7 @@ textarea[aria-invalid="true"] {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  background: #f4f1ed;
+  background: var(--onza-fixed-paper);
   transition: transform var(--onza-motion-state) var(--onza-motion-ease);
 }
 .toggle input[role="switch"]:checked {
@@ -725,7 +729,12 @@ textarea[aria-invalid="true"] {
   transform: translateX(20px);
 }
 .toggle input[role="switch"]:disabled {
-  opacity: 0.42;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.toggle input[role="switch"]:disabled:not(:checked) {
+  background: var(--onza-surface);
+  border-color: var(--onza-border);
 }
 .chips {
   display: flex;
@@ -920,8 +929,8 @@ textarea[aria-invalid="true"] {
   border-radius: var(--onza-radius-control);
   display: grid;
   place-items: center;
-  background: #0d0d0e;
-  color: #f4f1ed;
+  background: var(--onza-fixed-ink);
+  color: var(--onza-fixed-paper);
   font: 700 16px/1 var(--onza-font);
   letter-spacing: -0.02em;
   border: 1px solid var(--onza-border);
@@ -1205,7 +1214,9 @@ a.vcard:focus-visible {
   background: color-mix(in srgb, var(--onza-text) 7%, transparent);
 }
 .stepper button:disabled {
-  opacity: 0.35;
+  opacity: 0.5;
+  color: var(--onza-text-muted);
+  cursor: not-allowed;
 }
 .stepper .qty {
   text-align: center;
@@ -1252,9 +1263,9 @@ a.vcard:focus-visible {
   align-items: center;
   gap: var(--onza-space-12);
   border-radius: var(--onza-radius-media);
-  border: 1px solid #2c2b2d;
-  background: #0d0d0e;
-  color: #f4f1ed;
+  border: 1px solid var(--onza-fixed-line);
+  background: var(--onza-fixed-ink);
+  color: var(--onza-fixed-paper);
   text-decoration: none;
 }
 .dock .total {
@@ -1269,8 +1280,8 @@ a.vcard:focus-visible {
   min-height: 44px;
   padding: 0 var(--onza-space-12);
   border-radius: var(--onza-radius-control);
-  background: #741f2c;
-  color: #f4f1ed;
+  background: var(--onza-fixed-mark);
+  color: var(--onza-fixed-paper);
   font-size: var(--onza-type-label-size);
   font-weight: 600;
 }
@@ -1577,8 +1588,8 @@ a.vcard:focus-visible {
   padding: var(--onza-space-24) var(--onza-space-20);
   border-radius: var(--onza-radius-sheet);
   border: 1px solid var(--onza-border);
-  background: #f4f1ed;
-  color: #0d0d0e;
+  background: var(--onza-fixed-paper);
+  color: var(--onza-fixed-ink);
 }
 .ticket .where {
   font-size: var(--onza-type-heading-size);
@@ -1586,19 +1597,19 @@ a.vcard:focus-visible {
 }
 .ticket .small {
   font-size: var(--onza-type-caption-size);
-  color: #5f5a54;
+  color: var(--onza-fixed-muted);
 }
 .ticket .qr {
   width: 208px;
   height: 208px;
   padding: 12px;
   border-radius: var(--onza-radius-control);
-  background: #fff;
+  background: var(--onza-fixed-qr); /* blanco puro: lo exige el lector de QR */
 }
 .ticket .qr img {
   width: 100%;
   height: 100%;
-  background: #fff;
+  background: var(--onza-fixed-qr); /* blanco puro: lo exige el lector de QR */
 }
 .ticket .code {
   font-size: 28px;
@@ -1610,7 +1621,7 @@ a.vcard:focus-visible {
   padding: 0 6px;
 }
 .ticket a {
-  color: #741f2c;
+  color: var(--onza-fixed-mark);
 }
 
 /* ---------- Equipo ---------- */
@@ -2740,7 +2751,7 @@ button.link-button {
   margin-inline: auto;
   width: 100%;
   border-radius: var(--onza-radius-media);
-  background: #0d0d0e;
+  background: var(--onza-fixed-ink);
 }
 .scanner video {
   width: 100%;
@@ -2750,9 +2761,9 @@ button.link-button {
 .scanner-frame {
   position: absolute;
   inset: 18%;
-  border: 3px solid #f4f1ed;
+  border: 3px solid var(--onza-fixed-paper);
   border-radius: var(--onza-radius-media);
-  box-shadow: 0 0 0 100vmax #0d0d0e66;
+  box-shadow: 0 0 0 100vmax var(--onza-fixed-shade);
 }
 .pickup-code-field {
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -3108,7 +3119,7 @@ button.link-button {
    se desplaza en horizontal. */
 .admin-tabs {
   position: sticky;
-  top: 0;
+  top: calc(var(--onza-size-header-staff) + env(safe-area-inset-top)); /* bajo la cabecera del equipo, que también es fija */
   z-index: 12;
   margin-inline: calc(-1 * var(--onza-layout-gutter));
   padding-inline: var(--onza-layout-gutter);
@@ -3178,8 +3189,9 @@ button.link-button {
   cursor: pointer;
 }
 .row-link:disabled {
-  cursor: default;
-  opacity: 0.7;
+  cursor: not-allowed;
+  opacity: 0.8;
+  color: var(--onza-text-muted);
 }
 
 /* Plan de pulido · E4: imágenes del local en Negocio. */
@@ -3248,9 +3260,9 @@ button.link-button {
   width: 1.5rem;
   height: 1.5rem;
   translate: -50% -50%;
-  border: 3px solid #fff;
+  border: 3px solid var(--onza-fixed-paper);
   border-radius: 50%;
-  box-shadow: 0 0 0 2px #0d0d0e99;
+  box-shadow: 0 0 0 2px var(--onza-fixed-shade-strong);
   pointer-events: none;
 }
 
@@ -3452,14 +3464,19 @@ button.link-button {
 .qr-img {
   border-radius: var(--onza-radius-control);
   border: 1px solid var(--onza-border);
-  background: #fff;
+  background: var(--onza-fixed-qr); /* blanco puro: lo exige el lector de QR */
 }
 /* Pulso del local en «Ahora»: cuatro números que se leen de un vistazo, en cifras tabulares. */
 .now-strip {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--onza-space-8);
   margin: var(--onza-space-12) 0;
+}
+@media (min-width: 560px) {
+  .now-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
 }
 .now-strip > div {
   padding: var(--onza-space-8) var(--onza-space-12);
@@ -3527,8 +3544,8 @@ button.link-button {
   padding: var(--onza-space-16);
   border-radius: var(--onza-radius-media);
   border: 1px solid var(--onza-border);
-  background: #fff;
-  color: #0d0d0e;
+  background: var(--onza-fixed-qr); /* blanco puro: lo exige el lector de QR */
+  color: var(--onza-fixed-ink);
   text-align: center;
   break-inside: avoid;
 }
@@ -3546,7 +3563,7 @@ button.link-button {
 }
 .qr-card figcaption span {
   font-size: var(--onza-type-label-size);
-  color: #5f5a54;
+  color: var(--onza-fixed-muted);
 }
 @media print {
   .shdr,
@@ -3558,7 +3575,7 @@ button.link-button {
     grid-template-columns: repeat(2, 1fr);
   }
   .qr-card {
-    border-color: #000;
+    border-color: var(--onza-fixed-ink);
   }
 }
 
@@ -3675,7 +3692,7 @@ button.link-button {
 .plan-pin {
   transform-origin: 50% 100%;
   line-height: 0;
-  filter: drop-shadow(0 2px 3px #0d0d0e66);
+  filter: drop-shadow(0 2px 3px var(--onza-fixed-shade));
 }
 .plan-pin svg {
   animation: plan-drop 0.22s var(--onza-motion-ease) both;
@@ -3713,8 +3730,10 @@ button.link-button {
   cursor: pointer;
 }
 .plan-controls button:disabled {
-  opacity: 0.45;
-  cursor: default;
+  opacity: 0.6;
+  background: var(--onza-surface);
+  color: var(--onza-text-muted);
+  cursor: not-allowed;
 }
 .plan-controls button:focus-visible {
   outline: 3px solid var(--onza-focus);

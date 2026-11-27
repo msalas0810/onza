@@ -66,14 +66,17 @@ try {
   await maria.getByLabel("@usuario de Onza").fill("@sofiav");
   await maria.getByRole("button", { name: "Enviar solicitud" }).click();
   await maria.getByText("Solicitud enviada a @sofiav.").waitFor();
+  check("«Copiar enlace de invitación» está habilitado", await maria.getByRole("button", { name: "Copiar enlace de invitación" }).isEnabled());
   check("María envía una solicitud por @usuario", (await text(maria)).includes("Esperando respuesta: @sofiav"));
   const bad = await social(maria, { action: "friend_request", username: "nadie_existe" });
   check("Un @usuario inexistente da 404 con mensaje claro", bad.status === 404 && bad.body.error === "FRIEND_NOT_FOUND");
   const staff = await social(ana, { action: "checkin", venueId: PICNIC, minutes: 60 });
   check("Una cuenta del equipo no puede usar lo social", staff.status === 403 && staff.body.error === "STAFF_NOT_SOCIAL");
 
+  await tomas.goto(`${APP}/amigos?agregar=mariasolis`);
+  check("El enlace de invitación precarga el @usuario de quien invita", (await tomas.getByLabel("@usuario de Onza").inputValue()) === "mariasolis");
   await sofia.goto(`${APP}/amigos?agregar=mariasolis`);
-  check("El enlace de invitación precarga el @usuario", (await sofia.getByLabel("@usuario de Onza").inputValue()) === "mariasolis");
+  check("Si quien invita ya pidió amistad, no se precarga: la acción es aceptar", (await sofia.getByLabel("@usuario de Onza").inputValue()) === "");
   await sofia.getByRole("button", { name: "Aceptar" }).click();
   await sofia.getByText("@mariasolis ya es tu amigo.").waitFor();
   check("Sofía acepta la solicitud recibida", (await text(sofia)).includes("María"));

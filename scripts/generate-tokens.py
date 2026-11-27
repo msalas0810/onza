@@ -15,6 +15,8 @@ def outputs():
     css += ':root {\n' + rules('light') + '\n'
     for key, value in tokens.get('access', {}).items():
         css += f'  --onza-access-{key}: {value};\n'
+    for key, value in tokens.get('fixed', {}).items():
+        css += f'  --onza-fixed-{key}: {value};\n'
     for group in ['space', 'radius', 'size']:
         for key, value in tokens[group].items():
             css += f'  --onza-{group}-{key}: {value}px;\n'

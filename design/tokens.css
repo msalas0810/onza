@@ -28,6 +28,14 @@
   --onza-access-glass: #120E10A6;
   --onza-access-glass-border: #FFFFFF2E;
   --onza-access-glass-focus: #F4F1ED;
+  --onza-fixed-ink: #0D0D0E;
+  --onza-fixed-paper: #F4F1ED;
+  --onza-fixed-mark: #741F2C;
+  --onza-fixed-line: #2C2B2D;
+  --onza-fixed-muted: #5F5A54;
+  --onza-fixed-qr: #FFFFFF;
+  --onza-fixed-shade: #0D0D0E66;
+  --onza-fixed-shade-strong: #0D0D0E99;
   --onza-space-4: 4px;
   --onza-space-8: 8px;
   --onza-space-12: 12px;
