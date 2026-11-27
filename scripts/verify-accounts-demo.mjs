@@ -1,8 +1,8 @@
-// Explicit existing Preview only; no screenshots, credentials, tokens or request dumps.
+// Known deployments only (it sends demo credentials); no screenshots, credentials, tokens or request dumps.
 import { chromium } from "playwright";
 import { writeFileSync } from "node:fs";
-const origin = process.argv[2];
-if (origin !== "https://onza-demo.vercel.app")
+const origin = process.env.ONZA_APP ?? process.argv[2];
+if (!/^https:\/\/(onza-demo\.vercel\.app|onza(-preview)?\.[a-z0-9-]+\.workers\.dev)$/.test(origin ?? ""))
   throw new Error("Expected the reviewed Onza Preview URL");
 if (
   process.env.NEXT_PUBLIC_SUPABASE_URL !==

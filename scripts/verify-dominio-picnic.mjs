@@ -6,7 +6,7 @@ import { readFileSync, writeFileSync, mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
-const APP = "https://onza-demo.vercel.app";
+const APP = process.env.ONZA_APP ?? "https://onza-demo.vercel.app";
 const OUT = `${process.argv[2] ?? `${tmpdir()}/onza-dominio`}/`;
 mkdirSync(OUT, { recursive: true });
 const PICNIC = "20000000-0000-4000-8000-000000000004";

@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Nombre de nivel superior distinto a propósito: un deploy sin --env no puede pisar Production.
+  "name": "onza-sin-entorno",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": { "directory": ".open-next/assets", "binding": "ASSETS" },
+  "observability": { "enabled": true },
+  // Antes de cada dev o deploy: frena un bundle con secretos adentro (ver scripts/cf-guard.mjs).
+  "build": { "command": "node scripts/cf-guard.mjs" },
+  // `vars` y `services` no se heredan entre entornos: van repetidos en cada uno.
+  // Acá solo van valores públicos. Los secretos y APP_ORIGIN se cargan con scripts/configure-workers-secrets.mjs.
+  "env": {
+    "preview": {
+      "name": "onza-preview",
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "onza-preview" }],
+      "vars": {
+        "ONZA_ENV": "preview",
+        "ACCOUNTS_REQUIRED": "true",
+        "DEMO_MODE": "true",
+        "PAYMENT_PROVIDER": "mock",
+        "REAL_PAYMENTS_ENABLED": "false",
+        "ENABLE_PAYMENT_SCENARIOS": "false",
+        "ENABLE_DESIGN_SYSTEM": "false"
+      }
+    },
+    "production": {
+      "name": "onza",
+      "services": [{ "binding": "WORKER_SELF_REFERENCE", "service": "onza" }],
+      "vars": {
+        "ONZA_ENV": "production",
+        "ACCOUNTS_REQUIRED": "true",
+        "DEMO_MODE": "true",
+        "PAYMENT_PROVIDER": "mock",
+        "REAL_PAYMENTS_ENABLED": "false",
+        "ENABLE_PAYMENT_SCENARIOS": "false",
+        "ENABLE_DESIGN_SYSTEM": "false"
+      }
+    }
+  }
+}

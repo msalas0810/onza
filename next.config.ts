@@ -18,9 +18,6 @@ function supabaseOrigin() {
  */
 function contentSecurityPolicy() {
   const images = ["'self'", "data:", "blob:", supabaseOrigin()];
-  // El Preview de Vercel carga su barra de comentarios solo para miembros del equipo.
-  if (process.env.VERCEL_ENV === "preview")
-    images.push("https://vercel.live", "https://vercel.com");
   return [
     "frame-ancestors 'none'",
     "base-uri 'self'",
