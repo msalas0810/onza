@@ -18,7 +18,7 @@ const require = createRequire(import.meta.url);
 const { chromium } = require("playwright");
 const SHOTS = process.argv.includes("--shots");
 const APP = process.env.ONZA_APP ?? "http://127.0.0.1:3000";
-const PORT = 54321;
+const PORT = Number(process.env.SHIM_PORT ?? 54321);
 const results = [];
 const errors = [];
 const check = (name, ok, detail = "") => {
