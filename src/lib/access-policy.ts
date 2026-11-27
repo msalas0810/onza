@@ -16,7 +16,7 @@ export const accountsRequired = (
   env: Record<string, string | undefined> = process.env,
 ) => env.ACCOUNTS_REQUIRED === "true";
 
-const CUSTOMER = /^\/(v|cart|checkout|orders|cuenta|settings)(\/|$)|^\/$/;
+const CUSTOMER = /^\/(v|cart|checkout|orders|cuenta|settings|amigos|actividad)(\/|$)|^\/$/;
 const STAFF = /^\/(staff|admin|onza)(\/|$)|^\/equipo\/(locales|clave)$/;
 const CUSTOMER_ENTRY = /^\/(acceso|confirmar|recuperar)$/;
 

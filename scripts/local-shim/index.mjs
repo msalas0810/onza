@@ -34,6 +34,7 @@ const MIGRATIONS = [
   "202611210024_resolve_rate_limit.sql",
   "202611260025_location_delivery.sql",
   "202611270026_delivery_map.sql",
+  "202611270027_social_activity.sql",
 ];
 const TABLES = new Set([
   "venues",
@@ -65,6 +66,21 @@ export const people = {
     email: "sofia@correo.demo",
     name: "Sofía Vargas",
     username: "sofiav",
+    kind: "customer",
+  },
+  // Clientes extra para probar amigos y actividad (D-2026-11-27-01).
+  tomas: {
+    id: "10000000-0000-4000-8000-0000000000b3",
+    email: "tomas@correo.demo",
+    name: "Tomás Quesada",
+    username: "tomasq",
+    kind: "customer",
+  },
+  valeria: {
+    id: "10000000-0000-4000-8000-0000000000b4",
+    email: "valeria@correo.demo",
+    name: "Valeria Chaves",
+    username: "valeriac",
     kind: "customer",
   },
   jorge: {
@@ -128,7 +144,7 @@ export async function createDatabase() {
     await db.exec(
       `insert into auth.users(id,email) values(${q(p.id)},${q(p.email)})`,
     );
-  for (const p of [people.maria, people.sofia])
+  for (const p of [people.maria, people.sofia, people.tomas, people.valeria])
     await db.exec(
       `insert into public.profiles(user_id,full_name,username,phone_country,phone_e164,birth_date,terms_version,privacy_version,terms_accepted_at) values(${q(p.id)},${q(p.name)},${q(p.username)},'+506','+50688887777','1995-05-05','borrador-1','borrador-1',now())`,
     );

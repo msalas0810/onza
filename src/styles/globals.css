@@ -373,7 +373,8 @@ time {
   height: calc(var(--onza-size-bottom-nav) + env(safe-area-inset-bottom));
   padding-bottom: env(safe-area-inset-bottom);
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
   background: var(--onza-bg);
   border-top: 1px solid var(--onza-border);
 }
@@ -1944,6 +1945,12 @@ a.vcard:focus-visible {
 .rows {
   display: grid;
   border-top: 1px solid var(--onza-border);
+}
+ul.rows,
+ol.rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 .rows .r {
   display: flex;
@@ -3840,4 +3847,95 @@ button.link-button {
   border-radius: var(--onza-radius-control);
   border: 1px solid var(--onza-border);
   background: var(--onza-bg);
+}
+
+/* ---------- Actividad y amigos (202611270027) ---------- */
+.activity-lead {
+  margin-bottom: var(--onza-space-16);
+}
+.activity {
+  display: grid;
+  gap: var(--onza-space-16);
+  margin: 0 0 var(--onza-space-24);
+}
+.activity-map {
+  width: 100%;
+  height: auto;
+  border-radius: var(--onza-radius-media);
+  border: 1px solid var(--onza-border);
+  background: var(--onza-surface);
+}
+.activity-bg {
+  fill: var(--onza-surface);
+}
+.activity-grid {
+  fill: none;
+  stroke: var(--onza-border);
+  stroke-width: 0.3;
+}
+.heat-core {
+  stop-color: var(--onza-chart);
+  stop-opacity: 0.75;
+}
+.heat-edge {
+  stop-color: var(--onza-chart);
+  stop-opacity: 0;
+}
+.activity-spot circle:first-child {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: heat-breathe 3.2s var(--onza-motion-ease) infinite alternate;
+}
+.activity-dot {
+  fill: var(--onza-text);
+}
+@keyframes heat-breathe {
+  to {
+    opacity: 0.7;
+    transform: scale(0.92);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .activity-spot circle:first-child {
+    animation: none;
+  }
+}
+.activity-swatch {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--onza-chart);
+  flex: none;
+}
+.activity-swatch[data-level="1"] {
+  opacity: 0.4;
+}
+.activity-swatch[data-level="2"] {
+  opacity: 0.7;
+}
+.checkin-now {
+  display: flex;
+  align-items: center;
+  gap: var(--onza-space-12);
+  color: var(--onza-text);
+}
+.friend-venue {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--onza-space-4);
+  color: var(--onza-success-text);
+  font-weight: 600;
+}
+.invite-link {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--onza-space-8);
+  margin-top: var(--onza-space-12);
+}
+.social .saved {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--onza-space-4);
 }

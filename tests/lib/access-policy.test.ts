@@ -14,6 +14,8 @@ describe("política de acceso", () => {
       "/checkout",
       "/orders",
       "/cuenta",
+      "/amigos",
+      "/actividad",
     ])
       expect(decideAccess(p, none)).toBe(
         `/acceso?next=${encodeURIComponent(p)}`,

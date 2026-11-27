@@ -1,5 +1,10 @@
 // El orden importa: errorCode toma la primera clave contenida en el texto (ORDER_EXPIRED antes que EXPIRED).
 export const messages: Record<string, string> = {
+  STAFF_NOT_SOCIAL:
+    "Amigos y actividad son para cuentas personales. Entrá con tu cuenta de cliente.",
+  FRIEND_NOT_FOUND: "No encontramos a nadie con ese @usuario. Revisalo y volvé a intentar.",
+  FRIEND_SELF: "Ese es tu propio @usuario.",
+  CHECKIN_REQUIRED: "Primero marcá en qué local estás para poder compartirlo.",
   ORDER_EXPIRED:
     "Pasaron los cinco minutos para aceptar este pedido. Venció y la reserva quedó liberada.",
   PRODUCT_ARCHIVED:

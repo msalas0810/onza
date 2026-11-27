@@ -58,6 +58,33 @@ export type Database = {
         };
         Relationships: [];
       };
+      friendships: {
+        Row: {
+          id: string;
+          requester: string;
+          addressee: string;
+          status: string;
+          created_at: string;
+          responded_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          requester: string;
+          addressee: string;
+          status?: string;
+          created_at?: string;
+          responded_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          requester?: string;
+          addressee?: string;
+          status?: string;
+          created_at?: string;
+          responded_at?: string | null;
+        };
+        Relationships: [];
+      };
       memberships: {
         Row: { user_id: string; venue_id: string; role: string };
         Insert: { user_id: string; venue_id: string; role: string };
@@ -343,6 +370,36 @@ export type Database = {
         };
         Relationships: [];
       };
+      venue_checkins: {
+        Row: {
+          id: string;
+          user_id: string;
+          venue_id: string;
+          share_with_friends: boolean;
+          created_at: string;
+          expires_at: string;
+          ended_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          venue_id: string;
+          share_with_friends?: boolean;
+          created_at?: string;
+          expires_at: string;
+          ended_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          venue_id?: string;
+          share_with_friends?: boolean;
+          created_at?: string;
+          expires_at?: string;
+          ended_at?: string | null;
+        };
+        Relationships: [];
+      };
       venue_maps: {
         Row: {
           id: string;
@@ -550,6 +607,17 @@ export type Database = {
       venue_map_save: { Args: { input: Json }; Returns: Json };
       venue_map_area: { Args: { input: Json }; Returns: Json };
       venue_map_remove: { Args: { input: Json }; Returns: Json };
+      social_checkin: { Args: { input: Json }; Returns: Json };
+      social_checkout: { Args: Record<never, never>; Returns: Json };
+      social_share: { Args: { share: boolean }; Returns: Json };
+      social_friend_request: { Args: { handle: string }; Returns: Json };
+      social_friend_respond: {
+        Args: { request: string; accept: boolean };
+        Returns: Json;
+      };
+      social_friend_remove: { Args: { friend: string }; Returns: Json };
+      social_overview: { Args: Record<never, never>; Returns: Json };
+      venue_activity: { Args: Record<never, never>; Returns: Json };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

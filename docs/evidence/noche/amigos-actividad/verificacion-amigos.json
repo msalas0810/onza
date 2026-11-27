@@ -1,0 +1,112 @@
+{
+  "generado": "2026-11-27T06:50:49.232Z",
+  "total": 21,
+  "fallos": 0,
+  "resultados": [
+    {
+      "name": "Sin actividad, el mapa muestra un estado útil con la acción «Marcar que estoy acá»",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El ejemplo simulado está rotulado y usa lugares ficticios",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Amigos arranca vacío y explica cómo invitar",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "María envía una solicitud por @usuario",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Un @usuario inexistente da 404 con mensaje claro",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Una cuenta del equipo no puede usar lo social",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "El enlace de invitación precarga el @usuario",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sofía acepta la solicitud recibida",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Compartir arranca apagado",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "María marca que está en Picnic, por 1 h",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sin compartir, su amiga no ve el local",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Al compartir, la pantalla dice hasta qué hora",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Su amiga ve «Picnic, hasta las …»",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Alguien fuera de la relación no ve nada de María",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Dejar de compartir es inmediato",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "(Preparación) coordenadas de prueba para el local ficticio Picnic",
+      "ok": true,
+      "detail": "200"
+    },
+    {
+      "name": "Con 2 personas (conteo chico) el local no aparece",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Con 3 personas aparece Picnic con un nivel, sin números de personas",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Al salir María, vuelve a quedar por debajo del mínimo",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Quitar la amistad corta la relación para los dos",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "Sin errores de página",
+      "ok": true,
+      "detail": ""
+    }
+  ]
+}
