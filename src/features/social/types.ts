@@ -43,7 +43,6 @@ export const activitySchema = z.array(
     level: z.union([z.literal(1), z.literal(2), z.literal(3)]),
   }),
 );
-export type VenueActivity = z.infer<typeof activitySchema>[number];
 
 /** El nivel nunca es un número de personas: es un rango (3–9, 10–24, 25 o más). */
 export const activityLevelLabel: Record<1 | 2 | 3, string> = {

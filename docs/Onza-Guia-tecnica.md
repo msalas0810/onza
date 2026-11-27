@@ -132,6 +132,19 @@ Personas del shim (cualquier contraseña): `maria@correo.demo` y `sofia@correo.d
 
 Migración `202611260025` (aditiva, **sin aplicar en remoto**). Diseño, decisiones y pasos para probar Picnic: `docs/Onza-Entrega-en-el-lugar.md`. Recorrido en navegador con el shim y `next dev` (como arriba): `ONZA_APP=http://127.0.0.1:3100 node scripts/verify-entrega-lugar.mjs [carpeta-capturas]` (reiniciá el shim antes de repetirlo: crea pedidos).
 
+### Mapa de Picnic, administración por momentos, actividad y amigos (noviembre de 2026)
+
+Migraciones `202611270026` (mapa del local con pin) y `202611270027` (check-ins, amigos y mapa de actividad), aditivas y **sin aplicar en remoto**. Decisiones, referencias y pendientes: `docs/Onza-Noche-decisiones.md`. Con el shim recién iniciado y la app apuntando a él (`npm run demo:local`, o el bloque de arriba), en este orden y reiniciando el shim entre uno y otro porque crean datos:
+
+```bash
+ONZA_APP=http://127.0.0.1:3100 node scripts/verify-entrega-mapa.mjs [carpeta]       # QR → login → pin → pedido → mismo pin en barra → entrega (50)
+ONZA_APP=http://127.0.0.1:3100 node scripts/verify-entrega-lugar.mjs [carpeta]       # lugares nombrados, cola, «Ahora», CSV, QR (43)
+ONZA_APP=http://127.0.0.1:3100 node scripts/verify-amigos-actividad.mjs [carpeta]    # solicitud, aceptar, compartir, cortar, conteos chicos (23)
+ONZA_APP=http://127.0.0.1:3100 node scripts/shots-noche.mjs <carpeta>                # capturas comparables antes/después
+```
+
+Con otro puerto del shim, agregá `SHIM_URL=http://127.0.0.1:<puerto>`. Clientes extra del shim para amigos: `tomas@correo.demo` y `valeria@correo.demo`.
+
 ### Auditoría de seguridad y escala (noviembre de 2026)
 
 Informe, matriz de roles, hallazgos con su prueba y pendientes: `docs/Onza-Auditoria-seguridad-y-escala.md`; operación: `docs/Onza-Runbook-operacion.md`. Migraciones nuevas (aditivas, **sin aplicar en remoto**): `202611210021` a `202611210023`. Las pruebas de concurrencia, migraciones y carga usan un Postgres 17 real y efímero que se instala **una vez fuera del repo** (instrucciones en `scripts/audit/pg.mjs`); no tocan ningún proyecto remoto:

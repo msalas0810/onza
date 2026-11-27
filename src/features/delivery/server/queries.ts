@@ -19,19 +19,6 @@ export async function listSpots(venueId: string): Promise<Spot[]> {
   return data.map((row) => spotSchema.parse(row));
 }
 
-/** Un lugar habilitado de este local (para precargarlo desde el QR de una mesa); null si no corresponde. */
-export async function findEnabledSpot(venueId: string, spotId: string) {
-  const db = await serverDb();
-  const { data } = await db
-    .from("delivery_spots")
-    .select("*")
-    .eq("venue_id", venueId)
-    .eq("id", spotId)
-    .eq("enabled", true)
-    .maybeSingle();
-  return data ? spotSchema.parse(data) : null;
-}
-
 /**
  * Cómo entrega un local y qué lugares ofrece, para el checkout y el seguimiento. Lectura pública: un local desconocido
  * responde 404 y los lugares deshabilitados nunca llegan al cliente.
