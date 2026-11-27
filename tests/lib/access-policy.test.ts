@@ -16,6 +16,12 @@ describe("política de acceso", () => {
       "/cuenta",
       "/amigos",
       "/actividad",
+      "/juego",
+      "/tienda",
+      "/avatar",
+      "/ranking",
+      "/bares",
+      "/historias",
     ])
       expect(decideAccess(p, none)).toBe(
         `/acceso?next=${encodeURIComponent(p)}`,

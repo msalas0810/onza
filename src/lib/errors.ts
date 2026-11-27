@@ -116,6 +116,42 @@ export const messages: Record<string, string> = {
   LAST_ADMIN: "El local necesita al menos un administrador.",
   WEAK_PASSWORD: "Usá al menos 10 caracteres.",
   SAME_PASSWORD: "La contraseña nueva tiene que ser distinta de la temporal.",
+  STAFF_NOT_PLAYER:
+    "Tienda, avatar y ranking son para cuentas personales. Entrá con tu cuenta de cliente.",
+  INSUFFICIENT_COINS: "No tenés suficientes Avatar Coins para este artículo.",
+  ALREADY_OWNED: "Ya tenés este artículo.",
+  LEVEL_TOO_LOW: "Todavía no llegaste al nivel que pide este artículo.",
+  NOT_FOR_SALE:
+    "Este artículo es exclusivo: no se vende, se consigue con logros o campañas.",
+  ITEM_NOT_AVAILABLE: "Este artículo no está disponible ahora.",
+  ITEM_NOT_OWNED: "Primero conseguí este artículo para poder equiparlo.",
+  ITEM_NOT_FOUND: "No encontramos ese artículo para esa ranura.",
+  INCOMPATIBLE_ITEM: "Este artículo no le queda al cuerpo de tu avatar.",
+  COIN_PURCHASES_DISABLED:
+    "La compra de monedas no está habilitada todavía. Podés ganarlas pidiendo y participando.",
+  PACKAGE_NOT_FOUND: "Ese paquete de monedas no está disponible.",
+  ADULT_REQUIRED: "Esta función es solo para mayores de 18 años.",
+  GIFTS_NOT_AVAILABLE: "Enviar un trago todavía no está disponible.",
+  VENUE_GIFTS_DISABLED: "Este local no habilitó enviar tragos.",
+  VENUE_STORIES_DISABLED: "Este local no habilitó historias.",
+  NOT_FRIENDS: "Solo podés enviar un trago a una amistad aceptada.",
+  TOO_MANY_PENDING: "Ya tenés varios tragos pendientes. Esperá a que respondan.",
+  GIFT_NOT_PENDING: "Este trago ya no está pendiente.",
+  GIFT_NOT_CANCELABLE: "Este trago ya no se puede cancelar.",
+  PRODUCT_NOT_AVAILABLE: "Ese producto no está disponible en este local.",
+  PRODUCT_NOT_FOUND: "Ese producto no pertenece al local elegido.",
+  ALREADY_EXISTS: "Ese archivo ya se publicó.",
+  EMPTY_IMPORT: "El archivo no trae filas para importar.",
+  IMPORT_NOT_PENDING: "Esta importación ya se aplicó o se descartó.",
+  CATEGORY_CHANGE_NOT_ALLOWED:
+    "No se puede cambiar la categoría de un artículo existente. Retirá el artículo y creá uno nuevo.",
+  DEMO_NOT_CONFIGURED: "Las cuentas demo no están cargadas en este entorno.",
+  DEMO_LOGIN_FAILED: "No pudimos abrir esa cuenta demo.",
+  NOT_FOUND: "No encontramos lo que buscabas.",
+  BUDGET_BELOW_ISSUED:
+    "El presupuesto no puede ser menor a lo que ya se emitió en esta campaña.",
+  FUNDER_LOCKED:
+    "No se puede cambiar quién financia una campaña que ya emitió puntos.",
 };
 export function errorCode(error: unknown) {
   if (error instanceof Error && error.name === "AuthSessionMissingError")

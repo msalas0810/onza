@@ -45,7 +45,7 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | Demo desplegada | https://onza-demo.vercel.app (Vercel, sin cambios) y, nuevo y en prueba, https://onza-demo.onza.workers.dev (Cloudflare Workers, mismo Supabase `onza-dev`; ver D-2026-11-27-06) |
 | Backend | Supabase alojado `onza-dev` con las migraciones 001–027 aplicadas, `accounts_required=true`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Recorrido completo contra el dominio de Cloudflare con las cuentas demo y decidir si se apaga Vercel (D-2026-11-27-06). Antes: Prueba física en iPhone y Android del pedido con pin en Picnic, incluido el QR de mesa. Decidir qué hacer con las cuatro ramas sin integrar (PEN-013). |
+| Siguiente tarea exacta | Probar a mano en el dominio de Cloudflare el recorrido del juego (pedido entregado → monedas → tienda → equipar) y decidir PEN-015/PEN-019 (D-2026-11-27-09). Antes: Prueba física en iPhone y Android del pedido con pin en Picnic, incluido el QR de mesa. Decidir qué hacer con las cuatro ramas sin integrar (PEN-013). |
 
 ### Pendientes abiertos
 
@@ -65,6 +65,11 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-012 | Actividad y amigos: 027 aplicada (D-2026-11-27-05). Falta cargar coordenadas verificadas (Picnic no tiene), elegir proveedor de mapa base si se quieren calles, probar amistad entre dos cuentas en el demo y revisar si el mínimo de 5 personas sube a 10. Ver `docs/Onza-Noche-decisiones.md` §4 | 2026-11-27 |
 | PEN-013 | Decidir sobre las ramas no integradas: `claude/cool-hawking-4i6xag` y `claude/affectionate-fermat-s2u74m` (dos versiones de entrada como invitado; chocan con el acceso obligatorio del blueprint §0), `claude/kind-cannon-4gv720` (fidelización sin interfaz) y `feat/mapa-interactivo` (otro mapa, con editor y zoom). Sus migraciones 025/026 chocan en número con las aplicadas: habría que renumerarlas | 2026-11-27 |
 | PEN-014 | Production no tiene `SUPABASE_SERVICE_ROLE_KEY` (el Preview anterior tampoco): el alta de cuentas del equipo (`/api/team`) no funciona en el demo publicado. Decidir si se carga | 2026-11-27 |
+| PEN-015 | **Enviar un trago**: falta el cobro al remitente y el pedido regalado (cambia `onza_command`; requiere aprobación y pruebas de concurrencia). Hoy apagado. Ver `docs/Onza-Juego-y-economia.md` | 2026-11-27 |
+| PEN-016 | Diseños definitivos de avatares: subir los archivos (carpeta pública, Storage o CDN; si es CDN, `AVATAR_ASSET_ORIGINS`) e importar el CSV. Hoy hay 13 artículos `prov_*` | 2026-11-27 |
+| PEN-017 | **Canje de cashback en el checkout**: no hecho (cambia monto autorizado y capturado). Programador de vencimientos y programa compartido entre locales, pendientes. Ver `docs/loyalty.md` | 2026-11-27 |
+| PEN-018 | Compra real de Avatar Coins: hoy solo simulada; depende de BAC (PEN-006). Cargar paquetes y activar `coin_purchases_enabled` solo para pruebas | 2026-11-27 |
+| PEN-019 | Vercel no tiene estos cambios (solo Cloudflare, rama `claude/eloquent-hamilton-rw4w0y`). Falta decidir si se integra a `main`; el blueprint §0 aún no registra fidelización ni juego como parte del producto | 2026-11-27 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -93,6 +98,20 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ---
 
 ## Entradas
+
+### D-2026-11-27-09 · Fidelización, Avatar Coins, XP, tienda de avatares y ONZA Social
+
+- **Fecha:** 2026-11-27 (America/Costa_Rica)
+- **Persona:** Manu (encargo: plataforma social de bares con cashback, Avatar Coins, tienda de avatares, importador CSV y siete funciones sociales, sin diseños definitivos).
+- **IA:** Claude Code · claude-sonnet-5-5
+- **Rama y commits:** `claude/eloquent-hamilton-rw4w0y` · hash en el commit de esta entrada. No se tocó `main`.
+- **Qué cambió:** tres sistemas independientes con libros append-only: **cashback** (puntos con valor, 1 punto = ₡1, rescatado de `claude/kind-cannon-4gv720` y renumerado a 028), **Avatar Coins** y **XP** (029). Avatares con 12 ranuras, catálogo con `sku`, inventario, tienda y equipado (030) con **importador CSV** (vista previa exacta, aplicar, historial; las compras se conservan al actualizar por `sku`). Social (031–032): ranking entre amigos y por bar, mapa de bares desbloqueables por visita verificada, «quién está en el bar» con avatares y privacidad, Drink Stories (bucket privado, reportes, moderación) y el modelo de «enviar un trago». Pantallas de cliente (`/juego`, `/avatar`, `/tienda`, `/ranking`, `/bares`, `/historias`), pestaña «Fidelización y social» del local y `/onza/economia`, `/onza/catalogo`, `/onza/moderacion`. Detalle y reglas en `docs/Onza-Juego-y-economia.md`.
+- **Hallazgos corregidos en el camino:** (1) una función interna `private.coin_grant` era ejecutable por cualquier cuenta autenticada (default PUBLIC de las funciones nuevas): se revoca explícitamente en cada migración y hay pruebas que lo comprueban; (2) las expresiones regulares de PostgreSQL no admiten `{3,500}` (rechazaba toda referencia de diseño); (3) las rutas nuevas quedaban visibles sin sesión: se agregaron a `CUSTOMER` en `access-policy.ts`; (4) los triggers de economía podían bloquear una entrega si fallaban: ahora son a prueba de fallos.
+- **Base de datos:** migraciones 028–032 aplicadas en `onza-dev` (cada una en una transacción) y registradas en el historial. Antes y después: los conteos de las tablas existentes no cambiaron. RLS en todas las tablas nuevas, sin permisos directos, funciones internas no ejecutables por el cliente, bucket `stories` privado. Hay 13 artículos provisionales (`prov_*`).
+- **Verificado:** `npm run typecheck`, `npm run lint` (0 errores), `vitest run` 58 archivos / 338 pruebas (nuevas: 21 de economía, 18 de tienda e importador, 16 de social y almacenamiento, 8 del parser CSV, 18 del cimiento de cashback, más las rutas en la política de acceso). Asesor de seguridad de Supabase sin hallazgos críticos nuevos. En vivo en `onza-demo.onza.workers.dev`: login demo, las 7 pantallas del cliente cargan con datos reales, errores en español, 403 sin `Origin`, comandos de ONZA negados a un cliente. Administración de ONZA probada contra la base real dentro de una transacción revertida: configuración, vista previa del CSV (1 crear, 1 actualizar, 1 error, catálogo intacto) y rechazo a un cliente.
+- **No verificado:** compra de un artículo, equipado y ganancias con un pedido entregado de punta a punta en el demo (cubierto por pruebas de base, no por navegador); subida real de una historia a Storage; tablero de ranking con varias cuentas; pantallas de ONZA y de la pestaña del local en navegador (compilan y sus RPC están probadas, sin recorrer); iPhone y Android físicos.
+- **Decisiones:** (a) las monedas y el XP se otorgan al **entregar** (no al cobrar); el cashback sigue al **cobrar**. (b) Visita verificada = pedido entregado, no check-in. (c) Rankings por bar opt-in. (d) Comprar monedas solo con pago simulado (`assertMockPayments`); BAC sigue sin configurar. (e) **Enviar un trago queda apagado** (`social_gifts_available=false`): cobrar y crear el pedido exige cambiar `onza_command`, reservado a una etapa autorizada. (f) Los diseños no bloquean nada: el SVG provisional se reemplaza por `asset_ref`/`preview_ref` del CSV.
+- **Pendientes / siguiente paso:** ver PEN-015 a PEN-019. Primero: probar a mano el recorrido con una cuenta y un pedido entregado, y aprobar el diseño del pedido regalado.
 
 ### D-2026-11-27-08 · Secrets de cuentas demo cargados en el Worker de Cloudflare
 

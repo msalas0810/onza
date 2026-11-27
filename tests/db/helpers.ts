@@ -26,6 +26,10 @@ export const LATER_MIGRATIONS = [
   "202611260025_location_delivery.sql",
   "202611270026_delivery_map.sql",
   "202611270027_social_activity.sql",
+  "202611270028_loyalty_foundation.sql",
+  "202611270029_economy_core.sql",
+  "202611270030_avatar_store.sql",
+  "202611270031_social_game.sql",
 ];
 export async function database() {
   const db = new PGlite();

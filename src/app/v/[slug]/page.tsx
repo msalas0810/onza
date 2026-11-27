@@ -8,6 +8,7 @@ import { Notice, buttonClass } from "@/components/ui/primitives";
 import { getVenueMap, listSpots } from "@/features/delivery/server/queries";
 import { SpotEntry } from "@/features/delivery/components/spot-entry";
 import { offersLocation, type DeliveryMode } from "@/features/delivery/types";
+import { PresenceStrip } from "@/features/game/components/presence-strip";
 
 export const dynamic = "force-dynamic";
 export default async function MenuPage({
@@ -51,6 +52,7 @@ export default async function MenuPage({
         )}
       </div>
       <VenueHero venue={venue} />
+      <PresenceStrip venueId={venue.id} />
       {closed ? (
         <Notice
           title="Cerrado"
