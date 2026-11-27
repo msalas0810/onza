@@ -126,7 +126,12 @@ try {
     await bar.locator("article.ocard").first().waitFor({ timeout: 20000 });
   }
   check("La barra recibe el pedido sin recargar la página", live);
-  const card = bar.locator("article.ocard", { hasText: "Spritz" }).last();
+  // El pedido nuevo es el que todavía se puede aceptar (una corrida cortada puede dejar otro a medias).
+  const card = bar
+    .locator("article.ocard", { hasText: "Spritz" })
+    .filter({ has: bar.getByRole("button", { name: "Aceptar" }) })
+    .last();
+  const publicCode = (await card.innerText()).match(/#[0-9A-F]{6}/)[0];
   const cardText = (await card.innerText()).replace(/\s+/g, " ");
   check("La tarjeta de la barra dice «Llevar al punto marcado» y ofrece el mapa", cardText.includes("Llevar al punto marcado") && cardText.includes("Ver en el mapa"));
   await shot(bar, "04-barra-cola");
@@ -139,7 +144,7 @@ try {
   step = "barra: preparar";
   await card.getByRole("button", { name: "Aceptar" }).click();
   await openLane(bar, "Preparando");
-  await bar.getByRole("button", { name: "Marcar listo" }).first().click();
+  await bar.locator("article.ocard", { hasText: publicCode }).getByRole("button", { name: "Marcar listo" }).click();
   await openLane(bar, "Listos");
   await bar.getByRole("button", { name: /Entregar en/ }).first().waitFor({ timeout: 20000 });
 
@@ -150,7 +155,7 @@ try {
   check("El cliente ve su QR y código privado", (await customer.locator(".ticket .qr img").count()) === 1 && code.length >= 8);
 
   step = "barra: entregar";
-  await bar.getByRole("button", { name: /Entregar en/ }).first().click();
+  await bar.getByRole("button", { name: "Validar retiro" }).first().click();
   await bar.getByLabel("Código privado").fill(code);
   await bar.getByRole("button", { name: "Validar", exact: true }).click();
   await bar.getByRole("button", { name: /Marcar como cobrado/ }).click({ timeout: 20000 });
@@ -174,18 +179,23 @@ try {
   await customer.goto(`${APP}/amigos`);
   await customer.getByLabel("@usuario de Onza").waitFor({ timeout: 20000 });
   check("Amigos abre para la cuenta de cliente", true);
-  await customer.goto(`${APP}/v/picnic`);
-  await customer.getByRole("link", { name: "Estoy acá" }).click();
-  await customer.waitForURL(/\/amigos\?local=picnic/, { timeout: 20000 });
-  const sw = customer.getByRole("switch", { name: "Que mis amigos vean este local" });
-  check("Compartir arranca apagado", !(await sw.isChecked()));
-  await customer.getByRole("button", { name: "1 h" }).click();
-  await customer.getByRole("button", { name: "Estoy acá", exact: true }).click();
-  await customer.getByText("Listo, contás para la actividad del local.").waitFor({ timeout: 20000 });
-  check("El check-in en Picnic funciona contra la base real", true);
-  await shot(customer, "08-amigos-checkin", true);
-  const out = await customer.request.post(`${APP}/api/social`, { headers: { origin: APP, "content-type": "application/json" }, data: { action: "checkout" } });
-  check("Salir del check-in funciona (no queda actividad de prueba)", out.ok(), String(out.status()));
+  // Si la cuenta ya tiene un check-in (alguien la está usando), no se toca.
+  if (await customer.getByRole("button", { name: "Me fui" }).isVisible()) {
+    console.log("– Check-in omitido: la cuenta ya tiene uno activo");
+  } else {
+    await customer.goto(`${APP}/v/picnic`);
+    await customer.getByRole("link", { name: "Estoy acá" }).click();
+    await customer.waitForURL(/\/amigos\?local=picnic/, { timeout: 20000 });
+    const sw = customer.getByRole("switch", { name: "Que mis amigos vean este local" });
+    check("Compartir arranca apagado", !(await sw.isChecked()));
+    await customer.getByRole("button", { name: "1 h" }).click();
+    await customer.getByRole("button", { name: "Estoy acá", exact: true }).click();
+    await customer.getByText("Listo, contás para la actividad del local.").waitFor({ timeout: 20000 });
+    check("El check-in en Picnic funciona contra la base real", true);
+    await shot(customer, "08-amigos-checkin", true);
+    const out = await customer.request.post(`${APP}/api/social`, { headers: { origin: APP, "content-type": "application/json" }, data: { action: "checkout" } });
+    check("Salir del check-in funciona (no queda actividad de prueba)", out.ok(), String(out.status()));
+  }
 
   step = "admin";
   const admin = await open("admin", 1280, 900);

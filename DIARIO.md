@@ -40,12 +40,12 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | Campo | Valor |
 | --- | --- |
 | Rama vigente de trabajo | `main` es la única versión oficial (consolidada el 2026-11-27, D-2026-11-27-05). Se trabaja con ramas `feat/*` o `fix/*` y PR |
-| `main` | Versión oficial. **Cada push a `main` despliega a Production** en Vercel. Código validado en el demo: `238aa87`; los commits posteriores del 2026-11-27 son documentación y scripts |
+| `main` | Versión oficial. **Cada push a `main` despliega a Production** en Vercel. Código de la app vigente: `8fbe29a` |
 | Commit desplegado en Vercel | La punta de `main`. El primer deployment de Production fue `dpl_8DNAyssP9ShpdqoApx4aeE683Vkh`, desde `238aa87` |
 | Demo desplegada | https://onza-demo.vercel.app (dominio de Production del proyecto `onza-demo`; ya no está atado a la rama `fix/hosted-integration`) |
 | Backend | Supabase alojado `onza-dev` con las migraciones 001–027 aplicadas, `accounts_required=true`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Prueba física en iPhone y Android del pedido con pin en Picnic, incluido el QR de mesa. Decidir qué hacer con las cuatro ramas sin integrar (PEN-013). |
+| Siguiente tarea exacta | **Desbloquear el registro (PEN-015):** hoy sigue fallando hasta que una persona desactive «Confirm email» o se configure un SMTP propio. Después, los pendientes de lanzamiento (PEN-016). |
 
 ### Pendientes abiertos
 
@@ -65,6 +65,8 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-012 | Actividad y amigos: 027 aplicada (D-2026-11-27-05). Falta cargar coordenadas verificadas (Picnic no tiene), elegir proveedor de mapa base si se quieren calles, probar amistad entre dos cuentas en el demo y revisar si el mínimo de 5 personas sube a 10. Ver `docs/Onza-Noche-decisiones.md` §4 | 2026-11-27 |
 | PEN-013 | Decidir sobre las ramas no integradas: `claude/cool-hawking-4i6xag` y `claude/affectionate-fermat-s2u74m` (dos versiones de entrada como invitado; chocan con el acceso obligatorio del blueprint §0), `claude/kind-cannon-4gv720` (fidelización sin interfaz) y `feat/mapa-interactivo` (otro mapa, con editor y zoom). Sus migraciones 025/026 chocan en número con las aplicadas: habría que renumerarlas | 2026-11-27 |
 | PEN-014 | Production no tiene `SUPABASE_SERVICE_ROLE_KEY` (el Preview anterior tampoco): el alta de cuentas del equipo (`/api/team`) no funciona en el demo publicado. Decidir si se carga | 2026-11-27 |
+| PEN-015 | Registro con correo: el alta exige confirmación y el correo integrado de Supabase está en su límite (429 `over_email_send_rate_limit`). Salida inmediata: Dashboard → Authentication → Sign In / Providers → Email → apagar «Confirm email». Salida de lanzamiento: SMTP propio con dominio verificado y volver a encenderlo (la recuperación de contraseña también lo necesita) | 2026-11-27 |
+| PEN-016 | Antes de lanzar: acuerdo, menú y precios reales por local (Picnic sigue con menú, mesas y plano inventados); textos legales revisados; rotar o borrar las cuentas `DEMO_*` y los pedidos de prueba; proyecto de producción separado de `onza-dev`; definir cómo se cobra (Onza no cobra) | 2026-11-27 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -93,6 +95,20 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ---
 
 ## Entradas
+
+### D-2026-11-27-06 · Quitar lo de demo y diagnosticar el registro
+
+- **Fecha:** 2026-11-27 (America/Costa_Rica)
+- **Persona:** Manu (encargo: arreglar que no llega el correo al crear cuenta y quitar todo lo que diga demo o pruebas, de cara al lanzamiento).
+- **IA:** Claude Code · claude-sonnet-5-5
+- **Rama y commits:** `fix/registro-y-textos` → `main` por fast-forward · `8fbe29a`; esta entrada y el ajuste del verificador van en el commit siguiente.
+- **Causa del registro:** `onza-dev` exige confirmar el correo y no aparece un SMTP propio. Un alta con una dirección sin uso devolvió 429 `over_email_send_rate_limit`. La app lo mostraba como «No pudimos completar el registro».
+- **No resuelto:** apagar la confirmación desde el CLI lo bloqueó el clasificador de permisos del agente (control de seguridad). No se buscó un atajo. **El registro sigue igual** hasta hacer PEN-015. Solo mejoró el mensaje de error (probado con pruebas unitarias, no contra el alojado).
+- **Cambios en la app:** sin la nota «Menú de demostración», sin el ejemplo simulado de Actividad, sin los botones que fingían respuestas del proveedor de pagos y sin la leyenda del plano. Los textos de pago dicen que Onza no cobra y que se paga en el local; la barra «marca como cobrado» y las devoluciones se «registran». Políticas reescritas como «versión preliminar, pendiente de revisión legal». Un local sin publicar ya no abre por enlace directo. Siguen internos (no visibles): `DEMO_MODE`, `demo_listed`, versión `demo-v1`, carpetas `demo-*` y pagos `mock`.
+- **Base de datos:** `demo_listed=false` en `mil948`, `apotecario`, `stiefel-pub`, `wilk` (bares reales con menús inventados; sin la nota parecerían suyos) y `otro-bar` (de prueba). Publicado: solo `picnic`. No se borró nada. Volver: `update public.venues set demo_listed=true where slug in (...)`.
+- **Verificado:** `npm run check` (53 archivos / 259 pruebas y build); recorridos locales 51/51, 43/43, 17/17 y 26/26 (este último cuatro veces seguidas, después de hacer que la prueba espere la carga de la página); CI completa en `8fbe29a`; dominio sirviendo `8fbe29a` según el log del build; 19 comprobaciones en el dominio, más sin textos de demo en Explorar, políticas, checkout y pedidos, y `/v/mil948` no encontrado.
+- **No verificado:** registro de una cuenta nueva; el check-in en el dominio en esta corrida (la cuenta demo de cliente tenía uno activo de otra persona y no se tocó); iPhone y Android físicos.
+- **Rastros de prueba en el demo:** dos corridas cortadas (por correr antes de que cambiara el dominio) dejaron los pedidos `15b1c7db` y `c2f09051` abiertos; vencen solos. Quedan además los pedidos entregados de las verificaciones.
 
 ### D-2026-11-27-05 · Consolidar en `main` y publicar el demo
 
