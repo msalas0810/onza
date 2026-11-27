@@ -35,8 +35,8 @@ describe("registro de auditoría", () => {
     expect(parsed.action).toBeUndefined();
     expect(parsed.venueId).toBeUndefined();
   });
-  it("requestId acepta el de Vercel o genera uno y rechaza basura", () => {
-    expect(requestId(new Request("http://x", { headers: { "x-vercel-id": "iad1::k6d82-1" } }))).toBe("iad1::k6d82-1");
+  it("requestId acepta el de Cloudflare o genera uno y rechaza basura", () => {
+    expect(requestId(new Request("http://x", { headers: { "cf-ray": "8f1c2d3e4f5a6b7c-SJO" } }))).toBe("8f1c2d3e4f5a6b7c-SJO");
     expect(requestId(new Request("http://x", { headers: { "x-request-id": "con espacios y símbolos <b>" } }))).toMatch(/^[0-9a-f-]{36}$/);
     expect(requestId(new Request("http://x"))).toMatch(/^[0-9a-f-]{36}$/);
   });

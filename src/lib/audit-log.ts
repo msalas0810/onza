@@ -20,7 +20,7 @@ export type AuditEvent = {
 };
 
 export function requestId(request: Request) {
-  const given = request.headers.get("x-vercel-id") ?? request.headers.get("x-request-id");
+  const given = request.headers.get("cf-ray") ?? request.headers.get("x-request-id");
   return given && /^[\w.:-]{1,80}$/.test(given) ? given : crypto.randomUUID();
 }
 
