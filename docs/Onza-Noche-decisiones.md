@@ -47,5 +47,5 @@ Capturas «antes» en `docs/evidence/noche/antes/`, «después» en `docs/eviden
 
 1. **Coordenadas verificadas.** Hoy ningún local real las tiene (el seed las deja en `null` sin fuente verificada), así que el mapa real muestra «Todavía no hay actividad visible». Se cargan con fuente y fecha en `fixtures/real-venues.json` (`coordinates.verified_on` y `source`) o desde Administración → Perfil.
 2. **Mapa base de calles.** Hoy es un plano esquemático sin calles. Para un mapa real hace falta elegir un proveedor de teselas (por ejemplo MapLibre con un estilo propio) con su clave en una variable pública, y sumar ese origen a `img-src` y `connect-src` en `next.config.ts`. No se instaló nada.
-3. **Migración 027** en un proyecto Supabase aislado, y después en el remoto.
+3. ~~Migración 027 en un proyecto aislado y en el remoto~~: hecho el 2026-11-27 (D-2026-11-27-05).
 4. Revisar con volumen real si el mínimo de 5 sube a 10 (la investigación citada sugiere que 5 protege poco ante inferencia de pertenencia).

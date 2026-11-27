@@ -39,14 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama en revisión | `feat/noche-picnic-social` (base `d8a596d` de `feat/entrega-mapa`/`feat/entrega-mesa-admin`): mapa de Picnic con pin (026), barra con el pin en la tarjeta, admin por momentos, actividad y amigos (027). Solo commits locales; 025–027 sin aplicar en remoto. Ver D-2026-11-27-01 |
-| Rama vigente de trabajo | `main` (consolidada el 2026-11-23: contiene la auditoría `audit/seguridad-escala`, el rescate `1090b4e` y los cambios de Codex). Se trabaja con ramas `feat/*` o `fix/*` y PR. Migraciones 021–024 sin aplicar en remoto |
-| `main` | Fuente única de trabajo en GitHub (`msalas0810/onza`). **Despliegue automático de `main` desactivado en `vercel.json`** hasta aplicar 013–024 en la base alojada |
-| Commit desplegado en Vercel | `fed579403d75da1d49cc54f0af9239b55c125706`, Preview READY `dpl_8emjFDVbshCsg5xBBsiaKNFSpEqT`. Video e ingreso laboral comprobados por HTTPS. |
-| Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
-| Backend | Supabase alojado `onza-dev`, pagos **mock** |
+| Rama vigente de trabajo | `main` es la única versión oficial (consolidada el 2026-11-27, D-2026-11-27-05). Se trabaja con ramas `feat/*` o `fix/*` y PR |
+| `main` | Versión oficial. **Cada push a `main` despliega a Production** en Vercel. Código validado en el demo: `238aa87`; los commits posteriores del 2026-11-27 son documentación y scripts |
+| Commit desplegado en Vercel | La punta de `main`. El primer deployment de Production fue `dpl_8DNAyssP9ShpdqoApx4aeE683Vkh`, desde `238aa87` |
+| Demo desplegada | https://onza-demo.vercel.app (dominio de Production del proyecto `onza-demo`; ya no está atado a la rama `fix/hosted-integration`) |
+| Backend | Supabase alojado `onza-dev` con las migraciones 001–027 aplicadas, `accounts_required=true`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Revisar `feat/noche-picnic-social` con `npm run demo:local` (README, «Probar en cinco minutos») y `docs/Onza-Noche-decisiones.md`. Después, en un proyecto Supabase **aislado**: `npx supabase db push --dry-run` (013–027), aplicar y repetir los tres recorridos de la guía técnica con Realtime real. Prueba física en iPhone/Android del plano de Picnic. |
+| Siguiente tarea exacta | Prueba física en iPhone y Android del pedido con pin en Picnic, incluido el QR de mesa. Decidir qué hacer con las cuatro ramas sin integrar (PEN-013). |
 
 ### Pendientes abiertos
 
@@ -61,9 +60,11 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-006 | Cobros reales: falta acuerdo y manual de BAC. Ver `docs/03-bac-y-pagos.md` | 2026-11-15 |
 | PEN-007 | Corregido el registro: las migraciones 005–007 ya estaban aplicadas al iniciar esta sesión; 12 productos tenían imagen. Se aplicaron únicamente las nuevas 008/009. No se inventaron portadas ni coordenadas. | 2026-11-16 |
 | PEN-009 | Auditoría 2026-11-21: la CI ya prueba login y Realtime reales (2026-11-23); sigue sin probarse contra Supabase real: Storage, cookies/refresh, expiración, revocación y cierre por dispositivo. Pasos exactos en `docs/Onza-Auditoria-seguridad-y-escala.md` §10 | 2026-11-21 |
-| PEN-010 | Confirmar el límite de 60 validaciones de retiro por minuto (migración 024) y aplicar 021–024 en un proyecto aislado | 2026-11-21 |
-| PEN-011 | Entrega en el lugar: aplicar la migración 025 con 013–024 en un proyecto aislado, probar Realtime real y el escaneo del QR en iPhone/Android físicos, y cargar los datos reales de Picnic (el seed es ilustrativo). Ver `docs/Onza-Entrega-en-el-lugar.md` §6 | 2026-11-26 |
-| PEN-012 | Actividad y amigos (027): aplicar en un proyecto aislado; cargar coordenadas verificadas de locales reales (hoy ninguno tiene); elegir proveedor de mapa base si se quiere calles; revisar con volumen real si el mínimo de 5 personas sube a 10. Ver `docs/Onza-Noche-decisiones.md` §4 | 2026-11-27 |
+| PEN-010 | 021–024 ya están en `onza-dev` (D-2026-11-27-05). Falta confirmar el límite de 60 validaciones de retiro por minuto (024) | 2026-11-21 |
+| PEN-011 | Entrega en el lugar: 025–026 aplicadas y Realtime probado en el demo (D-2026-11-27-05). Falta el escaneo del QR de mesa en iPhone/Android físicos y cargar los datos reales de Picnic (hoy menú, mesas y plano son ilustrativos) | 2026-11-26 |
+| PEN-012 | Actividad y amigos: 027 aplicada (D-2026-11-27-05). Falta cargar coordenadas verificadas (Picnic no tiene), elegir proveedor de mapa base si se quieren calles, probar amistad entre dos cuentas en el demo y revisar si el mínimo de 5 personas sube a 10. Ver `docs/Onza-Noche-decisiones.md` §4 | 2026-11-27 |
+| PEN-013 | Decidir sobre las ramas no integradas: `claude/cool-hawking-4i6xag` y `claude/affectionate-fermat-s2u74m` (dos versiones de entrada como invitado; chocan con el acceso obligatorio del blueprint §0), `claude/kind-cannon-4gv720` (fidelización sin interfaz) y `feat/mapa-interactivo` (otro mapa, con editor y zoom). Sus migraciones 025/026 chocan en número con las aplicadas: habría que renumerarlas | 2026-11-27 |
+| PEN-014 | Production no tiene `SUPABASE_SERVICE_ROLE_KEY` (el Preview anterior tampoco): el alta de cuentas del equipo (`/api/team`) no funciona en el demo publicado. Decidir si se carga | 2026-11-27 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -92,6 +93,28 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ---
 
 ## Entradas
+
+### D-2026-11-27-05 · Consolidar en `main` y publicar el demo
+
+- **Fecha:** 2026-11-27 (America/Costa_Rica)
+- **Persona:** Manu (encargo: una sola versión oficial en `main` y en onza-demo.vercel.app, con permiso para subir, integrar, migrar el demo y desplegar).
+- **IA:** Claude Code · claude-sonnet-5-5
+- **Rama y commits:** `feat/noche-picnic-social` subida hasta `dd75aa4`, más `238aa87` (deploy). `main` avanzó por fast-forward `e415735` → `238aa87`, sin force-push. Esta entrada va en un commit posterior de documentación y scripts sobre `main`.
+- **Qué entró:** Picnic con mapa y pin, cliente, barra, admin por momentos, Actividad y Amigos. La auditoría (`audit/seguridad-escala`) ya estaba en `main`. `fix/hosted-integration` y `review/rescate-entrega` no tenían commits fuera de `main`.
+- **Qué no entró (ramas conservadas, ver PEN-013):** las dos de invitado, la de fidelización y `feat/mapa-interactivo`. Entre los dos mapas se conservó el de Picnic (026): está integrado con los datos de Picnic y probado de punta a punta; el otro no tiene plano de Picnic y no se volvió a probar en esta sesión. El generador de tipos ya incluía el arreglo (`update_profile_details`) que traían dos de esas ramas.
+- **Base de datos (`onza-dev`):** estaba en 012. Se aplicaron **013–027** (15). Antes: volcado con `pg_dump`, restaurado en un PostgreSQL 17 local desechable (conteos idénticos a los remotos), dry-run y `db push` ensayados sobre esa copia, y dry-run remoto con la misma lista. Después: historial en 27 y ninguna tabla existente cambió su número de filas. Además: `accounts_required=true`.
+- **Picnic:** bloque de `supabase/seed.sql` (5 productos, 13 lugares, plano ilustrativo) y las 3 cuentas demo del equipo asignadas. Los demás locales no cambiaron (mismo hash antes y después). Son datos simulados; la cabecera del local dice «Menú de demostración». Sin coordenadas.
+- **Vercel:** variables de Production cargadas desde `.env.local` por stdin (sin `SUPABASE_SERVICE_ROLE_KEY`), `vercel.json` sin el bloqueo de `main`, y el dominio `onza-demo.vercel.app` desatado de la rama `fix/hosted-integration`.
+- **Verificado:** `npm run check` local (52 archivos / 257 pruebas y build). CI en verde en `dd75aa4` y `238aa87`: checks, security y Supabase completo en el runner (27 migraciones, seed, pgTAP, `full-demo` y `pickup`). Build de Production desde `238aa87` según el log de Vercel. En el dominio, 22/22 con las cuentas demo: Picnic en Explorar, menú, pedido con pin, llegada a la barra sin recargar (Realtime), mismo pin (0.6625, 0.3200 en ambos y en la base), entrega con código y cobro simulado, admin, Actividad y check-in de Amigos.
+- **No verificado:** iPhone y Android físicos; QR de mesa y retiro en barra en el dominio (sí en local); amistad entre dos cuentas en el dominio (sí en local); Storage real (subida de avatar o imágenes) en el demo.
+- **Cómo probar el demo:** automático, `node scripts/verify-dominio-picnic.mjs`. A mano, con las cuentas de `.env.local` (`DEMO_CUSTOMER_*`, `DEMO_BARTENDER_*`, `DEMO_ADMIN_*`):
+  1. Teléfono: entrar en `/acceso`, abrir Picnic, agregar un trago, ir a «Confirmar pedido», elegir «Llevarlo a mi mesa», tocar el plano y pedir.
+  2. Computadora: `/equipo/acceso` con el bartender, Picnic, «Ver en el mapa», aceptar, marcar listo y entregar con el código que muestra el teléfono.
+  3. Admin: `/equipo/acceso` con la cuenta admin, Administrar Picnic («Ahora» y «Resumen y CSV»).
+  4. `/actividad` (el ejemplo está en `?ejemplo=1`) y `/amigos`.
+  - Por QR de mesa: `/v/picnic?spot=50000000-0000-4000-8000-000000000007`.
+- **Respaldo y vuelta atrás:** en esta máquina, `~/Documents/Onza/Onza-respaldo-ramas/2026-11-27-consolidacion/`: bundle de todas las ramas y `onza-dev-antes-013.dump` (contiene cuentas de Auth; no compartir ni versionar). No hay migraciones de reversa. El deployment anterior sigue en Vercel (`dpl_8emjFDVbshCsg5xBBsiaKNFSpEqT`), pero no se probó contra la base ya migrada.
+- **Limpieza:** borradas por estar completas dentro de `main`: `feat/noche-picnic-social` (local y remota), `feat/entrega-mapa` y `feat/entrega-mesa-admin` (locales), `fix/hosted-integration` y `review/rescate-entrega` (remotas). Las variables de Preview atadas a `fix/hosted-integration` siguen en Vercel sin uso. Quedan sin versionar `.claude/` y `docs/Onza-Plan-seguridad-y-escala.md` (documento personal; copia en el respaldo).
 
 > Más recientes arriba.
 

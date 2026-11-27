@@ -1,4 +1,5 @@
-// Run via npm exec --package=vercel -- node scripts/configure-vercel-env.mjs [https://origin] [preview|production]
+// Run via npm exec --package=vercel -- node scripts/configure-vercel-env.mjs [https://origin]
+// Configura las variables de Production del demo (main).
 // CLI receives secret values only through stdin; output and error details are withheld.
 import { readFileSync } from "node:fs";
 import { execFileSync } from "node:child_process";
@@ -21,12 +22,9 @@ if (
   local.NEXT_PUBLIC_SUPABASE_URL !== "https://ukdjuubekpanizcmppod.supabase.co"
 )
   throw new Error("Supabase project mismatch");
-const origin = process.argv[2] ?? "https://onza-demo-msalas0810.vercel.app";
+const origin = process.argv[2] ?? "https://onza-demo.vercel.app";
 if (!/^https:\/\/[a-z0-9.-]+\.vercel\.app$/.test(origin))
   throw new Error("Expected HTTPS Vercel origin");
-const target = process.argv[3] ?? "preview";
-if (!["preview", "production"].includes(target))
-  throw new Error("Expected preview or production");
 // Sin SUPABASE_SERVICE_ROLE_KEY a propósito: el demo publicado no la usa (solo /api/team la necesitaría).
 const values = {
   NEXT_PUBLIC_SUPABASE_URL: local.NEXT_PUBLIC_SUPABASE_URL,
@@ -52,10 +50,7 @@ for (const [key, value] of Object.entries(values)) {
         "add",
         key,
         "--environment",
-        target,
-        ...(target === "preview"
-          ? ["--git-branch", "fix/hosted-integration"]
-          : []),
+        "production",
         "--yes",
         "--force",
         "--scope",
@@ -63,7 +58,7 @@ for (const [key, value] of Object.entries(values)) {
       ],
       { input: value, stdio: ["pipe", "pipe", "pipe"] },
     );
-    console.log(`Configured ${key} (${target})`);
+    console.log(`Configured ${key} (production)`);
   } catch {
     throw new Error(
       `Failed configuring ${key}; response withheld to protect credentials`,
