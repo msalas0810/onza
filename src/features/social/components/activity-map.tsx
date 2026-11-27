@@ -31,14 +31,14 @@ const radius = { 1: 7, 2: 10, 3: 14 } as const;
  * Mapa esquemático de actividad: manchas por local según el nivel (nunca un número de personas). Sin mapa base de calles:
  * para eso hace falta un proveedor de teselas con su clave (ver docs/Onza-Noche-decisiones.md).
  */
-export function ActivityMap({ points, simulated }: { points: readonly ActivityPoint[]; simulated: boolean }) {
+export function ActivityMap({ points }: { points: readonly ActivityPoint[] }) {
   return (
     <figure className="activity">
       <svg
         className="activity-map"
         viewBox="0 0 100 64"
         role="img"
-        aria-label={`${simulated ? "Ejemplo simulado: " : ""}${points.length} ${points.length === 1 ? "local con actividad" : "locales con actividad"}`}
+        aria-label={`${points.length} ${points.length === 1 ? "local con actividad" : "locales con actividad"}`}
       >
         <defs>
           <radialGradient id="heat">

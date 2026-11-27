@@ -210,7 +210,7 @@ test("Supabase real: cliente → barra → retiro concurrente → administrador"
       .getByRole("button", { name: "Retomar entrega", exact: true })
       .click();
     await expect(
-      owner.getByText("Cobro confirmado (simulado).", { exact: true }),
+      owner.getByText("Pago registrado.", { exact: true }),
     ).toBeVisible();
     // Al retomar, el formulario de código no se muestra: no queda ninguna credencial a la vista.
     await expect(owner.getByLabel("Código privado")).toHaveCount(0);

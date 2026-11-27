@@ -70,6 +70,6 @@ Onza demo local (datos ficticios, pagos simulados). Cualquier contraseña entra.
   Picnic por QR  ${APP}/v/picnic?spot=50000000-0000-4000-8000-000000000007   (Mesa 7 · Jardín)
   Barra          ${APP}/equipo/acceso   jorge@equipo.demo  → Picnic o Mil948
   Admin          ${APP}/equipo/acceso   ana@equipo.demo    → Administración de Picnic o Mil948
-  Amigos         ${APP}/amigos          · Actividad ${APP}/actividad (ejemplo: ?ejemplo=1)
+  Amigos         ${APP}/amigos          · Actividad ${APP}/actividad
 Ctrl+C para detener.
 `);

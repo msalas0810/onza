@@ -123,7 +123,7 @@ export function WaitlistPanel({
             {entry.position === 1 ? "Sos la próxima persona en la fila." : `Sos el ${entry.position ?? "—"}.º en la fila.`} Te avisamos acá cuando se libere un cupo.
           </p>
         )}
-        <p className="hint">Tu carrito se conserva. Todavía no hay pedido ni reserva de dinero.</p>
+        <p className="hint">Tu carrito se conserva. Todavía no hay pedido.</p>
         <Button variant="quiet" block loading={busy} onClick={() => void act("leave")}>
           Salir de la lista
         </Button>

@@ -270,15 +270,6 @@ time {
   color: var(--onza-text);
   background: var(--onza-surface);
 }
-.demo-chip {
-  font-size: var(--onza-type-caption-size);
-  line-height: var(--onza-type-caption-line);
-  color: var(--onza-text-muted);
-  border: 1px solid var(--onza-border);
-  border-radius: var(--onza-radius-pill);
-  padding: var(--onza-space-4) 10px;
-  white-space: nowrap;
-}
 .icon-btn {
   position: relative;
   width: var(--onza-size-touch-min);
@@ -1109,13 +1100,6 @@ a.vcard:focus-visible {
   gap: var(--onza-space-4) var(--onza-space-12);
   font-size: var(--onza-type-label-size);
   color: var(--onza-text-muted);
-}
-.demo-note {
-  font-size: var(--onza-type-caption-size);
-  line-height: var(--onza-type-caption-line);
-  color: var(--onza-text-muted);
-  border-left: 2px solid var(--onza-border);
-  padding-left: 10px;
 }
 @media (min-width: 720px) {
   .vhero .media {

@@ -507,10 +507,10 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           <span>Total</span>
           <Price amount={total} />
         </div>
-        {/* Mientras el proveedor sea simulado: una sola indicación compacta, acá en la confirmación. */}
+        {/* Onza no cobra en línea: una sola indicación compacta, acá en la confirmación. */}
         <p className="no-charge">
           <Lock size={16} aria-hidden="true" />
-          Sin cobro real · no pedimos tarjeta
+          Pagás en el local. No pedimos tarjeta.
         </p>
         {!accounts && (
           <>
@@ -534,9 +534,9 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
               <span>
                 Acepto los{" "}
                 <Link href="/policies">
-                  términos y la política de privacidad del demo
-                </Link>{" "}
-                (demo-v1).
+                  términos y la política de privacidad
+                </Link>
+                .
               </span>
             </label>
           </>

@@ -5,7 +5,7 @@ export type Venue = Database["public"]["Tables"]["venues"]["Row"];
 export type Product = Database["public"]["Tables"]["products"]["Row"];
 export async function getVenues() {
   const db = await serverDb();
-  // Solo los locales listados en el demo. Si la migración demo_listing aún no está aplicada (columna inexistente), se
+  // Solo los locales publicados. Si la migración demo_listing aún no está aplicada (columna inexistente), se
   // listan todos como antes: el frontend nuevo nunca deja Explorar sin datos por ir por delante de la base.
   for (const listedOnly of [true, false]) {
     const venues: Venue[] = [];

@@ -22,6 +22,8 @@ export default async function MenuPage({
   let venue, menu, spots, map;
   try {
     venue = await getVenue(slug);
+    // Un local sin publicar no se abre ni por enlace directo.
+    if (venue.demo_listed === false) throw new Error("RESOURCE_NOT_FOUND");
     menu = await getPublishedMenu(venue.id);
     // Un local que entrega en el lugar ofrece sus lugares habilitados; el del QR (?spot=) solo cuenta si es de este local.
     spots = offersLocation(venue.delivery_mode as DeliveryMode)

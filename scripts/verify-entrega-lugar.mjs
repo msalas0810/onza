@@ -54,8 +54,8 @@ async function deliverWithCode(staff, code, { spotLabel } = {}) {
   await staff.getByLabel("Código privado").fill(code);
   await staff.getByRole("button", { name: "Validar", exact: true }).click();
   if (spotLabel) await staff.getByText(`Entregar en ${spotLabel}`).waitFor({ timeout: 10000 });
-  await staff.getByRole("button", { name: /Confirmar cobro simulado/ }).click();
-  await staff.getByText("Cobro confirmado (simulado).").waitFor({ timeout: 10000 });
+  await staff.getByRole("button", { name: /Marcar como cobrado/ }).click();
+  await staff.getByText("Pago registrado.").waitFor({ timeout: 10000 });
   await staff.getByLabel(/Entregué/).check();
   await staff.getByRole("button", { name: "Confirmar entrega" }).click();
   return staff.locator(".result.ok").waitFor({ timeout: 10000 });
@@ -189,7 +189,7 @@ try {
   await shot(sofia, "10-ticket-barra-390");
   const barCode = (await sofia.locator("[data-private='pickup']").innerText()).replace(/\s+/g, "");
   await deliverWithCode(barra, barCode);
-  check("La barra valida el código, cobra (simulado) y entrega", (await barra.locator(".result.ok").innerText()).includes("Entregado"));
+  check("La barra valida el código, registra el cobro y entrega", (await barra.locator(".result.ok").innerText()).includes("Entregado"));
   await sofia.reload();
   await sofia.getByText(/Retirado a las|está entregado\./).waitFor({ timeout: 15000 });
   check("El cliente ve su pedido entregado (momento final o comprobante)", true);

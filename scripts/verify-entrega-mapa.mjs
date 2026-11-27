@@ -130,9 +130,9 @@ async function deliverWithCode(staff, code) {
     .click();
   await staff.getByLabel("Código privado").fill(code);
   await staff.getByRole("button", { name: "Validar", exact: true }).click();
-  await staff.getByRole("button", { name: /Confirmar cobro simulado/ }).click();
+  await staff.getByRole("button", { name: /Marcar como cobrado/ }).click();
   await staff
-    .getByText("Cobro confirmado (simulado).")
+    .getByText("Pago registrado.")
     .waitFor({ timeout: 10000 });
   await staff.getByLabel(/Entregué/).check();
   await staff.getByRole("button", { name: "Confirmar entrega" }).click();
@@ -393,9 +393,9 @@ try {
     "Al validar el código la barra puede abrir el mapa con el pin antes de entregar",
     true,
   );
-  await jorge.getByRole("button", { name: /Confirmar cobro simulado/ }).click();
+  await jorge.getByRole("button", { name: /Marcar como cobrado/ }).click();
   await jorge
-    .getByText("Cobro confirmado (simulado).")
+    .getByText("Pago registrado.")
     .waitFor({ timeout: 10000 });
   await jorge.getByLabel(/Entregué/).check();
   await jorge.getByRole("button", { name: "Confirmar entrega" }).click();
@@ -459,7 +459,7 @@ try {
   await shot(maria, "07-ticket-barra-390", false);
   await deliverWithCode(jorge, barCode);
   check(
-    "La barra valida el código, cobra (simulado) y entrega el retiro",
+    "La barra valida el código, registra el cobro y entrega el retiro",
     (await jorge.locator(".result.ok").innerText()).includes("Entregado"),
   );
 

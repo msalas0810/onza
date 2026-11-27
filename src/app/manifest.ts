@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Onza Demo",
+    name: "Onza",
     short_name: "Onza",
     start_url: "/",
     display: "standalone",

@@ -92,7 +92,7 @@ try {
   await customer.goto(`${APP}/v/picnic`);
   await customer.locator("article.prow").first().waitFor({ timeout: 20000 });
   const menu = await customer.locator("article.prow").count();
-  check("/v/picnic abre con su menú de 5 productos y el rótulo de demostración", menu === 5 && (await text(customer)).includes("Menú de demostración"), `${menu} productos`);
+  check("/v/picnic abre con su menú de 5 productos y sin rótulos de demostración", menu === 5 && !/demo|simulad/i.test(await text(customer)), `${menu} productos`);
   await shot(customer, "02-picnic-menu", true);
   await customer.locator("article.prow", { hasText: "Spritz" }).getByRole("button", { name: "Agregar", exact: true }).click();
 
@@ -153,12 +153,12 @@ try {
   await bar.getByRole("button", { name: /Entregar en/ }).first().click();
   await bar.getByLabel("Código privado").fill(code);
   await bar.getByRole("button", { name: "Validar", exact: true }).click();
-  await bar.getByRole("button", { name: /Confirmar cobro simulado/ }).click({ timeout: 20000 });
-  await bar.getByText("Cobro confirmado (simulado).").waitFor({ timeout: 20000 });
+  await bar.getByRole("button", { name: /Marcar como cobrado/ }).click({ timeout: 20000 });
+  await bar.getByText("Pago registrado.").waitFor({ timeout: 20000 });
   await bar.getByLabel(/Entregué/).check();
   await bar.getByRole("button", { name: "Confirmar entrega" }).click();
   await bar.locator(".result.ok").waitFor({ timeout: 20000 });
-  check("La barra cierra la entrega con el código y el cobro simulado", (await bar.locator(".result.ok").innerText()).includes("Entregado"));
+  check("La barra cierra la entrega con el código y el cobro en el local", (await bar.locator(".result.ok").innerText()).includes("Entregado"));
   await shot(bar, "06-barra-entregado");
   await customer.reload();
   await customer.getByText(/entregado en/i).first().waitFor({ timeout: 25000 });
@@ -168,9 +168,7 @@ try {
   await customer.goto(`${APP}/actividad`);
   await customer.getByText("Todavía no hay actividad visible").waitFor({ timeout: 20000 });
   check("Actividad abre con su estado vacío (sin coordenadas inventadas)", true);
-  await customer.goto(`${APP}/actividad?ejemplo=1`);
-  check("El ejemplo de Actividad está rotulado «Simulado»", (await text(customer)).includes("Simulado"));
-  await shot(customer, "07-actividad-simulada", true);
+  check("Actividad no ofrece ejemplos simulados", !/simulad|ejemplo/i.test(await text(customer)));
 
   step = "cliente: amigos";
   await customer.goto(`${APP}/amigos`);

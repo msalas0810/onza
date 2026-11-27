@@ -74,13 +74,13 @@ export const messages: Record<string, string> = {
   IDEMPOTENCY_CONFLICT:
     "Ese intento corresponde a otro contenido. Revisá el pedido antes de iniciar uno nuevo.",
   DEMO_NOT_ENABLED:
-    "Esta base no tiene habilitado el demo. Los pagos reales permanecen desactivados.",
+    "Los pedidos no están habilitados en este momento.",
   POLICY_REQUIRED: "Aceptá las políticas y confirmá tu mayoría de edad.",
   INVALID_QUANTITY:
     "Usá entre 1 y 10 unidades por producto, hasta 20 por pedido.",
   PROVIDER_NOT_CONFIGURED: "Los pagos reales no están configurados.",
   SCENARIO_DISABLED:
-    "Los resultados de pago simulados no están habilitados en esta base (solo pruebas).",
+    "Esa opción no está disponible.",
   INVALID_BRANDING:
     "Los datos del local o la imagen no son válidos. Usá una imagen JPG, PNG o WebP de hasta 2 MB subida desde esta pantalla.",
   INVALID_PRODUCT_IMAGE:

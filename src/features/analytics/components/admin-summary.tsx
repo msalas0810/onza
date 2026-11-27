@@ -25,7 +25,7 @@ const minutes = (seconds: number | null) =>
 /**
  * Resumen de administración por período, con el corte operativo de las 06:00. Entregados, ventas netas (capturas menos
  * devoluciones confirmadas en el período), mediana de preparación y pedidos activos; las reservas van aparte como saldo
- * actual. Montos simulados mientras el proveedor sea mock.
+ * actual. Montos según lo marcado como cobrado: no hay proveedor de pagos.
  */
 export function AdminSummary({
   venueId,
@@ -135,7 +135,7 @@ export function AdminSummary({
             "El CSV trae cada pedido del período con su estado, lugar de entrega, horas y montos. Sin datos de clientes."}
       </p>
       <p className="muted t-label">
-        Noches operativas de 06:00 a 06:00 (Costa Rica). Montos simulados: no hay cobros reales.
+        Noches operativas de 06:00 a 06:00 (Costa Rica). Los montos salen de lo que la barra marcó como cobrado. Onza no procesa pagos.
       </p>
       {error && <p className="notice warning" role="status">{error}</p>}
       {!summary ? (
@@ -156,7 +156,7 @@ export function AdminSummary({
               <span className="hint">cancelados, vencidos o sin retirar</span>
             </div>
             <div className="metric">
-              <span className="muted t-label">Ventas netas (simuladas)</span>
+              <span className="muted t-label">Ventas netas</span>
               <span className="v">
                 <Price amount={summary.net_minor} />
               </span>
@@ -177,12 +177,12 @@ export function AdminSummary({
           </div>
           <div className="block-card reserve-card">
             <div className="grow">
-              <span className="muted t-label">Monto reservado · actual</span>
+              <span className="muted t-label">Pendiente de cobro</span>
               <strong className="num">
                 <Price amount={summary.reserved_now_minor} />
               </strong>
             </div>
-            <p className="hint">Reservas de pedidos abiertos. No son ventas hasta confirmar el cobro.</p>
+            <p className="hint">Pedidos abiertos. No son ventas hasta marcarlos como cobrados.</p>
           </div>
           <div className="block-card stack">
             <div className="row between wrap">

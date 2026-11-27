@@ -36,7 +36,7 @@ const hasDetector = () =>
     .BarcodeDetector;
 
 /**
- * Retiro en la barra. Contra el servidor no cambia nada: resolver (asigna el retiro a esta sesión) → cobro simulado →
+ * Retiro en la barra. Contra el servidor no cambia nada: resolver (asigna el retiro a esta sesión) → cobro en el local →
  * entrega física. El escaneo solo identifica el pedido; cada confirmación es una acción separada.
  * - Escáner primero; «Ingresar código» siempre visible. Si falla el permiso, la cámara o no hay detector, pasa al código
  *   manual sin perder el contexto.
@@ -312,7 +312,7 @@ export function PickupPanel({
       </form>
     );
 
-  // Pedido identificado: resumen → cobro simulado → entrega física.
+  // Pedido identificado: resumen → cobro en el local → entrega física.
   const captured = order?.payment_state === "captured";
   const inProgress = busy || captured || order?.payment_state === "unknown";
   return (
@@ -373,7 +373,8 @@ export function PickupPanel({
                   {captured ? <Check size={16} /> : 1}
                 </span>
                 <div className="grow stack tight">
-                  <strong>Cobro simulado</strong>
+                  <strong>Cobro en el local</strong>
+                  {!captured && <span className="muted t-label">Onza no cobra. Recibí el pago antes de marcarlo.</span>}
                   {order.capture_state === "declined" && (
                     <Notice tone="danger">
                       Captura rechazada. No entregues. Pedile al supervisor la cancelación y la anulación de la reserva.
@@ -381,7 +382,7 @@ export function PickupPanel({
                   )}
                   {order.payment_state === "authorized" && order.capture_state !== "declined" && (
                     <Button size="lg" block loading={busy} onClick={() => void act("capture")}>
-                      Confirmar cobro simulado · <Price amount={order.total_minor} />
+                      Marcar como cobrado · <Price amount={order.total_minor} />
                     </Button>
                   )}
                   {order.payment_state === "unknown" && (
@@ -394,7 +395,7 @@ export function PickupPanel({
                       </Button>
                     </>
                   )}
-                  {captured && <span className="muted t-label">Cobro confirmado (simulado).</span>}
+                  {captured && <span className="muted t-label">Pago registrado.</span>}
                 </div>
               </li>
               <li data-disabled={!captured || undefined}>

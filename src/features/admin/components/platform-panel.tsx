@@ -55,7 +55,7 @@ export function PlatformPanel({ venues }: { venues: Venue[] }) {
           });
         }}
       >
-        <h2>Crear local ficticio</h2>
+        <h2>Crear local</h2>
         <TextField name="name" label="Nombre" required />
         <TextField
           name="slug"

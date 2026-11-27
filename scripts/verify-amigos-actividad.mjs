@@ -32,7 +32,12 @@ const shot = async (page, name) => {
   await page.waitForLoadState("networkidle").catch(() => undefined);
   await page.screenshot({ path: `${OUT}/${name}.png`, fullPage: true });
 };
-const text = async (page) => (await page.locator("main, body").first().innerText()).replace(/\s+/g, " ");
+// Las páginas llegan por partes (loading.tsx): leer recién cuando ya no hay peticiones ni esqueleto.
+const text = async (page) => {
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.locator("h1").first().waitFor({ timeout: 10000 });
+  return (await page.locator("main, body").first().innerText()).replace(/\s+/g, " ");
+};
 const social = async (page, body) => {
   const r = await page.request.post(`${APP}/api/social`, {
     headers: { origin: APP, "content-type": "application/json" },
@@ -57,9 +62,7 @@ try {
   await maria.getByText("Todavía no hay actividad visible").waitFor();
   check("Sin actividad, el mapa muestra un estado útil con la acción «Marcar que estoy acá»", (await maria.getByRole("link", { name: "Marcar que estoy acá" }).count()) === 1);
   await shot(maria, "s0-actividad-vacia-390");
-  await maria.goto(`${APP}/actividad?ejemplo=1`);
-  check("El ejemplo simulado está rotulado y usa lugares ficticios", (await text(maria)).includes("Simulado") && (await text(maria)).includes("Local simulado A"));
-  await shot(maria, "s1-actividad-simulada-390");
+  check("Actividad no ofrece ejemplos simulados", !/simulad|ejemplo/i.test(await text(maria)));
 
   /* 2 · Solicitud por @usuario y aceptación */
   await maria.goto(`${APP}/amigos`);

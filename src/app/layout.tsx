@@ -7,7 +7,7 @@ import "@/styles/globals.css";
 export const metadata: Metadata = {
   title: "Onza · Pedí y recogé",
   description:
-    "Demo de pedidos y retiro en barra. Pagos exclusivamente simulados.",
+    "Pedí desde el celular y recibilo en tu mesa o retiralo en la barra.",
   manifest: "/manifest.webmanifest",
   icons: { icon: "/brand/favicon.svg", apple: "/brand/apple-touch-icon.png" },
 };

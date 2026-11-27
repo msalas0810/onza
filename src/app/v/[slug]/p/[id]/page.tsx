@@ -16,6 +16,7 @@ export default async function ProductPage({
 }) {
   const { slug, id } = await params;
   const venue = await getVenue(slug);
+  if (venue.demo_listed === false) notFound();
   if (venue.open_state === "closed")
     return (
       <div className="page">

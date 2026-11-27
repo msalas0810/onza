@@ -7,6 +7,7 @@ import { browserDb } from "@/lib/supabase/browser";
 import { Button, TextField } from "@/components/ui/primitives";
 import { errorMessage } from "@/lib/errors";
 import { safeNext } from "@/lib/access-policy";
+import { authErrorMessage } from "../auth-errors";
 type Mode = "in" | "up";
 const callback = (next: string) =>
   `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`;
@@ -58,15 +59,13 @@ export function AuthForm({ next, notice }: { next: string; notice?: string }) {
       }
       router.refresh();
     } catch (e) {
+      // Los errores del ingreso ya vienen redactados; los del registro se traducen por el código de Supabase.
       setError(
-        e instanceof Error &&
-          /SUPABASE_NOT_CONFIGURED|CONNECTION_ERROR/.test(e.message)
+        e instanceof Error && /SUPABASE_NOT_CONFIGURED|CONNECTION_ERROR/.test(e.message)
           ? errorMessage(e)
-          : e instanceof Error
-            ? e.message.startsWith("Correo") || e.message.startsWith("Confirmá")
-              ? e.message
-              : "No pudimos completar el registro. Revisá los datos e intentá de nuevo."
-            : "No pudimos continuar.",
+          : e instanceof Error && /^(Correo|Confirmá)/.test(e.message)
+            ? e.message
+            : authErrorMessage(e),
       );
     } finally {
       setBusy(false);

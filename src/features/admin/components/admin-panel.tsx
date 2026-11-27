@@ -453,7 +453,7 @@ export function AdminPanel({
                     </StatusBadge>
                   </div>
                   <p className="muted t-label">
-                    {paymentLabels[o.payment_state]} (simulado) ·{" "}
+                    {paymentLabels[o.payment_state]} ·{" "}
                     <Price amount={o.total_minor} />
                   </p>
                   {o.fulfillment === "location" && (
@@ -474,63 +474,9 @@ export function AdminPanel({
                   {financialIssue(o) && (
                     <StatusBadge tone="warning">Incidencia de cobro</StatusBadge>
                   )}
-                  {o.status === "pending_authorization" &&
-                    o.payment_state === "unknown" && (
-                      <>
-                        <Notice tone="warning">
-                          Reserva sin referencia confirmada. No se repetirá la
-                          autorización.
-                        </Notice>
-                        <div className="row wrap">
-                          <Button
-                            variant="secondary"
-                            size="sm"
-                            onClick={() =>
-                              ask({
-                                title: "Conciliar reserva aprobada",
-                                description:
-                                  "Solo DEMO: simula evidencia del proveedor de que la reserva está confirmada, sin crear otra autorización.",
-                                min: 5,
-                                confirm: "Confirmar reserva",
-                                tone: "primary",
-                                build: (reason) => ({
-                                  action: "reconcile_authorization",
-                                  orderId: o.id,
-                                  outcome: "authorized",
-                                  providerResultConfirmed: true,
-                                  reason,
-                                }),
-                              })
-                            }
-                          >
-                            Reserva aprobada
-                          </Button>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() =>
-                              ask({
-                                title: "Conciliar reserva anulada",
-                                description:
-                                  "Solo DEMO: simula evidencia de que no hay reserva ni cobro vigente.",
-                                min: 5,
-                                confirm: "Anular reserva",
-                                tone: "danger",
-                                build: (reason) => ({
-                                  action: "reconcile_authorization",
-                                  orderId: o.id,
-                                  outcome: "voided",
-                                  providerResultConfirmed: true,
-                                  reason,
-                                }),
-                              })
-                            }
-                          >
-                            Reserva anulada
-                          </Button>
-                        </div>
-                      </>
-                    )}
+                  {o.status === "pending_authorization" && o.payment_state === "unknown" && (
+                    <Notice tone="warning">Pedido sin confirmar. No se repite el intento.</Notice>
+                  )}
                   <div className="row wrap">
                     {o.status === "ready" && o.claimed_elsewhere && (
                       <Button
@@ -562,11 +508,11 @@ export function AdminPanel({
                         size="sm"
                         onClick={() =>
                           ask({
-                            title: "Devolver el monto simulado",
+                            title: "Registrar devolución",
                             description:
-                              "Devolución ficticia completa. Indicá el motivo.",
+                              "Onza no mueve dinero: devolvé el monto completo en el local y anotá el motivo.",
                             min: 5,
-                            confirm: "Devolver",
+                            confirm: "Registrar",
                             tone: "danger",
                             build: (reason) => ({
                               action: "refund",
@@ -576,7 +522,7 @@ export function AdminPanel({
                           })
                         }
                       >
-                        Devolver monto
+                        Registrar devolución
                       </Button>
                     )}
                     {["queued", "preparing", "ready"].includes(o.status) &&
@@ -868,7 +814,7 @@ export function AdminPanel({
                   style={{ maxWidth: 160 }}
                 />
                 <p className="muted t-label">
-                  Solo acepta si el local recibe pedidos, el pedido está vigente, la reserva está autorizada, hay stock y
+                  Solo acepta si el local recibe pedidos, el pedido está vigente, el pago está pendiente, hay stock y
                   lugar en preparación. Una pausa la detiene. El equipo puede volver a manual desde los Ajustes de la barra.
                 </p>
               </section>

@@ -131,7 +131,7 @@ try {
   await ana.locator("#agotados").getByText("Todo disponible.").waitFor({ timeout: 10000 });
   check("Se reactiva desde «Ahora»", true);
 
-  /* 5 · Al cerrar: no entregados, tiempos y montos simulados */
+  /* 5 · Al cerrar: no entregados, tiempos y montos */
   await order(sofia, "Cerveza");
   await sofia.getByRole("button", { name: "Cancelar pedido" }).click();
   await sofia.getByRole("button", { name: "Sí, cancelar pedido" }).click();
@@ -139,11 +139,11 @@ try {
   await ana.goto(`${ADMIN}?tab=resumen`);
   await ana.locator(".kpis").waitFor();
   const kpis = (await ana.locator(".kpis").innerText()).replace(/\s+/g, " ");
-  check("«Al cerrar» muestra entregados, no entregados, ventas netas simuladas y preparación con aceptación",
-    ["Entregados", "No entregados", "Ventas netas (simuladas)", "Preparación", "Aceptación"].every((k) => kpis.includes(k)), kpis);
+  check("«Al cerrar» muestra entregados, no entregados, ventas netas y preparación con aceptación",
+    ["Entregados", "No entregados", "Ventas netas", "Preparación", "Aceptación"].every((k) => kpis.includes(k)), kpis);
   const notDelivered = Number((await ana.locator(".kpis .metric", { hasText: "No entregados" }).locator(".v").innerText()).trim());
   check("El pedido cancelado cuenta como no entregado", notDelivered >= 1, String(notDelivered));
-  check("Los montos se rotulan como simulados", (await text(ana)).includes("Montos simulados"));
+  check("Los montos aclaran que Onza no procesa pagos", (await text(ana)).includes("Onza no procesa pagos"));
   await shot(ana, "a4-al-cerrar-1280");
   check("Sin errores de página", errors.length === 0, errors.join(" | "));
 } catch (error) {

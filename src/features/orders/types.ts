@@ -114,14 +114,14 @@ export const orderStatusLabel = (
     ? "Listo · te lo llevamos"
     : statusLabels[order.status];
 export const paymentLabels: Record<string, string> = {
-  authorizing: "Reserva pendiente de acción",
-  authorized: "Monto reservado",
-  capture_pending: "Confirmando cobro",
-  captured: "Cobro confirmado",
-  void_pending: "Liberación solicitada",
-  voided: "Reserva anulada",
-  failed: "Reserva rechazada",
+  authorizing: "Confirmando pedido",
+  authorized: "Pago pendiente en el local",
+  capture_pending: "Registrando el pago",
+  captured: "Pago registrado",
+  void_pending: "Anulando el pago pendiente",
+  voided: "Sin pago",
+  failed: "Pago rechazado",
   unknown: "Resultado sin confirmar",
-  refunded: "Monto devuelto",
-  refund_pending: "Devolución solicitada",
+  refunded: "Devolución registrada",
+  refund_pending: "Devolución en proceso",
 };

@@ -411,20 +411,13 @@ export function OrderDetail({ id }: { id: string }) {
           <Price amount={order.total_minor} />
         </div>
         <p className="hint">
-          {financial} · simulado
+          {financial}
         </p>
         {order.payment_state === "unknown" && (
           <Notice tone="danger" title="Resultado pendiente de conciliación">
-            No inicies otro pedido para resolver esta reserva. Consultá al
-            local.
+            No inicies otro pedido. Consultá al local.
           </Notice>
         )}
-        {order.status === "pending_authorization" &&
-          order.payment_state === "authorizing" && (
-            <Button loading={busy} onClick={() => void act("authorize_action")}>
-              Simular confirmación de reserva
-            </Button>
-          )}
         {order.status === "queued" && (
           <Button variant="danger" block onClick={() => setConfirmCancel(true)}>
             Cancelar pedido

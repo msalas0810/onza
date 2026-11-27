@@ -4,7 +4,7 @@ import { venueStatus } from "./venue-status";
 import { VenueCover, VenueMark, useCover } from "./venue-parts";
 import { coverPosition } from "./venue-card";
 
-/** Cabecera del local: foto (si hay), identidad, datos de retiro y nota de demo. */
+/** Cabecera del local: foto (si hay), identidad, datos de retiro. */
 export function VenueHero({ venue }: { venue: Venue }) {
   const cover = useCover(venue.cover_url);
   const status = venueStatus(venue);
@@ -32,8 +32,6 @@ export function VenueHero({ venue }: { venue: Venue }) {
         </div>
         {status.badge}
       </div>
-      {/* Locales reales sin acuerdo: una sola línea, compacta, mientras dure el entorno controlado. */}
-      <p className="demo-note">Menú de demostración · sin relación comercial con el local</p>
     </header>
   );
 }
