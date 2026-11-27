@@ -39,14 +39,14 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama en revisión | `feat/entrega-mesa-admin` (entrega en el lugar, Picnic y admin; migración 025 sin aplicar en remoto; ver D-2026-11-26-01) |
+| Rama en revisión | `feat/noche-picnic-social` (base `d8a596d` de `feat/entrega-mapa`/`feat/entrega-mesa-admin`): mapa de Picnic con pin (026), barra con el pin en la tarjeta, admin por momentos, actividad y amigos (027). Solo commits locales; 025–027 sin aplicar en remoto. Ver D-2026-11-27-01 |
 | Rama vigente de trabajo | `main` (consolidada el 2026-11-23: contiene la auditoría `audit/seguridad-escala`, el rescate `1090b4e` y los cambios de Codex). Se trabaja con ramas `feat/*` o `fix/*` y PR. Migraciones 021–024 sin aplicar en remoto |
 | `main` | Fuente única de trabajo en GitHub (`msalas0810/onza`). **Despliegue automático de `main` desactivado en `vercel.json`** hasta aplicar 013–024 en la base alojada |
 | Commit desplegado en Vercel | `fed579403d75da1d49cc54f0af9239b55c125706`, Preview READY `dpl_8emjFDVbshCsg5xBBsiaKNFSpEqT`. Video e ingreso laboral comprobados por HTTPS. |
 | Demo desplegada | https://onza-demo.vercel.app (alias comprobado del Preview vigente; protección existente preservada, sin SSO obligatorio) |
 | Backend | Supabase alojado `onza-dev`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Revisar `feat/entrega-mesa-admin` (D-2026-11-26-01). Antes: revisar `audit/seguridad-escala` (ver `docs/Onza-Auditoria-seguridad-y-escala.md`, §10). Después, en un proyecto Supabase **aislado**: `db push --dry-run` (013–024), aplicar, y probar sesiones/Storage/Realtime reales. Antes: aplicar las migraciones 013–020 en un proyecto de prueba (el dry-run contra `onza-dev` listó exactamente esas ocho; no se aplicó nada). Próxima prueba en Safari de iPad y iPhone físicos. |
+| Siguiente tarea exacta | Revisar `feat/noche-picnic-social` con `npm run demo:local` (README, «Probar en cinco minutos») y `docs/Onza-Noche-decisiones.md`. Después, en un proyecto Supabase **aislado**: `npx supabase db push --dry-run` (013–027), aplicar y repetir los tres recorridos de la guía técnica con Realtime real. Prueba física en iPhone/Android del plano de Picnic. |
 
 ### Pendientes abiertos
 
@@ -63,6 +63,7 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-009 | Auditoría 2026-11-21: la CI ya prueba login y Realtime reales (2026-11-23); sigue sin probarse contra Supabase real: Storage, cookies/refresh, expiración, revocación y cierre por dispositivo. Pasos exactos en `docs/Onza-Auditoria-seguridad-y-escala.md` §10 | 2026-11-21 |
 | PEN-010 | Confirmar el límite de 60 validaciones de retiro por minuto (migración 024) y aplicar 021–024 en un proyecto aislado | 2026-11-21 |
 | PEN-011 | Entrega en el lugar: aplicar la migración 025 con 013–024 en un proyecto aislado, probar Realtime real y el escaneo del QR en iPhone/Android físicos, y cargar los datos reales de Picnic (el seed es ilustrativo). Ver `docs/Onza-Entrega-en-el-lugar.md` §6 | 2026-11-26 |
+| PEN-012 | Actividad y amigos (027): aplicar en un proyecto aislado; cargar coordenadas verificadas de locales reales (hoy ninguno tiene); elegir proveedor de mapa base si se quiere calles; confirmar el umbral de 3 personas. Ver `docs/Onza-Noche-decisiones.md` §4 | 2026-11-27 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -93,6 +94,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ## Entradas
 
 > Más recientes arriba.
+
+### D-2026-11-27-01 · Picnic de punta a punta, administración por momentos de la noche, actividad y amigos
+
+- **Fecha y hora:** 2026-11-27 00:13–01:10 (America/Costa_Rica)
+- **Persona:** Manu (encargo «ONZA — Rediseño de producto, implementación y orden del código», sesión nocturna sin confirmaciones).
+- **IA:** Claude Code · claude-opus-5-5
+- **Rama y commits:** `feat/noche-picnic-social` desde `d8a596d` (`feat/entrega-mapa`). Commits: `920be7c` (trabajo previo del mapa que estaba **sin commit**, guardado tal cual), `31bd6f3` (Picnic y barra), `2185a2b` (admin), `5f0d128` (actividad y amigos), `05184e8` (pulido), `f33eba7` (demo local, entorno, limpieza) y el cierre documental. Sin push, sin deploy, sin migraciones remotas.
+- **Qué cambió:** (1) La barra ve el pin del cliente **en la tarjeta**: un recorte del mismo plano, centrado en el punto, sin abrir nada. El checkout ya no repite el lugar: se confirma junto a «Pedir». (2) Admin por momento: *Durante la noche* (Ahora, Pedidos), *Antes de abrir* (Menú y precios, Capacidad, Entrega y QR, Perfil y horario, Equipo) y *Al cerrar* (Resumen y CSV). «Ahora» es la entrada, con nuevos, preparando, listos y activos frente a la capacidad, pausa y agotados. (3) Migración **027**: check-in voluntario «Estoy acá» con vencimiento, `/actividad` con niveles por local (nunca conteos, mínimo 3 personas), ejemplo simulado aparte, y `/amigos` con solicitud por @usuario o enlace, compartir apagado por defecto y corte inmediato. Pedir no hace check-in. (4) Pulido con Hallmark e Impeccable: tokens `--onza-fixed-*`, sin etiquetas en mayúsculas espaciadas, deshabilitados legibles, barra inferior de 4 destinos. (5) `npm run demo:local`, `.env.example` documentado por variable, README «Probar en cinco minutos»; fuera `pickup-service.ts` y `findEnabledSpot` (sin usos).
+- **Archivos clave:** `docs/Onza-Noche-decisiones.md` (referencias, crítica, decisiones, qué falta), `supabase/migrations/202611270027_social_activity.sql`, `src/features/social/*`, `src/app/{amigos,actividad}`, `src/app/api/social`, `src/features/delivery/components/order-map-button.tsx`, `src/features/admin/{admin-tabs.ts,components/now-panel.tsx}`, `scripts/{demo-local,shots-noche,verify-amigos-actividad}.mjs`, evidencia en `docs/evidence/noche/` (antes, después, verificaciones).
+- **Verificado:** antes de tomarlo como base, el trabajo sin commit del mapa pasaba tipos, lint y 245 pruebas. Al cerrar, `npm run check` en verde: tipos, lint, 51 archivos / 255 pruebas (8 nuevas de base para lo social: alcance, conteos chicos, vencimiento, revocación, terceros, «pedir no hace check-in»; 2 de proyección) y build. En navegador (Chromium vía Playwright, contra un shim propio en :54322 y un build en :3200, cada recorrido con el shim recién iniciado): `verify-entrega-mapa` **50/50** (QR de mesa → login → pin → pedido → el mismo pin en la barra → entrega con código; retiro en barra; mapa en admin), `verify-entrega-lugar` **43/43** (incluye pausar y reanudar desde «Ahora», CSV y lugares), `verify-amigos-actividad` **23/23** (solicitud, aceptación, compartir, dejar de compartir, tercero sin acceso, cuenta del equipo rechazada, 2 personas ocultas y 3 visibles como nivel). Detector de Impeccable sin hallazgos; Hallmark sin fallos salvo cinco excepciones documentadas. `scan-secrets`: sin claves versionadas y `.env.local` ignorado.
+- **No verificado:** Supabase real (Auth, Realtime, Storage) y migraciones 025–027 en cualquier base remota. Safari, iPhone y Android físicos (toque del plano, QR real). Vencimiento con el reloj real en navegador (sí en la base, `tests/db/social.test.ts`). El arranque completo de `npm run demo:local`: hay un `next dev` de la sesión anterior en :3100 (PID 23281) que no se detuvo, y Next permite uno por carpeta. Sí se comprobaron sus mensajes de falla (puerto ocupado y `next dev` duplicado). La búsqueda web general quedó bloqueada; las referencias salen de páginas abiertas una por una (ver la nota).
+- **Decisiones:** se partió del trabajo sin commit del mapa porque era lo más reciente y completo. Se guardó en su propio commit y con respaldo en `~/Documents/Onza/Onza-respaldo-ramas/2026-11-27-wip-entrega-mapa/`. No se detuvieron procesos ajenos (:3100 y :54321). Lo social vive en `src/features/social` y su propia API (`/api/social`), no en los comandos de pedidos. Las tablas no tienen permisos directos. Mapa de actividad esquemático, sin dependencia nueva: no hay coordenadas verificadas ni proveedor de mapa base. Detalle y alternativas en `docs/Onza-Noche-decisiones.md`.
+- **Pendientes / siguiente paso:** revisar la rama. Aplicar 013–027 en un proyecto aislado y repetir los tres recorridos con Realtime real. Cargar coordenadas verificadas (PEN-012). Probar en teléfono físico el plano de Picnic y el recorte del pin en la barra. Opcional: tiempos de aceptación y preparación por producto en «Al cerrar», que hoy son por noche.
 
 ### D-2026-11-26-01 · Entrega en el lugar (mesa, zona o puesto), flujo de Picnic y mejoras del administrador
 
