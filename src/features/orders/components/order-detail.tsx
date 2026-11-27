@@ -26,8 +26,9 @@ import { formatClock } from "@/lib/clock";
 import { SessionExpiredSheet } from "./session-expired-sheet";
 import { ReconnectingBanner } from "@/components/ui/connection-banner";
 import { EnjoyMoment } from "./enjoy";
-import { SpotPicker } from "@/features/delivery/components/spot-picker";
-import { writeSpotPreference } from "@/features/delivery/spot-preference";
+import { describeChoice, LocationPicker } from "@/features/delivery/components/location-picker";
+import { OrderPinMap } from "@/features/delivery/components/order-pin-map";
+import { writeLocationPreference, type LocationPref } from "@/features/delivery/spot-preference";
 import {
   deliveryOptionsSchema,
   offersLocation,
@@ -96,6 +97,7 @@ export function OrderDetail({ id }: { id: string }) {
   const [expired, setExpired] = useState(false);
   const [busy, setBusy] = useState(false);
   const [moving, setMoving] = useState<DeliveryOptions | "loading" | "error" | null>(null);
+  const [draft, setDraft] = useState<LocationPref | null>(null);
   const actionKey = useRef<string | null>(null);
   useWakeLock(order?.status === "ready" && !!order.pickup_code);
   const enjoy = useEnjoyOnce(order);
@@ -133,21 +135,39 @@ export function OrderDetail({ id }: { id: string }) {
   const openMove = async () => {
     if (!order) return;
     setMoving("loading");
+    setDraft(null);
     try {
       const response = await fetch(`/api/delivery?venue=${order.venue_id}`, { cache: "no-store" });
       if (!response.ok) throw new Error("delivery");
-      setMoving(deliveryOptionsSchema.parse(await response.json()));
+      const options = deliveryOptionsSchema.parse(await response.json());
+      // Se parte de donde está hoy: su pin (si el mapa no cambió) o su lugar de la lista.
+      setDraft(
+        order.map_id && options.map?.id === order.map_id && order.map_x != null && order.map_y != null
+          ? { point: { mapId: order.map_id, x: order.map_x, y: order.map_y } }
+          : order.spot_id && !order.map_id
+            ? { spotId: order.spot_id }
+            : null,
+      );
+      setMoving(options);
     } catch {
       setMoving("error");
     }
   };
-  const moveTo = async (spotId: string) => {
+  const moveTo = async (next: LocationPref) => {
     if (!order || busy) return;
     setBusy(true);
     setNotice("");
     try {
-      orderSchema.parse(await sendCommand({ action: "order_change_spot", orderId: order.id, spotId }));
-      writeSpotPreference(order.venue_id, spotId);
+      orderSchema.parse(
+        await sendCommand({
+          action: "order_change_spot",
+          orderId: order.id,
+          ...(next.point
+            ? { point: next.point, ...(next.hint ? { spotId: next.hint } : {}) }
+            : { spotId: next.spotId }),
+        }),
+      );
+      writeLocationPreference(order.venue_id, next);
       setMoving(null);
     } catch (e) {
       if (isSessionError(e)) setExpired(true);
@@ -234,6 +254,7 @@ export function OrderDetail({ id }: { id: string }) {
             </Button>
           </div>
         )}
+        {canMove && <OrderPinMap order={order} label={`Tu lugar en el mapa: ${spotText(order)}`} />}
         {ready && (
           <section className="ticket" aria-label="Ticket de retiro">
             <div>
@@ -401,7 +422,19 @@ export function OrderDetail({ id }: { id: string }) {
         open={moving !== null}
         onOpenChange={(open) => !open && setMoving(null)}
         title="¿Dónde estás ahora?"
-        description={`Elegí ${yourSpot(noun)}. El equipo ve el cambio al instante.`}
+        description={`${typeof moving === "object" && moving?.map ? "Tocá el mapa donde estás ahora" : `Elegí ${yourSpot(noun)}`}. El equipo ve el cambio al instante.`}
+        actions={
+          typeof moving === "object" && moving && moving.map ? (
+            <Button
+              block
+              loading={busy}
+              disabled={!draft || describeChoice(draft, moving.spots, moving.map) === null}
+              onClick={() => draft && void moveTo(draft)}
+            >
+              Confirmar este lugar
+            </Button>
+          ) : undefined
+        }
       >
         {moving === "loading" && <p role="status">Cargando lugares…</p>}
         {moving === "error" && (
@@ -410,12 +443,14 @@ export function OrderDetail({ id }: { id: string }) {
           </Notice>
         )}
         {moving && typeof moving === "object" && offersLocation(moving.mode) && (
-          <SpotPicker
-            spots={moving.spots}
+          <LocationPicker
             noun={moving.noun}
-            value={order.spot_id ?? null}
+            map={moving.map ?? null}
+            spots={moving.spots}
+            value={moving.map ? draft : order.map_id ? null : order.spot_id ? { spotId: order.spot_id } : null}
             name="move-spot"
-            onChange={(spot) => void moveTo(spot)}
+            maxVh={50}
+            onChange={(next) => (moving.map ? setDraft(next) : void moveTo(next))}
           />
         )}
       </Sheet>

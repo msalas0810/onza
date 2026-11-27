@@ -15,6 +15,7 @@ import { sendCommand } from "@/features/orders/client-api";
 import { orderSchema, type Order } from "@/features/orders/types";
 import { formatPickupCode, isPickupCode, normalizePickupCode } from "../code";
 import { spotText } from "@/features/delivery/types";
+import { OrderMapButton } from "@/features/delivery/components/order-map-button";
 
 type Detector = {
   detect: (video: HTMLVideoElement) => Promise<{ rawValue: string }[]>;
@@ -338,6 +339,7 @@ export function PickupPanel({
                 Entregar en {spotText(order)}
               </p>
             )}
+            {order.fulfillment === "location" && <OrderMapButton order={order} />}
             <ul className="pickup-items">
               {order.items.map((i) => (
                 <li key={i.id}>

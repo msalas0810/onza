@@ -1,7 +1,7 @@
 // Servidor de verificación local: las migraciones REALES sobre PGlite detrás de la parte de la API de Supabase que usa la app
 // (REST de tablas, RPC y Auth). Sirve para recorrer la app completa sin red ni proyecto remoto.
 //
-// NO es Supabase: sin Realtime, sin Storage, sin contraseñas reales (cualquier contraseña entra) y sin límites de tasa.
+// NO es Supabase: sin Realtime, Storage mínimo (solo venue-images, en memoria), sin contraseñas reales (cualquier contraseña entra) y sin límites de tasa.
 // Los resultados de una ejecución contra este servidor no sustituyen la verificación contra onza-dev.
 import { createServer } from "node:http";
 import { readFileSync } from "node:fs";
@@ -33,6 +33,7 @@ const MIGRATIONS = [
   "202611210023_scale_fixes.sql",
   "202611210024_resolve_rate_limit.sql",
   "202611260025_location_delivery.sql",
+  "202611270026_delivery_map.sql",
 ];
 const TABLES = new Set([
   "venues",
@@ -45,6 +46,7 @@ const TABLES = new Set([
   "order_items",
   "order_events",
   "delivery_spots",
+  "venue_maps",
 ]);
 export const SERVICE_KEY = "local-shim-service-role";
 export const PUBLISHABLE_KEY = "local-shim-publishable";
@@ -239,13 +241,46 @@ export async function startShim({ port = 54321, quiet = true } = {}) {
       hint: null,
     });
   };
+  const files = new Map();
   const server = createServer(async (req, res) => {
     const url = new URL(req.url, "http://shim");
     if (req.method === "OPTIONS") return send(res, 204);
-    let body = "";
-    for await (const chunk of req) body += chunk;
-    const json = body ? JSON.parse(body) : {};
+    const chunks = [];
+    for await (const chunk of req) chunks.push(chunk);
+    const raw = Buffer.concat(chunks);
     const auth = req.headers.authorization ?? "";
+    // Storage mínimo (solo verificación): sube y sirve imágenes del bucket venue-images, en memoria. Sin políticas ni límites:
+    // la política real (administración del local, 2 MB, tipos) vive en la migración 006 y se prueba contra Supabase.
+    const storage = url.pathname.match(/^\/storage\/v1\/object\/(?:(public)\/)?venue-images\/(.+)$/);
+    if (storage) {
+      const path = decodeURIComponent(storage[2]);
+      if (req.method === "GET" && storage[1]) {
+        const file = files.get(path);
+        if (!file) return send(res, 404, { message: "Object not found" });
+        res.writeHead(200, { "Content-Type": file.type, "Cache-Control": "public, max-age=31536000", "Access-Control-Allow-Origin": "*" });
+        return res.end(file.bytes);
+      }
+      if ((req.method === "POST" || req.method === "PUT") && !storage[1]) {
+        if (!userOf(auth.replace(/^Bearer /i, ""))) return send(res, 401, { message: "Unauthorized" });
+        const type = req.headers["content-type"] ?? "";
+        const boundary = /boundary=(.+)$/.exec(type)?.[1];
+        let bytes = raw;
+        let fileType = type;
+        if (boundary) {
+          // multipart/form-data: se toma la parte del archivo (la que declara su propio Content-Type).
+          const text = raw.toString("latin1");
+          const start = text.indexOf("\r\n\r\n", text.search(/content-type:/i));
+          const end = text.indexOf(`\r\n--${boundary}`, start);
+          fileType = /content-type:\s*([^\r\n]+)/i.exec(text)?.[1] ?? "application/octet-stream";
+          bytes = raw.subarray(start + 4, end);
+        }
+        files.set(path, { type: fileType, bytes });
+        return send(res, 200, { Key: `venue-images/${path}`, Id: path });
+      }
+      return send(res, 404, { message: "shim: storage no implementado" });
+    }
+    const body = raw.toString("utf8");
+    const json = body ? JSON.parse(body) : {};
     try {
       /* ---------- Auth ---------- */
       if (url.pathname === "/auth/v1/user" && req.method === "GET") {

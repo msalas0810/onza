@@ -41,3 +41,18 @@ insert into public.delivery_spots(id,venue_id,label,area,position) select ('5000
 insert into public.delivery_spots(id,venue_id,label,area,position) values
  ('50000000-0000-4000-8000-000000000051','20000000-0000-4000-8000-000000000004','VIP 1','Zona VIP',51),
  ('50000000-0000-4000-8000-000000000052','20000000-0000-4000-8000-000000000004','VIP 2','Zona VIP',52) on conflict do nothing;
+-- Mapa de ejemplo de Picnic (plano ilustrativo propio del repo, public/demo-venues/picnic-plano.svg). Mesas = círculos, la pista = zona.
+insert into public.venue_maps(id,venue_id,version,image_url,width,height,service_area) values ('60000000-0000-4000-8000-000000000001','20000000-0000-4000-8000-000000000004',1,'/demo-venues/picnic-plano.svg',1600,1000,'[{"points": [[0.0375, 0.06], [0.4625, 0.06], [0.4625, 0.64], [0.0375, 0.64]]}, {"points": [[0.4875, 0.06], [0.8375, 0.06], [0.8375, 0.94], [0.4875, 0.94]]}, {"points": [[0.8625, 0.3], [0.9625, 0.3], [0.9625, 0.94], [0.8625, 0.94]]}]'::jsonb) on conflict do nothing;
+insert into public.delivery_spots(id,venue_id,label,area,position,shape) values ('50000000-0000-4000-8000-000000000053','20000000-0000-4000-8000-000000000004','Pista de baile','',53,'{"kind": "polygon", "points": [[0.5, 0.6], [0.825, 0.6], [0.825, 0.92], [0.5, 0.92]]}'::jsonb) on conflict do nothing;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.1187, "y": 0.21, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000001' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.25, "y": 0.21, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000002' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.3812, "y": 0.21, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000003' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.1187, "y": 0.45, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000004' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.25, "y": 0.45, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000005' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.3812, "y": 0.45, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000006' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.5875, "y": 0.2, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000007' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.7375, "y": 0.2, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000008' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.5875, "y": 0.44, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000009' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.7375, "y": 0.44, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000010' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.9125, "y": 0.48, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000051' and shape is null;
+update public.delivery_spots set shape='{"kind": "circle", "x": 0.9125, "y": 0.74, "r": 0.026}'::jsonb where id='50000000-0000-4000-8000-000000000052' and shape is null;

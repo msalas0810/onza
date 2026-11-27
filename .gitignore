@@ -12,3 +12,5 @@ supabase/.temp/
 .superpowers/
 *.tsbuildinfo
 .vercel/
+# Playwright CLI output (may contain credentials)
+.playwright-cli/

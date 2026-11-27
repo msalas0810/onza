@@ -19,7 +19,8 @@ import {
   sendCommand,
 } from "@/features/orders/client-api";
 import { SessionExpiredSheet } from "@/features/orders/components/session-expired-sheet";
-import { groupSpots, type DeliveryMode, type Spot } from "../types";
+import { groupSpots, type DeliveryMode, type Spot, type VenueMap } from "../types";
+import { MapAdmin } from "./map-admin";
 import { QrImage } from "./qr-image";
 
 const modeOptions = [
@@ -34,13 +35,13 @@ const modeCopy: Record<DeliveryMode, string> = {
 };
 const nounSuggestions = ["Mesa", "Zona", "Puesto", "Gradas", "Lugar"];
 
-type Props = { venue: Venue; spots: Spot[]; availableProducts: number };
+type Props = { venue: Venue; spots: Spot[]; map: VenueMap | null; availableProducts: number };
 
 /**
  * Entrega en el lugar: cómo reciben los clientes, qué lugares hay (mesas, zonas o puestos), y el enlace y los QR para
  * entrar directo al local o a una mesa. La administración del local lo gestiona sola; la base valida cada cambio.
  */
-export function DeliveryAdmin({ venue, spots, availableProducts }: Props) {
+export function DeliveryAdmin({ venue, spots, map, availableProducts }: Props) {
   const router = useRouter();
   const mode = (venue.delivery_mode ?? "bar") as DeliveryMode;
   const [draftMode, setDraftMode] = useState<DeliveryMode>(mode);
@@ -66,7 +67,7 @@ export function DeliveryAdmin({ venue, spots, availableProducts }: Props) {
 
   const enabledCount = spots.filter((s) => s.enabled).length;
   const open = venue.open_state === "open" && !venue.paused;
-  const ready = mode !== "bar" && enabledCount > 0;
+  const ready = mode !== "bar" && (enabledCount > 0 || map !== null);
   const entryUrl = `${origin}/v/${venue.slug}`;
   const spotUrl = (spot: Spot) => `${entryUrl}?spot=${spot.id}`;
 
@@ -118,7 +119,7 @@ export function DeliveryAdmin({ venue, spots, availableProducts }: Props) {
           {[
             {
               done: ready,
-              text: "La entrega en el lugar está activa y hay lugares habilitados",
+              text: "La entrega en el lugar está activa y hay un mapa o lugares habilitados",
               fix: "Activala acá abajo",
             },
             {
@@ -195,10 +196,12 @@ export function DeliveryAdmin({ venue, spots, availableProducts }: Props) {
             </Button>
           </div>
         </form>
-        {draftMode !== "bar" && enabledCount === 0 && (
-          <Notice tone="warning">Agregá al menos un lugar abajo antes de activar la entrega en el lugar.</Notice>
+        {draftMode !== "bar" && enabledCount === 0 && !map && (
+          <Notice tone="warning">Cargá el mapa o agregá al menos un lugar abajo antes de activar la entrega en el lugar.</Notice>
         )}
       </section>
+
+      <MapAdmin venue={venue} map={map} spots={spots} noun={venue.spot_noun ?? "Mesa"} busy={busy} run={run} />
 
       <section className="block-card" aria-labelledby="delivery-spots">
         <div className="row between wrap">
@@ -222,6 +225,12 @@ export function DeliveryAdmin({ venue, spots, availableProducts }: Props) {
                       <>
                         {" "}
                         <StatusBadge>Deshabilitado</StatusBadge>
+                      </>
+                    )}
+                    {map && spot.shape && (
+                      <>
+                        {" "}
+                        <StatusBadge tone="success">En el mapa</StatusBadge>
                       </>
                     )}
                   </strong>

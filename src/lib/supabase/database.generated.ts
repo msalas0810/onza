@@ -34,6 +34,7 @@ export type Database = {
           position: number;
           enabled: boolean;
           created_at: string;
+          shape: Json | null;
         };
         Insert: {
           id?: string;
@@ -43,6 +44,7 @@ export type Database = {
           position?: number;
           enabled?: boolean;
           created_at?: string;
+          shape?: Json | null;
         };
         Update: {
           id?: string;
@@ -52,6 +54,7 @@ export type Database = {
           position?: number;
           enabled?: boolean;
           created_at?: string;
+          shape?: Json | null;
         };
         Relationships: [];
       };
@@ -152,6 +155,9 @@ export type Database = {
           spot_label: string | null;
           spot_area: string | null;
           spot_changed_at: string | null;
+          map_id: string | null;
+          map_x: string | null;
+          map_y: string | null;
         };
         Insert: {
           id?: string;
@@ -174,6 +180,9 @@ export type Database = {
           spot_label?: string | null;
           spot_area?: string | null;
           spot_changed_at?: string | null;
+          map_id?: string | null;
+          map_x?: string | null;
+          map_y?: string | null;
         };
         Update: {
           id?: string;
@@ -196,6 +205,9 @@ export type Database = {
           spot_label?: string | null;
           spot_area?: string | null;
           spot_changed_at?: string | null;
+          map_id?: string | null;
+          map_x?: string | null;
+          map_y?: string | null;
         };
         Relationships: [];
       };
@@ -327,6 +339,42 @@ export type Database = {
           display_name?: string;
           must_change_password?: boolean;
           created_by?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      venue_maps: {
+        Row: {
+          id: string;
+          venue_id: string;
+          version: number;
+          image_url: string;
+          width: number;
+          height: number;
+          service_area: Json;
+          status: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          venue_id: string;
+          version: number;
+          image_url: string;
+          width: number;
+          height: number;
+          service_area?: Json;
+          status?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          venue_id?: string;
+          version?: number;
+          image_url?: string;
+          width?: number;
+          height?: number;
+          service_area?: Json;
+          status?: string;
           created_at?: string;
         };
         Relationships: [];
@@ -499,6 +547,9 @@ export type Database = {
         Args: { venue: string; from_day: string; to_day: string };
         Returns: Json;
       };
+      venue_map_save: { Args: { input: Json }; Returns: Json };
+      venue_map_area: { Args: { input: Json }; Returns: Json };
+      venue_map_remove: { Args: { input: Json }; Returns: Json };
     };
     Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;

@@ -29,7 +29,14 @@ export const messages: Record<string, string> = {
   SPOT_IN_USE:
     "Ese lugar ya recibió pedidos, así que no se puede borrar. Deshabilitalo y el historial lo conserva.",
   NO_SPOTS:
-    "Agregá y habilitá al menos un lugar antes de activar la entrega en el lugar.",
+    "Cargá el mapa o habilitá al menos un lugar antes de activar la entrega en el lugar.",
+  MAP_OUTDATED:
+    "El mapa del local cambió. Volvé a marcar dónde estás y pedí otra vez.",
+  OUTSIDE_AREA:
+    "Ahí no llegamos. Marcá un punto dentro de la zona de entrega del mapa.",
+  INVALID_SHAPE:
+    "Esa forma no es válida. Dibujala de nuevo dentro de la imagen.",
+  NO_MAP: "Primero cargá el mapa del local.",
   LAST_SPOT:
     "Es el último lugar habilitado. Volvé primero a «Solo barra» o habilitá otro lugar.",
   TOO_MANY_SPOTS: "Un local puede tener hasta 300 lugares.",

@@ -38,6 +38,20 @@ export const orderSchema = z.object({
   spot_label: z.string().nullable().optional(),
   spot_area: z.string().nullable().optional(),
   spot_changed_at: z.string().nullable().optional(),
+  /** Pin marcado en el mapa (relativo a la imagen, 0 a 1) y la versión del mapa en que se marcó. */
+  map_id: z.string().nullable().optional(),
+  map_x: z.number().nullable().optional(),
+  map_y: z.number().nullable().optional(),
+  map: z
+    .object({
+      id: z.string(),
+      image_url: z.string(),
+      width: z.number(),
+      height: z.number(),
+      current: z.boolean(),
+    })
+    .nullable()
+    .optional(),
   // Solo para el equipo del local: quién registró la entrega.
   delivered_by_name: z.string().nullable().optional(),
   claim_id: z.string().nullable(),

@@ -363,6 +363,8 @@ describe("catálogo de permisos (bajo los permisos por defecto de Supabase)", ()
         "categories:anon", "categories:authenticated", "products:anon", "products:authenticated", "venues:anon", "venues:authenticated",
         // Lugares de entrega: públicos para el checkout; la política RLS solo deja ver los habilitados (025).
         "delivery_spots:anon", "delivery_spots:authenticated",
+        // Mapa del local: público el vigente; el staff lee también los retirados (026).
+        "venue_maps:anon", "venue_maps:authenticated",
         "memberships:authenticated", "orders:authenticated", "order_items:authenticated", "profiles:authenticated", "staff_accounts:authenticated",
       ].sort(),
     );

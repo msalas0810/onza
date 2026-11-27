@@ -1,8 +1,14 @@
 import { z } from "zod";
+import { MAP_POINT_LABEL } from "./geometry";
 
 /** Cómo entrega un local: solo en la barra (lo de siempre), el cliente elige, o solo en su lugar. */
 export type DeliveryMode = "bar" | "both" | "location";
 
+const pointTuple = z.tuple([z.number(), z.number()]);
+export const shapeSchema = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("circle"), x: z.number(), y: z.number(), r: z.number() }),
+  z.object({ kind: z.literal("polygon"), points: z.array(pointTuple) }),
+]);
 export const spotSchema = z.object({
   id: z.string(),
   venue_id: z.string(),
@@ -10,6 +16,8 @@ export const spotSchema = z.object({
   area: z.string(),
   position: z.number(),
   enabled: z.boolean(),
+  /** Dónde está el lugar sobre el mapa; nulo si solo existe en la lista. */
+  shape: shapeSchema.nullable().optional(),
 });
 export type Spot = z.infer<typeof spotSchema>;
 
@@ -33,12 +41,26 @@ export function groupSpots(spots: Spot[]) {
     .sort((a, b) => Number(Boolean(a.area)) - Number(Boolean(b.area)));
 }
 
-/** «Mesa 4 · Terraza»: el lugar tal como lo ve quien lo pidió y quien lo lleva. */
+export const MAP_NAME_FALLBACK = MAP_POINT_LABEL;
+
+/** El mapa vigente de un local: imagen, medidas y área de servicio (polígonos 0..1; vacía = toda la imagen). */
+export const mapSchema = z.object({
+  id: z.string(),
+  imageUrl: z.string(),
+  width: z.number(),
+  height: z.number(),
+  serviceArea: z.array(z.object({ points: z.array(pointTuple) })),
+});
+export type VenueMap = z.infer<typeof mapSchema>;
+
+/** «Mesa 4 · Terraza»: el lugar tal como lo ve quien lo pidió y quien lo lleva. Un punto sin mesa ni zona: «punto en el mapa». */
 export function spotText(order: {
   spot_label?: string | null;
   spot_area?: string | null;
 }) {
   if (!order.spot_label) return "";
+  if (order.spot_label === MAP_POINT_LABEL)
+    return order.spot_area ? `${MAP_POINT_LABEL} · ${order.spot_area}` : MAP_POINT_LABEL;
   return order.spot_area
     ? `${order.spot_label} · ${order.spot_area}`
     : order.spot_label;
@@ -52,5 +74,7 @@ export const deliveryOptionsSchema = z.object({
   noun: z.string(),
   pickupLabel: z.string(),
   spots: z.array(spotSchema),
+  /** Mapa vigente del local, o null si el cliente elige de la lista. */
+  map: mapSchema.nullable().optional(),
 });
 export type DeliveryOptions = z.infer<typeof deliveryOptionsSchema>;

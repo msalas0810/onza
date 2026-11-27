@@ -2,6 +2,14 @@ import { z } from "zod";
 const uuid = z.string().uuid();
 const key = z.string().min(1).max(128);
 const version = z.number().int().positive();
+const coord = z.number().min(0).max(1);
+/** Un toque en el mapa del local: relativo a la imagen (0 a 1). La base valida mapa vigente, área y lugar. */
+const mapPoint = z.object({ mapId: uuid, x: coord, y: coord });
+const pt = z.tuple([coord, coord]);
+const shape = z.discriminatedUnion("kind", [
+  z.object({ kind: z.literal("circle"), x: coord, y: coord, r: z.number().min(0.005).max(0.2) }),
+  z.object({ kind: z.literal("polygon"), points: z.array(pt).min(3).max(60) }),
+]);
 export const createSchema = z.object({
   action: z.literal("create"),
   venueId: uuid,
@@ -20,8 +28,11 @@ export const createSchema = z.object({
   idempotencyKey: key,
   // Dónde se entrega. Sin este campo el pedido es de retiro en barra, como siempre. El servidor valida el lugar.
   delivery: z
-    .discriminatedUnion("mode", [
+    .union([
       z.object({ mode: z.literal("bar") }),
+      // Un toque en el mapa. spotId (opcional) es el QR de una mesa: la base comprueba que contenga el punto. Va ANTES que la
+      // variante de solo lugar: si no, zod la tomaría primero y descartaría el punto en silencio.
+      z.object({ mode: z.literal("location"), point: mapPoint, spotId: uuid.optional() }),
       z.object({ mode: z.literal("location"), spotId: uuid }),
     ])
     .optional(),
@@ -68,7 +79,22 @@ export const commandSchema = z.discriminatedUnion("action", [
     label: z.string().trim().min(1).max(40),
     area: z.string().trim().max(40).optional(),
     enabled: z.boolean().optional(),
+    /** Dónde está sobre el mapa; null lo quita; sin la clave no cambia. */
+    shape: shape.nullable().optional(),
   }),
+  z.object({
+    action: z.literal("map_save"),
+    venueId: uuid,
+    imageUrl: z.string().url().max(2048),
+    width: z.number().int().min(1).max(20000),
+    height: z.number().int().min(1).max(20000),
+  }),
+  z.object({
+    action: z.literal("map_area"),
+    venueId: uuid,
+    serviceArea: z.array(z.object({ points: z.array(pt).min(3).max(60) })).max(10),
+  }),
+  z.object({ action: z.literal("map_remove"), venueId: uuid }),
   z.object({
     action: z.literal("spot_bulk"),
     venueId: uuid,
@@ -85,7 +111,9 @@ export const commandSchema = z.discriminatedUnion("action", [
   z.object({
     action: z.literal("order_change_spot"),
     orderId: uuid,
-    spotId: uuid,
+    // Un lugar de la lista, o un toque en el mapa (con spotId opcional del QR de una mesa).
+    spotId: uuid.optional(),
+    point: mapPoint.optional(),
   }),
   z.object({
     action: z.literal("product_archive"),

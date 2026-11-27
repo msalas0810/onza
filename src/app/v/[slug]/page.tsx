@@ -5,7 +5,7 @@ import { ProductMenu } from "@/features/catalog/components/product-menu";
 import { VenueHero } from "@/features/catalog/components/venue-hero";
 import { ConfigurationState } from "@/components/ui/configuration-state";
 import { Notice, buttonClass } from "@/components/ui/primitives";
-import { listSpots } from "@/features/delivery/server/queries";
+import { getVenueMap, listSpots } from "@/features/delivery/server/queries";
 import { SpotEntry } from "@/features/delivery/components/spot-entry";
 import { offersLocation, type DeliveryMode } from "@/features/delivery/types";
 
@@ -19,7 +19,7 @@ export default async function MenuPage({
 }) {
   const { slug } = await params;
   const { spot } = await searchParams;
-  let venue, menu, spots;
+  let venue, menu, spots, map;
   try {
     venue = await getVenue(slug);
     menu = await getPublishedMenu(venue.id);
@@ -27,6 +27,7 @@ export default async function MenuPage({
     spots = offersLocation(venue.delivery_mode as DeliveryMode)
       ? (await listSpots(venue.id)).filter((s) => s.enabled)
       : [];
+    map = offersLocation(venue.delivery_mode as DeliveryMode) ? await getVenueMap(venue.id) : null;
   } catch (error) {
     return (
       <div className="page">
@@ -69,6 +70,7 @@ export default async function MenuPage({
             mode={venue.delivery_mode as DeliveryMode}
             noun={venue.spot_noun}
             spots={spots}
+            map={map}
             presetSpotId={spots.find((s) => s.id === spot)?.id}
           />
           <ProductMenu venue={venue} {...menu} />

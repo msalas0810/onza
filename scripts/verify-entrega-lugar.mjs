@@ -30,10 +30,16 @@ async function open(email, width = 390, height = 844, { anonymous = false } = {}
   if (!anonymous) await context.addCookies(await sessionCookies(SHIM, email));
   const page = await context.newPage();
   page.on("pageerror", (e) => errors.push(`${email}: ${e.message}`));
-  page.on("console", (m) => m.type() === "error" && !/Failed to load resource|realtime\/v1\/websocket/.test(m.text()) && errors.push(`${email}: ${m.text()}`));
+  page.on("console", (m) => m.type() === "error" && !/Failed to load resource|realtime\/v1\/websocket/.test(m.text()) && errors.push(`${email} @ ${page.url()}: ${m.text().slice(0, 3500)}`));
   return page;
 }
-const shot = (page, name) => OUT && page.screenshot({ path: `${OUT}/${name}.png`, fullPage: true });
+// Playwright oculta el cursor de los campos al capturar; si lo hace mientras la página se hidrata, React avisa de una diferencia
+// que no es de la app. Se espera a que termine de cargar.
+const shot = async (page, name) => {
+  if (!OUT) return;
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  await page.screenshot({ path: `${OUT}/${name}.png`, fullPage: true });
+};
 const text = async (page) => (await page.locator("body").innerText()).replace(/\s+/g, " ");
 const addToCart = (page, name) =>
   page.locator("article.prow", { hasText: name }).getByRole("button", { name: "Agregar", exact: true }).click();
@@ -80,6 +86,8 @@ try {
   await addToCart(maria, "Cerveza");
   await maria.goto(`${APP}/checkout`);
   await maria.getByText("¿Cómo recibís tu pedido?").waitFor();
+  // Con mapa, la lista de lugares es la alternativa («¿No ves tu mesa?»): se abre para comprobar los grupos por zona.
+  await maria.getByText(/No ves tu mesa/).click();
   const checkoutText = await text(maria);
   check("El checkout ofrece barra o lugar y deja elegida la mesa del QR", checkoutText.includes("Llevarlo a mi mesa") && checkoutText.includes("Retirar en la barra") && checkoutText.includes("Entrega: Mesa 3 · Terraza"));
   check("Los lugares se agrupan por zona (Terraza, Jardín, Zona VIP)", ["Terraza", "Jardín", "Zona VIP"].every((z) => checkoutText.includes(z)));
@@ -94,7 +102,9 @@ try {
   // El cliente corrige su lugar.
   await maria.getByRole("button", { name: "Cambiar", exact: true }).click();
   await maria.getByText("¿Dónde estás ahora?").waitFor();
+  await maria.getByText(/No ves tu mesa/).click();
   await maria.locator("label.spot", { hasText: /^Mesa 7$/ }).click();
+  await maria.getByRole("button", { name: "Confirmar este lugar" }).click();
   await maria.getByText("Entrega en Mesa 7 · Jardín").waitFor({ timeout: 10000 });
   check("El cliente puede cambiar su lugar antes de la entrega", (await text(maria)).includes("Lugar actualizado"));
 
@@ -136,7 +146,7 @@ try {
 
   // Validación en servidor.
   await ana.goto(`${APP}/admin/${PICNIC}?tab=entrega`);
-  await ana.getByText("Lugares (12)").waitFor();
+  await ana.getByText("Lugares (13)").waitFor();
   await ana.locator(".r", { hasText: "Mesa 9" }).getByRole("switch").click();
   await ana.getByText("Mesa 9 deshabilitado").waitFor({ timeout: 10000 });
   const item = [{ productId: "30000000-0000-4000-8000-000000000017", quantity: 1, expectedProductVersion: 1 }];
@@ -148,7 +158,7 @@ try {
   const noSpot = await command(maria, create("spot-none", { mode: "location", spotId: "00000000-0000-4000-8000-00000000dead" }));
   check("El servidor rechaza un lugar inexistente", noSpot.status() === 409 && (await noSpot.json()).error === "SPOT_INVALID");
   const options = await (await maria.request.get(`${APP}/api/delivery?venue=${PICNIC}`)).json();
-  check("El checkout no recibe lugares deshabilitados", !options.spots.some((s) => s.label === "Mesa 9") && options.spots.length === 11);
+  check("El checkout no recibe lugares deshabilitados", !options.spots.some((s) => s.label === "Mesa 9") && options.spots.length === 12);
 
   /* ================= Recorrido 2 · local normal: barra → retirar con código ================= */
   console.log("\n# Recorrido 2 · local normal (Mil948)");
@@ -195,6 +205,7 @@ try {
   await maria.goto(`${APP}/checkout`);
   await maria.getByText("¿Cómo recibís tu pedido?").waitFor();
   await maria.getByRole("button", { name: "Llevarlo a mi mesa" }).click();
+  await maria.getByText(/No ves tu mesa/).click();
   await maria.locator("label.spot", { hasText: /^VIP 2$/ }).click();
   await maria.getByRole("button", { name: /^Pedir/ }).click();
   await maria.waitForURL(/\/orders\//, { timeout: 15000 });
@@ -254,7 +265,7 @@ try {
   await bulk.getByLabel("Hasta").fill("4");
   await bulk.getByRole("button", { name: "Crear lugares" }).click();
   await ana.getByText(/Se crearon 4 lugares/).waitFor({ timeout: 10000 });
-  await ana.getByText("Lugares (16)").waitFor({ timeout: 10000 });
+  await ana.getByText("Barra alta 4").first().waitFor({ timeout: 10000 });
   check("Crear varios lugares de una vez funciona y los agrupa por zona", (await text(ana)).includes("Barra alta 4"));
   await ana.getByRole("button", { name: "QR de Mesa 1", exact: true }).click();
   await ana.locator(".sheet img.qr-img").waitFor({ timeout: 10000 });
@@ -263,7 +274,7 @@ try {
   await ana.keyboard.press("Escape");
   await ana.goto(`${APP}/admin/${PICNIC}/qr`);
   await ana.locator(".qr-card").first().waitFor();
-  check("La hoja de impresión trae el QR del local y el de cada lugar habilitado", (await ana.locator(".qr-card").count()) === 16, `${await ana.locator(".qr-card").count()} QR`);
+  check("La hoja de impresión trae el QR del local y el de cada lugar habilitado", (await ana.locator(".qr-card").count()) === 17, `${await ana.locator(".qr-card").count()} QR`);
   await shot(ana, "14-admin-qr-imprimir-1280");
   // Un empleado no administra la entrega ni exporta.
   const staffCfg = await command(jorge, { action: "venue_delivery", venueId: PICNIC, mode: "bar" });
@@ -278,7 +289,7 @@ try {
   for (const [w, h, tag] of [[360, 740, "360"], [1280, 800, "1280"]]) {
     const page = await open(people.ana.email, w, h);
     await page.goto(`${APP}/admin/${PICNIC}?tab=entrega`);
-    await page.getByRole("heading", { name: "Lugares (16)" }).waitFor();
+    await page.getByRole("heading", { name: /^Lugares \(\d+\)$/ }).waitFor();
     const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
     check(`Administración · Entrega sin desborde horizontal a ${w}px`, overflow <= 1, `${overflow}px`);
     await shot(page, `15-admin-entrega-${tag}`);
@@ -290,6 +301,7 @@ try {
   await phone.goto(`${APP}/checkout`);
   await phone.getByText("¿Cómo recibís tu pedido?").waitFor();
   await phone.getByRole("button", { name: "Llevarlo a mi mesa" }).click();
+  await phone.getByText(/No ves tu mesa/).click();
   await phone.locator("label.spot span").first().waitFor();
   const phoneOverflow = await phone.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
   const touch = await phone.locator("label.spot span").first().boundingBox();

@@ -24,6 +24,7 @@ export const LATER_MIGRATIONS = [
   "202611210023_scale_fixes.sql",
   "202611210024_resolve_rate_limit.sql",
   "202611260025_location_delivery.sql",
+  "202611270026_delivery_map.sql",
 ];
 export async function database() {
   const db = new PGlite();

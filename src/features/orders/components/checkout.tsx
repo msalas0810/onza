@@ -31,10 +31,15 @@ import {
 } from "./waitlist-panel";
 import { formatClock } from "@/lib/clock";
 import { useOnline } from "@/lib/use-online";
-import { SpotPicker } from "@/features/delivery/components/spot-picker";
 import {
-  readSpotPreference,
-  writeSpotPreference,
+  describeChoice,
+  LocationPicker,
+} from "@/features/delivery/components/location-picker";
+import {
+  deliveryFrom,
+  readLocationPreference,
+  writeLocationPreference,
+  type LocationPref,
 } from "@/features/delivery/spot-preference";
 import {
   deliveryOptionsSchema,
@@ -62,6 +67,8 @@ const DEFINITIVE = [
   "CANCEL_COOLDOWN",
   "SPOT_REQUIRED",
   "SPOT_INVALID",
+  "MAP_OUTDATED",
+  "OUTSIDE_AREA",
   "DELIVERY_UNAVAILABLE",
 ];
 const ACTIVE = ["pending_authorization", "queued", "preparing", "ready"];
@@ -140,8 +147,13 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
   const [optionsError, setOptionsError] = useState(false);
   const [reloadOptions, setReloadOptions] = useState(0);
   const [way, setWay] = useState<"bar" | "location">("bar");
-  const [spotId, setSpotId] = useState<string | null>(null);
+  // Dónde quiere recibirlo: un toque en el mapa (con la mesa del QR como pista) o un lugar de la lista.
+  const [pref, setPref] = useState<LocationPref | null>(null);
   const wayTouched = useRef(false);
+  const deliveryRef = useRef<HTMLElement>(null);
+  const choice = options
+    ? describeChoice(pref, options.spots, options.map ?? null)
+    : null;
   useEffect(() => {
     if (!venueId) return;
     let closed = false;
@@ -152,12 +164,13 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       })
       .then((next) => {
         if (closed) return;
-        const saved = readSpotPreference(venueId);
-        const known = (id: string | null) =>
-          id !== null && next.spots.some((spot) => spot.id === id);
+        const saved = readLocationPreference(venueId);
+        // Un lugar o un mapa que el local ya cambió no se conserva: se vuelve a marcar.
+        const known = (p: LocationPref | null) =>
+          describeChoice(p, next.spots, next.map ?? null) !== null;
         setOptions(next);
         setOptionsError(false);
-        setSpotId((current) =>
+        setPref((current) =>
           known(current) ? current : known(saved) ? saved : null,
         );
         setWay((current) =>
@@ -233,10 +246,12 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
     setActiveOrder(null);
     let attemptKey = legacyAttemptKey;
     try {
-      if (options && offersLocation(options.mode) && way === "location" && !spotId) {
+      if (options && offersLocation(options.mode) && way === "location" && !choice) {
         setError({
           code: "SPOT_REQUIRED",
-          message: `Elegí ${yourSpot(options.noun)} para que te lleven el pedido.`,
+          message: options.map
+            ? "Tocá el mapa donde estás para que te lleven el pedido."
+            : `Elegí ${yourSpot(options.noun)} para que te lleven el pedido.`,
         });
         return;
       }
@@ -278,9 +293,9 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
         ...(options && offersLocation(options.mode)
           ? {
               delivery:
-                way === "location" && spotId
-                  ? { mode: "location", spotId }
-                  : { mode: "bar" },
+                (way === "location" && choice && pref
+                  ? deliveryFrom(pref)
+                  : null) ?? { mode: "bar" },
             }
           : {}),
       };
@@ -330,10 +345,15 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
       // El local cambió sus lugares mientras tanto: se vuelve a leer la lista y se elige de nuevo.
       if (
         e instanceof CommandError &&
-        ["SPOT_INVALID", "SPOT_REQUIRED", "DELIVERY_UNAVAILABLE"].includes(e.code)
+        [
+          "SPOT_INVALID",
+          "SPOT_REQUIRED",
+          "DELIVERY_UNAVAILABLE",
+          "MAP_OUTDATED",
+        ].includes(e.code)
       ) {
-        setSpotId(null);
-        if (venueId) writeSpotPreference(venueId, null);
+        setPref(null);
+        if (venueId) writeLocationPreference(venueId, null);
         setReloadOptions((n) => n + 1);
       }
       setError({
@@ -355,7 +375,6 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
     }
   };
   const total = cartTotal(cart);
-  const chosenSpot = options?.spots.find((spot) => spot.id === spotId);
   const affected = error?.detail?.productId
     ? cart.items.find((i) => i.productId === error.detail?.productId)
     : undefined;
@@ -399,8 +418,29 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           <strong>{cart.venueName}</strong>
           <div className="muted t-label">
             {options && offersLocation(options.mode) && way === "location"
-              ? `Entrega: ${chosenSpot ? spotText({ spot_label: chosenSpot.label, spot_area: chosenSpot.area }) : `en ${yourSpot(options.noun)} (sin elegir)`}`
+              ? `Entrega: ${choice ? choice.text || "tu punto en el mapa" : `en ${yourSpot(options.noun)} (sin elegir)`}`
               : `Retiro: ${options?.pickupLabel ?? cart.pickupLabel}`}
+            {options && offersLocation(options.mode) && way === "location" && (
+              <>
+                {" · "}
+                <button
+                  type="button"
+                  className="link-button"
+                  onClick={() =>
+                    deliveryRef.current?.scrollIntoView({
+                      behavior: window.matchMedia(
+                        "(prefers-reduced-motion: reduce)",
+                      ).matches
+                        ? "auto"
+                        : "smooth",
+                      block: "center",
+                    })
+                  }
+                >
+                  {choice ? "Editar" : options.map ? "Marcar en el mapa" : "Elegir"}
+                </button>
+              </>
+            )}
           </div>
         </div>
         {optionsError && (
@@ -421,7 +461,11 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
           </Notice>
         )}
         {options && offersLocation(options.mode) && (
-          <section className="delivery-choice" aria-labelledby="delivery-title">
+          <section
+            ref={deliveryRef}
+            className="delivery-choice"
+            aria-labelledby="delivery-title"
+          >
             <h2 id="delivery-title" className="t-heading">
               ¿Cómo recibís tu pedido?
             </h2>
@@ -446,16 +490,20 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
             {way === "location" ? (
               <>
                 <p className="muted t-label">
-                  Elegí {yourSpot(options.noun)} y te lo llevamos. Cuando
-                  llegue, mostrá el QR o el código privado de tu pedido.
+                  {options.map
+                    ? "Tocá el mapa donde estás y te lo llevamos. "
+                    : `Elegí ${yourSpot(options.noun)} y te lo llevamos. `}
+                  Cuando llegue, mostrá el QR o el código privado de tu pedido.
                 </p>
-                <SpotPicker
-                  spots={options.spots}
+                <LocationPicker
                   noun={options.noun}
-                  value={spotId}
-                  onChange={(id) => {
-                    setSpotId(id);
-                    if (venueId) writeSpotPreference(venueId, id);
+                  map={options.map ?? null}
+                  spots={options.spots}
+                  value={pref}
+                  name="checkout-spot"
+                  onChange={(next) => {
+                    setPref(next);
+                    if (venueId) writeLocationPreference(venueId, next);
                   }}
                 />
               </>
@@ -641,7 +689,7 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
                 !policy ||
                 !online ||
                 !options ||
-                (offersLocation(options.mode) && way === "location" && !spotId)
+                (offersLocation(options.mode) && way === "location" && !choice)
               }
               loading={busy}
             >
@@ -650,9 +698,11 @@ export function Checkout({ accounts = false }: { accounts?: boolean }) {
             {options &&
               offersLocation(options.mode) &&
               way === "location" &&
-              !spotId && (
+              !choice && (
                 <p className="btn-note">
-                  Elegí {yourSpot(options.noun)} para poder pedir.
+                  {options.map
+                    ? "Tocá el mapa donde estás para poder pedir."
+                    : `Elegí ${yourSpot(options.noun)} para poder pedir.`}
                 </p>
               )}
             {!online && (

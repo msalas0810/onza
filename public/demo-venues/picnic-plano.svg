@@ -1,0 +1,104 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" width="1600" height="1000" role="img" aria-label="Plano de ejemplo de Picnic">
+<rect width="1600" height="1000" fill="#EAE6E0"/>
+<rect x="30" y="30" width="1540" height="940" rx="28" fill="#F4F1ED" stroke="#8A847D" stroke-width="6"/>
+<rect x="60" y="60" width="680" height="580" rx="18" fill="#E3D6C3" stroke="#B8AA94" stroke-width="3"/>
+<line x1="100" y1="60" x2="100" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<line x1="160" y1="60" x2="160" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<line x1="220" y1="60" x2="220" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<line x1="280" y1="60" x2="280" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<line x1="340" y1="60" x2="340" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<line x1="400" y1="60" x2="400" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<line x1="460" y1="60" x2="460" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<line x1="520" y1="60" x2="520" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<line x1="580" y1="60" x2="580" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<line x1="640" y1="60" x2="640" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<line x1="700" y1="60" x2="700" y2="640" stroke="#D2C3AB" stroke-width="2"/>
+<rect x="780" y="60" width="560" height="880" rx="18" fill="#CFDCC6" stroke="#9FB394" stroke-width="3"/>
+<rect x="800" y="600" width="520" height="320" rx="14" fill="#E6D9DB" stroke="#B88A92" stroke-width="3" stroke-dasharray="14 10"/>
+<rect x="1380" y="300" width="160" height="640" rx="18" fill="#DCCFD2" stroke="#9E7A82" stroke-width="3"/>
+<rect x="1380" y="60" width="160" height="200" rx="14" fill="#D6D1CA" stroke="#8A847D" stroke-width="3"/>
+<rect x="60" y="700" width="680" height="240" rx="18" fill="#D6D1CA" stroke="#8A847D" stroke-width="3"/>
+<rect x="100" y="740" width="600" height="56" rx="12" fill="#741F2C"/>
+<circle cx="135" cy="835" r="18" fill="#FBFAF8" stroke="#8A847D" stroke-width="3"/>
+<circle cx="201" cy="835" r="18" fill="#FBFAF8" stroke="#8A847D" stroke-width="3"/>
+<circle cx="267" cy="835" r="18" fill="#FBFAF8" stroke="#8A847D" stroke-width="3"/>
+<circle cx="333" cy="835" r="18" fill="#FBFAF8" stroke="#8A847D" stroke-width="3"/>
+<circle cx="399" cy="835" r="18" fill="#FBFAF8" stroke="#8A847D" stroke-width="3"/>
+<circle cx="465" cy="835" r="18" fill="#FBFAF8" stroke="#8A847D" stroke-width="3"/>
+<circle cx="531" cy="835" r="18" fill="#FBFAF8" stroke="#8A847D" stroke-width="3"/>
+<circle cx="597" cy="835" r="18" fill="#FBFAF8" stroke="#8A847D" stroke-width="3"/>
+<circle cx="663" cy="835" r="18" fill="#FBFAF8" stroke="#8A847D" stroke-width="3"/>
+<circle cx="850" cy="110" r="34" fill="#9FB394" stroke="#7E967A" stroke-width="3"/><circle cx="850" cy="110" r="9" fill="#7E967A"/>
+<circle cx="1290" cy="110" r="34" fill="#9FB394" stroke="#7E967A" stroke-width="3"/><circle cx="1290" cy="110" r="9" fill="#7E967A"/>
+<circle cx="850" cy="350" r="34" fill="#9FB394" stroke="#7E967A" stroke-width="3"/><circle cx="850" cy="350" r="9" fill="#7E967A"/>
+<circle cx="1290" cy="350" r="34" fill="#9FB394" stroke="#7E967A" stroke-width="3"/><circle cx="1290" cy="350" r="9" fill="#7E967A"/>
+<circle cx="1290" cy="880" r="34" fill="#9FB394" stroke="#7E967A" stroke-width="3"/><circle cx="1290" cy="880" r="9" fill="#7E967A"/>
+<circle cx="230" cy="250" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="150" cy="250" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="150" cy="170" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="230" cy="170" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="190" cy="210" r="34" fill="#FBFAF8" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="440" cy="250" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="360" cy="250" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="360" cy="170" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="440" cy="170" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="400" cy="210" r="34" fill="#FBFAF8" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="650" cy="250" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="570" cy="250" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="570" cy="170" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="650" cy="170" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="610" cy="210" r="34" fill="#FBFAF8" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="230" cy="490" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="150" cy="490" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="150" cy="410" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="230" cy="410" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="190" cy="450" r="34" fill="#FBFAF8" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="440" cy="490" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="360" cy="490" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="360" cy="410" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="440" cy="410" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="400" cy="450" r="34" fill="#FBFAF8" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="650" cy="490" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="570" cy="490" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="570" cy="410" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="650" cy="410" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="610" cy="450" r="34" fill="#FBFAF8" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="980" cy="240" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="900" cy="240" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="900" cy="160" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="980" cy="160" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="940" cy="200" r="34" fill="#FBFAF8" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="1220" cy="240" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1140" cy="240" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1140" cy="160" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1220" cy="160" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1180" cy="200" r="34" fill="#FBFAF8" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="980" cy="480" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="900" cy="480" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="900" cy="400" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="980" cy="400" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="940" cy="440" r="34" fill="#FBFAF8" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="1220" cy="480" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1140" cy="480" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1140" cy="400" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1220" cy="400" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1180" cy="440" r="34" fill="#FBFAF8" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="1500" cy="520" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1420" cy="520" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1420" cy="440" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1500" cy="440" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1460" cy="480" r="34" fill="#F3E0E0" stroke="#5F5A54" stroke-width="4"/>
+<circle cx="1500" cy="780" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1420" cy="780" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1420" cy="700" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1500" cy="700" r="15" fill="#B8AA94" stroke="#8A847D" stroke-width="2"/>
+<circle cx="1460" cy="740" r="34" fill="#F3E0E0" stroke="#5F5A54" stroke-width="4"/>
+<text x="400" y="128" font-family="Inter, Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#5F5A54" text-anchor="middle" letter-spacing="6">TERRAZA</text>
+<text x="1060" y="128" font-family="Inter, Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#5F5A54" text-anchor="middle" letter-spacing="6">JARDÍN</text>
+<text x="1460" y="352" font-family="Inter, Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#5F5A54" text-anchor="middle" letter-spacing="6">VIP</text>
+<text x="1060" y="670" font-family="Inter, Arial, Helvetica, sans-serif" font-size="30" font-weight="700" fill="#5F5A54" text-anchor="middle" letter-spacing="6">PISTA DE BAILE</text>
+<text x="400" y="690" font-family="Inter, Arial, Helvetica, sans-serif" font-size="34" font-weight="700" fill="#741F2C" text-anchor="middle" letter-spacing="6">BARRA</text>
+<text x="1460" y="170" font-family="Inter, Arial, Helvetica, sans-serif" font-size="28" font-weight="700" fill="#5F5A54" text-anchor="middle" letter-spacing="6">BAÑOS</text>
+<text x="400" y="925" font-family="Inter, Arial, Helvetica, sans-serif" font-size="24" font-weight="600" fill="#5F5A54" text-anchor="middle" letter-spacing="2">Retiro en barra</text>
+<text x="60" y="990" font-family="Inter, Arial, Helvetica, sans-serif" font-size="20" font-weight="500" fill="#5F5A54" text-anchor="start" letter-spacing="1">Plano de ejemplo ilustrativo de Onza</text>
+</svg>

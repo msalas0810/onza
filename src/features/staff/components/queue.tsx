@@ -33,6 +33,7 @@ import { countdownText } from "@/features/orders/countdown";
 import type React from "react";
 import type { Venue } from "@/features/catalog/server/queries";
 import { spotText } from "@/features/delivery/types";
+import { OrderMapButton } from "@/features/delivery/components/order-map-button";
 
 const lanes = [
   ["queued", "Nuevos"],
@@ -527,6 +528,7 @@ export function StaffQueue({
                             <MapPin size={16} aria-hidden="true" />
                             <span>Llevar a {spotText(o)}</span>
                           </p>
+                          <OrderMapButton order={o} />
                           {o.spot_changed_at && (
                             <span className="muted t-label">
                               El cliente cambió su lugar a las {clockTime(o.spot_changed_at)}

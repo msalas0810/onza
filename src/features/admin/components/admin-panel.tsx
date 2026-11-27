@@ -42,7 +42,7 @@ import { SessionExpiredSheet } from "@/features/orders/components/session-expire
 import { TeamPanel } from "@/features/team/components/team-panel";
 import { DeliveryAdmin } from "@/features/delivery/components/delivery-admin";
 import { NowPanel } from "./now-panel";
-import { spotText, type Spot } from "@/features/delivery/types";
+import { spotText, type Spot, type VenueMap } from "@/features/delivery/types";
 import { adminTabIds, adminTabLabels, type AdminTab } from "../admin-tabs";
 
 const productSchema = z.object({
@@ -88,6 +88,7 @@ export function AdminPanel({
   categories,
   summary,
   spots,
+  map,
   period,
   tab,
   editId,
@@ -97,6 +98,7 @@ export function AdminPanel({
   categories: { id: string; label: string }[];
   summary: RangeSummary | null;
   spots: Spot[];
+  map: VenueMap | null;
   period: Period;
   tab: AdminTab;
   editId?: string;
@@ -826,6 +828,7 @@ export function AdminPanel({
             <DeliveryAdmin
               venue={venue}
               spots={spots}
+              map={map}
               availableProducts={catalog.filter((p) => !p.archived && p.available).length}
             />
           )}

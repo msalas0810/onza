@@ -22,6 +22,9 @@ const deliveryRpc = {
   spot_save: "venue_spot_save",
   spot_bulk: "venue_spot_bulk",
   spot_delete: "venue_spot_delete",
+  map_save: "venue_map_save",
+  map_area: "venue_map_area",
+  map_remove: "venue_map_remove",
 } as const;
 export async function executeCommand(raw: unknown) {
   assertMockPayments();

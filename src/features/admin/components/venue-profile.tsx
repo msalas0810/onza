@@ -18,7 +18,7 @@ import {
 } from "../venue-image";
 
 /** The venue profile only handles these two; product images are edited in the drink editor. */
-type BrandingKind = Exclude<VenueImageKind, "product">;
+type BrandingKind = Exclude<VenueImageKind, "product" | "map">;
 
 const copy: Record<
   BrandingKind,
