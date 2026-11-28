@@ -73,6 +73,8 @@ Hay dos destinos mientras dura la mudanza. Los dos usan el proyecto Supabase `on
 
 **Antes de integrar a `main` un cambio con migración:** probala en un entorno aislado (la CI levanta un Supabase completo en cada push a `feat/**`), hacé un respaldo, revisá `npx supabase db push --linked --dry-run` y recién ahí aplicala. `main` no debe adelantarse a la base. Aplicar migraciones remotas y cambiar variables lo decide una persona autorizada.
 
+Existe además un Worker `onza-demo` (`onza-demo.onza.workers.dev`), publicado antes de unificar con una configuración que ya no está en el repo: estos comandos no lo actualizan (ver PEN-026 en `DIARIO.md`).
+
 ### Workers: comandos
 
 ```sh

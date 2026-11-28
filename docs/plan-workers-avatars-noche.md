@@ -1,5 +1,7 @@
 # Plan: Workers + limpieza + personaje con puntos + noche social
 
+> **Atención (2026-11-27, D-2026-11-27-10):** este plan se escribió sin conocer la rama `claude/eloquent-hamilton-rw4w0y`, que ya ocupa las migraciones **028–032** (según su diario, aplicadas en `onza-dev`) y trae puntos, monedas, XP, avatares, tienda y funciones sociales. La numeración y el diseño de las **Fases 3 y 4 no son ejecutables tal como están**: hay que replantearlos sobre ese código. La próxima migración es la 033.
+
 Aprobado por Manu el 2026-11-27, con los ajustes ya incorporados. Cada fase termina y espera su aviso antes de seguir con la siguiente.
 
 Repo `onza-starter` (origin `msalas0810/onza`), `main` limpio en `3c2e982`. Este documento es el entregable de la Fase 0.
