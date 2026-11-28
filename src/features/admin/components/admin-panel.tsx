@@ -12,6 +12,7 @@ import {
   ToggleLeft,
   Users,
   Wine,
+  Gift,
 } from "lucide-react";
 import type { Product, Venue } from "@/features/catalog/server/queries";
 import type { RangeSummary } from "@/features/analytics/types";
@@ -42,6 +43,7 @@ import { useLiveOrders } from "@/features/orders/use-live-orders";
 import { statusLabels, paymentLabels } from "@/features/orders/types";
 import { SessionExpiredSheet } from "@/features/orders/components/session-expired-sheet";
 import { TeamPanel } from "@/features/team/components/team-panel";
+import { LoyaltyAdmin } from "@/features/loyalty/components/loyalty-admin";
 import { DeliveryAdmin } from "@/features/delivery/components/delivery-admin";
 import { NowPanel } from "./now-panel";
 import { spotText, type Spot, type VenueMap } from "@/features/delivery/types";
@@ -63,6 +65,7 @@ const tabIcons = {
   entrega: MapPin,
   negocio: Store,
   equipo: Users,
+  fidelizacion: Gift,
 } as const;
 
 type Support = {
@@ -893,6 +896,9 @@ export function AdminPanel({
           )}
           {tab === "equipo" && (
             <TeamPanel venueId={venue.id} venueName={venue.name} />
+          )}
+          {tab === "fidelizacion" && (
+            <LoyaltyAdmin venueId={venue.id} categories={categories} />
           )}
         </div>
       </div>

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { AuthForm } from "@/features/account/components/auth-form";
 import { safeNext } from "@/lib/access-policy";
 import { AccessScreen } from "./access-screen";
+import { DemoLogin } from "@/features/demo/components/demo-login";
+import { demoEnabled } from "@/features/demo/server/demo-accounts";
 import { OnzaLogo } from "@/components/ui/brand";
 import styles from "./access.module.css";
 export const dynamic = "force-dynamic";
@@ -12,6 +14,7 @@ export default async function Page({
 }) {
   const { next, error } = await searchParams;
   const destination = safeNext(next);
+  const showDemo = demoEnabled();
   return (
     <AccessScreen>
       <div className={styles.content}>
@@ -32,6 +35,14 @@ export default async function Page({
                 : undefined
             }
           />
+          {showDemo && (
+            <DemoLogin
+              title="O probá una cuenta demo"
+              options={[
+                { role: "customer", label: "Entrar como cliente demo", next: destination },
+              ]}
+            />
+          )}
           <p className={styles.legal}>
             Al continuar aceptás las <Link href="/policies">condiciones</Link> y
             la <Link href="/policies">política de privacidad</Link>.

@@ -17,7 +17,12 @@ function supabaseOrigin() {
  * evaluará aparte. `img-src` repite en el navegador la regla de servidor de `src/lib/storage-url.ts`.
  */
 function contentSecurityPolicy() {
-  const images = ["'self'", "data:", "blob:", supabaseOrigin()];
+  // Diseños de avatares alojados fuera de Supabase: orígenes https explícitos (AVATAR_ASSET_ORIGINS, separados por coma).
+  const assetOrigins = (process.env.AVATAR_ASSET_ORIGINS ?? "")
+    .split(",")
+    .map((origin) => origin.trim())
+    .filter((origin) => /^https:\/\/[a-z0-9.-]+(:\d+)?$/i.test(origin));
+  const images = ["'self'", "data:", "blob:", supabaseOrigin(), ...assetOrigins];
   return [
     "frame-ancestors 'none'",
     "base-uri 'self'",

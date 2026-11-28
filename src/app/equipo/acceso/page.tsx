@@ -5,6 +5,8 @@ import { StaffLogin } from "@/features/staff/components/login";
 import { staffHome } from "@/features/team/server/staff-home";
 import { currentAccount } from "@/lib/account";
 import { safeNext } from "@/lib/access-policy";
+import { DemoLogin } from "@/features/demo/components/demo-login";
+import { demoEnabled } from "@/features/demo/server/demo-accounts";
 
 export const dynamic = "force-dynamic";
 export default async function Page({
@@ -33,6 +35,17 @@ export default async function Page({
         </div>
       )}
       <StaffLogin next={safeNext(next, "") || undefined} email={email} />
+      {demoEnabled() && (
+        <div style={{ marginTop: 24 }}>
+          <DemoLogin
+            title="O probá una cuenta demo del equipo"
+            options={[
+              { role: "bartender", label: "Entrar como bartender demo", next: "/equipo/acceso" },
+              { role: "admin", label: "Entrar como admin demo", next: "/equipo/acceso" },
+            ]}
+          />
+        </div>
+      )}
     </AccessFrame>
   );
 }
