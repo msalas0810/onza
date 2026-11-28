@@ -39,6 +39,9 @@ const MIGRATIONS = [
   "202611270029_economy_core.sql",
   "202611270030_avatar_store.sql",
   "202611270031_social_game.sql",
+  "202611280033_platform_operator.sql",
+  "202611280034_organizations.sql",
+  "202611280035_platform_rpc.sql",
 ];
 const TABLES = new Set([
   "venues",
@@ -117,7 +120,7 @@ export const people = {
 export async function createDatabase() {
   const db = new PGlite();
   await db.exec(
-    `create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key,email text);
+    `create role anon;create role authenticated;create schema auth;create table auth.users(id uuid primary key,email text,email_confirmed_at timestamptz);
      create function auth.uid() returns uuid language sql stable as $$select (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid$$;
      create function auth.jwt() returns jsonb language sql stable as $$select nullif(current_setting('request.jwt.claims',true),'')::jsonb$$;
      grant usage on schema auth to authenticated,anon;grant execute on all functions in schema auth to authenticated,anon;`,
@@ -153,7 +156,7 @@ export async function createDatabase() {
   );
   for (const p of Object.values(people))
     await db.exec(
-      `insert into auth.users(id,email) values(${q(p.id)},${q(p.email)})`,
+      `insert into auth.users(id,email,email_confirmed_at) values(${q(p.id)},${q(p.email)},now())`,
     );
   for (const p of [people.maria, people.sofia, people.tomas, people.valeria, people.diego])
     await db.exec(
@@ -174,12 +177,21 @@ export async function createDatabase() {
   return db;
 }
 
-const claims = (userId) => ({
-  sub: userId,
-  role: "authenticated",
-  is_anonymous: false,
-  session_id: `shim-${userId}`,
-});
+// SHIM_MFA_EMAILS (solo desarrollo local): correos cuya sesión simula un segundo factor reciente (aal2 + amr totp).
+const MFA_EMAILS = (process.env.SHIM_MFA_EMAILS ?? "").toLowerCase().split(",").map((e) => e.trim()).filter(Boolean);
+const claims = (userId, email = "") => {
+  const mfa = email && MFA_EMAILS.includes(email.toLowerCase());
+  const now = Math.floor(Date.now() / 1000);
+  return {
+    sub: userId,
+    role: "authenticated",
+    is_anonymous: false,
+    session_id: `shim-${userId}`,
+    ...(email ? { email } : {}),
+    aal: mfa ? "aal2" : "aal1",
+    amr: mfa ? [{ method: "password", timestamp: now - 60 }, { method: "totp", timestamp: now - 30 }] : [{ method: "password", timestamp: now - 60 }],
+  };
+};
 const tokenOf = (id) => `t.${id}`;
 const userOf = (token) => (token?.startsWith("t.") ? token.slice(2) : null);
 const sessionFor = (person) => ({
@@ -249,8 +261,9 @@ export async function startShim({ port = 54321, quiet = true } = {}) {
     return serial(() =>
       db.transaction(async (tx) => {
         if (!service) {
+          const email = userId ? ((await tx.query("select email from auth.users where id=$1", [userId])).rows[0]?.email ?? "") : "";
           await tx.query("select set_config('request.jwt.claims',$1,true)", [
-            userId ? JSON.stringify(claims(userId)) : "",
+            userId ? JSON.stringify(claims(userId, email)) : "",
           ]);
           await tx.exec(`set local role ${userId ? "authenticated" : "anon"}`);
         }
@@ -368,7 +381,7 @@ export async function startShim({ port = 54321, quiet = true } = {}) {
           });
         const id = crypto.randomUUID();
         await serial(() =>
-          db.query("insert into auth.users(id,email) values($1,$2)", [
+          db.query("insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())", [
             id,
             json.email,
           ]),

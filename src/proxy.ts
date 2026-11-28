@@ -1,6 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { isConfigured, supabaseConfig } from "@/lib/supabase/config";
+import { classifyRoute, isRouteInventoried } from "@/lib/platform/route-inventory";
+import { platformPageDecision } from "@/lib/platform/proxy-gate";
+import { clientIpOf, requestIdOf } from "@/lib/platform/log";
 import {
   accountsRequired,
   decideAccess,
@@ -9,6 +12,9 @@ import {
 const PASS_THROUGH = /^\/(api|auth)(\/|$)/;
 const STAFF_AREA = /^\/(staff|admin|onza)(\/|$)|^\/equipo\/locales$/;
 export async function proxy(request: NextRequest) {
+  // Denegar por defecto: una ruta que no está en el inventario (src/lib/platform/route-inventory.ts) no existe para nadie.
+  if (!isRouteInventoried(request.nextUrl.pathname))
+    return new NextResponse("Not Found", { status: 404, headers: { "cache-control": "no-store" } });
   let response = NextResponse.next({ request });
   if (!isConfigured()) return response;
   const { url, key } = supabaseConfig();
@@ -29,6 +35,19 @@ export async function proxy(request: NextRequest) {
   // Un fallo transitorio de Auth no es «sin sesión»: no se redirige al acceso ni se adivina la cuenta. Se pide reintentar.
   if (authError && transientFailure(authError) && !PASS_THROUGH.test(pathname))
     return retryResponse(request);
+  // Páginas del panel de plataforma: la decisión se toma ACÁ para que quien no es el operador reciba un 404 real.
+  const rule = classifyRoute(pathname);
+  if (rule?.gate === "operator" && !pathname.startsWith("/api/")) {
+    const decision = await platformPageDecision(db, data.user, authError, {
+      requestId: requestIdOf(request),
+      ip: clientIpOf(request),
+      path: pathname,
+    });
+    if (decision.action === "redirect") return redirect(request, response, decision.to);
+    if (decision.action === "notfound")
+      return new NextResponse("Not Found", { status: 404, headers: { "cache-control": "no-store" } });
+    return response;
+  }
   if (pathname === "/login")
     return redirect(request, response, "/equipo/acceso");
   if (!accountsRequired() || PASS_THROUGH.test(pathname)) {

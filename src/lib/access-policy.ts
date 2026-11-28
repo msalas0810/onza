@@ -19,6 +19,13 @@ export const accountsRequired = (
 const CUSTOMER = /^\/(v|cart|checkout|orders|cuenta|settings|amigos|actividad|juego|tienda|avatar|ranking|bares|historias)(\/|$)|^\/$/;
 const STAFF = /^\/(staff|admin|onza)(\/|$)|^\/equipo\/(locales|clave)$/;
 const CUSTOMER_ENTRY = /^\/(acceso|confirmar|recuperar)$/;
+/**
+ * Panel del superadministrador (`/admin`, `/admin/empresas`, …) y panel de empresa (`/panel`): cada página decide su acceso en el
+ * servidor (operador único o membresía de empresa). El operador y las personas de una empresa no son «cuenta de cliente» ni
+ * necesariamente «cuenta del equipo» del modelo anterior, así que esta decisión por tipo de cuenta no se les aplica.
+ * `/admin/<uuid>` (administrador de un local) NO entra acá: sigue siendo del equipo del local.
+ */
+const OWN_GATE = /^\/admin(\/(acceso|seguridad|empresas|establecimientos|usuarios|auditoria|nueva-empresa|nuevo-establecimiento)(\/[A-Za-z0-9-]+)*)?$|^\/panel(\/[A-Za-z0-9_-]+)*$/;
 
 /** Only same-site relative paths survive as post-login destinations. */
 export function safeNext(value: string | null | undefined, fallback = "/") {
@@ -40,6 +47,7 @@ export function decideAccess(
   const here = encodeURIComponent(path + search);
   const signedOutCustomer = account.kind === "none" || account.kind === "guest";
   if (path === "/login") return "/equipo/acceso";
+  if (OWN_GATE.test(path)) return null;
   if (path === "/onboarding") {
     if (signedOutCustomer) return "/acceso";
     if (account.kind === "staff") return "/sesion-activa?want=cliente";

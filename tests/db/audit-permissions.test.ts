@@ -366,19 +366,21 @@ describe("catálogo de permisos (bajo los permisos por defecto de Supabase)", ()
         // Mapa del local: público el vigente; el staff lee también los retirados (026).
         "venue_maps:anon", "venue_maps:authenticated",
         "memberships:authenticated", "orders:authenticated", "order_items:authenticated", "profiles:authenticated", "staff_accounts:authenticated",
+        // Panel de plataforma y de empresa (033-034): lectura solo con sesión y siempre filtrada por RLS (operador único o pertenencia).
+        "organizations:authenticated", "org_memberships:authenticated", "platform_audit:authenticated",
       ].sort(),
     );
   });
-  it("funciones públicas ejecutables por anon: solo la utilidad de fecha; las privadas, solo los dos predicados de RLS", async () => {
+  it("funciones públicas ejecutables por anon: solo la utilidad de fecha; las privadas, solo los predicados de RLS del catálogo", async () => {
     await db.exec("reset role");
     const anon = await db.query<{ f: string }>(
       `select n.nspname||'.'||p.proname f from pg_proc p join pg_namespace n on n.oid=p.pronamespace
        where n.nspname in ('public','private') and has_function_privilege('anon',p.oid,'execute') order by 1`,
     );
-    expect(anon.rows.map((r) => r.f)).toEqual(["private.can_read_order", "private.is_staff", "public.business_date_at"]);
+    expect(anon.rows.map((r) => r.f)).toEqual(["private.can_read_order", "private.is_staff", "private.venue_visible", "public.business_date_at"]);
     const serverOnly = await db.query<{ f: string }>(
       `select p.proname f from pg_proc p join pg_namespace n on n.oid=p.pronamespace
-       where n.nspname='public' and has_function_privilege('authenticated',p.oid,'execute') and p.proname in ('team_lookup_email','team_attach','complete_password_change','auto_accept_tick')`,
+       where n.nspname='public' and has_function_privilege('authenticated',p.oid,'execute') and p.proname in ('team_lookup_email','team_attach','complete_password_change','auto_accept_tick','platform_is_operator_email','invitation_lookup','invitation_accept','coins_purchase_settle','coins_purchase_refund','gift_mark_paid')`,
     );
     expect(serverOnly.rows).toEqual([]);
   });

@@ -45,7 +45,7 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | Demo desplegada | https://onza-demo.vercel.app (Vercel, sin cambios) y, nuevo y en prueba, https://onza-demo.onza.workers.dev (Cloudflare Workers, mismo Supabase `onza-dev`; ver D-2026-11-27-06) |
 | Backend | Supabase alojado `onza-dev` con las migraciones 001–027 aplicadas, `accounts_required=true`, pagos **mock** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | Probar a mano en el dominio de Cloudflare el recorrido del juego (pedido entregado → monedas → tienda → equipar) y decidir PEN-015/PEN-019 (D-2026-11-27-09). Antes: Prueba física en iPhone y Android del pedido con pin en Picnic, incluido el QR de mesa. Decidir qué hacer con las cuatro ramas sin integrar (PEN-013). |
+| Siguiente tarea exacta | Mega admin: decidir PEN-020 y aplicar 033–035 (PEN-022) en la rama `feat/mega-admin`; luego lo anterior: Probar a mano en el dominio de Cloudflare el recorrido del juego (pedido entregado → monedas → tienda → equipar) y decidir PEN-015/PEN-019 (D-2026-11-27-09). Antes: Prueba física en iPhone y Android del pedido con pin en Picnic, incluido el QR de mesa. Decidir qué hacer con las cuatro ramas sin integrar (PEN-013). |
 
 ### Pendientes abiertos
 
@@ -70,6 +70,9 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-017 | **Canje de cashback en el checkout**: no hecho (cambia monto autorizado y capturado). Programador de vencimientos y programa compartido entre locales, pendientes. Ver `docs/loyalty.md` | 2026-11-27 |
 | PEN-018 | Compra real de Avatar Coins: hoy solo simulada; depende de BAC (PEN-006). Cargar paquetes y activar `coin_purchases_enabled` solo para pruebas | 2026-11-27 |
 | PEN-019 | Vercel no tiene estos cambios (solo Cloudflare, rama `claude/eloquent-hamilton-rw4w0y`). Falta decidir si se integra a `main`; el blueprint §0 aún no registra fidelización ni juego como parte del producto | 2026-11-27 |
+| PEN-020 | **Acceso global anterior por rol `onza`** sigue activo (`/onza`, `/api/onza`, `/api/platform`, y el rol `onza` de la cuenta demo). El panel nuevo sí es de un solo correo; decidir si se retira o se unifica | 2026-11-28 |
+| PEN-021 | Mega admin: la plataforma ve el menú y el plano en solo lectura; editarlos exigiría extender `private.is_staff` y el proxy. Los locales existentes no tienen empresa asignada (trabajo de datos) | 2026-11-28 |
+| PEN-022 | Aplicar 033–035 en `onza-dev` (con respaldo), activar TOTP en el proyecto de autenticación, tener el correo del operador verificado y probar el segundo factor y la revocación de sesión reales. Falta un límite de intentos en la activación pública de invitaciones | 2026-11-28 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -98,6 +101,19 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ---
 
 ## Entradas
+
+### D-2026-11-28-01 · Mega admin (superadministrador de un solo correo) y panel de empresa
+
+- **Fecha:** 2026-11-28 (America/Costa_Rica)
+- **Persona:** Manu (encargo: panel de superadministrador para operar un SaaS multiempresa, accesible solo para `admin.choliempresas@gmail.com`, y panel de empresa).
+- **IA:** Claude Code · claude-sonnet-5-5 (parte con claude-haiku-5-5)
+- **Rama y commits:** `feat/mega-admin` (nueva, sale de `claude/eloquent-hamilton-rw4w0y`) · hash en el commit de esta entrada. No se tocó `main`.
+- **Qué cambió:** migraciones **033–035** con su reversión en `supabase/rollbacks/`: operador único con comprobación en la base (correo verificado = correo del token = correo vigente), segundo factor de 15 minutos para toda acción, auditoría de solo inserción; empresas, estado de locales, membresías de 8 roles, invitaciones por hash (7 días, un solo uso) y clientes con seudónimo por empresa, todo con RLS; funciones del panel y de la empresa. Capa de aplicación: guard por petición (404 / `SESSION_REVOKED` / `REAUTH_REQUIRED`), registro de denegaciones sin token, **inventario de rutas con denegación por defecto** (en el proxy y en una prueba), API `/api/platform-admin/*` y `/api/panel/*`. Interfaz en `/admin/*` (resumen, asistente de 4 pasos, empresas, establecimientos, usuarios, auditoría, seguridad) y `/panel/*` (resumen, clientes, menú, horarios, personal, activación de invitación). Detalle, criterios y limitaciones en `docs/Onza-Mega-admin.md`.
+- **Hallazgos corregidos en el camino:** (1) las páginas del panel respondían HTTP **200** a quien no es operador porque `notFound()` llega con la respuesta ya iniciada (el `loading.tsx` global): ahora la decisión se toma en el proxy y es un 404 real; (2) las funciones validaban la entrada antes de comprobar al operador, lo que delataba su existencia con un error distinto a `NOT_FOUND`: ahora la comprobación es lo primero que se evalúa; (3) la política de `venues` obligaba a dar al rol anónimo siete funciones: se redujo a un único predicado, y la prueba de permisos existente lo detectó; (4) varias ambigüedades variable/columna de plpgsql; (5) el inicio de sesión del operador podía quedar colgado si fallaba la consulta del nivel de verificación.
+- **Verificado:** `npm run typecheck`, `npm run lint` (0 errores), `npx vitest run` → 65 archivos / 407 pruebas (nuevas: operador 11, organizaciones 8, funciones 22, reversión 2, guard y API 14, inventario de rutas 6, validación por país 5; ampliada la de permisos y la política de acceso). Recorrido con **navegador real** (`scripts/verify-platform-local.mjs`, 33 comprobaciones, dos corridas en frío): 404 reales en las 10 rutas del panel para sin sesión, consumidor, administrador de local, barra y otro correo verificado; inicio de sesión del operador; asistente completo con validación de cédula jurídica y teléfono; publicar y suspender con confirmación y motivo; auditoría con IP y petición; invitación con contraseña elegida por la persona, un solo uso y panel de empresa; quien pertenece a una empresa recibe 404 en el panel de plataforma y su API; sin desbordes en 390 px. El entorno local de pruebas (`scripts/local-shim`) ahora emite tokens con correo verificado y, solo con `SHIM_MFA_EMAILS`, un segundo factor simulado.
+- **No verificado:** **nada se aplicó ni se desplegó en ninguna base remota** (no se autorizó); el segundo factor real (TOTP del proveedor), la revocación real de sesiones y la activación de invitaciones con la clave de servicio no se probaron contra Supabase real, solo contra el entorno local y con simulaciones; iPhone y Android físicos; el panel en Cloudflare o Vercel.
+- **Decisiones:** (a) el panel vive en `/admin` (estático) y convive con `/admin/[venueId]` (uuid); la API en `/api/platform-admin`. (b) `/admin/acceso` es la única ruta visible sin ser operador. (c) El acceso anterior por rol `onza` (`/onza`, `/api/onza`, `/api/platform`) **no se tocó**: queda listado como `legacy-onza` en el inventario; no cumple «un solo correo» y hay que decidir si se retira (PEN-020). (d) Editar menú y plano desde la plataforma queda en solo lectura (PEN-021). (e) Sin servicio de correo: los enlaces de invitación se copian a mano.
+- **Pendientes / siguiente paso:** PEN-020 a PEN-022. Para activarlo: respaldar `onza-dev`, aplicar 033–035 y confirmar que el correo del operador existe y está verificado.
 
 ### D-2026-11-27-09 · Fidelización, Avatar Coins, XP, tienda de avatares y ONZA Social
 

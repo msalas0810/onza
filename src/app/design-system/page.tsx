@@ -45,6 +45,13 @@ const sampleVenue: Venue = {
   auto_accept_max_preparing: 5,
   delivery_mode: "bar",
   spot_noun: "Mesa",
+  organization_id: null,
+  publication_status: "published",
+  suspended_at: null,
+  suspended_reason: null,
+  suspended_by: null,
+  service_modes: { dine_in: true, pickup: true, delivery: { enabled: false, zones: [], fee_minor: 0, min_order_minor: 0 } },
+  brand_color: null,
 };
 
 // Sample drinks for reviewing the menu rows and the drink editor. Nothing here is saved.

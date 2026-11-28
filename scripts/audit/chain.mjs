@@ -14,7 +14,7 @@ export const read = (file) => readFileSync(new URL(file, DIR), "utf8");
 export const SUPABASE_STUB = `
 create role anon; create role authenticated; create role service_role;
 create schema auth;
-create table auth.users(id uuid primary key, email text, raw_user_meta_data jsonb default '{}', is_anonymous boolean default false);
+create table auth.users(id uuid primary key, email text, email_confirmed_at timestamptz, raw_user_meta_data jsonb default '{}', is_anonymous boolean default false);
 create function auth.uid() returns uuid language sql stable as $$select (nullif(current_setting('request.jwt.claims',true),'')::jsonb->>'sub')::uuid$$;
 create function auth.jwt() returns jsonb language sql stable as $$select nullif(current_setting('request.jwt.claims',true),'')::jsonb$$;
 grant usage on schema auth to authenticated,anon,service_role;

@@ -115,4 +115,12 @@ describe("política de acceso", () => {
       `/equipo/acceso?next=${encodeURIComponent("/equipo/locales")}`,
     );
   });
+  it("el panel de plataforma y el de empresa deciden su acceso en el servidor; /admin/<uuid> sigue siendo del equipo del local", () => {
+    for (const p of ["/admin", "/admin/acceso", "/admin/empresas", "/admin/empresas/30000000-0000-4000-8000-000000000001", "/admin/nueva-empresa", "/panel", "/panel/acceso", "/panel/personal", "/panel/invitacion/abc_DEF-123"])
+      for (const account of [none, guest, fresh])
+        expect(decideAccess(p, account), p).toBeNull();
+    const local = "/admin/20000000-0000-4000-8000-000000000001";
+    expect(decideAccess(local, none)).toBe(`/equipo/acceso?next=${encodeURIComponent(local)}`);
+    expect(decideAccess(local, fresh)).toBe("/sesion-activa?want=equipo");
+  });
 });
