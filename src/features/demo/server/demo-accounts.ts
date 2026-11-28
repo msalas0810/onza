@@ -1,10 +1,13 @@
 import "server-only";
 
-/** Cuentas demo: solo servidor. Activas únicamente con DEMO_MODE=true; nunca llegan al navegador. */
+/** Cuentas demo: solo servidor; las credenciales nunca llegan al navegador.
+ * Cualquiera que vea el botón entra sin contraseña (también como admin del local), así que tiene indicador propio:
+ * DEMO_MODE por sí solo no alcanza, porque hoy está activo en el despliegue público.
+ */
 export type DemoRole = "customer" | "bartender" | "admin";
 
 export function demoEnabled() {
-  return process.env.DEMO_MODE === "true";
+  return process.env.DEMO_MODE === "true" && process.env.DEMO_LOGIN_ENABLED === "true";
 }
 
 export function demoCredentials(
