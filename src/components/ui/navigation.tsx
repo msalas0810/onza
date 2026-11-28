@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Compass, Receipt, ShoppingBag, User, Users } from "lucide-react";
+import { Compass, Gamepad2, Receipt, ShoppingBag, User, Users } from "lucide-react";
 import { useCart } from "@/features/orders/cart-store";
 import { BrandMark } from "./primitives";
 import { ConnectionBanner } from "./connection-banner";
@@ -23,6 +23,12 @@ const items = [
   },
   { href: "/orders", match: /^\/orders/, label: "Pedidos", Icon: Receipt },
   { href: "/amigos", match: /^\/amigos/, label: "Amigos", Icon: Users },
+  {
+    href: "/juego",
+    match: /^\/(juego|tienda|avatar|ranking|bares|historias)/,
+    label: "Juego",
+    Icon: Gamepad2,
+  },
   {
     href: "/cuenta",
     match: /^\/(cuenta|settings|policies)/,

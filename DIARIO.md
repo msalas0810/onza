@@ -39,13 +39,13 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 
 | Campo | Valor |
 | --- | --- |
-| Rama vigente de trabajo | `main` es la única versión oficial (consolidada el 2026-11-27, D-2026-11-27-05). Se trabaja con ramas `feat/*` o `fix/*` y PR |
+| Rama vigente de trabajo | `feat/unificado`: Fase 1 (`feat/workers`) más `claude/eloquent-hamilton-rw4w0y` hasta `6e027e3`, con PR hacia `main`, **sin integrar** (D-2026-11-27-10). `main` sigue siendo la única versión oficial |
 | `main` | Versión oficial. **Cada push a `main` despliega a Production** en Vercel. Código de la app vigente: `8fbe29a` |
 | Commit desplegado en Vercel | La punta de `main`. El primer deployment de Production fue `dpl_8DNAyssP9ShpdqoApx4aeE683Vkh`, desde `238aa87` |
-| Demo desplegada | https://onza-demo.vercel.app (dominio de Production del proyecto `onza-demo`; ya no está atado a la rama `fix/hosted-integration`) |
-| Backend | Supabase alojado `onza-dev` con las migraciones 001–027 aplicadas, `accounts_required=true`, pagos **mock** |
+| Demo desplegada | https://onza-demo.vercel.app (Vercel, código de `main`). Además, según D-2026-11-27-06 (CF) a 09, existe el Worker `onza-demo` en https://onza-demo.onza.workers.dev, publicado desde la rama del juego con una configuración que `feat/unificado` reemplaza (no comprobado en esta sesión; ver PEN-026) |
+| Backend | Supabase alojado `onza-dev`. Según D-2026-11-27-09 tiene aplicadas **001–032** (no comprobado en esta sesión), `accounts_required=true`, pagos **mock**. La próxima migración es la **033** |
 | Pagos reales | Deshabilitados. `BacPaymentProvider` falla explícitamente |
-| Siguiente tarea exacta | **Desbloquear el registro (PEN-015):** hoy sigue fallando hasta que una persona desactive «Confirm email» o se configure un SMTP propio. Después, los pendientes de lanzamiento (PEN-016). |
+| Siguiente tarea exacta | **Manu, primero: rotar las credenciales expuestas (PEN-025).** Después revisar el PR de `feat/unificado` y decidir si entra a `main`. La Fase 2 no empieza sin su aviso, y las Fases 3 y 4 del plan hay que replantearlas sobre lo que ya trae la rama del juego (PEN-027) |
 
 ### Pendientes abiertos
 
@@ -67,6 +67,17 @@ Este diario lo leen y escriben **personas y agentes de IA** (Claude Code, Codex 
 | PEN-014 | Production no tiene `SUPABASE_SERVICE_ROLE_KEY` (el Preview anterior tampoco): el alta de cuentas del equipo (`/api/team`) no funciona en el demo publicado. Decidir si se carga | 2026-11-27 |
 | PEN-015 | Registro con correo: el alta exige confirmación y el correo integrado de Supabase está en su límite (429 `over_email_send_rate_limit`). Salida inmediata: Dashboard → Authentication → Sign In / Providers → Email → apagar «Confirm email». Salida de lanzamiento: SMTP propio con dominio verificado y volver a encenderlo (la recuperación de contraseña también lo necesita) | 2026-11-27 |
 | PEN-016 | Antes de lanzar: acuerdo, menú y precios reales por local (Picnic sigue con menú, mesas y plano inventados); textos legales revisados; rotar o borrar las cuentas `DEMO_*` y los pedidos de prueba; proyecto de producción separado de `onza-dev`; definir cómo se cobra (Onza no cobra) | 2026-11-27 |
+| PEN-017 | Workers con la configuración unificada (`onza-preview` / `onza`): sin desplegar. Faltan secretos, URLs de Auth, medir el CPU por petición con `wrangler tail` (tope Free: 10 ms) y correr los verificadores contra el preview. Si Free no alcanza, decide Manu | 2026-11-27 |
+| PEN-018 | Las cuentas `DEMO_*` tienen contraseñas más débiles que lo que pide `.env.example`. Se resuelve al rotarlas (PEN-025) | 2026-11-27 |
+| PEN-019 | `scripts/verify-local-flow.mjs` está desactualizado (falla 2 controles igual en Node y en Workers). `/actividad?ejemplo=1` y `activity-fixtures.ts`, citados en README y `docs/Onza-Noche-decisiones.md`, no existen en el código. Va en la Fase 2 | 2026-11-27 |
+| PEN-020 | **Enviar un trago**: falta el cobro al remitente y el pedido regalado (cambia `onza_command`; requiere aprobación y pruebas de concurrencia). Hoy apagado. Ver `docs/Onza-Juego-y-economia.md` | 2026-11-27 |
+| PEN-021 | Diseños definitivos de avatares: subir los archivos (carpeta pública, Storage o CDN; si es CDN, `AVATAR_ASSET_ORIGINS`) e importar el CSV. Hoy hay 13 artículos `prov_*` | 2026-11-27 |
+| PEN-022 | **Canje de cashback en el checkout**: no hecho (cambia monto autorizado y capturado). Programador de vencimientos y programa compartido entre locales, pendientes. Ver `docs/loyalty.md` | 2026-11-27 |
+| PEN-023 | Compra real de Avatar Coins: hoy solo simulada; depende de BAC (PEN-006). Cargar paquetes y activar `coin_purchases_enabled` solo para pruebas | 2026-11-27 |
+| PEN-024 | Vercel no tiene estos cambios (solo Cloudflare, rama `claude/eloquent-hamilton-rw4w0y`). Falta decidir si se integra a `main`; el blueprint §0 aún no registra fidelización ni juego como parte del producto | 2026-11-27 |
+| PEN-025 | **Seguridad, urgente.** El repo es público y la rama `claude/eloquent-hamilton-rw4w0y` publicó en su diario la contraseña de las cuentas demo (cliente, bartender, bartender 2 y admin; coincide con `.env.local`). Según D-2026-11-27-08 (secrets), la `service_role` y la clave de retiro además aparecieron en un chat. Rotar en Supabase las contraseñas y la `service_role`. Rotar `PICKUP_TOKEN_ENCRYPTION_KEY` deja ilegibles los tickets abiertos: hacerlo sin pedidos activos. Redactar el texto no lo saca del historial | 2026-11-27 |
+| PEN-026 | El Worker `onza-demo` se compiló con `opennextjs-cloudflare build` sin filtrar, que copia los `.env*` al bundle. No se pudo comprobar qué contiene. Además muestra botones de acceso demo, incluido admin, sin contraseña. Quitar los secretos `DEMO_*`, redesplegarlo con `npm run cf:*` o borrarlo | 2026-11-27 |
+| PEN-027 | El plan `docs/plan-workers-avatars-noche.md` se escribió sin conocer las migraciones 028–032. Las Fases 3 y 4 se solapan con la rama del juego (puntos, monedas, XP, avatares, tienda, ranking, bares, presencia, historias): replantearlas antes de ejecutarlas | 2026-11-27 |
 | PEN-008 | Subida real a Storage, guardado/restauración de imagen y rechazo entre locales comprobados; script ampliado a 29 controles. La cámara y el guardado desde teléfono físico siguen pendientes. | 2026-11-16 |
 
 ---
@@ -95,6 +106,89 @@ IDs: `D-<fecha>-<NN>`, con `NN` consecutivo dentro del día (01, 02, …).
 ---
 
 ## Entradas
+
+### D-2026-11-27-10 · Unificar la Fase 1 con la rama del juego en `feat/unificado`
+
+- **Fecha y hora:** 2026-11-27 18:47 (America/Costa_Rica)
+- **Persona:** Manu (encargo: «pushea todo al git y que todo quede unificado»; eligió rama de integración sin tocar `main`, botones demo apagados por defecto y confirmó que la otra sesión había terminado).
+- **IA:** Claude Code · claude-sonnet-5-5
+- **Rama y commits:** `feat/unificado` = `feat/workers` (`340c2cc`) + merge de `claude/eloquent-hamilton-rw4w0y` (`6e027e3`). `main` no se tocó.
+- **Qué cambió:** quedan juntos la Fase 1 y la fidelización, monedas, XP, avatares, tienda, importador CSV y ONZA Social (028–032). Entre las dos versiones de Workers queda la de la Fase 1 (assets estándar, `cf:build` que filtra secretos y su guardia); se quitaron `cloudflare/worker.js` (assets desde KV, un atajo para el proxy de la sesión remota), `scripts/cloudflare-upload-assets.mjs` y los scripts `cf:upload-assets` y `cf:deploy`. De la otra rama se conserva `AVATAR_ASSET_ORIGINS` en la CSP. El acceso demo ahora exige `DEMO_LOGIN_ENABLED=true` además de `DEMO_MODE=true`, y ningún despliegue lo activa.
+- **Corrección del diario:** las dos ramas usaron IDs repetidos. Hay dos `D-2026-11-27-06` («Migrar el hosting…», de la rama del juego, y «Quitar lo de demo…», de `main`) y dos `D-2026-11-27-07` (Fase 1 y «Cuentas demo…»). No se renumeraron entradas. En la tabla de pendientes, los `PEN-015` a `PEN-019` **de las entradas de la rama del juego** pasan a ser `PEN-020` a `PEN-024`; los que citan las entradas de `main` y de la Fase 1 no cambian. En D-2026-11-27-08 (secrets) se redactó una contraseña escrita en claro; es el único texto previo editado.
+- **Verificado:** `npm run check` (61 archivos / 351 pruebas y build); `npm run db:types:offline` sin cambios en los tipos; `npm run cf:build` con `.env.local` presente: sin secretos en el bundle y 2458,63 KiB gzip de 3072. En workerd local contra el shim, que carga 028–031: `verify-entrega-lugar` 43/43, `verify-entrega-mapa` 51/51, `verify-admin-noche` 17/17 y `verify-amigos-actividad` 26/26, sin errores en el log; `/api/demo-session` → 404 y sin botones demo en `/acceso` ni `/equipo/acceso`.
+- **No verificado:** las pantallas nuevas del juego en navegador; la 032 (Storage) en el shim; el código de la rama del juego no se revisó línea por línea (solo pasa sus pruebas y las de la Fase 1); el estado real de `onza-dev` y del Worker `onza-demo`; despliegue en Cloudflare; CPU por petición; teléfonos físicos.
+- **Pendientes / siguiente paso:** PEN-025 y PEN-026 primero. Después, revisar el PR. Integrarlo a `main` publica en Vercel Production el juego completo.
+
+### D-2026-11-27-07 · Fase 1: Onza compila y corre en Cloudflare Workers (sin desplegar)
+
+- **Fecha y hora:** 2026-11-27 15:21 (America/Costa_Rica)
+- **Persona:** Manu (encargo: plan de Workers, limpieza, personaje y noche social; aprobó el plan con ajustes y pidió ejecutar solo la Fase 1).
+- **IA:** Claude Code · plan con claude-opus-5-5, ejecución con claude-sonnet-5-5
+- **Rama y commits:** `feat/workers` · `82d01cc` (plan), `2ad5127`, `573bdf9`, `b5e5cb9`, `3445281`; esta entrada va en el commit siguiente. `main` no se tocó.
+- **Qué cambió:** la app se empaqueta con `@opennextjs/cloudflare` 1.20.19 y `wrangler` 4.169.0, con entornos `preview` y `production` (`npm run cf:*`). El origen permitido sale solo de `APP_ORIGIN`, el ID de correlación usa `cf-ray`, la CSP ya no abre la barra del Preview de Vercel y se borraron `vercel.json`, `configure-vercel-env.mjs` y `verify-vercel-demo.mjs`. Vercel sigue desplegando por su integración con Git. Sin cambios de base de datos ni migraciones (R4: no aplica).
+- **Hallazgo de seguridad:** `opennextjs-cloudflare build` copia **todos** los valores de `.env*` a `.open-next/cloudflare/next-env.mjs`, que viaja dentro del Worker. En la primera compilación local quedaron ahí las variables de `.env.local`, incluida la `service_role`. **No se desplegó ni se subió nada.** Ahora `scripts/cf-build.mjs` deja solo las `NEXT_PUBLIC_*`, busca los secretos en todo el bundle y borra la salida ante cualquier fallo; `scripts/cf-guard.mjs` hace que `wrangler` rechace un bundle armado a mano (comprobado).
+- **`proxy.ts`:** se queda como está. El adaptador lo soporta como middleware de Node, marcado **experimental**; funcionó en workerd local. Plan B, no aplicado: `src/middleware.ts` en edge.
+- **Node en Workers:** el ticket de retiro (`node:crypto`, AES-256-GCM) y el QR de servidor (`qrcode.toDataURL`) funcionan sin cambios con `nodejs_compat`.
+- **Tamaño:** 2364,96 KiB gzip en local y 2364,42 KiB en CI, de 3072 KiB del plan Free (quedan unos 707 KiB).
+- **Archivos clave:** `wrangler.jsonc`, `open-next.config.ts`, `scripts/cf-build.mjs`, `scripts/cf-guard.mjs`, `scripts/configure-workers-secrets.mjs`, `scripts/lib/worker-env.mjs`, `public/_headers`, `.github/workflows/`, README «Despliegue».
+- **Verificado:** `npm run check` (54 archivos / 268 pruebas y build). CI del push en verde: run 46069266701 (`checks`, `security`, `supabase-integration`, `workers-build`). `npm run cf:build` con `.env.local` presente: 7 secretos buscados, ninguno en el bundle. En **workerd local** contra `scripts/local-shim`: `verify-entrega-lugar` 43/43, `verify-entrega-mapa` 51/51, `verify-admin-noche` 17/17 y `verify-amigos-actividad` 26/26 (login, pedido, barra, ticket con QR y entrega con código), sin errores en el log del Worker; hoja de QR del admin con 34 PNG válidos; headers en un estático y en `/api/health`; POST con origen ajeno → 403; `opennextjs-cloudflare preview` lee `.dev.vars.preview` y no `.env.local`. `scan-secrets` sin hallazgos.
+- **No verificado:** despliegue real en Cloudflare; CPU por petición y el tope de 10 ms del plan Free (en local no se aplica); `wrangler tail`; recorrido en un Worker de preview; `verify:hosted:*` y `verify-dominio-picnic` contra Workers (escriben en `onza-dev` y no se corrieron); `verify:hosted:*` tampoco contra Vercel; `configure-workers-secrets.mjs` contra una cuenta real (solo su validación, con pruebas); el workflow `Deploy Workers` (apagado hasta crear la variable); Realtime y Storage desde el Worker (el shim no los tiene; el navegador se conecta directo a Supabase); teléfonos físicos. El despliegue Preview de Vercel de esta rama no se revisó.
+- **Decisiones:** plan Free primero (Manu); si no alcanza, se pregunta antes de pasar a pago. `verify-local-flow` falla 2 controles igual con `next start`, así que se usaron los cuatro recorridos vigentes; solo se le agregó `SHIM_PORT`. No se detuvo un shim de una sesión anterior que seguía en el 54321: se usó el 54323. La reversión de «pedir no crea check-in» (ahora: borrador privado) quedó aprobada para la Fase 4 y todavía no está implementada.
+- **Pendientes / siguiente paso:** pasos manuales del README y PEN-017. La Fase 2 espera el aviso de Manu.
+
+### D-2026-11-27-09 · Fidelización, Avatar Coins, XP, tienda de avatares y ONZA Social
+
+- **Fecha:** 2026-11-27 (America/Costa_Rica)
+- **Persona:** Manu (encargo: plataforma social de bares con cashback, Avatar Coins, tienda de avatares, importador CSV y siete funciones sociales, sin diseños definitivos).
+- **IA:** Claude Code · claude-sonnet-5-5
+- **Rama y commits:** `claude/eloquent-hamilton-rw4w0y` · hash en el commit de esta entrada. No se tocó `main`.
+- **Qué cambió:** tres sistemas independientes con libros append-only: **cashback** (puntos con valor, 1 punto = ₡1, rescatado de `claude/kind-cannon-4gv720` y renumerado a 028), **Avatar Coins** y **XP** (029). Avatares con 12 ranuras, catálogo con `sku`, inventario, tienda y equipado (030) con **importador CSV** (vista previa exacta, aplicar, historial; las compras se conservan al actualizar por `sku`). Social (031–032): ranking entre amigos y por bar, mapa de bares desbloqueables por visita verificada, «quién está en el bar» con avatares y privacidad, Drink Stories (bucket privado, reportes, moderación) y el modelo de «enviar un trago». Pantallas de cliente (`/juego`, `/avatar`, `/tienda`, `/ranking`, `/bares`, `/historias`), pestaña «Fidelización y social» del local y `/onza/economia`, `/onza/catalogo`, `/onza/moderacion`. Detalle y reglas en `docs/Onza-Juego-y-economia.md`.
+- **Hallazgos corregidos en el camino:** (1) una función interna `private.coin_grant` era ejecutable por cualquier cuenta autenticada (default PUBLIC de las funciones nuevas): se revoca explícitamente en cada migración y hay pruebas que lo comprueban; (2) las expresiones regulares de PostgreSQL no admiten `{3,500}` (rechazaba toda referencia de diseño); (3) las rutas nuevas quedaban visibles sin sesión: se agregaron a `CUSTOMER` en `access-policy.ts`; (4) los triggers de economía podían bloquear una entrega si fallaban: ahora son a prueba de fallos.
+- **Base de datos:** migraciones 028–032 aplicadas en `onza-dev` (cada una en una transacción) y registradas en el historial. Antes y después: los conteos de las tablas existentes no cambiaron. RLS en todas las tablas nuevas, sin permisos directos, funciones internas no ejecutables por el cliente, bucket `stories` privado. Hay 13 artículos provisionales (`prov_*`).
+- **Verificado:** `npm run typecheck`, `npm run lint` (0 errores), `vitest run` 58 archivos / 338 pruebas (nuevas: 21 de economía, 18 de tienda e importador, 16 de social y almacenamiento, 8 del parser CSV, 18 del cimiento de cashback, más las rutas en la política de acceso). Asesor de seguridad de Supabase sin hallazgos críticos nuevos. En vivo en `onza-demo.onza.workers.dev`: login demo, las 7 pantallas del cliente cargan con datos reales, errores en español, 403 sin `Origin`, comandos de ONZA negados a un cliente. Administración de ONZA probada contra la base real dentro de una transacción revertida: configuración, vista previa del CSV (1 crear, 1 actualizar, 1 error, catálogo intacto) y rechazo a un cliente.
+- **No verificado:** compra de un artículo, equipado y ganancias con un pedido entregado de punta a punta en el demo (cubierto por pruebas de base, no por navegador); subida real de una historia a Storage; tablero de ranking con varias cuentas; pantallas de ONZA y de la pestaña del local en navegador (compilan y sus RPC están probadas, sin recorrer); iPhone y Android físicos.
+- **Decisiones:** (a) las monedas y el XP se otorgan al **entregar** (no al cobrar); el cashback sigue al **cobrar**. (b) Visita verificada = pedido entregado, no check-in. (c) Rankings por bar opt-in. (d) Comprar monedas solo con pago simulado (`assertMockPayments`); BAC sigue sin configurar. (e) **Enviar un trago queda apagado** (`social_gifts_available=false`): cobrar y crear el pedido exige cambiar `onza_command`, reservado a una etapa autorizada. (f) Los diseños no bloquean nada: el SVG provisional se reemplaza por `asset_ref`/`preview_ref` del CSV.
+- **Pendientes / siguiente paso:** ver PEN-015 a PEN-019. Primero: probar a mano el recorrido con una cuenta y un pedido entregado, y aprobar el diseño del pedido regalado.
+
+### D-2026-11-27-08 · Secrets de cuentas demo cargados en el Worker de Cloudflare
+
+- **Fecha:** 2026-11-27 (America/Costa_Rica)
+- **Persona:** Manu (pasó las credenciales en el chat y pidió dejar activos los botones demo).
+- **IA:** Claude Code · claude-haiku-5-5
+- **Rama y commits:** `claude/eloquent-hamilton-rw4w0y` · hash en el commit de esta entrada.
+- **Qué cambió:** en el Worker `onza-demo` se cargaron como secrets `DEMO_CUSTOMER_*`, `DEMO_BARTENDER_*`, `DEMO_ADMIN_*` y `PICKUP_TOKEN_ENCRYPTION_KEY` (reemplaza la clave generada en D-2026-11-27-06, así los tickets de retiro de `onza-dev` vuelven a poder abrirse). No se guardaron valores en el repo.
+- **Verificado:** `POST /api/demo-session` con `Origin` del Worker devuelve 200 para cliente, bartender y admin.
+- **No verificado:** el recorrido en el navegador después del login (destino de cada rol); Vercel no tiene estas variables.
+- **Pendientes:** rotar la clave de servicio, la clave de cifrado de retiro y las contraseñas demo, porque aparecieron en el chat. Cambiar la contraseña demo publicada (redactada acá; sigue en el historial de git) por contraseñas nuevas.
+
+### D-2026-11-27-07 · Cuentas demo en la pantalla de acceso
+
+- **Fecha:** 2026-11-27 (America/Costa_Rica)
+- **Persona:** Manu (encargo: agregar la opción de cuentas demo sin quitar los accesos actuales; no entrar como invitado).
+- **IA:** Claude Code · claude-haiku-5-5 (la implementación se hizo en sesión con claude-sonnet-5-5)
+- **Rama y commits:** `claude/eloquent-hamilton-rw4w0y` · hash en el commit de esta entrada. No se tocó `main`.
+- **Qué cambió:** en `/acceso` aparece «Entrar como cliente demo»; en `/equipo/acceso`, «Entrar como bartender demo» y «Entrar como admin demo». Solo se muestran con `DEMO_MODE=true`. Los formularios de correo y contraseña y los proveedores siguen igual. Las credenciales quedan en el servidor: el botón llama a `POST /api/demo-session` con un rol; no hay invitado.
+- **Archivos clave:** `src/app/api/demo-session/route.ts`, `src/features/demo/server/demo-accounts.ts`, `src/features/demo/components/demo-login.tsx`, `src/app/acceso/page.tsx`, `src/app/equipo/acceso/page.tsx`.
+- **Otros cambios:** `.open-next/**` excluido del lint (el lint marcaba 1974 errores solo en el build generado); `.open-next`, `.wrangler` y `.dev.vars` en `.gitignore`.
+- **Verificado:** `npm run typecheck` (sin errores); `npm run lint` (0 errores, 2 advertencias); `vitest run tests/` 52 archivos / 257 pruebas OK; `opennextjs-cloudflare build` OK; despliegue en `onza-demo.onza.workers.dev`. En vivo: `/acceso` muestra los botones; `POST /api/demo-session` sin `Origin` da 403, con rol inválido 422 y, sin credenciales cargadas, 503 `DEMO_NOT_CONFIGURED`.
+- **No verificado:** entrar de verdad con las cuentas demo en Cloudflare (faltan sus secrets); en Vercel no se desplegó este cambio ni se cargaron las variables `DEMO_*`; prueba en iPhone/Android.
+- **Pendientes / siguiente paso:** cargar `DEMO_CUSTOMER_*`, `DEMO_BARTENDER_*` y `DEMO_ADMIN_*` como secrets del Worker (`wrangler secret put`) y en Vercel si se quiere el mismo comportamiento allí; luego probar cada botón.
+- **Nota:** `AGENTS.md` pide no lanzar producción con accesos públicos de demo; estas cuentas quedan activas solo mientras `DEMO_MODE=true`, que hoy está en el demo público. Decidir si se apaga para producción real.
+
+### D-2026-11-27-06 · Migrar el hosting de Vercel a Cloudflare Workers
+
+- **Fecha y hora:** 2026-11-27 13:50 (America/Costa_Rica)
+- **Persona:** Manu (encargo: migrar todo a Cloudflare con dominio de Cloudflare y los datos de Onza).
+- **IA:** Claude Code · claude-sonnet-5-5 (la sesión empezó con claude-haiku-5-5; la migración se hizo con Sonnet)
+- **Rama y commits:** `claude/eloquent-hamilton-rw4w0y` · hash en el commit de esta entrada. No se tocó `main`.
+- **Qué cambió:** la app se construye con OpenNext (`@opennextjs/cloudflare` 1.20.19, `wrangler` 4) y corre como Worker `onza-demo` en **https://onza-demo.onza.workers.dev** (subdominio `onza.workers.dev` creado en la cuenta). Usa el mismo Supabase `onza-dev`: no se creó un proyecto nuevo porque la credencial de la sesión solo ve `onza-dev` y no puede crear proyectos ni leer organizaciones. Vercel sigue activo y sin cambios.
+- **Archivos clave:** `wrangler.jsonc`, `open-next.config.ts`, `cloudflare/worker.js`, `scripts/cloudflare-upload-assets.mjs`, scripts `cf:*` en `package.json`.
+- **Archivos estáticos desde KV:** `wrangler deploy` no puede subir assets detrás del proxy de la sesión (el token temporal de subida da 401). Se sirven desde Workers KV (namespace `onza-assets`, binding `ASSETS_KV`, 77 archivos) con un envoltorio mínimo del worker. Con una cuenta o runner normal se puede volver al binding `assets` estándar y borrar el envoltorio.
+- **Secrets en el Worker:** `SUPABASE_SERVICE_ROLE_KEY` (leída de `onza-dev` por la API de gestión, sin imprimirla) y `PICKUP_TOKEN_ENCRYPTION_KEY` **nueva**. La clave anterior no estaba disponible, así que los tickets de retiro abiertos en `onza-dev` ya no se pueden abrir; los nuevos sí. Variables no secretas en `wrangler.jsonc` (`APP_ORIGIN`, `DEMO_MODE`, `PAYMENT_PROVIDER=mock`, `REAL_PAYMENTS_ENABLED=false`, `ACCOUNTS_REQUIRED=true`). La URL y la clave publicable de Supabase se incrustan en el build. No se cargaron contraseñas demo.
+- **Verificado:** `opennextjs-cloudflare build` y `wrangler deploy` terminan sin error. En el dominio: `/` y `/v/sala-norte` redirigen a `/acceso` (login obligatorio) y `/login` a `/equipo/acceso`; `/acceso` 200; CSS y fuente servidos desde KV con su tipo; cabeceras de seguridad y CSP con el origen de `onza-dev`.
+- **No verificado:** login real y flujos de pedido, retiro, QR y Realtime en el dominio nuevo (no hay contraseñas demo en esta sesión; `scripts/verify-dominio-picnic.mjs` apunta al dominio de Vercel); Storage; `/api/team` con la nueva clave de servicio; iPhone y Android físicos. OpenNext avisa que el middleware de Node (`src/proxy.ts`) es **experimental** en Cloudflare: el redirige-a-login funciona, pero el resto no se probó.
+- **Cambios fuera del repo:** se permitió el host `onza-demo.onza.workers.dev` en la red del entorno de Claude Code «Onza» para poder probar.
+- **Pendientes / siguiente paso:** correr el recorrido completo contra el dominio nuevo con las cuentas demo; decidir si se apaga Vercel y si se conecta el repo a Cloudflare (Workers Builds) para desplegar en cada push; un Supabase nuevo requiere una organización a la que la sesión tenga acceso.
 
 ### D-2026-11-27-06 · Quitar lo de demo y diagnosticar el registro
 

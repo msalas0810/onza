@@ -146,6 +146,23 @@ ONZA_APP=http://127.0.0.1:3100 node scripts/shots-noche.mjs <carpeta>           
 
 Con otro puerto del shim, agregá `SHIM_URL=http://127.0.0.1:<puerto>`. Clientes extra del shim para amigos y actividad: `tomas@`, `valeria@` y `diego@correo.demo` (el mapa de actividad necesita 5 personas para mostrar un local).
 
+### El mismo recorrido sobre Workers
+
+Compila apuntando al shim y sirve el Worker en workerd local. `CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV=false` evita que `wrangler` le pase tu `.env.local`; todos los valores de abajo son ficticios.
+
+```bash
+NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=local-shim-publishable npm run cf:build
+CLOUDFLARE_LOAD_DEV_VARS_FROM_DOT_ENV=false npx wrangler dev --env preview --ip 127.0.0.1 --port 3300 \
+  --var APP_ORIGIN:http://127.0.0.1:3300 --var SUPABASE_SERVICE_ROLE_KEY:local-shim-service-role \
+  --var PICKUP_TOKEN_ENCRYPTION_KEY:$(node -e 'process.stdout.write(Buffer.alloc(32,7).toString("base64"))') \
+  --var PICKUP_TOKEN_KEY_VERSION:1
+# en otra terminal, reiniciando el shim antes de cada recorrido:
+node scripts/local-shim/index.mjs &
+ONZA_APP=http://127.0.0.1:3300 node scripts/verify-entrega-lugar.mjs
+```
+
+Si el 54321 está ocupado, usá `SHIM_PORT=<puerto>` en el shim, ese puerto en `NEXT_PUBLIC_SUPABASE_URL` y `SHIM_URL=http://127.0.0.1:<puerto>` en el recorrido. `verify-local-flow.mjs` quedó desactualizado respecto de los datos actuales: falla 2 controles igual en Node y en Workers.
+
 ### Auditoría de seguridad y escala (noviembre de 2026)
 
 Informe, matriz de roles, hallazgos con su prueba y pendientes: `docs/Onza-Auditoria-seguridad-y-escala.md`; operación: `docs/Onza-Runbook-operacion.md`. Migraciones nuevas (aditivas, **sin aplicar en remoto**): `202611210021` a `202611210023`. Las pruebas de concurrencia, migraciones y carga usan un Postgres 17 real y efímero que se instala **una vez fuera del repo** (instrucciones en `scripts/audit/pg.mjs`); no tocan ningún proyecto remoto:

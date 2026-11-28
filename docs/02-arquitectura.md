@@ -124,7 +124,23 @@ Evento ready y fila de notification outbox se crean en la misma transacción. En
 
 Supabase Free sirve para desarrollo/demo pequeño: 500 MB DB, 1 GB Storage y pausa por inactividad publicados; Realtime tiene cuotas propias. No es un compromiso de capacidad ni SLA para una noche de operación. Medir concurrencia y mensajes antes de piloto, y exportar/migrar datos con respaldo. [S19-S20]
 
-Hosting Next compatible. Desarrollo local primero; al publicar un demo comercial elegir un plan que lo permita. Vercel Hobby restringe uso personal/no comercial; no presupuestar producción comercial gratis por defecto. No crear servicios pagados sin instrucción. [S21]
+### Hosting: Cloudflare Workers
+
+Next 16 corre en Workers con `@opennextjs/cloudflare` (flags `nodejs_compat` y `global_fetch_strictly_public`). Vercel sigue publicado hasta el cambio de dominio. No crear servicios pagados sin instrucción.
+
+| Pieza | Cómo corre en Workers |
+| --- | --- |
+| `src/proxy.ts` | Middleware de Node: soporte **experimental** del adaptador. Hace `auth.getUser()` y, según el caso, `rpc("current_account")`. Plan B: `src/middleware.ts` en edge |
+| Ticket de retiro y QR | Sin cambios: `node:crypto` (AES-256-GCM) y `qrcode.toDataURL` funcionan con `nodejs_compat` |
+| `next/image` | Todas las imágenes son `unoptimized`: no se usa el binding de Images. `src/lib/storage-url.ts` y la CSP no cambian |
+| Headers | Páginas y APIs: `headers()` de `next.config.ts`. Estáticos: `public/_headers` |
+| Realtime | El navegador se conecta directo a Supabase; el Worker no participa |
+| Origen (CSRF) | Solo `APP_ORIGIN`, uno por entorno |
+| ID de correlación | `cf-ray` |
+| Caché | Sin caché incremental: las páginas son dinámicas |
+| Variables | `scripts/cf-build.mjs` evita que los `.env*` viajen dentro del bundle |
+
+Sin medir: el tiempo de CPU por petición en Cloudflare (el plan Free admite 10 ms).
 
 Presupuestos propuestos, a verificar con build y móvil: JS inicial cliente propio y dependencias <200 KB gzip por ruta de catálogo; cada foto de lista <100 KB; LCP <2,5 s, INP <200 ms y CLS <0,1 en medición representativa. Son objetivos, no resultados obtenidos. Cámara, gráficos y animación se cargan por ruta/acción. Una fuente WOFF2 local; imágenes dimensionadas, hero prioritario y resto lazy. Convertir variantes antes de subir: las transformaciones de imagen de Supabase no se asumen incluidas en Free.
 

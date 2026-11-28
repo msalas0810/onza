@@ -7,6 +7,7 @@ export const adminTabIds = [
   "entrega",
   "negocio",
   "equipo",
+  "fidelizacion",
   "resumen",
 ] as const;
 export type AdminTab = (typeof adminTabIds)[number];
@@ -19,11 +20,12 @@ export const adminTabLabels: Record<AdminTab, string> = {
   entrega: "Entrega y QR",
   negocio: "Perfil y horario",
   equipo: "Equipo",
+  fidelizacion: "Fidelización y social",
   resumen: "Resumen y CSV",
 };
 export const adminTabGroups: readonly { label: string; tabs: readonly AdminTab[] }[] = [
   { label: "Durante la noche", tabs: ["ahora", "pedidos"] },
-  { label: "Antes de abrir", tabs: ["menu", "disponibilidad", "entrega", "negocio", "equipo"] },
+  { label: "Antes de abrir", tabs: ["menu", "disponibilidad", "entrega", "negocio", "equipo", "fidelizacion"] },
   { label: "Al cerrar", tabs: ["resumen"] },
 ];
 export const isAdminTab = (value: unknown): value is AdminTab =>

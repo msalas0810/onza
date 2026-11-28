@@ -1,7 +1,7 @@
 import { chromium } from "playwright";
 import { createServerClient } from "@supabase/ssr";
 import { writeFileSync } from "node:fs";
-const origin = "http://127.0.0.1:3000",
+const origin = process.env.ONZA_APP ?? "http://127.0.0.1:3000",
   venue = "20000000-0000-4000-8000-000000000001";
 const browser = await chromium.launch({ channel: "chrome" });
 const checks = [];
